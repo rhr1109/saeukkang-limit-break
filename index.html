@@ -57,15 +57,15 @@
   #hud .inv-pill .lv{font-size:10px;opacity:.92;color:#A5D6A7;}
   #hud .inv-pill.l .lv{color:#FFE066;}
 
-  /* Joystick & buttons */
-  #joystick{position:absolute;left:clamp(16px,4vw,28px);bottom:clamp(16px,4vw,28px);width:clamp(96px,24vw,130px);height:clamp(96px,24vw,130px);border-radius:50%;background:rgba(0,0,0,.35);border:3px solid rgba(255,212,59,.55);pointer-events:auto;touch-action:none;display:none;z-index:5;}
+  /* Joystick & buttons — joystick on right (right-handed), action buttons stacked on left */
+  #joystick{position:absolute;right:clamp(16px,4vw,28px);bottom:clamp(16px,4vw,28px);width:clamp(96px,24vw,130px);height:clamp(96px,24vw,130px);border-radius:50%;background:rgba(0,0,0,.35);border:3px solid rgba(255,212,59,.55);pointer-events:auto;touch-action:none;display:none;z-index:5;}
   #joystick .stick{position:absolute;left:50%;top:50%;width:44%;height:44%;border-radius:50%;background:rgba(255,224,102,.9);border:3px solid #C92A2A;transform:translate(-50%,-50%);box-shadow:0 4px 8px rgba(0,0,0,.4);}
   .hud-btn{position:absolute;width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;color:#FFE066;font-size:18px;font-weight:900;pointer-events:auto;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;}
   .hud-btn.danger{border-color:#FF6B6B;color:#FF6B6B;}
-  /* Vertical stack on right side, above joystick area */
-  #exitBtn{right:12px;bottom:calc(160px + env(safe-area-inset-bottom, 0px));}
-  #pauseBtn{right:12px;bottom:calc(110px + env(safe-area-inset-bottom, 0px));}
-  #muteBtn{right:12px;bottom:calc(60px + env(safe-area-inset-bottom, 0px));width:44px;height:44px;border-radius:10px;font-size:18px;}
+  /* Vertical stack on left side — reachable by left thumb on mobile, joystick lives opposite */
+  #exitBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(160px + env(safe-area-inset-bottom, 0px));}
+  #pauseBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(110px + env(safe-area-inset-bottom, 0px));}
+  #muteBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(60px + env(safe-area-inset-bottom, 0px));width:44px;height:44px;border-radius:10px;font-size:18px;}
 
   /* Modals — respect notches/safe-area, scrollable when content > viewport */
   .modal{position:absolute;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-right, 0px) + 14px) calc(env(safe-area-inset-bottom, 0px) + 16px) calc(env(safe-area-inset-left, 0px) + 14px);z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch;}
@@ -119,7 +119,6 @@
     #hud .inv-pill{font-size:10px;padding:1px 5px 1px 3px;gap:2px;}
     #hud .inv-pill .ic{font-size:11px;}
     #hud .inv-pill .lv{font-size:9px;}
-    #exitBtn{right:56px;}
     #title h1{font-size:min(11vw, 48px);}
     .card{padding:14px;}
     .card h2{font-size:20px;}
@@ -230,7 +229,7 @@
       <h2>조작법 · 규칙</h2>
       <div style="font-size:13px;line-height:1.65;color:#FFF9DB;">
         <p><b style="color:#FFE066;">💻 PC:</b> WASD 또는 방향키로 이동. 자동으로 가장 가까운 적에게 새우깡을 던집니다. ESC로 일시정지.</p>
-        <p><b style="color:#FFE066;">📱 모바일:</b> 왼쪽 하단 조이스틱으로 이동, 우측 하단 ✕ 나가기 / ⏸ 일시정지 / 🔊 음소거 버튼 스택.</p>
+        <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 하단 조이스틱으로 이동, 왼쪽 하단 ✕ 나가기 / ⏸ 일시정지 / 🔊 음소거 버튼 스택.</p>
         <p><b style="color:#FFE066;">📕 챕터:</b> 총 30개 챕터. 각 챕터는 8스테이지로 구성되며 후반 챕터일수록 적이 강해집니다. 직전 챕터를 돌파하면 다음 챕터가 열립니다.</p>
         <p><b style="color:#FFE066;">⏱ 스테이지:</b> 60~90초 생존 → 보스 출현 → 격파하면 스테이지 클리어!</p>
         <p><b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.</p>
@@ -363,6 +362,35 @@ function sfxHurt(){ noise(.15,.3); beep(140,.12,'sawtooth',.25,-50); }
 function sfxBoss(){ beep(80,.5,'sawtooth',.4,-40); beep(160,.3,'square',.2); }
 function sfxVictory(){ [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>beep(f,.18,'square',.3),i*130));}
 function sfxExplosion(){ noise(.2,.35); beep(80,.25,'sawtooth',.3,-40); }
+// Crisp two-tone UI click for menu / HUD buttons
+function sfxClick(){ beep(1180, .025, 'square', .14, -120); setTimeout(()=>beep(820, .03, 'square', .10, -80), 20); }
+// Item-specific pickup tones — each kind has its own personality so the player can tell what they grabbed by ear.
+function sfxHeal(){ beep(660,.08,'sine',.28,180); setTimeout(()=>beep(990,.10,'sine',.26,220), 70); setTimeout(()=>beep(1320,.12,'sine',.22,180), 150); }
+function sfxMagnet(){
+  // Long upward sweep: low → high, like XP being yanked across the map.
+  beep(180,.36,'sawtooth',.22, 1400);
+  setTimeout(()=>beep(1500,.06,'square',.16,-200), 80);
+  setTimeout(()=>beep(2100,.05,'square',.14,-200), 180);
+}
+function sfxGolden(){ [784,988,1175,1568].forEach((f,i)=>setTimeout(()=>beep(f,.10,'square',.26,200), i*55)); }
+function sfxCoin(){ beep(1320,.05,'square',.22,400); setTimeout(()=>beep(1760,.06,'square',.18,400), 40); }
+function sfxItemDrop(){ beep(620,.06,'sine',.18,260); setTimeout(()=>beep(880,.05,'sine',.14,200), 50); }
+// Soft whoosh that overlays any pickup — gives the impact of the aura ring expanding.
+// Debounced so a magnet sweep collecting 5+ items doesn't stack into a wall of noise.
+let _lastAuraT = 0;
+function sfxAura(){
+  if(!audioCtx) return;
+  const t = audioCtx.currentTime;
+  if(t - _lastAuraT < 0.06) return;
+  _lastAuraT = t;
+  noise(.10,.10); beep(440,.10,'triangle',.10,300);
+}
+// Deeper boss-spawn sting plus a low warning rumble.
+function sfxBossWarn(){ noise(.35,.18); beep(60,.55,'sawtooth',.42,-30); setTimeout(()=>beep(120,.35,'square',.22,-50),120); }
+// Heavy thud + descending fade for game over.
+function sfxDeath(){ noise(.4,.32); beep(220,.5,'sawtooth',.32,-180); setTimeout(()=>beep(110,.55,'sawtooth',.25,-60),200); }
+// Staccato dash whoosh for evade-style upgrades or movement bursts.
+function sfxDash(){ noise(.06,.18); beep(900,.06,'square',.16,-700); }
 
 // BGM — per-chapter chord progressions. Tier character (wave/vol) is preserved,
 // but each of the 30 chapters gets its own bar progression & tempo for distinct feel.
@@ -413,7 +441,19 @@ const BGM_CHAPTER_PACKS = [
   { label:'심판의 문',    bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['E3','G3','B3','E4'],['A3','C#4','E4','A4']], interval:128, wave:'sawtooth', bassShift:'3', vol:.12 },
   { label:'한계돌파',     bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:120, wave:'sawtooth', bassShift:'3', vol:.13 },
 ];
+// Title / chapter-select BGM — calm, hopeful arcade loop in C major
+const TITLE_BGM_PACK = {
+  label:'타이틀',
+  bars:[
+    ['C4','E4','G4','E4'],
+    ['F4','A4','C5','A4'],
+    ['D4','F4','A4','F4'],
+    ['G4','B4','D5','G4'],
+  ],
+  interval:200, wave:'triangle', bassShift:'3', vol:.09
+};
 function currentBgmPack(){
+  if(state.scene === 'title' || state.scene === 'chapterSelect') return TITLE_BGM_PACK;
   const idx = Math.min(Math.max(0, state.chapter - 1), BGM_CHAPTER_PACKS.length - 1);
   return BGM_CHAPTER_PACKS[idx];
 }
@@ -1275,6 +1315,7 @@ function spawnBoss(){
   state.bossAlive = true;
   state.camera.shake = 16;
   sfxBoss();
+  sfxBossWarn();
 }
 
 // Pool of basic enemies per stage — mixed with chapter-gated new enemies
@@ -1612,34 +1653,60 @@ function spawnItem(x, y, kind){
       state.particles.push({ x, y, vx:Math.cos(aa)*sp2, vy:Math.sin(aa)*sp2, life:.4, maxLife:.4, color:def.glow, size:3, grav:60 });
     }
     state.particles.push({ x, y, vx:0, vy:0, life:.3, maxLife:.3, color:def.color, size:20, grav:0, ring:true });
+    sfxItemDrop();
   }
 }
+// Survivor.io / 탕탕특공대-style pickup aura — two stacked rings + sparkle burst that follows the player.
+function spawnPickupAura(color, glow){
+  const p = state.player;
+  glow = glow || color;
+  // Outer faded ring + inner bright ring — both track the player so the aura looks anchored to them.
+  state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.50, maxLife:.50, color:glow,  size:64, grav:0, ring:true, follow:true });
+  state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.32, maxLife:.32, color:color, size:42, grav:0, ring:true, follow:true });
+  // Outward sparkle ring — 14 particles spaced evenly.
+  for(let i=0;i<14;i++){
+    const a = (i/14)*Math.PI*2 + Math.random()*0.2;
+    const sp = 130 + Math.random()*70;
+    state.particles.push({
+      x:p.x+Math.cos(a)*18, y:p.y+Math.sin(a)*18,
+      vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
+      life:.55, maxLife:.55, color:glow, size:3+Math.random()*1.5, grav:0
+    });
+  }
+  sfxAura();
+}
+
 function applyItem(item){
   const p = state.player;
   const def = ITEM_DEFS[item.kind];
   if(item.kind==='heal'){
     p.hp = Math.min(p.maxHp, p.hp + Math.ceil(p.maxHp*0.3));
-    beep(660,.08,'sine',.3,200); beep(880,.08,'sine',.3,200);
+    sfxHeal();
   } else if(item.kind==='magnet'){
-    for(const g of state.gems){
-      g.vx = (p.x-g.x) * 4; g.vy = (p.y-g.y) * 4;
-      g._magneted = true;
+    // Slurp mode: every gem and every other on-screen item homes in on the player at high speed
+    // and gets consumed by the existing pickup checks. No more "pulled but never reached".
+    for(const g of state.gems) g.homing = 1.6;
+    for(const it of state.items){
+      if(it === item) continue;          // don't re-magnetize self
+      it.homing = 1.6;
+      it.born = 0;                        // bypass landing delay so it can be picked up immediately
     }
-    beep(500,.1,'sine',.25,500);
+    sfxMagnet();
   } else if(item.kind==='bomb'){
     doBomb(p.x, p.y, 260, p.damage*3.5);
   } else if(item.kind==='golden'){
     gainXP(p.xpToNext * 0.35);
-    beep(880,.12,'square',.3,400); beep(1320,.12,'square',.3,400);
+    sfxGolden();
   } else if(item.kind==='coin'){
     const bonus = 25 + Math.floor(state.chapter*10);
     state.score += bonus;
-    beep(1200,.06,'square',.22,400);
+    sfxCoin();
     state.pickupTexts.push({ x:p.x+10, y:p.y-28, t:.8, txt:`+${bonus}점`, color:'#FFE066' });
   }
   if(item.kind !== 'coin'){
     state.pickupTexts.push({ x:p.x, y:p.y-40, t:1.0, txt:def.label, color:def.glow });
   }
+  spawnPickupAura(def.color, def.glow);
   state.camera.shake = Math.max(state.camera.shake, 8);
 }
 
@@ -1716,6 +1783,7 @@ function damagePlayer(dmg){
 function gameOver(){
   state.scene = 'gameover';
   bgmStop();
+  sfxDeath();
   renderGameOver();
   document.getElementById('gameOver').classList.remove('hidden');
 }
@@ -1965,15 +2033,23 @@ function update(dt){
   // Gems
   for(const g of state.gems){
     g.life -= dt;
-    g.vx *= 0.92; g.vy *= 0.92;
-    g.x += g.vx*dt; g.y += g.vy*dt;
     const dx=p.x-g.x, dy=p.y-g.y;
-    const d = Math.hypot(dx,dy);
-    if(d < p.magnet){
-      const pull = 600 * (1 - d/p.magnet);
-      g.vx += dx/d*pull*dt;
-      g.vy += dy/d*pull*dt;
+    const d = Math.max(0.01, Math.hypot(dx,dy));
+    // Magnet pickup: while homing, race straight at the player at constant speed (no damping)
+    // so the gem reliably reaches and is consumed by the radius check below.
+    if(g.homing && g.homing > 0){
+      g.homing -= dt;
+      const speed = 950;
+      g.vx = dx/d*speed; g.vy = dy/d*speed;
+    } else {
+      g.vx *= 0.92; g.vy *= 0.92;
+      if(d < p.magnet){
+        const pull = 600 * (1 - d/p.magnet);
+        g.vx += dx/d*pull*dt;
+        g.vy += dy/d*pull*dt;
+      }
     }
+    g.x += g.vx*dt; g.y += g.vy*dt;
     if(d < 22){
       gainXP(g.value);
       g._grab = true;
@@ -1982,33 +2058,45 @@ function update(dt){
   }
   state.gems = state.gems.filter(g=>g.life>0 && !g._grab);
 
-  // Items — with magnet pull and generous pickup radius so they feel rewarding to grab
+  // Items — homing for magneted ones, otherwise regular magnet pull + generous pickup radius
   for(const it of state.items){
     it.life -= dt;
     it.born = Math.max(0, it.born - dt);
-    it.vx *= 0.92; it.vy *= 0.92;
-    it.x += it.vx*dt; it.y += it.vy*dt;
     it.bob += dt*3;
     const dx=p.x-it.x, dy=p.y-it.y;
-    const d = Math.hypot(dx,dy);
-    const magnetR = p.magnet * 1.15;
-    if(d < magnetR && it.born<=0){
-      const pull = 500 * (1 - d/magnetR);
-      it.vx += dx/d*pull*dt;
-      it.vy += dy/d*pull*dt;
+    const d = Math.max(0.01, Math.hypot(dx,dy));
+    if(it.homing && it.homing > 0){
+      it.homing -= dt;
+      const speed = 850;
+      it.vx = dx/d*speed; it.vy = dy/d*speed;
+    } else {
+      it.vx *= 0.92; it.vy *= 0.92;
+      const magnetR = p.magnet * 1.15;
+      if(d < magnetR && it.born<=0){
+        const pull = 500 * (1 - d/magnetR);
+        it.vx += dx/d*pull*dt;
+        it.vy += dy/d*pull*dt;
+      }
     }
-    if(d < 34 && it.born<=0){
+    it.x += it.vx*dt; it.y += it.vy*dt;
+    // Magneted items bypass the born delay so chain pickups feel snappy.
+    if(d < 34 && (it.born<=0 || it.homing>0)){
       applyItem(it);
       it._taken = true;
     }
   }
   state.items = state.items.filter(it => it.life>0 && !it._taken);
 
-  // Particles
+  // Particles — `follow:true` particles ride the player (used for pickup auras).
   for(const pa of state.particles){
     pa.life -= dt;
-    pa.vx *= 0.98; pa.vy += (pa.grav||0)*dt;
-    pa.x += pa.vx*dt; pa.y += pa.vy*dt;
+    if(pa.follow){
+      pa.x = state.player.x;
+      pa.y = state.player.y;
+    } else {
+      pa.vx *= 0.98; pa.vy += (pa.grav||0)*dt;
+      pa.x += pa.vx*dt; pa.y += pa.vy*dt;
+    }
   }
   state.particles = state.particles.filter(p=>p.life>0);
 
@@ -3149,6 +3237,7 @@ function openChapterSelect(){
   document.getElementById('title').classList.add('hidden');
   renderChapterGrid();
   document.getElementById('chapterSelect').classList.remove('hidden');
+  if(!bgmTimer) bgmStart();
 }
 
 function renderChapterGrid(){
@@ -3198,6 +3287,7 @@ function backToTitle(){
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('chapterSelect').classList.add('hidden');
   document.getElementById('title').classList.remove('hidden');
+  if(audioCtx) bgmStart();
 }
 function togglePause(){
   if(state.scene==='playing'){
@@ -3273,6 +3363,25 @@ function renderVictory(finalEnding){
 
 // Prevent page scroll on mobile
 document.body.addEventListener('touchmove', e=>{ if(state.scene==='playing') e.preventDefault(); }, {passive:false});
+
+// Click SFX — fires for menu buttons, HUD buttons, level-up choices, chapter cards.
+// Delegated so newly-rendered elements (chapter grid, level-up choices) work without re-binding.
+document.addEventListener('click', e=>{
+  if(!audioCtx) return; // wait until first interaction has unlocked audio
+  if(e.target.closest('.btn, .hud-btn, .back-btn, .ch-card:not(.locked), .choice')) sfxClick();
+}, true);
+
+// Title BGM bootstrap — browsers block autoplay until a user gesture, so kick BGM off
+// on the first pointer/key event while the title screen (or chapter select) is visible.
+function startTitleBgmOnce(){
+  if(state.scene !== 'title') return;
+  initAudio();
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  if(!bgmTimer) bgmStart();
+}
+['pointerdown','keydown','touchstart'].forEach(ev=>{
+  window.addEventListener(ev, startTitleBgmOnce, {once:false, passive:true});
+});
 
 </script>
 </body>
