@@ -240,9 +240,12 @@ title ─▶ chapterSelect ─▶ playing ─▶ levelup ─▶ playing
 
 ## 10. UI 구조
 
-- `#title` — 타이틀 화면 (시작, 조작법, 기록 초기화)
+- `#title` — 타이틀 화면 (시작, 조작법, 기록 초기화). 화면 중앙 정렬 (`justify-content:center`)
 - `#chapterSelect` — 30개 챕터 그리드 (잠금/해금/진행 중 뱃지)
-- `#hud` — 인게임 HUD (좌: Lv 뱃지 + HP/XP 바, 우: 챕터/스테이지/타이머/점수/킬)
+- `#hud` — 인게임 HUD
+  - 좌상단: Lv 뱃지 + HP/XP 바
+  - **좌상단 하단(HP 바 아래): `#invBar` 획득 업그레이드 인벤토리** — 카드별 아이콘 + `현재/최대` 레벨 pill. 등급에 따라 테두리 색 (N=금, R=청, E=보라, L=주황+발광)
+  - 우상단: 챕터/스테이지/타이머/점수/킬 패널
 - 우하단 스택: `exitBtn` / `pauseBtn` / `muteBtn`
 - 모달: `levelUp`, `pauseModal`, `stageCleared`, `chapterCleared`, `howModal`, `gameOver`, `victory`
 
@@ -305,20 +308,46 @@ title ─▶ chapterSelect ─▶ playing ─▶ levelup ─▶ playing
 - 첫 유저 입력(시작/챕터선택) 시 `AudioContext.resume()` 호출 — 모바일 오토플레이 정책 대응
 - 음소거 버튼: `masterGain` 을 0으로 토글
 
-### 티어별 BGM 팩 (`BGM_PACKS`)
+### 챕터별 BGM 팩 (`BGM_CHAPTER_PACKS`, 30종)
 
-| 티어 | 장르 | 진행 | 템포 (ms) | 파형 |
+각 챕터가 고유 화성 진행·템포를 가진다. 티어의 파형(wave)·볼륨(vol)은 공유해 티어 내에서 사운드 일관성을 유지하면서도 챕터마다 다른 분위기.
+
+| Ch | 이름 | 진행 | 템포 (ms) | 파형 |
 | --- | --- | --- | --- | --- |
-| 0 Day City | 업비트 메이저 | C - G - Am - F | 160 | square |
-| 1 Neon Night | 신스 마이너 | Am - F - C - G | 150 | sawtooth |
-| 2 Cave Dungeon | 다크 마이너 | Em - Am - B - Em | 180 | triangle |
-| 3 Ice Storm | 크리스탈 | Dm - Bb - F - C | 170 | triangle |
-| 4 Cosmic | 앰비언트 | Cm - Ab - Eb - Bb | 190 | square |
-| 5 Hellfire | 프리지안 | E - F - G - E | 135 | sawtooth |
+| 1 | 비둘기 광장 | C-G-Am-F (I-V-vi-IV) | 160 | square |
+| 2 | 도시 공원 | C-Am-F-G | 168 | square |
+| 3 | 뒷골목 | Dm-G-C-Am | 155 | square |
+| 4 | 시장통 | F-G-C-G | 152 | square |
+| 5 | 옥상 정원 | G-C-D-G | 172 | square |
+| 6 | 네온 거리 | Am-F-C-G | 150 | sawtooth |
+| 7 | 클럽 뒷문 | Am-Dm-G-C | 145 | sawtooth |
+| 8 | 심야 하이웨이 | Em-C-G-D | 140 | sawtooth |
+| 9 | 버려진 빌딩 | Am-E-F-G | 155 | sawtooth |
+| 10 | 달 아래 도시 | Dm-Am-Bb-F | 148 | sawtooth |
+| 11 | 동굴 입구 | Em-Am-B-Em | 180 | triangle |
+| 12 | 수정 동굴 | Am-Em-Dm-Em | 185 | triangle |
+| 13 | 용암 동굴 | Dm-Bb-A-Dm | 175 | triangle |
+| 14 | 지하 던전 | Em-C-Am-B | 190 | triangle |
+| 15 | 버섯 숲 | Am-G-F-E | 178 | triangle |
+| 16 | 눈보라 | Dm-Bb-F-C | 170 | triangle |
+| 17 | 얼음 호수 | Am-F-C-G | 176 | triangle |
+| 18 | 설산 등반 | Em-D-C-Bm | 168 | triangle |
+| 19 | 빙하 절벽 | Dm-Am-Bb-C | 172 | triangle |
+| 20 | 오로라 정상 | Eb-Bb-F-C | 180 | triangle |
+| 21 | 대기권 돌파 | Cm-Ab-Eb-Bb | 190 | square |
+| 22 | 우주 정거장 | Am-F-Dm-E | 200 | square |
+| 23 | 소행성대 | Gm-Eb-Bb-F | 185 | square |
+| 24 | 성운의 중심 | Fm-Ab-Eb-Bb | 195 | square |
+| 25 | 블랙홀 경계 | Cm-Gm-Dm-Am | 198 | square |
+| 26 | 지옥 관문 | E-F-G-E (phrygian) | 135 | sawtooth |
+| 27 | 화산 분화구 | Am-Bb-C-Am | 130 | sawtooth |
+| 28 | 재의 평원 | Dm-Eb-F-Dm | 140 | sawtooth |
+| 29 | 심판의 문 | Em-F-Em-A | 128 | sawtooth |
+| 30 | **한계돌파** | E-F-G-Am (climax) | 120 | sawtooth |
 
 - 각 bar당 4 음표, 1/3박에 베이스 노트(1옥타브 아래)
-- Tier 3 이상에서는 1/3박마다 퍼커션 노이즈(click) 삽입
-- 챕터 진입 시 `bgmStart()` 가 자동으로 현재 티어 팩으로 재시작
+- Tier 3 이상(Ch16~)에서는 1/3박마다 퍼커션 노이즈(click) 삽입
+- 챕터/스테이지 진입 시 `bgmStart()` 가 `currentBgmPack()` 으로 자동 재시작 — 챕터 전환 시 자연스럽게 새 진행으로 교체
 
 ### SFX
 
@@ -338,6 +367,13 @@ game/
 
 ## 14. 변경 이력
 
+- **2026-04-24 · v0.8 HUD 인벤토리 + 챕터별 BGM**
+  - `#invBar` HUD 컴포넌트 신설 — 좌상단 HP 바 아래에 현재까지 획득한 레벨업 카드를 `icon + 현재/최대 lv` pill로 표시. 등급별 테두리 색상(N/R/E/L), 최대치 도달 시 glow
+  - `updateInvBar()` 를 `closeLevelUp`·`resetRun` 에서 호출. 시그니처 캐시로 불필요한 DOM 재렌더 방지
+  - BGM 시스템을 6개 티어팩 → **30개 챕터팩(`BGM_CHAPTER_PACKS`)** 으로 전환. 각 챕터 고유 화성 진행과 템포, 티어 파형(square/sawtooth/triangle)·볼륨은 티어 일관성 유지를 위해 공유
+  - `currentBgmPack()` 을 `state.chapter - 1` 인덱스 기반으로 변경. 챕터 전환(`ccNextBtn`) 시 `bgmStart()` 호출로 자연스럽게 새 진행 재생
+  - 타이틀 화면 수직/수평 중앙 정렬 (`#title` `justify-content: center`)
+  - 조작법 모달(`howModal`) 을 스펙에 맞춰 동기화: 모바일 버튼 "우측 상단" → "우측 하단", 🔊 음소거 추가, 드롭 아이템 5종 전체(🪙 코인 포함) + 수치 반영
 - **2026-04-24 · v0.1 초기 구현**
   - 8스테이지 + 근육질 비둘기 + 17종 레벨업 카드 + 6종 적 + 단일 보스
 - **2026-04-24 · v0.2 챕터 시스템 도입**

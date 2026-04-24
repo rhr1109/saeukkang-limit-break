@@ -46,6 +46,17 @@
   #hud .lvbar-wrap{display:flex;align-items:center;gap:6px;}
   #hud .lvbadge{background:#51CF66;color:#052;border:2px solid #fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:900;}
 
+  /* Inventory bar — shows acquired upgrade cards with current level, below HP/XP bars */
+  #hud .invbar{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 78px);left:calc(env(safe-area-inset-left, 0px) + 10px);display:flex;flex-wrap:wrap;gap:4px;max-width:min(62vw, 420px);pointer-events:none;z-index:2;}
+  #hud .inv-pill{display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;border-radius:6px;padding:2px 6px 2px 4px;font-size:11px;font-weight:900;color:#FFE066;line-height:1;}
+  #hud .inv-pill.r{border-color:#339AF0;}
+  #hud .inv-pill.e{border-color:#BE4BDB;}
+  #hud .inv-pill.l{border-color:#FAB005;background:rgba(250,176,5,.18);}
+  #hud .inv-pill.max{box-shadow:0 0 6px rgba(250,176,5,.6);}
+  #hud .inv-pill .ic{font-size:13px;}
+  #hud .inv-pill .lv{font-size:10px;opacity:.92;color:#A5D6A7;}
+  #hud .inv-pill.l .lv{color:#FFE066;}
+
   /* Joystick & buttons */
   #joystick{position:absolute;left:clamp(16px,4vw,28px);bottom:clamp(16px,4vw,28px);width:clamp(96px,24vw,130px);height:clamp(96px,24vw,130px);border-radius:50%;background:rgba(0,0,0,.35);border:3px solid rgba(255,212,59,.55);pointer-events:auto;touch-action:none;display:none;z-index:5;}
   #joystick .stick{position:absolute;left:50%;top:50%;width:44%;height:44%;border-radius:50%;background:rgba(255,224,102,.9);border:3px solid #C92A2A;transform:translate(-50%,-50%);box-shadow:0 4px 8px rgba(0,0,0,.4);}
@@ -104,6 +115,10 @@
     #hud .bar{width:clamp(110px, 34vw, 160px);}
     #hud .panel{font-size:11px;padding:4px 8px;}
     #hud .right{gap:3px;}
+    #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 68px);max-width:60vw;gap:3px;}
+    #hud .inv-pill{font-size:10px;padding:1px 5px 1px 3px;gap:2px;}
+    #hud .inv-pill .ic{font-size:11px;}
+    #hud .inv-pill .lv{font-size:9px;}
     #exitBtn{right:56px;}
     #title h1{font-size:min(11vw, 48px);}
     .card{padding:14px;}
@@ -146,6 +161,7 @@
         <div class="panel">💀 <span id="killsTxt">0</span></div>
       </div>
     </div>
+    <div class="invbar" id="invBar"></div>
     <button class="hud-btn" id="pauseBtn" title="일시정지">⏸</button>
     <button class="hud-btn danger" id="exitBtn" title="나가기">✕</button>
     <div id="joystick"><div class="stick"></div></div>
@@ -348,7 +364,8 @@ function sfxBoss(){ beep(80,.5,'sawtooth',.4,-40); beep(160,.3,'square',.2); }
 function sfxVictory(){ [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>beep(f,.18,'square',.3),i*130));}
 function sfxExplosion(){ noise(.2,.35); beep(80,.25,'sawtooth',.3,-40); }
 
-// BGM — tier-based chord progressions with varying tempo and voicing
+// BGM — per-chapter chord progressions. Tier character (wave/vol) is preserved,
+// but each of the 30 chapters gets its own bar progression & tempo for distinct feel.
 let bgmTimer=null, bgmStep=0;
 const NOTE={
   'C3':131,'D3':147,'E3':165,'F3':175,'G3':196,'A3':220,'B3':247,
@@ -357,29 +374,48 @@ const NOTE={
   'Eb3':156,'Eb4':311,'Eb5':622,'Ab3':208,'Ab4':415,'Bb3':233,'Bb4':466,
   'F#3':185,'F#4':370,'C#4':277,'D#4':311,'G#4':415,
 };
-// Tier-based BGM packs. Each pack: {bars:[[4-note bar],...], interval, wave, bassShift}
-const BGM_PACKS = [
-  // Tier 0: Day city — upbeat major (I-V-vi-IV: C-G-Am-F)
-  { bars:[['C4','E4','G4','C5'],['G3','B3','D4','G4'],['A3','C4','E4','A4'],['F3','A3','C4','F4']],
-    interval:160, wave:'square', bassShift:'3', vol:.11 },
-  // Tier 1: Neon night — minor/synth (Am-F-C-G)
-  { bars:[['A3','C4','E4','A4'],['F3','A3','C4','F4'],['C4','E4','G4','C5'],['G3','B3','D4','G4']],
-    interval:150, wave:'sawtooth', bassShift:'3', vol:.10 },
-  // Tier 2: Cave dungeon — dark minor (Em-Am-B-Em)
-  { bars:[['E3','G3','B3','E4'],['A3','C4','E4','A4'],['B3','D4','F#4','B4'],['E3','G3','B3','E4']],
-    interval:180, wave:'triangle', bassShift:'3', vol:.12 },
-  // Tier 3: Ice — crystalline (Dm-Bb-F-C)
-  { bars:[['D4','F4','A4','D5'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4'],['C4','E4','G4','C5']],
-    interval:170, wave:'triangle', bassShift:'3', vol:.10 },
-  // Tier 4: Space — ambient (Cm-Ab-Eb-Bb)
-  { bars:[['C4','Eb4','G4','C5'],['Ab3','C4','Eb4','Ab4'],['Eb3','G3','Bb3','Eb4'],['Bb3','D4','F4','Bb4']],
-    interval:190, wave:'square', bassShift:'3', vol:.11 },
-  // Tier 5: Hellfire — aggressive phrygian (E-F-G-E)
-  { bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['E3','G3','B3','E4']],
-    interval:135, wave:'sawtooth', bassShift:'3', vol:.12 },
+// 30 chapter BGM packs — index = chapter-1. Each: {label, bars:[[4-note bar]×4], interval, wave, bassShift, vol}
+const BGM_CHAPTER_PACKS = [
+  // === Tier 0 Day City (square, bright majors) ===
+  { label:'비둘기 광장',  bars:[['C4','E4','G4','C5'],['G3','B3','D4','G4'],['A3','C4','E4','A4'],['F3','A3','C4','F4']], interval:160, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'도시 공원',    bars:[['C4','E4','G4','C5'],['A3','C4','E4','A4'],['F3','A3','C4','F4'],['G3','B3','D4','G4']], interval:168, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'뒷골목',       bars:[['D4','F4','A4','D5'],['G3','B3','D4','G4'],['C4','E4','G4','C5'],['A3','C4','E4','A4']], interval:155, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'시장통',       bars:[['F3','A3','C4','F4'],['G3','B3','D4','G4'],['C4','E4','G4','C5'],['G3','B3','D4','G4']], interval:152, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'옥상 정원',    bars:[['G3','B3','D4','G4'],['C4','E4','G4','C5'],['D4','F#4','A4','D5'],['G3','B3','D4','G4']], interval:172, wave:'square',   bassShift:'3', vol:.11 },
+  // === Tier 1 Neon Night (sawtooth, minor synth) ===
+  { label:'네온 거리',    bars:[['A3','C4','E4','A4'],['F3','A3','C4','F4'],['C4','E4','G4','C5'],['G3','B3','D4','G4']], interval:150, wave:'sawtooth', bassShift:'3', vol:.10 },
+  { label:'클럽 뒷문',    bars:[['A3','C4','E4','A4'],['D4','F4','A4','D5'],['G3','B3','D4','G4'],['C4','E4','G4','C5']], interval:145, wave:'sawtooth', bassShift:'3', vol:.10 },
+  { label:'심야 하이웨이',bars:[['E3','G3','B3','E4'],['C4','E4','G4','C5'],['G3','B3','D4','G4'],['D4','F#4','A4','D5']], interval:140, wave:'sawtooth', bassShift:'3', vol:.10 },
+  { label:'버려진 빌딩',  bars:[['A3','C4','E4','A4'],['E3','G#4','B3','E4'],['F3','A3','C4','F4'],['G3','B3','D4','G4']], interval:155, wave:'sawtooth', bassShift:'3', vol:.10 },
+  { label:'달 아래 도시', bars:[['D4','F4','A4','D5'],['A3','C4','E4','A4'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4']], interval:148, wave:'sawtooth', bassShift:'3', vol:.10 },
+  // === Tier 2 Cave (triangle, dark minor) ===
+  { label:'동굴 입구',    bars:[['E3','G3','B3','E4'],['A3','C4','E4','A4'],['B3','D4','F#4','B4'],['E3','G3','B3','E4']], interval:180, wave:'triangle', bassShift:'3', vol:.12 },
+  { label:'수정 동굴',    bars:[['A3','C4','E4','A4'],['E3','G3','B3','E4'],['D4','F4','A4','D5'],['E3','G3','B3','E4']], interval:185, wave:'triangle', bassShift:'3', vol:.12 },
+  { label:'용암 동굴',    bars:[['D4','F4','A4','D5'],['Bb3','D4','F4','Bb4'],['A3','C#4','E4','A4'],['D4','F4','A4','D5']], interval:175, wave:'triangle', bassShift:'3', vol:.12 },
+  { label:'지하 던전',    bars:[['E3','G3','B3','E4'],['C4','E4','G4','C5'],['A3','C4','E4','A4'],['B3','D4','F#4','B4']], interval:190, wave:'triangle', bassShift:'3', vol:.12 },
+  { label:'버섯 숲',      bars:[['A3','C4','E4','A4'],['G3','B3','D4','G4'],['F3','A3','C4','F4'],['E3','G#4','B3','E4']], interval:178, wave:'triangle', bassShift:'3', vol:.12 },
+  // === Tier 3 Ice (triangle, crystalline) ===
+  { label:'눈보라',       bars:[['D4','F4','A4','D5'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4'],['C4','E4','G4','C5']], interval:170, wave:'triangle', bassShift:'3', vol:.10 },
+  { label:'얼음 호수',    bars:[['A3','C4','E4','A4'],['F3','A3','C4','F4'],['C4','E4','G4','C5'],['G3','B3','D4','G4']], interval:176, wave:'triangle', bassShift:'3', vol:.10 },
+  { label:'설산 등반',    bars:[['E3','G3','B3','E4'],['D4','F#4','A4','D5'],['C4','E4','G4','C5'],['B3','D4','F#4','B4']], interval:168, wave:'triangle', bassShift:'3', vol:.10 },
+  { label:'빙하 절벽',    bars:[['D4','F4','A4','D5'],['A3','C4','E4','A4'],['Bb3','D4','F4','Bb4'],['C4','E4','G4','C5']], interval:172, wave:'triangle', bassShift:'3', vol:.10 },
+  { label:'오로라 정상',  bars:[['Eb4','G4','Bb4','Eb5'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4'],['C4','E4','G4','C5']], interval:180, wave:'triangle', bassShift:'3', vol:.10 },
+  // === Tier 4 Cosmic (square, ambient minor) ===
+  { label:'대기권 돌파',  bars:[['C4','Eb4','G4','C5'],['Ab3','C4','Eb4','Ab4'],['Eb3','G3','Bb3','Eb4'],['Bb3','D4','F4','Bb4']], interval:190, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'우주 정거장',  bars:[['A3','C4','E4','A4'],['F3','A3','C4','F4'],['D4','F4','A4','D5'],['E3','G#4','B3','E4']], interval:200, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'소행성대',     bars:[['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4']], interval:185, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'성운의 중심',  bars:[['F3','Ab3','C4','F4'],['Ab3','C4','Eb4','Ab4'],['Eb3','G3','Bb3','Eb4'],['Bb3','D4','F4','Bb4']], interval:195, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'블랙홀 경계',  bars:[['C4','Eb4','G4','C5'],['G3','Bb3','D4','G4'],['D4','F4','A4','D5'],['A3','C4','E4','A4']], interval:198, wave:'square',   bassShift:'3', vol:.11 },
+  // === Tier 5 Hellfire (sawtooth, aggressive phrygian) ===
+  { label:'지옥 관문',    bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['E3','G3','B3','E4']], interval:135, wave:'sawtooth', bassShift:'3', vol:.12 },
+  { label:'화산 분화구',  bars:[['A3','C4','E4','A4'],['Bb3','D4','F4','Bb4'],['C4','E4','G4','C5'],['A3','C4','E4','A4']], interval:130, wave:'sawtooth', bassShift:'3', vol:.12 },
+  { label:'재의 평원',    bars:[['D4','F4','A4','D5'],['Eb3','G3','Bb3','Eb4'],['F3','A3','C4','F4'],['D4','F4','A4','D5']], interval:140, wave:'sawtooth', bassShift:'3', vol:.12 },
+  { label:'심판의 문',    bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['E3','G3','B3','E4'],['A3','C#4','E4','A4']], interval:128, wave:'sawtooth', bassShift:'3', vol:.12 },
+  { label:'한계돌파',     bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:120, wave:'sawtooth', bassShift:'3', vol:.13 },
 ];
 function currentBgmPack(){
-  return BGM_PACKS[chapterTier(state.chapter) || 0];
+  const idx = Math.min(Math.max(0, state.chapter - 1), BGM_CHAPTER_PACKS.length - 1);
+  return BGM_CHAPTER_PACKS[idx];
 }
 function bgmNote(name, dur, vol, wave){
   if(!audioCtx||muted) return;
@@ -1095,6 +1131,8 @@ function resetRun(startChapter){
   state.abilities = { orbit:0, bomb:0, lightning:0, heal:0, shield:0 };
   state.abilityTimers = { orbit:0, bomb:0, lightning:0, heal:0 };
   killsSinceDrop = 0;
+  _invBarCache = null; // force re-render
+  updateInvBar();
   initStage();
 }
 
@@ -1383,6 +1421,7 @@ function showLevelUp(){
 function closeLevelUp(){
   document.getElementById('levelUp').classList.add('hidden');
   sfxLevelUp();
+  updateInvBar();
   if(pendingLevelUps>0){
     pendingLevelUps--;
     showLevelUp();
@@ -2049,6 +2088,25 @@ function updateHUD(){
   document.getElementById('killsTxt').textContent = state.kills;
   const t = state.bossSpawned ? 'BOSS!' : Math.max(0, Math.ceil(state.stageDuration - state.stageTime));
   document.getElementById('timerTxt').textContent = t;
+}
+
+// Inventory HUD — shows acquired upgrade cards with their current level.
+// Called on upgrade pick and run start; cheap enough (max 17 entries) that re-rendering is fine.
+let _invBarCache = '';
+function updateInvBar(){
+  const p = state.player; if(!p) return;
+  const el = document.getElementById('invBar');
+  if(!el) return;
+  // Build a stable signature so we don't thrash DOM every frame
+  const entries = UPGRADES.filter(u => (p.upg[u.id]||0) > 0);
+  const sig = entries.map(u => u.id+':'+p.upg[u.id]).join('|');
+  if(sig === _invBarCache) return;
+  _invBarCache = sig;
+  el.innerHTML = entries.map(u => {
+    const lvl = p.upg[u.id];
+    const maxed = lvl >= u.max;
+    return `<span class="inv-pill ${u.rarity}${maxed?' max':''}" title="${u.title}"><span class="ic">${u.icon}</span><span class="lv">${lvl}/${u.max}</span></span>`;
+  }).join('');
 }
 
 // ---------- Render ----------
