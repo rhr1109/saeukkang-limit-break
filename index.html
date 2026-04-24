@@ -391,6 +391,10 @@ function sfxBossWarn(){ noise(.35,.18); beep(60,.55,'sawtooth',.42,-30); setTime
 function sfxDeath(){ noise(.4,.32); beep(220,.5,'sawtooth',.32,-180); setTimeout(()=>beep(110,.55,'sawtooth',.25,-60),200); }
 // Staccato dash whoosh for evade-style upgrades or movement bursts.
 function sfxDash(){ noise(.06,.18); beep(900,.06,'square',.16,-700); }
+// Per-weapon shot SFX — deliberately distinct so the player can tell weapons apart by ear.
+function sfxShuriken(){ beep(1500,.025,'square',.10,-600); setTimeout(()=>beep(2000,.02,'square',.07,-800),12); }
+function sfxBoomerang(){ noise(.07,.10); beep(280,.18,'sawtooth',.16,-90); }
+function sfxMissile(){ noise(.12,.14); beep(160,.22,'sawtooth',.20,260); setTimeout(()=>beep(80,.18,'sawtooth',.18,80),60); }
 
 // BGM — per-chapter chord progressions. Tier character (wave/vol) is preserved,
 // but each of the 30 chapters gets its own bar progression & tempo for distinct feel.
@@ -736,6 +740,153 @@ function drawSaeukkang(ctx, x, y, angle, scale){
   ctx.fillText('새우깡', 0, -3.2);
   ctx.restore();
 }
+
+// Silver 4-pointed throwing star — fast spinning, small.
+function drawShuriken(ctx, x, y, angle, scale){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(angle);
+  ctx.scale(scale,scale);
+  // Subtle motion-blur glow
+  ctx.fillStyle='rgba(206,212,218,.28)';
+  ctx.beginPath(); ctx.arc(0,0,12,0,Math.PI*2); ctx.fill();
+  // 4 sharp blades
+  ctx.fillStyle='#CED4DA';
+  ctx.strokeStyle='#212529';
+  ctx.lineWidth=1.1;
+  ctx.beginPath();
+  for(let i=0;i<4;i++){
+    const a = i*Math.PI/2;
+    const tip = 11, mid = 3.5;
+    ctx.lineTo(Math.cos(a)*tip, Math.sin(a)*tip);
+    ctx.lineTo(Math.cos(a+Math.PI/4)*mid, Math.sin(a+Math.PI/4)*mid);
+  }
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  // Center hole
+  ctx.fillStyle='#212529';
+  ctx.beginPath(); ctx.arc(0,0,2.2,0,Math.PI*2); ctx.fill();
+  // Edge highlight
+  ctx.fillStyle='rgba(255,255,255,.55)';
+  ctx.beginPath(); ctx.arc(-1.2,-1.2,1.1,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+// Wooden ㄴ-style boomerang with gold trim — bigger, slower spin, orange-brown.
+function drawBoomerang(ctx, x, y, angle, scale){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(angle);
+  ctx.scale(scale,scale);
+  // Soft trail glow
+  ctx.fillStyle='rgba(247,103,7,.25)';
+  ctx.beginPath(); ctx.arc(0,0,16,0,Math.PI*2); ctx.fill();
+  // Two arms forming an L (rotated to V)
+  ctx.fillStyle='#A77A4A';
+  ctx.strokeStyle='#5A3A1E';
+  ctx.lineWidth=1.4;
+  ctx.beginPath();
+  ctx.moveTo(-13,-2);
+  ctx.lineTo(2,-2);
+  ctx.lineTo(2,12);
+  ctx.lineTo(-3,12);
+  ctx.lineTo(-3,3);
+  ctx.lineTo(-13,3);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  // Gold trim stripes
+  ctx.strokeStyle='#FFD43B'; ctx.lineWidth=.8;
+  ctx.beginPath();
+  ctx.moveTo(-12,0); ctx.lineTo(0,0);
+  ctx.moveTo(0,4); ctx.lineTo(0,11);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Mini rocket — body + fins + warhead, leaves a thrust trail (caller spawns particles).
+function drawMissile(ctx, x, y, angle, scale){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(angle);
+  ctx.scale(scale, scale);
+  // Heat halo
+  ctx.fillStyle='rgba(247,103,7,.22)';
+  ctx.beginPath(); ctx.arc(0,0,14,0,Math.PI*2); ctx.fill();
+  // Body
+  ctx.fillStyle='#F1F3F5';
+  ctx.strokeStyle='#212529'; ctx.lineWidth=1.1;
+  roundRect(ctx,-9,-4,16,8,2); ctx.fill(); ctx.stroke();
+  // Red warhead tip
+  ctx.fillStyle='#FA5252';
+  ctx.beginPath();
+  ctx.moveTo(7,-4); ctx.lineTo(13,0); ctx.lineTo(7,4); ctx.closePath();
+  ctx.fill(); ctx.strokeStyle='#212529'; ctx.stroke();
+  // Tail fins
+  ctx.fillStyle='#495057';
+  ctx.beginPath();
+  ctx.moveTo(-9,-4); ctx.lineTo(-12,-7); ctx.lineTo(-7,-4); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-9,4); ctx.lineTo(-12,7); ctx.lineTo(-7,4); ctx.closePath(); ctx.fill();
+  // Thrust flicker
+  ctx.fillStyle='#FFE066';
+  ctx.beginPath();
+  const flick = 2 + Math.random()*3;
+  ctx.moveTo(-9,-2); ctx.lineTo(-9-flick,0); ctx.lineTo(-9,2); ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// Weapon registry. Each weapon has its own reload, count, dmg formula, and behavior.
+// Stats scale with the player's per-weapon level (set via the level-up unlock cards).
+const WEAPONS = {
+  shrimp: {
+    name:'새우깡', icon:'🍤',
+    rate:(w,p)=> p.fireRate,            // shrimp keeps using global player stats
+    count:(w,p)=> p.projCount,
+    dmg:(w,p)=> p.damage,
+    speed:(w,p)=> p.projSpeed,
+    size:(w,p)=> p.projSize,
+    pierce:(w,p)=> p.pierce,
+    life:1.2, behavior:'straight',
+    spinBase:10, draw:drawSaeukkang
+  },
+  shuriken: {
+    name:'표창', icon:'🌟',
+    rate:(w)=> 2.4 + w.lvl*0.4,         // L1 2.8 → L5 4.4 shots/s
+    count:(w)=> Math.min(7, 2 + w.lvl), // L1 3 → L5 7
+    dmg:(w,p)=> p.damage * (0.40 + w.lvl*0.10), // L1 50% → L5 90% of saeukkang dmg
+    speed:()=> 720,
+    size:()=> 0.7,
+    pierce:(w)=> 1 + Math.floor(w.lvl/2),
+    life:0.9, behavior:'straight',
+    spinBase:28, draw:drawShuriken,
+    spread:0.32                         // wider fan than shrimp
+  },
+  boomerang: {
+    name:'참치캔 부메랑', icon:'🪃',
+    rate:(w)=> 0.85 + w.lvl*0.15,
+    count:(w)=> Math.min(3, 1 + Math.floor(w.lvl/2)),
+    dmg:(w,p)=> p.damage * (1.00 + w.lvl*0.20),
+    speed:()=> 440,
+    size:()=> 1.2,
+    pierce:()=> 99,                     // unlimited pierce on the way out
+    life:1.6, behavior:'return',
+    returnAt:0.55, spinBase:18, draw:drawBoomerang
+  },
+  missile: {
+    name:'꿀꽈배기 미사일', icon:'🚀',
+    rate:(w)=> 0.55 + w.lvl*0.10,
+    count:(w)=> Math.min(2, w.lvl),     // L1 1, L2+ 2
+    dmg:(w,p)=> p.damage * (1.5 + w.lvl*0.40),
+    speed:()=> 290,
+    size:()=> 1.0,
+    pierce:()=> 0,                      // explodes on first hit
+    life:2.4, behavior:'homing',
+    aoeRadius:(w)=> 60 + w.lvl*8,
+    spinBase:0, draw:drawMissile,
+    homingStrength:7
+  },
+};
 
 // Draw enemy: cat, mouse, crow, dog
 function drawEnemy(ctx, e, walkPhase){
@@ -1159,7 +1310,10 @@ function resetPlayer(){
     xp: 0,
     xpToNext: 5,
     // upgrade levels for cards
-    upg: {}
+    upg: {},
+    // Per-weapon state: only saeukkang is unlocked initially. Each entry has {lvl, reloadT}.
+    // Other weapons (shuriken, boomerang, missile) become available via level-up cards.
+    weapons: { shrimp: { lvl:1, reloadT:0 } }
   };
 }
 
@@ -1404,6 +1558,28 @@ const UPGRADES = [
   { id:'shield', title:'불굴의 깃털', icon:'🛡️', max:1, rarity:'l',
     desc:(l)=>`죽을 때 한 번 부활 (HP 50%)`,
     apply:(p,s)=>{ s.abilities.shield = 1; } },
+  // ----- Multi-weapon unlock cards. lvl 1 unlocks the weapon, subsequent picks scale it. -----
+  { id:'shuriken', title:'표창 투척', icon:'🌟', max:5, rarity:'r',
+    desc:(l)=>{
+      if(!l) return '🌟 [신규 무기] 빠른 표창을 부채꼴로 던집니다';
+      const w={lvl:l+1};
+      return `표창 강화 — 발사 ${WEAPONS.shuriken.count(w)}개 / 연사 ${WEAPONS.shuriken.rate(w).toFixed(1)}/초`;
+    },
+    apply:(p)=>{ if(!p.weapons.shuriken) p.weapons.shuriken={lvl:1,reloadT:0}; else p.weapons.shuriken.lvl++; } },
+  { id:'boomerang', title:'참치캔 부메랑', icon:'🪃', max:4, rarity:'e',
+    desc:(l)=>{
+      if(!l) return '🪃 [신규 무기] 적을 관통하고 다시 돌아옵니다';
+      const w={lvl:l+1};
+      return `부메랑 강화 — 발사 ${WEAPONS.boomerang.count(w)}개 / 데미지 ×${(1+(l+1)*0.20).toFixed(2)}`;
+    },
+    apply:(p)=>{ if(!p.weapons.boomerang) p.weapons.boomerang={lvl:1,reloadT:0}; else p.weapons.boomerang.lvl++; } },
+  { id:'missile', title:'꿀꽈배기 미사일', icon:'🚀', max:3, rarity:'l',
+    desc:(l)=>{
+      if(!l) return '🚀 [신규 무기] 유도 미사일이 폭발 피해를 줍니다';
+      const w={lvl:l+1};
+      return `미사일 강화 — ${WEAPONS.missile.count(w)}발 / 폭발 반경 ${WEAPONS.missile.aoeRadius(w)}`;
+    },
+    apply:(p)=>{ if(!p.weapons.missile) p.weapons.missile={lvl:1,reloadT:0}; else p.weapons.missile.lvl++; } },
 ];
 
 function rebuildOrbits(){
@@ -1473,11 +1649,15 @@ function closeLevelUp(){
 }
 
 // ---------- Combat ----------
-function fireProjectiles(){
+// Fire one weapon at the nearest enemy. Each weapon has its own count/spread/speed/damage formulas.
+function fireWeapon(wid){
   const p = state.player;
-  // find nearest enemy
+  const w = p.weapons[wid];
+  const def = WEAPONS[wid];
+  if(!w || !def) return;
   let nearest=null, nd=Infinity;
   for(const e of state.enemies){
+    if(e.dead) continue;
     const dx=e.x-p.x, dy=e.y-p.y;
     const d=dx*dx+dy*dy;
     if(d<nd){ nd=d; nearest=e; }
@@ -1485,28 +1665,41 @@ function fireProjectiles(){
   if(!nearest) return;
   const baseAngle = Math.atan2(nearest.y-p.y, nearest.x-p.x);
   p.facing = (Math.cos(baseAngle)>=0)?1:-1;
-  const count = p.projCount;
-  const spread = (count-1)*0.18;
+  const count = def.count(w,p);
+  const speed = def.speed(w,p);
+  const size = def.size(w,p);
+  const pierce = def.pierce(w,p);
+  const dmgBase = def.dmg(w,p);
+  const spread = (count-1) * (def.spread || 0.18);
   const startA = baseAngle - spread/2;
   for(let i=0;i<count;i++){
     const a = count===1 ? baseAngle : startA + (spread/Math.max(1,count-1))*i;
     const isCrit = Math.random()<p.crit;
-    const dmg = Math.round(p.damage * (isCrit? p.critMult:1));
+    const dmg = Math.round(dmgBase * (isCrit? p.critMult:1));
     state.bullets.push({
+      kind: wid,
       x:p.x, y:p.y-20,
-      vx: Math.cos(a)*p.projSpeed,
-      vy: Math.sin(a)*p.projSpeed,
-      r: 10*p.projSize,
-      life: 1.2,
+      vx: Math.cos(a)*speed,
+      vy: Math.sin(a)*speed,
+      r: 10*size,
+      life: def.life,
       damage: dmg,
       crit: isCrit,
-      pierce: p.pierce,
-      hit: new Set(),
+      pierce, hit: new Set(),
       angle: a,
-      spin: (Math.random()<.5?-1:1)*10,
+      spin: (Math.random()<.5?-1:1) * (def.spinBase||10),
+      _t: 0,
+      _behavior: def.behavior,
+      _ownerSpeed: speed,
+      _aoe: def.aoeRadius ? def.aoeRadius(w,p) : 0,
+      _returnAt: def.returnAt || 0,
+      _homingStr: def.homingStrength || 0,
     });
   }
-  sfxShoot();
+  if(wid==='shrimp')        sfxShoot();
+  else if(wid==='shuriken') sfxShuriken();
+  else if(wid==='boomerang')sfxBoomerang();
+  else if(wid==='missile')  sfxMissile();
 }
 
 function damageEnemy(e, dmg, crit=false, knockbackDir=null){
@@ -1817,11 +2010,15 @@ function update(dt){
   // Invuln
   if(p.invT>0) p.invT -= dt;
 
-  // Auto shoot
-  p.reloadT -= dt;
-  if(p.reloadT<=0){
-    p.reloadT = 1/p.fireRate;
-    fireProjectiles();
+  // Auto shoot — every unlocked weapon ticks its own reload independently.
+  for(const wid in p.weapons){
+    const w = p.weapons[wid];
+    const def = WEAPONS[wid]; if(!def) continue;
+    w.reloadT -= dt;
+    if(w.reloadT <= 0){
+      w.reloadT = 1 / def.rate(w, p);
+      fireWeapon(wid);
+    }
   }
 
   // Abilities
@@ -2001,18 +2198,63 @@ function update(dt){
     }
   }
 
-  // Update bullets
+  // Update bullets — branch by per-weapon behavior. Default is straight-line.
   for(const b of state.bullets){
-    b.x += b.vx*dt; b.y += b.vy*dt;
+    b._t = (b._t||0) + dt;
+    if(b._behavior === 'return'){
+      // Boomerang: outbound for _returnAt seconds, then steer back to player. Re-hit on return.
+      if(b._t < b._returnAt){
+        b.x += b.vx*dt; b.y += b.vy*dt;
+      } else {
+        if(!b._returningCleared){ b.hit.clear(); b._returningCleared = true; }
+        const dx = state.player.x - b.x, dy = (state.player.y - 20) - b.y;
+        const d = Math.max(1, Math.hypot(dx,dy));
+        const sp = b._ownerSpeed * 1.1;
+        const targetVx = dx/d * sp, targetVy = dy/d * sp;
+        const lerp = Math.min(1, dt*5);
+        b.vx += (targetVx - b.vx) * lerp;
+        b.vy += (targetVy - b.vy) * lerp;
+        b.x += b.vx*dt; b.y += b.vy*dt;
+        if(d < 28) b.life = 0;        // caught — despawn cleanly
+      }
+    } else if(b._behavior === 'homing'){
+      // Missile: each frame, soft-steer toward the closest unhit enemy.
+      let nearest=null, nd=Infinity;
+      for(const e of state.enemies){
+        if(e.dead || b.hit.has(e)) continue;
+        const dx=e.x-b.x, dy=e.y-b.y;
+        const d2=dx*dx+dy*dy;
+        if(d2<nd){ nd=d2; nearest=e; }
+      }
+      if(nearest){
+        const dx=nearest.x-b.x, dy=nearest.y-b.y;
+        const d = Math.max(1, Math.hypot(dx,dy));
+        const sp = b._ownerSpeed;
+        const lerp = Math.min(1, dt * (b._homingStr || 5));
+        b.vx += (dx/d*sp - b.vx) * lerp;
+        b.vy += (dy/d*sp - b.vy) * lerp;
+        b.angle = Math.atan2(b.vy, b.vx);    // missile orientation tracks velocity
+      }
+      b.x += b.vx*dt; b.y += b.vy*dt;
+    } else {
+      // Straight-line (saeukkang, shuriken)
+      b.x += b.vx*dt; b.y += b.vy*dt;
+    }
     b.life -= dt;
-    b.angle += b.spin*dt;
+    if(b._behavior !== 'homing') b.angle += b.spin*dt;
     for(const e of state.enemies){
       if(e.dead||b.hit.has(e)) continue;
       const dx=e.x-b.x, dy=e.y-b.y;
       const rr = (e.collideRadius + b.r*0.6);
       if(dx*dx+dy*dy < rr*rr){
-        damageEnemy(e, b.damage, b.crit, { x:b.vx/p.projSpeed, y:b.vy/p.projSpeed });
+        const knockSpeed = Math.max(1, Math.hypot(b.vx,b.vy));
+        damageEnemy(e, b.damage, b.crit, { x:b.vx/knockSpeed, y:b.vy/knockSpeed });
         b.hit.add(e);
+        // Missile detonates on first hit with AoE.
+        if(b._behavior === 'homing' && b._aoe > 0){
+          doBomb(b.x, b.y, b._aoe, b.damage * 0.55);
+          b.life = 0; break;
+        }
         if(b.pierce>0){ b.pierce--; }
         else { b.life=0; break; }
       }
@@ -3062,14 +3304,30 @@ function render(){
     drawPigeon(ctx, p.x, p.y, 0.95, p.facing, p.walkPhase, p.invT>0, 1, p);
   }
 
-  // Player bullets (saeukkang)
+  // Player bullets — dispatch by weapon kind. Missile also drops thrust particles per frame.
   for(const b of state.bullets){
-    drawSaeukkang(ctx, b.x, b.y, b.angle, p.projSize);
+    const def = WEAPONS[b.kind] || WEAPONS.shrimp;
+    const drawScale = (b.kind === 'shrimp') ? p.projSize : 1.0;
+    if(def.draw) def.draw(ctx, b.x, b.y, b.angle, drawScale);
+    else drawSaeukkang(ctx, b.x, b.y, b.angle, drawScale);
+    if(b.kind === 'missile' && Math.random() < 0.6){
+      // thrust trail behind missile (anti-velocity direction)
+      const sp = Math.max(1, Math.hypot(b.vx, b.vy));
+      const tx = b.x - b.vx/sp * 11, ty = b.y - b.vy/sp * 11;
+      state.particles.push({
+        x:tx, y:ty,
+        vx:-b.vx*0.05 + (Math.random()-.5)*40,
+        vy:-b.vy*0.05 + (Math.random()-.5)*40,
+        life:.30, maxLife:.30,
+        color: Math.random()<0.5 ? '#FFE066' : '#F76707',
+        size: 2.2 + Math.random()*1.5, grav:0
+      });
+    }
     if(b.crit){
       ctx.save();
       ctx.translate(b.x,b.y);
       ctx.strokeStyle='rgba(255,107,107,.8)'; ctx.lineWidth=2;
-      ctx.beginPath(); ctx.arc(0,0,14*p.projSize,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,14*drawScale,0,Math.PI*2); ctx.stroke();
       ctx.restore();
     }
   }
