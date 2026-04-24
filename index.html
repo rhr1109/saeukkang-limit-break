@@ -16,7 +16,8 @@
   .hidden{display:none!important;}
 
   /* Title screen — scrollable on short/notched viewports; content anchored to top with safe-area padding */
-  #title{background:radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.9) 0%, rgba(255,212,59,.85) 18%, rgba(247,103,7,.85) 45%, rgba(90,26,4,.92) 80%, rgba(18,3,0,.98) 100%);flex-direction:column;gap:16px;padding:calc(env(safe-area-inset-top, 0px) + 24px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 16px);align-items:center;justify-content:flex-start;min-height:100%;}
+  #title{background:radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.9) 0%, rgba(255,212,59,.85) 18%, rgba(247,103,7,.85) 45%, rgba(90,26,4,.92) 80%, rgba(18,3,0,.98) 100%);flex-direction:column;gap:16px;padding:calc(env(safe-area-inset-top, 0px) + 24px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 16px);align-items:center;justify-content:center;min-height:100%;}
+  #title > *{flex-shrink:0;}
   #title h1{margin:0;font-size:min(9vw,56px);font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A, 0 6px 20px rgba(0,0,0,.6);letter-spacing:-1px;text-align:center;}
   #title .sub{font-size:min(3.5vw,18px);color:#FFF9DB;font-weight:700;opacity:.9;letter-spacing:2px;}
   #title .pigeon-stage{position:relative;width:min(70vw,260px);height:min(70vw,260px);display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 10px 20px rgba(0,0,0,.5));}
