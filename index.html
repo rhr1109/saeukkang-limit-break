@@ -283,7 +283,10 @@
       <h2 style="color:#FFE066;">🏆 한계돌파 성공!</h2>
       <div class="sub">모든 스테이지를 정복했습니다!</div>
       <div id="vStats" style="margin:12px 0;"></div>
-      <button class="btn" id="vAgainBtn" style="width:100%;">🔁 다시 플레이</button>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn" id="vAgainBtn">🔁 처음부터 다시 플레이</button>
+        <button class="btn alt" id="vHomeBtn">🏠 홈으로</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3428,24 +3431,45 @@ function render(){
   // Drawn on top of the world so the pigeon and entities sit inside the ambience, not hidden by the ground.
   drawSkyline(stageHue, themeIdx);
 
-  // Boss warning banner — vertical centre so it never sits behind the HUD inventory bar.
-  // Fades out 4s after the boss enters so it doesn't permanently block the playfield.
+  // Boss warning — centered pill so it never sits behind the HUD inventory bar (old 60–90 strip),
+  // but stays legible without fully obscuring the player. Fades out ~5s after boss enters.
   if(state.bossSpawned && state.bossAlive){
     const sinceSpawn = state.time - (state.bossFightStart || state.time);
     const fade = sinceSpawn < 4 ? 1 : Math.max(0, 1 - (sinceSpawn-4)/1.2);
     if(fade > 0.02){
-      const alpha = (0.55 + 0.45*Math.sin(state.time*4)) * fade;
+      const pulse = 0.6 + 0.4*Math.sin(state.time*4);
       const isChapterBoss = state.stage === TARGET_STAGES;
-      const bannerY = Math.round(H * 0.5);
-      const bannerH = 44;
+      const text = isChapterBoss ? '★ 챕터 보스 — 다음 챕터로 가려면 돌파하라! ★' : '⚠ 보스 등장 — 한계를 돌파하라! ⚠';
+      const fontSize = Math.max(14, Math.min(22, Math.round(W/24)));
       ctx.save();
-      ctx.fillStyle = isChapterBoss ? `rgba(128,0,64,${alpha*0.95})` : `rgba(201,42,42,${alpha*0.9})`;
-      ctx.fillRect(0, bannerY - bannerH/2, W, bannerH);
-      ctx.fillStyle = isChapterBoss ? '#FF6B6B' : '#FFE066';
-      ctx.font='900 22px sans-serif';
+      ctx.font = `900 ${fontSize}px sans-serif`;
       ctx.textAlign='center'; ctx.textBaseline='middle';
+      const metrics = ctx.measureText(text);
+      const padX = 22, padY = 12;
+      const pillW = Math.min(W - 24, metrics.width + padX*2);
+      const pillH = fontSize + padY*2;
+      const cx = W/2;
+      const cy = Math.round(H * 0.5);
+      // Soft drop shadow so the pill reads against any backdrop without fully blocking the playfield.
+      ctx.globalAlpha = fade * 0.85;
+      ctx.fillStyle = isChapterBoss ? `rgba(80,0,40,${pulse})` : `rgba(120,20,20,${pulse})`;
+      const radius = pillH/2;
+      const x = cx - pillW/2, y = cy - pillH/2;
+      ctx.beginPath();
+      ctx.moveTo(x+radius, y);
+      ctx.lineTo(x+pillW-radius, y); ctx.arcTo(x+pillW, y, x+pillW, y+radius, radius);
+      ctx.lineTo(x+pillW, y+pillH-radius); ctx.arcTo(x+pillW, y+pillH, x+pillW-radius, y+pillH, radius);
+      ctx.lineTo(x+radius, y+pillH); ctx.arcTo(x, y+pillH, x, y+pillH-radius, radius);
+      ctx.lineTo(x, y+radius); ctx.arcTo(x, y, x+radius, y, radius);
+      ctx.closePath();
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = isChapterBoss ? `rgba(255,107,107,${pulse})` : `rgba(255,224,102,${pulse})`;
+      ctx.stroke();
       ctx.globalAlpha = fade;
-      ctx.fillText(isChapterBoss ? '★ 챕터 보스 — 다음 챕터로 가려면 돌파하라! ★' : '⚠ 보스 등장 — 한계를 돌파하라! ⚠', W/2, bannerY);
+      ctx.fillStyle = isChapterBoss ? '#FF6B6B' : '#FFE066';
+      ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 6;
+      ctx.fillText(text, cx, cy);
       ctx.restore();
     }
   }
@@ -3479,7 +3503,8 @@ document.getElementById('csBackBtn').addEventListener('click', ()=>{
 });
 document.getElementById('retryBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); startGame(state.chapter); });
 document.getElementById('goTitleBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); backToTitle(); });
-document.getElementById('vAgainBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); backToTitle(); });
+document.getElementById('vAgainBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); startGame(1); });
+document.getElementById('vHomeBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); backToTitle(); });
 document.getElementById('ccNextBtn').addEventListener('click', ()=>{
   document.getElementById('chapterCleared').classList.add('hidden');
   if(state.chapter >= MAX_CHAPTERS){
@@ -3505,6 +3530,7 @@ document.getElementById('ccNextBtn').addEventListener('click', ()=>{
   updateInvBar();
   initStage();
   state.scene = 'playing';
+  updateHUD(); // refresh chapter/stage HUD before the level-up modal pauses updates
   bgmStart();
   showLevelUp(); // first card pick of the new chapter
 });
