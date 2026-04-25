@@ -254,10 +254,11 @@
       <div id="ccStats" style="margin:12px 0;"></div>
       <div style="background:rgba(255,107,107,.1);border:2px dashed #FF6B6B;border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;color:#FFF9DB;">
         <b style="color:#FF6B6B;">⚠ 다음 챕터:</b> <span id="ccNextLabel"></span><br>
-        <span style="opacity:.85;">적의 체력·속도·공격력이 강화됩니다. 현재 레벨과 업그레이드는 유지됩니다.</span>
+        <span style="opacity:.85;">적이 강해지고 새로운 종류가 등장합니다. 레벨과 업그레이드는 초기화되어 새 빌드를 짜게 됩니다.</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <button class="btn" id="ccNextBtn">⚔ 다음 챕터 도전 ▶</button>
+        <button class="btn alt" id="ccHomeBtn">🏠 홈으로</button>
         <button class="btn alt small" id="ccEndBtn">여기서 마무리하고 기록 보기</button>
       </div>
     </div>
@@ -1467,12 +1468,14 @@ function spawnBoss(){
   }
   state.bossSpawned = true;
   state.bossAlive = true;
+  state.bossFightStart = state.time;
   state.camera.shake = 16;
   sfxBoss();
   sfxBossWarn();
 }
 
-// Pool of basic enemies per stage — mixed with chapter-gated new enemies
+// Pool of basic enemies per stage — mixed with chapter-gated new enemies.
+// Earlier chapters introduce new types steadily so each chapter feels distinct.
 function stageEnemyPool(stage){
   let base;
   if(stage===1) base = ['mouse','mouse','mouse','crow'];
@@ -1485,17 +1488,23 @@ function stageEnemyPool(stage){
   else base = ['dog','tank','tank','tank','cat','crow','crow']; // 8
   const c = state.chapter;
   const pool = base.slice();
-  // Chapter-gated additions
-  if(c>=5)  pool.push('ghost','ghost');
-  if(c>=8)  pool.push('ghost'); // more ghosts
-  if(c>=10) pool.push('bomber','bomber');
-  if(c>=13) pool.push('bomber');
-  if(c>=15) pool.push('reaper');
-  if(c>=18) pool.push('reaper','reaper');
-  if(c>=20) pool.push('sniper','sniper');
-  if(c>=23) pool.push('sniper');
-  if(c>=25) pool.push('summoner');
-  if(c>=28) pool.push('summoner','reaper');
+  // Chapter-gated additions — every chapter from 2 onward feels a step harder & more varied.
+  if(c>=2)  pool.push('ghost');
+  if(c>=3)  pool.push('ghost');
+  if(c>=4)  pool.push('bomber');
+  if(c>=5)  pool.push('bomber','ghost');
+  if(c>=6)  pool.push('reaper');
+  if(c>=7)  pool.push('bomber','reaper');
+  if(c>=8)  pool.push('sniper','ghost');
+  if(c>=10) pool.push('sniper','reaper');
+  if(c>=12) pool.push('summoner');
+  if(c>=14) pool.push('sniper','bomber');
+  if(c>=16) pool.push('summoner','reaper');
+  if(c>=18) pool.push('reaper','reaper','sniper');
+  if(c>=20) pool.push('summoner','bomber','ghost');
+  if(c>=23) pool.push('reaper','summoner');
+  if(c>=26) pool.push('summoner','summoner');
+  if(c>=28) pool.push('reaper','summoner','sniper');
   return pool;
 }
 
@@ -1590,9 +1599,18 @@ function rebuildOrbits(){
   }
 }
 
+function isUpgradeMaxed(u, p){
+  // Some weapon upgrades carry their level on p.weapons[id].lvl (which apply() bumps).
+  // p.upg[id] mirrors that, but we cross-check both so a desync can't leak a maxed pick into the pool.
+  const upgLvl = p.upg[u.id] || 0;
+  if(upgLvl >= u.max) return true;
+  const w = p.weapons && p.weapons[u.id];
+  if(w && typeof w.lvl === 'number' && w.lvl >= u.max) return true;
+  return false;
+}
 function rollUpgrades(){
   const p = state.player;
-  const pool = UPGRADES.filter(u => (p.upg[u.id]||0) < u.max);
+  const pool = UPGRADES.filter(u => !isUpgradeMaxed(u, p));
   const weights = pool.map(u => u.rarity==='n'? 10 : u.rarity==='r'? 5 : u.rarity==='e'? 2 : 1);
   const picks = [];
   for(let i=0;i<3;i++){
@@ -1626,8 +1644,9 @@ function showLevelUp(){
       const rarityMap = {n:'노멀',r:'레어',e:'에픽',l:'전설'};
       btn.innerHTML = `<div class="title"><span class="icon">${u.icon}</span>${u.title}<span class="rarity ${u.rarity}">${rarityMap[u.rarity]}</span></div><div class="desc">${u.desc(lvl)}</div><div class="lvl">Lv ${lvl+1} / ${u.max}</div>`;
       btn.onclick = ()=>{
+        if(isUpgradeMaxed(u, state.player)) { closeLevelUp(); return; }
         u.apply(state.player, state);
-        state.player.upg[u.id] = lvl+1;
+        state.player.upg[u.id] = Math.min(u.max, lvl+1);
         closeLevelUp();
       };
       el.appendChild(btn);
@@ -1815,15 +1834,27 @@ let killsSinceDrop = 0; // pity timer so player sees regular drops even on unluc
 function rollItemDrop(e){
   const table = DROP_TABLES[e.kind];
   if(!table) return;
-  let dropChance = table.drop;
+  // Higher chapters → slightly more drops & a stronger tilt toward rare items so the loot feels richer.
+  const c = state.chapter || 1;
+  const chapterDropMult = 1 + Math.min(0.6, (c-1) * 0.04);
+  let dropChance = Math.min(1, table.drop * chapterDropMult);
   // Pity: every 5 kills without any drop, +100% rate; every 10+, guaranteed.
   if(killsSinceDrop >= 10) dropChance = 1;
   else if(killsSinceDrop >= 5) dropChance = Math.min(1, dropChance * 2);
   const r = Math.random();
   if(r >= dropChance){ killsSinceDrop++; return; }
   killsSinceDrop = 0;
-  // Pick which item based on mix weights
-  const mix = table.mix;
+  // Per-chapter mix bias — common heal/coin shrink, bomb/golden/magnet grow.
+  const rareBoost = Math.min(0.9, (c-1) * 0.06);
+  const baseMix = table.mix;
+  const mix = {};
+  for(const k in baseMix){
+    let w = baseMix[k];
+    if(k==='heal' || k==='coin') w *= (1 - rareBoost*0.5);
+    else if(k==='bomb' || k==='golden') w *= (1 + rareBoost);
+    else if(k==='magnet') w *= (1 + rareBoost*0.5);
+    mix[k] = Math.max(0.01, w);
+  }
   let total = 0; for(const k in mix) total += mix[k];
   let rr = Math.random()*total;
   for(const k in mix){ rr -= mix[k]; if(rr<=0){ spawnItem(e.x, e.y, k); return; } }
@@ -3397,18 +3428,26 @@ function render(){
   // Drawn on top of the world so the pigeon and entities sit inside the ambience, not hidden by the ground.
   drawSkyline(stageHue, themeIdx);
 
-  // Boss warning banner
+  // Boss warning banner — vertical centre so it never sits behind the HUD inventory bar.
+  // Fades out 4s after the boss enters so it doesn't permanently block the playfield.
   if(state.bossSpawned && state.bossAlive){
-    const alpha = 0.5 + 0.5*Math.sin(state.time*4);
-    const isChapterBoss = state.stage === TARGET_STAGES;
-    ctx.save();
-    ctx.fillStyle = isChapterBoss ? `rgba(128,0,64,${alpha*0.95})` : `rgba(201,42,42,${alpha*0.9})`;
-    ctx.fillRect(0, 60, W, 30);
-    ctx.fillStyle = isChapterBoss ? '#FF6B6B' : '#FFE066';
-    ctx.font='900 18px sans-serif';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(isChapterBoss ? '★ 챕터 보스 - 다음 챕터로 가려면 돌파하라! ★' : '⚠ 보스 등장 - 한계를 돌파하라! ⚠', W/2, 75);
-    ctx.restore();
+    const sinceSpawn = state.time - (state.bossFightStart || state.time);
+    const fade = sinceSpawn < 4 ? 1 : Math.max(0, 1 - (sinceSpawn-4)/1.2);
+    if(fade > 0.02){
+      const alpha = (0.55 + 0.45*Math.sin(state.time*4)) * fade;
+      const isChapterBoss = state.stage === TARGET_STAGES;
+      const bannerY = Math.round(H * 0.5);
+      const bannerH = 44;
+      ctx.save();
+      ctx.fillStyle = isChapterBoss ? `rgba(128,0,64,${alpha*0.95})` : `rgba(201,42,42,${alpha*0.9})`;
+      ctx.fillRect(0, bannerY - bannerH/2, W, bannerH);
+      ctx.fillStyle = isChapterBoss ? '#FF6B6B' : '#FFE066';
+      ctx.font='900 22px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.globalAlpha = fade;
+      ctx.fillText(isChapterBoss ? '★ 챕터 보스 — 다음 챕터로 가려면 돌파하라! ★' : '⚠ 보스 등장 — 한계를 돌파하라! ⚠', W/2, bannerY);
+      ctx.restore();
+    }
   }
 }
 
@@ -3450,14 +3489,28 @@ document.getElementById('ccNextBtn').addEventListener('click', ()=>{
     document.getElementById('victory').classList.remove('hidden');
     return;
   }
-  // Advance to next chapter: keep all player upgrades & level, reset stage to 1
-  state.chapter++;
+  // Advance to next chapter: items/level reset (per spec) so each chapter is a fresh build.
+  // Score & kills stay cumulative — that matches the stats shown on the chapter-cleared/victory screens.
+  const nextChapter = state.chapter + 1;
+  resetPlayer();
+  state.chapter = nextChapter;
   state.stage = 1;
-  state.player.hp = state.player.maxHp;
+  state.enemies = []; state.bullets = []; state.gems = []; state.items = [];
+  state.particles = []; state.damageNums = []; state.orbits = []; state.enemyBullets = [];
+  state.pickupTexts = [];
+  state.abilities = { orbit:0, bomb:0, lightning:0, heal:0, shield:0 };
+  state.abilityTimers = { orbit:0, bomb:0, lightning:0, heal:0 };
+  killsSinceDrop = 0;
+  _invBarCache = null;
+  updateInvBar();
   initStage();
   state.scene = 'playing';
   bgmStart();
-  showLevelUp(); // bonus upgrade card
+  showLevelUp(); // first card pick of the new chapter
+});
+document.getElementById('ccHomeBtn').addEventListener('click', ()=>{
+  document.getElementById('chapterCleared').classList.add('hidden');
+  backToTitle();
 });
 document.getElementById('ccEndBtn').addEventListener('click', ()=>{
   document.getElementById('chapterCleared').classList.add('hidden');
