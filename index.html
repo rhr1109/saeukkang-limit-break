@@ -360,14 +360,24 @@ function noise(dur=.08, vol=.2){
 function sfxShoot(){ beep(720+Math.random()*80, .04, 'square', .12, -260); }
 function sfxHit(){ beep(240, .05, 'triangle', .2, -120); }
 function sfxKill(){ beep(520, .08, 'sawtooth', .18, 180); beep(880,.08,'square',.12,200); }
-function sfxPickup(){ beep(880, .05, 'sine', .2, 240); }
+function sfxPickup(){
+  // Crisp "ting" with a bright follow — feels chunkier than a single beep.
+  beep(960, .04, 'sine', .22, 260);
+  setTimeout(()=>beep(1280, .035, 'sine', .16, 200), 28);
+}
 function sfxLevelUp(){ beep(523,.1,'square',.3); setTimeout(()=>beep(659,.1,'square',.3),90); setTimeout(()=>beep(784,.14,'square',.3),180); setTimeout(()=>beep(1047,.2,'square',.3),280);}
 function sfxHurt(){ noise(.15,.3); beep(140,.12,'sawtooth',.25,-50); }
 function sfxBoss(){ beep(80,.5,'sawtooth',.4,-40); beep(160,.3,'square',.2); }
 function sfxVictory(){ [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>beep(f,.18,'square',.3),i*130));}
 function sfxExplosion(){ noise(.2,.35); beep(80,.25,'sawtooth',.3,-40); }
 // Crisp two-tone UI click for menu / HUD buttons
-function sfxClick(){ beep(1180, .025, 'square', .14, -120); setTimeout(()=>beep(820, .03, 'square', .10, -80), 20); }
+function sfxClick(){
+  // Layered click: high tick + mid body + low tail so menu interactions feel weighty.
+  beep(1480, .02, 'square', .22, -200);
+  setTimeout(()=>beep(960, .03, 'square', .18, -180), 18);
+  setTimeout(()=>beep(560, .04, 'triangle', .12, -120), 38);
+}
+function sfxHover(){ beep(1320, .015, 'sine', .08, -80); }
 // Item-specific pickup tones — each kind has its own personality so the player can tell what they grabbed by ear.
 function sfxHeal(){ beep(660,.08,'sine',.28,180); setTimeout(()=>beep(990,.10,'sine',.26,220), 70); setTimeout(()=>beep(1320,.12,'sine',.22,180), 150); }
 function sfxMagnet(){
@@ -449,7 +459,8 @@ const BGM_CHAPTER_PACKS = [
   { label:'심판의 문',    bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['E3','G3','B3','E4'],['A3','C#4','E4','A4']], interval:128, wave:'sawtooth', bassShift:'3', vol:.12 },
   { label:'한계돌파',     bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:120, wave:'sawtooth', bassShift:'3', vol:.13 },
 ];
-// Title / chapter-select BGM — calm, hopeful arcade loop in C major
+// Title / chapter-select BGM — calm, hopeful arcade loop in C major.
+// Slightly louder than chapter packs so the menu feels alive the moment audio unlocks.
 const TITLE_BGM_PACK = {
   label:'타이틀',
   bars:[
@@ -458,7 +469,7 @@ const TITLE_BGM_PACK = {
     ['D4','F4','A4','F4'],
     ['G4','B4','D5','G4'],
   ],
-  interval:200, wave:'triangle', bassShift:'3', vol:.09
+  interval:190, wave:'triangle', bassShift:'3', vol:.13
 };
 function currentBgmPack(){
   if(state.scene === 'title' || state.scene === 'chapterSelect') return TITLE_BGM_PACK;
@@ -482,11 +493,64 @@ function bgmBassNote(name, dur=.3, vol=.14){
   o.connect(g); g.connect(bgmGain);
   o.start(); o.stop(audioCtx.currentTime+dur);
 }
+// Per-tier flair so each chapter band sounds genuinely different, not just retuned.
+// Layered on top of the base arpeggio so the underlying pack progression still drives mood.
+function bgmFlair(tier, noteIdx, bar, pack){
+  if(!audioCtx || muted) return;
+  const head = bar[0];
+  switch(tier){
+    case 0: // Day city — bright top-octave echo on beat 1
+      if(noteIdx===0) setTimeout(()=>bgmNote(bar[0].replace(/\d/, '5'), .08, pack.vol*0.45, 'square'), 60);
+      break;
+    case 1: // Neon night — soft sawtooth pad swell every bar
+      if(noteIdx===0){
+        const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        o.type='sawtooth'; o.frequency.value=(NOTE[head]||440)/2;
+        g.gain.value=0; g.gain.linearRampToValueAtTime(pack.vol*0.55, audioCtx.currentTime+.4);
+        g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+.9);
+        o.connect(g); g.connect(bgmGain); o.start(); o.stop(audioCtx.currentTime+0.95);
+      }
+      break;
+    case 2: // Cave — low drone hum + sparse hi-knock on beat 3
+      if(noteIdx===0){
+        const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        o.type='sine'; o.frequency.value=(NOTE[head]||220)/4;
+        g.gain.value=0; g.gain.linearRampToValueAtTime(pack.vol*0.6, audioCtx.currentTime+.3);
+        g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+1.2);
+        o.connect(g); g.connect(bgmGain); o.start(); o.stop(audioCtx.currentTime+1.25);
+      }
+      if(noteIdx===2) noise(.04, .06);
+      break;
+    case 3: // Ice — crystalline bell ping on every offbeat
+      if(noteIdx===1 || noteIdx===3){
+        bgmNote(bar[noteIdx].replace(/\d/, '5'), .05, pack.vol*0.55, 'sine');
+        setTimeout(()=>bgmNote(bar[noteIdx].replace(/\d/, '5'), .04, pack.vol*0.3, 'sine'), 30);
+      }
+      break;
+    case 4: // Cosmic — wide sub-bass swell on bar start, sparkle on beat 3
+      if(noteIdx===0){
+        const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        o.type='triangle'; o.frequency.value=(NOTE[head]||220)/4;
+        g.gain.value=0; g.gain.linearRampToValueAtTime(pack.vol*0.7, audioCtx.currentTime+.5);
+        g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+1.4);
+        o.connect(g); g.connect(bgmGain); o.start(); o.stop(audioCtx.currentTime+1.45);
+      }
+      if(noteIdx===2) bgmNote(bar[2].replace(/\d/, '5'), .06, pack.vol*0.4, 'sine');
+      break;
+    case 5: // Hellfire — kick every beat + lead octave-up double on beats 1 & 3
+      noise(.05, .12); // kick
+      if(noteIdx===0 || noteIdx===2){
+        bgmNote(bar[noteIdx].replace(/\d/, '5'), .07, pack.vol*0.5, 'sawtooth');
+      }
+      break;
+  }
+}
 function bgmStart(){
   bgmStop(); // restart with current pack
   bgmStep=0;
   const tick=()=>{
     const pack = currentBgmPack();
+    const tier = state.scene === 'title' ? -1 : chapterTier(state.chapter);
     const barIdx = Math.floor(bgmStep/4)%pack.bars.length;
     const noteIdx = bgmStep%4;
     const bar = pack.bars[barIdx];
@@ -494,8 +558,11 @@ function bgmStart(){
     bgmNote(noteName, .15, pack.vol, pack.wave);
     if(noteIdx===0) bgmBassNote(bar[0].replace(/\d/, pack.bassShift), .3);
     if(noteIdx===2) bgmBassNote(bar[0].replace(/\d/, pack.bassShift), .2);
-    // Occasional percussion-like click on beats 1 & 3 for later tiers
-    if(chapterTier(state.chapter) >= 3 && (noteIdx===0 || noteIdx===2)) noise(.04, .08);
+    if(tier >= 0) bgmFlair(tier, noteIdx, bar, pack);
+    else if(state.scene === 'title'){
+      // Title flair — a sparkly counter-melody on beats 2 & 4 so the menu has personality.
+      if(noteIdx===1 || noteIdx===3) bgmNote(bar[noteIdx].replace(/\d/, '5'), .06, pack.vol*0.55, 'sine');
+    }
     bgmStep++;
   };
   const pack = currentBgmPack();
@@ -1159,6 +1226,46 @@ function drawEnemy(ctx, e, walkPhase){
       ctx.fillStyle = '#FFE066';
       ctx.beginPath(); ctx.arc(ox, oy, 2, 0, Math.PI*2); ctx.fill();
     }
+  } else if(kind==='tyrant'){
+    // Massive armored demon-cat — late-game unique unlock (ch28+).
+    // Slower than boss but with devastating shockwave AOE.
+    const body = flashing ? '#FFB3B3' : '#3A0A0A';
+    const accent = flashing ? '#FFE0E0' : '#7A1818';
+    const glow = '#FF1744';
+    // Shadow puddle
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.beginPath(); ctx.ellipse(0, 26*s, 24*s, 7*s, 0, 0, Math.PI*2); ctx.fill();
+    // Wings (folded behind shoulders, tinted red)
+    ctx.fillStyle = accent;
+    ctx.beginPath(); ctx.moveTo(-12*s, -2*s); ctx.lineTo(-26*s, -16*s); ctx.lineTo(-22*s, 8*s); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(12*s, -2*s); ctx.lineTo(26*s, -16*s); ctx.lineTo(22*s, 8*s); ctx.closePath(); ctx.fill();
+    // Body
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.ellipse(0, 10*s, 18*s, 16*s, 0, 0, Math.PI*2); ctx.fill();
+    // Chest plate
+    ctx.fillStyle = accent;
+    ctx.beginPath(); ctx.ellipse(0, 12*s, 11*s, 9*s, 0, 0, Math.PI*2); ctx.fill();
+    // Head
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.arc(0, -6*s, 13*s, 0, Math.PI*2); ctx.fill();
+    // Horns — twin curved
+    ctx.beginPath(); ctx.moveTo(-9*s, -14*s); ctx.quadraticCurveTo(-16*s, -22*s, -10*s, -28*s); ctx.lineTo(-7*s, -16*s); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(9*s, -14*s); ctx.quadraticCurveTo(16*s, -22*s, 10*s, -28*s); ctx.lineTo(7*s, -16*s); ctx.closePath(); ctx.fill();
+    // Glowing eyes
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.ellipse(-5*s, -7*s, 3*s, 2.4*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(5*s, -7*s, 3*s, 2.4*s, 0, 0, Math.PI*2); ctx.fill();
+    // Fangs
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.moveTo(-3*s, 0); ctx.lineTo(-2*s, 4*s); ctx.lineTo(-1*s, 0); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(3*s, 0); ctx.lineTo(2*s, 4*s); ctx.lineTo(1*s, 0); ctx.closePath(); ctx.fill();
+    // Shockwave telegraph ring — pulses red right before AOE
+    if(e.shockTelegraph && e.shockTelegraph > 0){
+      const rt = e.shockTelegraph;
+      ctx.strokeStyle = `rgba(255,23,68,${rt})`;
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 8*s, 28*s + (1-rt)*20, 0, Math.PI*2); ctx.stroke();
+    }
   } else if(kind==='boss'){
     // giant menacing cat boss
     const body = flashing?'#FFB3B3':'#222';
@@ -1312,7 +1419,7 @@ function resetPlayer(){
     facing: 1,
     level: 1,
     xp: 0,
-    xpToNext: 5,
+    xpToNext: 8,
     // upgrade levels for cards
     upg: {},
     // Per-weapon state: only saeukkang is unlocked initially. Each entry has {lvl, reloadT}.
@@ -1413,6 +1520,8 @@ const ENEMY_DEFS = {
   sniper: { speed: 75,  hp: 34,  dmg: 24, size:1.15,score:8, xp:5, color:'#FFA94D' },
   // Ch25+: summoner that spawns mice waves
   summoner:{ speed:55,  hp: 180, dmg: 14, size:1.7, score:20,xp:14, color:'#7950F2' },
+  // Ch28+: tyrant — slow but devastating shockwave AOE; unique to late chapters
+  tyrant: { speed: 60, hp: 320, dmg: 32, size:2.0, score:35, xp:22, color:'#5D0F0F' },
   boss:   { speed: 70,  hp: 500, dmg: 25, size:2.4, score:100,xp:40, color:'#222' }
 };
 
@@ -1447,6 +1556,7 @@ function spawnEnemy(kind){
   else if(kind==='reaper'){ e.slashCd = 2 + Math.random(); e.knockback = 14; }
   else if(kind==='sniper'){ e.rangedCd = 2.2 + Math.random()*.6; e.sniperScope=0; }
   else if(kind==='summoner'){ e.summonCd = 4 + Math.random(); }
+  else if(kind==='tyrant'){ e.shockCd = 3 + Math.random()*.8; e.shockTelegraph = 0; }
   state.enemies.push(e);
   return e;
 }
@@ -1507,7 +1617,8 @@ function stageEnemyPool(stage){
   if(c>=20) pool.push('summoner','bomber','ghost');
   if(c>=23) pool.push('reaper','summoner');
   if(c>=26) pool.push('summoner','summoner');
-  if(c>=28) pool.push('reaper','summoner','sniper');
+  if(c>=28) pool.push('reaper','summoner','sniper','tyrant');
+  if(c>=30) pool.push('tyrant','tyrant','summoner','reaper'); // final chapter — reign of tyrants
   return pool;
 }
 
@@ -1592,6 +1703,26 @@ const UPGRADES = [
       return `미사일 강화 — ${WEAPONS.missile.count(w)}발 / 폭발 반경 ${WEAPONS.missile.aoeRadius(w)}`;
     },
     apply:(p)=>{ if(!p.weapons.missile) p.weapons.missile={lvl:1,reloadT:0}; else p.weapons.missile.lvl++; } },
+  // ----- Chapter-gated bold upgrades. Each only shows once player has cleared up to that chapter,
+  // and each is a 1-pick power spike (max:1) so the build feels noticeably different post-pick. -----
+  { id:'berserk', title:'광폭 새우깡', icon:'🔥', max:1, rarity:'l', unlockCh:5,
+    desc:(l)=>'공격력 ×1.5, 치명타 +12%',
+    apply:p=>{ p.damage *= 1.5; p.crit = Math.min(0.9, p.crit+0.12); } },
+  { id:'overdrive', title:'오버드라이브', icon:'⚙️', max:1, rarity:'l', unlockCh:10,
+    desc:(l)=>'연사 ×1.4, 탄속 ×1.3',
+    apply:p=>{ p.fireRate *= 1.4; p.projSpeed *= 1.3; } },
+  { id:'deathray', title:'데스레이', icon:'☄️', max:1, rarity:'l', unlockCh:15,
+    desc:(l)=>'관통 +5, 투사체 크기 ×1.5',
+    apply:p=>{ p.pierce += 5; p.projSize *= 1.5; } },
+  { id:'harvester', title:'대수확자', icon:'🌾', max:1, rarity:'l', unlockCh:20,
+    desc:(l)=>'XP 획득 ×2.0, 자석 범위 ×2.5',
+    apply:p=>{ p.xpMult *= 2.0; p.magnet *= 2.5; } },
+  { id:'stormcaller', title:'폭풍 소환사', icon:'🌩️', max:2, rarity:'l', unlockCh:25,
+    desc:(l)=>l?'번개 대상 +2, 빈도 ×1.4':'⚡ 번개 빈도 +50%, 추가 대상 +2',
+    apply:(p,s)=>{ s.abilities.lightning = (s.abilities.lightning||0) + 2; s.abilities.stormBoost = (s.abilities.stormBoost||0)+1; } },
+  { id:'godkiller', title:'신살자', icon:'🗡️', max:1, rarity:'l', unlockCh:28,
+    desc:(l)=>'공격력 ×2.0, 치명타 배율 +1.0 (단, 최대 HP -25%)',
+    apply:p=>{ p.damage *= 2.0; p.critMult += 1.0; p.maxHp = Math.max(20, Math.round(p.maxHp*0.75)); p.hp = Math.min(p.maxHp, p.hp); } },
 ];
 
 function rebuildOrbits(){
@@ -1611,9 +1742,14 @@ function isUpgradeMaxed(u, p){
   if(w && typeof w.lvl === 'number' && w.lvl >= u.max) return true;
   return false;
 }
+function isUpgradeUnlocked(u){
+  // unlockCh gates bold late-game upgrades behind a minimum chapter so early runs aren't
+  // overwhelmed with options and the unlocks feel like a reward for progress.
+  return !u.unlockCh || state.chapter >= u.unlockCh;
+}
 function rollUpgrades(){
   const p = state.player;
-  const pool = UPGRADES.filter(u => !isUpgradeMaxed(u, p));
+  const pool = UPGRADES.filter(u => isUpgradeUnlocked(u) && !isUpgradeMaxed(u, p));
   const weights = pool.map(u => u.rarity==='n'? 10 : u.rarity==='r'? 5 : u.rarity==='e'? 2 : 1);
   const picks = [];
   for(let i=0;i<3;i++){
@@ -1629,16 +1765,26 @@ function rollUpgrades(){
 }
 
 function showLevelUp(){
+  // If every chapter-applicable upgrade is already maxed, don't pop the modal at all — silently flush
+  // any queued level-ups so the player keeps playing. (User spec: 모두 모았으면 팝업 안뜨게)
+  const allMaxed = UPGRADES.filter(isUpgradeUnlocked).every(u => isUpgradeMaxed(u, state.player));
+  if(allMaxed){
+    pendingLevelUps = 0;
+    state.scene = 'playing';
+    if(!bgmTimer) bgmStart();
+    return;
+  }
   state.scene = 'levelup';
   bgmStop();
   const picks = rollUpgrades();
   const el = document.getElementById('lvChoices');
   el.innerHTML='';
   if(picks.length===0){
-    const btn=document.createElement('button');
-    btn.className='choice'; btn.innerHTML=`<div class="title"><span class="icon">🌟</span>강인함 보너스<span class="rarity l">LGD</span></div><div class="desc">HP +30, 공격력 +15%</div>`;
-    btn.onclick=()=>{ state.player.maxHp+=30; state.player.hp=Math.min(state.player.maxHp,state.player.hp+30); state.player.damage*=1.15; closeLevelUp(); };
-    el.appendChild(btn);
+    // Edge case: pool empty but allMaxed check was false (shouldn't happen) — bail safely.
+    pendingLevelUps = 0;
+    state.scene = 'playing';
+    if(!bgmTimer) bgmStart();
+    return;
   } else {
     for(const u of picks){
       const lvl = state.player.upg[u.id]||0;
@@ -1832,6 +1978,7 @@ const DROP_TABLES = {
   reaper:   { drop:0.55, mix:{heal:.30, magnet:.15, coin:.20, bomb:.15, golden:.20} },
   tank:     { drop:0.75, mix:{heal:.30, magnet:.15, coin:.15, bomb:.20, golden:.20} },
   summoner: { drop:0.90, mix:{heal:.25, magnet:.15, coin:.15, bomb:.20, golden:.25} },
+  tyrant:   { drop:1.00, mix:{heal:.20, magnet:.10, coin:.10, bomb:.30, golden:.30} },
 };
 let killsSinceDrop = 0; // pity timer so player sees regular drops even on unlucky streaks
 function rollItemDrop(e){
@@ -1920,7 +2067,9 @@ function applyItem(item){
     }
     sfxMagnet();
   } else if(item.kind==='bomb'){
-    doBomb(p.x, p.y, 260, p.damage*3.5);
+    // Ignite chime before the boom so the pickup itself is felt, not just the explosion.
+    beep(420, .06, 'square', .22, 120);
+    setTimeout(()=>doBomb(p.x, p.y, 260, p.damage*3.5), 60);
   } else if(item.kind==='golden'){
     gainXP(p.xpToNext * 0.35);
     sfxGolden();
@@ -1973,7 +2122,9 @@ function gainXP(amount){
   while(p.xp >= p.xpToNext){
     p.xp -= p.xpToNext;
     p.level++;
-    p.xpToNext = Math.round(p.xpToNext * 1.35 + 2);
+    // Tamer growth curve so the chapter's full upgrade set isn't maxed before the final stage.
+    // Was xpToNext * 1.35 + 2 (exponential-ish, runs away after level 15).
+    p.xpToNext = Math.round(p.xpToNext * 1.18 + 4);
     queueLevelUp();
   }
 }
@@ -1981,7 +2132,9 @@ function gainXP(amount){
 let pendingLevelUps = 0;
 function queueLevelUp(){
   pendingLevelUps++;
-  if(state.scene==='playing'){ showLevelUp(); pendingLevelUps--; }
+  // If we can show now, fire it and rebalance the counter. showLevelUp() may flush the
+  // queue itself when all upgrades are maxed, so we clamp to avoid going negative.
+  if(state.scene==='playing'){ showLevelUp(); pendingLevelUps = Math.max(0, pendingLevelUps-1); }
 }
 
 function damagePlayer(dmg){
@@ -2185,6 +2338,33 @@ function update(dt){
       const perpX = -dy/d, perpY = dx/d;
       e.x += dx/d * e.speed * dt + perpX * zig * dt;
       e.y += dy/d * e.speed * dt + perpY * zig * dt;
+    } else if(e.kind==='tyrant'){
+      // Tyrant — slow approach with periodic shockwave AOE.
+      // Telegraphs by pulsing the ring around itself for ~0.6s before the pulse hits.
+      e.x += dx/d * e.speed * dt;
+      e.y += dy/d * e.speed * dt;
+      e.shockCd -= dt;
+      if(e.shockCd <= 0.6 && e.shockCd > 0) e.shockTelegraph = e.shockCd / 0.6;
+      else e.shockTelegraph = 0;
+      if(e.shockCd <= 0){
+        e.shockCd = 4.2 + Math.random()*0.8;
+        const radius = 220;
+        const pl = state.player;
+        if(pl){
+          const ddx = pl.x - e.x, ddy = pl.y - e.y;
+          if(ddx*ddx + ddy*ddy < radius*radius){
+            damagePlayer(Math.ceil(e.damage * 0.75));
+          }
+        }
+        state.camera.shake = Math.max(state.camera.shake, 12);
+        state.particles.push({ x:e.x, y:e.y, vx:0, vy:0, life:.6, maxLife:.6, color:'#FF1744', size: radius, grav:0, ring:true });
+        for(let k=0;k<14;k++){
+          const aa = Math.random()*Math.PI*2;
+          const sp = 100+Math.random()*180;
+          state.particles.push({ x:e.x, y:e.y, vx:Math.cos(aa)*sp, vy:Math.sin(aa)*sp, life:.55, maxLife:.55, color:k%2?'#FF1744':'#FFD43B', size:4, grav:120 });
+        }
+        sfxExplosion();
+      }
     } else if(e.kind==='summoner'){
       // Summoner: maintains medium distance, summons minions
       if(d<200){ e.x -= dx/d * e.speed * 0.7 * dt; e.y -= dy/d * e.speed * 0.7 * dt; }
@@ -3439,7 +3619,7 @@ function render(){
     if(fade > 0.02){
       const pulse = 0.6 + 0.4*Math.sin(state.time*4);
       const isChapterBoss = state.stage === TARGET_STAGES;
-      const text = isChapterBoss ? '★ 챕터 보스 — 다음 챕터로 가려면 돌파하라! ★' : '⚠ 보스 등장 — 한계를 돌파하라! ⚠';
+      const text = isChapterBoss ? '★ 챕터 보스 등장! ★' : '⚠ 보스 등장! ⚠';
       const fontSize = Math.max(14, Math.min(22, Math.round(W/24)));
       ctx.save();
       ctx.font = `900 ${fontSize}px sans-serif`;
