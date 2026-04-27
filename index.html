@@ -2799,9 +2799,11 @@ function drawSkyline(stageHue, themeIdx){
   ctx.restore();
 }
 
-// Deterministic pseudo-random from tile coords + stage seed
+// Deterministic pseudo-random from tile coords + chapter seed.
+// Stage is intentionally NOT in the seed — props within a chapter must stay identical
+// across stages so the background only "swaps" when the chapter changes.
 function tileHash(tx, ty, salt){
-  let h = (tx|0)*73856093 ^ (ty|0)*19349663 ^ ((state.chapter*31 + state.stage*17 + (salt||0))|0);
+  let h = (tx|0)*73856093 ^ (ty|0)*19349663 ^ ((state.chapter*31 + (salt||0))|0);
   h = (h ^ (h>>>13)) * 1274126177;
   h = h ^ (h>>>16);
   return h >>> 0;
@@ -3447,7 +3449,9 @@ function render(){
     ],
   ];
   const tier = chapterTier(state.chapter);
-  const stageHue = TIER_HUES[tier][(state.stage-1) % 8];
+  // Sky gradient is fixed per chapter — varies across the 5 chapters within a tier,
+  // and stays constant across the 8 stages of a single chapter.
+  const stageHue = TIER_HUES[tier][(state.chapter-1) % 5];
   g.addColorStop(0, stageHue[0]);
   g.addColorStop(.20, stageHue[1]);
   g.addColorStop(.50, stageHue[2]);
@@ -3458,7 +3462,7 @@ function render(){
 
   if(state.scene==='title') return; // overlay handles it
 
-  const themeIdx = ((state.stage-1) % 3);
+  const themeIdx = themeId();
 
   // Camera
   let camX = state.camera.x - W/2;
