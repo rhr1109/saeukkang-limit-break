@@ -939,7 +939,7 @@ const WEAPONS = {
     count:(w)=> Math.min(3, 1 + Math.floor(w.lvl/2)),
     dmg:(w,p)=> p.damage * (1.00 + w.lvl*0.20),
     speed:()=> 440,
-    size:()=> 1.2,
+    size:()=> 2.1,                      // chunky tuna can — visually heavy, easy to read on screen
     pierce:()=> 99,                     // unlimited pierce on the way out
     life:1.6, behavior:'return',
     returnAt:0.55, spinBase:18, draw:drawBoomerang
@@ -1319,6 +1319,9 @@ function drawEnemy(ctx, e, walkPhase){
 // ---------- Game state ----------
 const TARGET_STAGES = 8;
 const MAX_CHAPTERS = 30;
+// Pickup hitbox spans the pigeon body (head→feet ≈ 90px tall, 60px wide).
+// 48 means anything brushing the body proper grabs the pickup.
+const PICKUP_RADIUS = 48;
 // Chapter names — each chapter is a location, not a difficulty label.
 // Difficulty is implicit in chapter number; higher chapters belong to harsher tiers.
 const CHAPTER_NAMES = [
@@ -1348,8 +1351,9 @@ function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.len
 function chapterMult(){
   const c = state.chapter;
   return {
-    hp:    Math.pow(1.62, c-1),
-    dmg:   1 + (c-1)*0.25,
+    // Softer HP/DMG curves so mid chapters (3-5) don't turn into a wall.
+    hp:    Math.pow(1.42, c-1),
+    dmg:   1 + (c-1)*0.17,
     speed: 1 + Math.min(0.9, (c-1)*0.055),
     score: Math.pow(1.4, c-1),
     xp:    1 + (c-1)*0.20,
@@ -1391,6 +1395,7 @@ const state = {
   orbits: [],
   enemyBullets: [],
   pickupTexts: [],
+  toastBanner: null, // { text, sub, t, maxT } — in-screen notice for stage transitions
   spawnTimer: 0,
   abilities: { orbit:0, bomb:0, lightning:0, heal:0, shield:0 },
   abilityTimers: { orbit:0, bomb:0, lightning:0, heal:0 },
@@ -1433,6 +1438,7 @@ function resetRun(startChapter){
   state.chapter = startChapter || 1;
   state.stage=1; state.score=0; state.kills=0; state.time=0;
   state.enemies=[]; state.bullets=[]; state.gems=[]; state.items=[]; state.particles=[]; state.damageNums=[]; state.orbits=[]; state.enemyBullets=[]; state.pickupTexts=[];
+  state.toastBanner = null;
   state.abilities = { orbit:0, bomb:0, lightning:0, heal:0, shield:0 };
   state.abilityTimers = { orbit:0, bomb:0, lightning:0, heal:0 };
   killsSinceDrop = 0;
@@ -1446,7 +1452,8 @@ function initStage(){
   state.bossSpawned=false;
   state.bossAlive=false;
   state.spawnTimer=0;
-  state.stageDuration = 55 + state.stage*4;
+  // Shorter stages — total chapter (~8 stages) lands around 6-7 min instead of 9-10.
+  state.stageDuration = 32 + state.stage*3;
   state.camera.x = state.player.x;
   state.camera.y = state.player.y;
 }
@@ -1465,6 +1472,9 @@ const joyEl = document.getElementById('joystick');
 const stickEl = joyEl.querySelector('.stick');
 let joyActive=false, joyDx=0, joyDy=0, joyTouchId=null;
 function isTouch(){ return 'ontouchstart' in window || navigator.maxTouchPoints>0; }
+// PC users get a noticeably larger pigeon — desktop screens are far bigger than phones,
+// and the previous 0.95 scale made the player look tiny.
+const PLAYER_DRAW_SCALE = isTouch() ? 0.95 : 1.45;
 if(isTouch()) joyEl.style.display='block';
 function onJoyStart(e){
   const t = (e.touches ? e.touches[0] : e);
@@ -1532,7 +1542,7 @@ function spawnEnemy(kind){
   const dist = Math.max(W,H)*0.6 + 60;
   const x = p.x + Math.cos(angle)*dist;
   const y = p.y + Math.sin(angle)*dist;
-  const scale = 1 + (state.stage-1)*0.12;
+  const scale = 1 + (state.stage-1)*0.07;
   const chm = chapterMult();
   const hp = Math.ceil(def.hp * scale * chm.hp);
   const e = {
@@ -1564,10 +1574,11 @@ function spawnEnemy(kind){
 function spawnBoss(){
   const b = spawnEnemy('boss');
   const chm = chapterMult();
-  // Override base boss stats with stage-scaled values, then apply chapter mult
-  b.hp = b.maxHp = Math.ceil((400 + state.stage*120) * chm.hp);
-  b.speed = (60 + state.stage*4) * chm.speed;
-  b.damage = Math.ceil((20 + state.stage*3) * chm.dmg);
+  // Override base boss stats with stage-scaled values, then apply chapter mult.
+  // Stage 1-2 bosses are pushovers (warm-up); stage 7-8 are the real wall.
+  b.hp = b.maxHp = Math.ceil((140 + Math.pow(state.stage,1.7)*70) * chm.hp);
+  b.speed = (55 + state.stage*4) * chm.speed;
+  b.damage = Math.ceil((14 + state.stage*3) * chm.dmg);
   b.collideRadius = 55;
   b.ranged = true;
   b.rangedCd = 2;
@@ -1623,8 +1634,9 @@ function stageEnemyPool(stage){
 }
 
 function spawnRateForStage(stage){
-  // enemies per second ramp
-  return 0.8 + stage*0.25;
+  // 탕탕특공대-style swarm — rate climbs sharply with stage and slowly with chapter
+  // so the screen stays full of trash even with the lower per-mob HP.
+  return (1.6 + stage*0.45) * (1 + (state.chapter-1)*0.04);
 }
 
 // ---------- Upgrades ----------
@@ -2087,8 +2099,8 @@ function applyItem(item){
 }
 
 function onBossDefeated(){
-  bgmStop();
   if(state.stage>=TARGET_STAGES){
+    bgmStop();
     // Update progress — unlock next chapter
     if(state.chapter > progress.clearedChapter){
       progress.clearedChapter = Math.min(MAX_CHAPTERS, state.chapter);
@@ -2109,10 +2121,20 @@ function onBossDefeated(){
     renderChapterCleared();
     document.getElementById('chapterCleared').classList.remove('hidden');
   } else {
-    state.scene='cleared';
+    // Stage clear → auto-advance with on-screen banner. No modal, no BGM cut.
     sfxLevelUp();
-    renderCleared();
-    document.getElementById('stageCleared').classList.remove('hidden');
+    const p = state.player;
+    p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp*0.25));
+    state.stage++;
+    initStage();
+    state.toastBanner = {
+      text: `스테이지 ${state.stage} 진입!`,
+      sub: `HP +25% 회복`,
+      t: 2.6, maxT: 2.6
+    };
+    updateHUD();
+    // If level-ups were queued mid-fight, surface one now (doesn't block auto-advance flow).
+    if(pendingLevelUps > 0){ showLevelUp(); pendingLevelUps = Math.max(0, pendingLevelUps-1); }
   }
 }
 
@@ -2506,7 +2528,9 @@ function update(dt){
       }
     }
     g.x += g.vx*dt; g.y += g.vy*dt;
-    if(d < 22){
+    // Pickup hitbox covers the whole pigeon body (~50px tall) — was 22px which only
+    // matched the feet, making XP/items easy to brush past.
+    if(d < PICKUP_RADIUS){
       gainXP(g.value);
       g._grab = true;
       sfxPickup();
@@ -2536,7 +2560,8 @@ function update(dt){
     }
     it.x += it.vx*dt; it.y += it.vy*dt;
     // Magneted items bypass the born delay so chain pickups feel snappy.
-    if(d < 34 && (it.born<=0 || it.homing>0)){
+    // Generous radius so the entire pigeon body (not just feet) collects items.
+    if(d < PICKUP_RADIUS + 8 && (it.born<=0 || it.homing>0)){
       applyItem(it);
       it._taken = true;
     }
@@ -2561,6 +2586,12 @@ function update(dt){
     t.t -= dt; t.y -= 30*dt;
   }
   state.pickupTexts = state.pickupTexts.filter(t=>t.t>0);
+
+  // Toast banner (stage transition notice) — counts down even during play
+  if(state.toastBanner){
+    state.toastBanner.t -= dt;
+    if(state.toastBanner.t <= 0) state.toastBanner = null;
+  }
 
   // Damage numbers
   for(const d of state.damageNums){
@@ -2659,8 +2690,9 @@ function updateInvBar(){
 // 0: city (1-5), 1: night city (6-10), 2: cave (11-15), 3: ice (16-20), 4: space (21-25), 5: hell (26-30)
 function chapterTier(ch){ return Math.min(5, Math.floor((ch-1)/5)); }
 function themeId(){
-  // Stage within chapter rotates sub-themes (0..2)
-  return ((state.stage-1) % 3);
+  // Each chapter has a fixed biome — stages inside a chapter share the same background.
+  // Sub-theme rotates with chapter so the 5 chapters in each tier still feel distinct.
+  return ((state.chapter-1) % 3);
 }
 
 // ── Top-down background system ──
@@ -3515,13 +3547,14 @@ function render(){
   const p = state.player;
   const flash = p.invT>0 && Math.floor(state.time*16)%2===0;
   if(!flash){
-    drawPigeon(ctx, p.x, p.y, 0.95, p.facing, p.walkPhase, p.invT>0, 1, p);
+    drawPigeon(ctx, p.x, p.y, PLAYER_DRAW_SCALE, p.facing, p.walkPhase, p.invT>0, 1, p);
   }
 
   // Player bullets — dispatch by weapon kind. Missile also drops thrust particles per frame.
   for(const b of state.bullets){
     const def = WEAPONS[b.kind] || WEAPONS.shrimp;
-    const drawScale = (b.kind === 'shrimp') ? p.projSize : 1.0;
+    // Scale draw by the weapon's configured size (b.r/10 == size). Shrimp keeps its own multiplier.
+    const drawScale = (b.kind === 'shrimp') ? p.projSize : (b.r / 10);
     if(def.draw) def.draw(ctx, b.x, b.y, b.angle, drawScale);
     else drawSaeukkang(ctx, b.x, b.y, b.angle, drawScale);
     if(b.kind === 'missile' && Math.random() < 0.6){
@@ -3653,6 +3686,55 @@ function render(){
       ctx.restore();
     }
   }
+
+  // Stage transition toast — slides in at the top, fades out near the end.
+  if(state.toastBanner){
+    const tb = state.toastBanner;
+    const lr = Math.max(0, Math.min(1, tb.t / tb.maxT));
+    const enter = 1 - Math.max(0, (tb.maxT - tb.t) / 0.25); // first 0.25s slide-in
+    const slide = Math.max(0, enter) * 60; // px offset above final position
+    const fade = lr < 0.3 ? lr/0.3 : 1;
+    ctx.save();
+    const fontSize = Math.max(16, Math.min(26, Math.round(W/20)));
+    ctx.font = `900 ${fontSize}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    const text = tb.text;
+    const sub = tb.sub || '';
+    const metrics = ctx.measureText(text);
+    const subFontSize = Math.max(12, Math.round(fontSize*0.55));
+    ctx.font = `700 ${subFontSize}px sans-serif`;
+    const subMetrics = sub ? ctx.measureText(sub) : { width: 0 };
+    const padX = 24, padY = 12;
+    const pillW = Math.min(W - 24, Math.max(metrics.width, subMetrics.width) + padX*2);
+    const pillH = fontSize + (sub ? subFontSize + 6 : 0) + padY*2;
+    const cx = W/2;
+    const cy = Math.round(H * 0.22) - slide;
+    const x = cx - pillW/2, y = cy - pillH/2;
+    const radius = 14;
+    ctx.globalAlpha = fade * 0.92;
+    ctx.fillStyle = 'rgba(20,8,40,0.92)';
+    ctx.beginPath();
+    ctx.moveTo(x+radius, y);
+    ctx.lineTo(x+pillW-radius, y); ctx.arcTo(x+pillW, y, x+pillW, y+radius, radius);
+    ctx.lineTo(x+pillW, y+pillH-radius); ctx.arcTo(x+pillW, y+pillH, x+pillW-radius, y+pillH, radius);
+    ctx.lineTo(x+radius, y+pillH); ctx.arcTo(x, y+pillH, x, y+pillH-radius, radius);
+    ctx.lineTo(x, y+radius); ctx.arcTo(x, y, x+radius, y, radius);
+    ctx.closePath();
+    ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,224,102,0.95)';
+    ctx.stroke();
+    ctx.globalAlpha = fade;
+    ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 4;
+    ctx.fillStyle = '#FFE066';
+    ctx.font = `900 ${fontSize}px sans-serif`;
+    ctx.fillText(text, cx, sub ? cy - subFontSize/2 - 2 : cy);
+    if(sub){
+      ctx.fillStyle = '#A5D6A7';
+      ctx.font = `700 ${subFontSize}px sans-serif`;
+      ctx.fillText(sub, cx, cy + fontSize/2 - 2);
+    }
+    ctx.restore();
+  }
 }
 
 // ---------- Main loop ----------
@@ -3703,6 +3785,7 @@ document.getElementById('ccNextBtn').addEventListener('click', ()=>{
   state.enemies = []; state.bullets = []; state.gems = []; state.items = [];
   state.particles = []; state.damageNums = []; state.orbits = []; state.enemyBullets = [];
   state.pickupTexts = [];
+  state.toastBanner = null;
   state.abilities = { orbit:0, bomb:0, lightning:0, heal:0, shield:0 };
   state.abilityTimers = { orbit:0, bomb:0, lightning:0, heal:0 };
   killsSinceDrop = 0;
@@ -3773,8 +3856,8 @@ function renderChapterGrid(){
       card.style.borderColor = '#FFF9DB';
       card.style.color = '#120300';
     }
-    const hp = Math.pow(1.62, i-1);
-    const dmg = 1 + (i-1)*0.25;
+    const hp = Math.pow(1.42, i-1);
+    const dmg = 1 + (i-1)*0.17;
     card.innerHTML = locked
       ? `<div class="ch-lock">🔒</div><div class="ch-num">Ch. ${i}</div><div class="ch-name" style="font-size:12px;opacity:.7;">미공개</div>`
       : `<div class="ch-num">Ch. ${i}</div><div class="ch-name">${chapterName(i)}</div><div class="ch-mult">${i===1?'처음 시작':`적 ×${hp.toFixed(1)} HP · ×${dmg.toFixed(2)} DMG`}</div>`;
@@ -3841,8 +3924,8 @@ function renderChapterCleared(){
     nextLabelEl.parentElement.style.display = '';
     nextBtn.textContent = '⚔ 다음 챕터 도전 ▶';
     const chm = {
-      hp:    Math.pow(1.62, nextCh-1),
-      dmg:   1 + (nextCh-1)*0.25,
+      hp:    Math.pow(1.42, nextCh-1),
+      dmg:   1 + (nextCh-1)*0.17,
       speed: 1 + Math.min(0.9,(nextCh-1)*0.055),
     };
     nextLabelEl.innerHTML = `<span style="color:${chapterColor(nextCh)};font-weight:900;">챕터 ${nextCh} · ${nextName}</span> — 체력 ×${chm.hp.toFixed(1)}, 공격력 ×${chm.dmg.toFixed(2)}, 속도 ×${chm.speed.toFixed(2)}`;
