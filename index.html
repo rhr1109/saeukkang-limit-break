@@ -16,20 +16,38 @@
   .hidden{display:none!important;}
 
   /* Title screen — scrollable on short/notched viewports; content anchored to top with safe-area padding */
-  #title{background:radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.9) 0%, rgba(255,212,59,.85) 18%, rgba(247,103,7,.85) 45%, rgba(90,26,4,.92) 80%, rgba(18,3,0,.98) 100%);flex-direction:column;gap:16px;padding:calc(env(safe-area-inset-top, 0px) + 24px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 16px);align-items:center;justify-content:center;min-height:100%;}
+  #title{background:radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.92) 0%, rgba(255,212,59,.88) 18%, rgba(247,103,7,.88) 45%, rgba(90,26,4,.94) 80%, rgba(18,3,0,.98) 100%);flex-direction:column;gap:14px;padding:calc(env(safe-area-inset-top, 0px) + 24px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 16px);align-items:center;justify-content:center;min-height:100%;}
   #title > *{flex-shrink:0;}
-  #title h1{margin:0;font-size:min(9vw,56px);font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A, 0 6px 20px rgba(0,0,0,.6);letter-spacing:-1px;text-align:center;}
-  #title .sub{font-size:min(3.5vw,18px);color:#FFF9DB;font-weight:700;opacity:.9;letter-spacing:2px;}
-  #title .pigeon-stage{position:relative;width:min(70vw,260px);height:min(70vw,260px);display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 10px 20px rgba(0,0,0,.5));}
-  #title .pigeon-stage svg{width:100%;height:100%;}
-  #title .rays{position:absolute;inset:-30%;background:conic-gradient(from 0deg, transparent 0deg, rgba(255,224,102,.25) 10deg, transparent 20deg, transparent 40deg, rgba(255,224,102,.25) 50deg, transparent 60deg);animation:spin 12s linear infinite;z-index:-1;border-radius:50%;}
+  #title h1{margin:0;font-size:min(10.5vw,64px);font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A, 0 5px 0 #5A1A04, 0 8px 24px rgba(0,0,0,.6), 0 0 30px rgba(255,224,102,.4);letter-spacing:-1.5px;text-align:center;line-height:1;animation:titleBob 3.5s ease-in-out infinite;}
+  @keyframes titleBob{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-4px) rotate(1deg);}}
+  #title .sub{font-size:min(3.5vw,18px);color:#FFF9DB;font-weight:800;opacity:.95;letter-spacing:6px;text-shadow:0 2px 0 #5A1A04;}
+  #title .pigeon-stage{position:relative;width:min(60vw,240px);height:min(60vw,240px);display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 12px 22px rgba(0,0,0,.55));}
+  #title .pigeon-stage svg{width:100%;height:100%;animation:floatY 3.5s ease-in-out infinite;}
+  @keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+  #title .rays{position:absolute;inset:-30%;background:conic-gradient(from 0deg, transparent 0deg, rgba(255,224,102,.28) 10deg, transparent 20deg, transparent 40deg, rgba(255,224,102,.28) 50deg, transparent 60deg);animation:spin 12s linear infinite;z-index:-1;border-radius:50%;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  #title .btns{display:flex;flex-direction:column;gap:10px;width:min(80vw,320px);margin-top:8px;}
-  .btn{padding:14px 20px;border:3px solid #FFD43B;border-radius:10px;background:linear-gradient(180deg,#C92A2A,#7A0F0F);color:#FFE066;font-weight:900;font-size:18px;cursor:pointer;transition:transform .08s;font-family:inherit;box-shadow:0 4px 0 rgba(0,0,0,.4);}
-  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.4);}
-  .btn.alt{background:linear-gradient(180deg,#495057,#212529);border-color:#ADB5BD;color:#F1F3F5;}
-  .btn.small{padding:10px 14px;font-size:14px;}
+  #title .btns{display:flex;flex-direction:column;gap:9px;width:min(82vw,340px);margin-top:6px;}
+  .btn{padding:14px 20px;border:3px solid #FFD43B;border-radius:14px;background:linear-gradient(180deg,#FF6B6B 0%,#C92A2A 50%,#7A0F0F 100%);color:#FFF9DB;font-weight:900;font-size:18px;cursor:pointer;transition:transform .08s, box-shadow .08s;font-family:inherit;box-shadow:0 5px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.18);text-shadow:0 1px 0 rgba(0,0,0,.45);letter-spacing:-.2px;}
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.25);}
+  .btn.alt{background:linear-gradient(180deg,#5C6670 0%,#343A40 50%,#212529 100%);border-color:#ADB5BD;color:#F1F3F5;}
+  .btn.small{padding:10px 14px;font-size:14px;border-radius:11px;}
+  .btn.shop-cta{background:linear-gradient(180deg,#FFD43B 0%,#F59F00 50%,#D9480F 100%);border-color:#FFF9DB;color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 5px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.18),0 0 20px rgba(255,212,59,.35);}
   .hint{font-size:12px;color:#FFF9DB;opacity:.85;margin-top:6px;text-align:center;line-height:1.5;}
+  /* Title decorative frame around the pigeon stage — subtle hex ring */
+  #title .pigeon-stage::before{content:'';position:absolute;inset:-6%;border-radius:50%;border:3px dashed rgba(255,224,102,.4);animation:spin 28s linear infinite reverse;}
+
+  /* Title-screen shop entry — designed as a tiny shopfront card so it screams 'shop' at a glance:
+     red/white striped awning roof, golden storefront body with a shopping cart, coin badge, and a
+     pulsing 'NEW' tag + corner sparkle. Anchored top-right where the eye lands first on mobile. */
+  #titleShopPill{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 22px);right:calc(env(safe-area-inset-right, 0px) + 16px);width:138px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit;z-index:3;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(255,212,59,.45));animation:shopBob 2.6s ease-in-out infinite;overflow:visible;}
+  @keyframes shopBob{0%,100%{transform:translateY(0) rotate(-1.2deg);}50%{transform:translateY(-3px) rotate(1.2deg);}}
+  #titleShopPill:active{animation:none;transform:translateY(3px);}
+  #titleShopPill .awning{display:block;height:22px;background:repeating-linear-gradient(90deg,#C92A2A 0 11px,#FFF9DB 11px 22px);border:3px solid #5A1A04;border-bottom-width:4px;border-radius:14px 14px 4px 4px;position:relative;overflow:hidden;}
+  #titleShopPill .shop-front{display:flex;align-items:center;gap:8px;padding:10px 10px 12px;background:linear-gradient(180deg,#FFE066 0%,#FAB005 55%,#D9480F 100%);border:3px solid #5A1A04;border-top:0;border-radius:4px 4px 14px 14px;color:#5A1A04;text-align:left;}
+  #titleShopPill .shop-icon{font-size:24px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3));flex:0 0 auto;}
+  #titleShopPill .shop-info{display:flex;flex-direction:column;align-items:flex-start;gap:3px;flex:1;min-width:0;}
+  #titleShopPill .shop-label{font-size:14px;font-weight:900;letter-spacing:-.4px;text-shadow:0 1px 0 rgba(255,255,255,.4);line-height:1;}
+  #titleShopPill .shop-coin{font-size:11px;font-weight:900;background:rgba(90,26,4,.85);color:#FFE066;padding:2px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:3px;line-height:1.2;text-shadow:0 1px 0 rgba(0,0,0,.4);}
 
   /* HUD */
   #hud{position:absolute;inset:0;pointer-events:none;font-family:inherit;}
@@ -57,15 +75,81 @@
   #hud .inv-pill .lv{font-size:10px;opacity:.92;color:#A5D6A7;}
   #hud .inv-pill.l .lv{color:#FFE066;}
 
-  /* Joystick & buttons — joystick on right (right-handed), action buttons stacked on left */
-  #joystick{position:absolute;right:clamp(16px,4vw,28px);bottom:clamp(16px,4vw,28px);width:clamp(96px,24vw,130px);height:clamp(96px,24vw,130px);border-radius:50%;background:rgba(0,0,0,.35);border:3px solid rgba(255,212,59,.55);pointer-events:auto;touch-action:none;display:none;z-index:5;}
-  #joystick .stick{position:absolute;left:50%;top:50%;width:44%;height:44%;border-radius:50%;background:rgba(255,224,102,.9);border:3px solid #C92A2A;transform:translate(-50%,-50%);box-shadow:0 4px 8px rgba(0,0,0,.4);}
-  .hud-btn{position:absolute;width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;color:#FFE066;font-size:18px;font-weight:900;pointer-events:auto;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;}
-  .hud-btn.danger{border-color:#FF6B6B;color:#FF6B6B;}
-  /* Vertical stack on left side — reachable by left thumb on mobile, joystick lives opposite */
-  #exitBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(160px + env(safe-area-inset-bottom, 0px));}
-  #pauseBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(110px + env(safe-area-inset-bottom, 0px));}
+  /* Joystick & buttons — 탕탕특공대 식 우측 조이스틱(오른손 엄지). 우하단 절반에 부동 캡처 영역을 두어
+     손가락을 가져다 댄 위치로 베이스가 따라옵니다. HUD 액션 버튼은 좌측에 스택. */
+  #joystick{position:absolute;right:clamp(20px,7vw,48px);bottom:clamp(24px,8vw,52px);width:clamp(140px,32vw,180px);height:clamp(140px,32vw,180px);border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,.55) 0%, rgba(0,0,0,.42) 60%, rgba(0,0,0,.30) 100%);border:4px solid rgba(255,212,59,.75);pointer-events:auto;touch-action:none;display:none;z-index:6;box-shadow:0 6px 16px rgba(0,0,0,.5),inset 0 0 18px rgba(255,212,59,.18);}
+  #joystick::before{content:'';position:absolute;inset:14%;border-radius:50%;border:1.5px dashed rgba(255,212,59,.42);pointer-events:none;}
+  #joystick::after{content:'';position:absolute;left:50%;top:50%;width:16%;height:16%;border-radius:50%;background:rgba(255,224,102,.45);transform:translate(-50%,-50%);pointer-events:none;}
+  #joystick.active{border-color:#FFE066;box-shadow:0 0 22px rgba(255,224,102,.55),inset 0 0 18px rgba(255,224,102,.35);}
+  #joystick .stick{position:absolute;left:50%;top:50%;width:46%;height:46%;border-radius:50%;background:radial-gradient(circle at 35% 30%, #FFF3BF 0%, #FFE066 38%, #F76707 100%);border:3px solid #C92A2A;transform:translate(-50%,-50%);box-shadow:0 4px 10px rgba(0,0,0,.5),inset 0 -3px 6px rgba(0,0,0,.25);transition:background .15s;}
+  /* Floating capture: 우하단 절반을 가상 패드로 사용 — 손가락 닿는 곳으로 베이스가 텔레포트 */
+  #joyArea{position:absolute;right:0;bottom:0;width:62%;height:64%;pointer-events:auto;touch-action:none;display:none;z-index:5;background:transparent;}
+  .hud-btn{position:absolute;width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;color:#FFE066;font-size:18px;font-weight:900;pointer-events:auto;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;z-index:7;}
+  /* Vertical stack on left side — joystick lives on the right, action buttons go opposite.
+     Pause sits on top (most-used) and mute below; quitting goes through the pause menu so
+     there is no rogue ✕ next to the joystick that fires a confirm() on accidental taps. */
+  #pauseBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(112px + env(safe-area-inset-bottom, 0px));}
   #muteBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(60px + env(safe-area-inset-bottom, 0px));width:44px;height:44px;border-radius:10px;font-size:18px;}
+  /* While a non-playing scene is up (gameover / victory / chapter cleared / level up overlay),
+     hide the in-game HUD entirely so the modal owns the screen. The pause modal stays an
+     exception because the surrounding HUD is meaningful context for "resume". */
+  body[data-scene="title"] #hud,
+  body[data-scene="chapterSelect"] #hud,
+  body[data-scene="shop"] #hud,
+  body[data-scene="gameover"] #hud,
+  body[data-scene="victory"] #hud,
+  body[data-scene="chapterCleared"] #hud,
+  body[data-scene="cleared"] #hud,
+  body[data-scene="levelup"] #hud { display: none !important; }
+
+  /* Shop screen — 탕탕특공대-style skill tree opened from title screen.
+     Three branches (방어/공격/민첩), each a vertical chain of 3 nodes connected by glowing rails. */
+  #shopScreen{background:radial-gradient(ellipse at 50% 30%, #2A1509 0%, #120300 60%, #050000 100%);flex-direction:column;gap:8px;padding:calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 10px);overflow-y:auto;align-items:stretch;justify-content:flex-start;}
+  #shopScreen .cs-header{display:flex;align-items:center;gap:10px;padding:4px 6px 6px;flex:0 0 auto;}
+  #shopScreen .cs-header h2{margin:0;color:#FFE066;font-size:min(5.4vw,24px);text-shadow:0 2px 0 #C92A2A,0 0 18px rgba(255,224,102,.35);flex:1;text-align:center;letter-spacing:-.5px;}
+  #shopScreen .back-btn{width:42px;height:42px;border-radius:12px;background:linear-gradient(180deg,rgba(0,0,0,.7),rgba(0,0,0,.5));border:2px solid #FFD43B;color:#FFE066;font-weight:900;font-size:18px;cursor:pointer;font-family:inherit;box-shadow:0 3px 0 rgba(0,0,0,.4);}
+  #shopScreen .back-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.4);}
+  #shopScreen .coin-bar{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(180deg,#FFD43B 0%,#FAB005 50%,#E67700 100%);border:3px solid #FFF9DB;border-radius:14px;padding:10px 18px;margin:0 auto 4px;font-weight:900;color:#5A1A04;font-size:18px;max-width:300px;width:100%;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 -3px 0 rgba(0,0,0,.18);letter-spacing:-.3px;}
+  #shopScreen .coin-bar .coin-ic{font-size:22px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3));}
+  #shopScreen .shop-hint{text-align:center;color:#FFF9DB;font-size:11px;opacity:.7;margin-bottom:10px;line-height:1.45;}
+
+  /* The tree itself — three columns of nodes with connecting rails drawn via pseudo-elements */
+  #shopScreen .tree{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:0 4px;padding:6px 6px 32px;max-width:560px;width:100%;margin:0 auto;}
+  .tree .branch{display:flex;flex-direction:column;align-items:center;gap:38px;position:relative;padding:6px 0;}
+  .tree .branch-head{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 14px 8px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.18));border:2px solid;font-weight:900;letter-spacing:0.5px;text-shadow:0 1px 0 rgba(0,0,0,.55);box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 0 14px rgba(255,255,255,.05);min-width:78px;}
+  .tree .branch-head .lbl{font-size:15px;}
+  .tree .branch-head .tip{font-size:9px;font-weight:700;opacity:.75;letter-spacing:1px;}
+
+  /* Node — circular badge with icon, name & cost stacked below */
+  .tree .node{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;}
+  /* Connector rail — drawn from each node's center up to the previous node */
+  .tree .node .rail{position:absolute;left:50%;top:-44px;width:6px;height:46px;transform:translateX(-50%);border-radius:3px;background:linear-gradient(180deg,#FFD43B,#7A0F0F);box-shadow:0 0 8px rgba(255,212,59,.4);z-index:0;}
+  .tree .node .rail.locked{background:linear-gradient(180deg,#495057,#1A1D20);box-shadow:none;opacity:.65;}
+  .tree .node .rail.met{background:linear-gradient(180deg,#FFE066,#51CF66);box-shadow:0 0 10px rgba(81,207,102,.55);}
+
+  .tree .ring{position:relative;width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;background:radial-gradient(circle at 35% 30%, #FFF3BF 0%, #FFD43B 35%, #C92A2A 100%);border:4px solid #FFE066;box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 18px rgba(255,212,59,.35);z-index:1;cursor:pointer;font-family:inherit;color:#fff;padding:0;transition:transform .08s;}
+  .tree .ring:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 18px rgba(255,212,59,.35);}
+  .tree .node.locked .ring{background:radial-gradient(circle at 50% 50%, #495057 0%, #1A1D20 100%);border-color:#6C757D;box-shadow:0 4px 0 rgba(0,0,0,.45),inset 0 0 12px rgba(0,0,0,.6);cursor:not-allowed;filter:grayscale(.6);}
+  .tree .node.maxed .ring{background:radial-gradient(circle at 35% 30%, #FFF9DB 0%, #FAB005 50%, #E67700 100%);border-color:#FFF9DB;box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(250,176,5,.6);animation:nodepulse 2.4s ease-in-out infinite;}
+  @keyframes nodepulse{0%,100%{box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(250,176,5,.6);}50%{box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 32px rgba(250,176,5,.85);}}
+  .tree .node.affordable .ring{box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(81,207,102,.6);}
+
+  /* Lock badge overlays the ring when the node's prerequisite isn't met */
+  .tree .node.locked .ring::after{content:'🔒';position:absolute;font-size:24px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6));}
+
+  /* Name + dot row + cost */
+  .tree .node .nm{margin-top:7px;font-weight:900;color:#FFE066;font-size:11px;letter-spacing:-.2px;text-align:center;line-height:1.15;text-shadow:0 1px 0 rgba(0,0,0,.55);}
+  .tree .node.locked .nm{color:#ADB5BD;}
+  .tree .node .desc-tip{font-size:9.5px;color:#FFF9DB;opacity:.8;text-align:center;line-height:1.25;margin-top:2px;min-height:22px;padding:0 2px;}
+  .tree .node .dots{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap;justify-content:center;max-width:80px;}
+  .tree .node .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);}
+  .tree .node .dot.on{background:#FFD43B;border-color:#FFF9DB;box-shadow:0 0 4px rgba(255,212,59,.7);}
+  .tree .node.maxed .dot.on{background:#FFF9DB;}
+  .tree .node .cost{margin-top:6px;display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:999px;background:linear-gradient(180deg,#51CF66,#2F9E44);border:2px solid #FFE066;color:#fff;font-weight:900;font-size:11px;cursor:pointer;font-family:inherit;box-shadow:0 2px 0 rgba(0,0,0,.4);min-width:54px;justify-content:center;}
+  .tree .node.locked .cost{background:linear-gradient(180deg,#495057,#212529);border-color:#6C757D;color:#ADB5BD;cursor:not-allowed;box-shadow:0 2px 0 rgba(0,0,0,.4);}
+  .tree .node .cost.poor{background:linear-gradient(180deg,#7A0F0F,#3B0606);border-color:#FF8787;color:#FFE3E3;}
+  .tree .node .cost.maxed{background:linear-gradient(180deg,#FAB005,#E67700);border-color:#FFF9DB;color:#fff;cursor:default;}
+  .tree .node .cost:active{transform:translateY(2px);box-shadow:0 0 0 rgba(0,0,0,.4);}
 
   /* Modals — respect notches/safe-area, scrollable when content > viewport */
   .modal{position:absolute;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-right, 0px) + 14px) calc(env(safe-area-inset-bottom, 0px) + 16px) calc(env(safe-area-inset-left, 0px) + 14px);z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch;}
@@ -92,22 +176,24 @@
   .statline b{color:#FFE066;}
 
   /* Chapter select */
-  #chapterSelect{background:linear-gradient(180deg,rgba(18,3,0,.96),rgba(42,21,9,.96));flex-direction:column;gap:10px;padding:calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 10px);overflow-y:auto;align-items:stretch;justify-content:flex-start;}
+  #chapterSelect{background:radial-gradient(ellipse at 50% 30%, rgba(60,28,12,.96), rgba(18,3,0,.96) 70%, rgba(5,0,0,.98) 100%);flex-direction:column;gap:10px;padding:calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 10px);overflow-y:auto;align-items:stretch;justify-content:flex-start;}
   #chapterSelect .cs-header{display:flex;align-items:center;gap:10px;padding:4px 6px 10px;flex:0 0 auto;}
-  #chapterSelect .cs-header h2{margin:0;color:#FFE066;font-size:min(5vw,22px);text-shadow:0 2px 0 #C92A2A;flex:1;text-align:center;}
-  #chapterSelect .back-btn{width:40px;height:40px;border-radius:10px;background:rgba(0,0,0,.6);border:2px solid #FFD43B;color:#FFE066;font-weight:900;font-size:18px;cursor:pointer;font-family:inherit;}
+  #chapterSelect .cs-header h2{margin:0;color:#FFE066;font-size:min(5.4vw,24px);text-shadow:0 2px 0 #C92A2A,0 0 16px rgba(255,224,102,.35);flex:1;text-align:center;letter-spacing:-.3px;}
+  #chapterSelect .back-btn{width:42px;height:42px;border-radius:12px;background:linear-gradient(180deg,rgba(0,0,0,.7),rgba(0,0,0,.5));border:2px solid #FFD43B;color:#FFE066;font-weight:900;font-size:18px;cursor:pointer;font-family:inherit;box-shadow:0 3px 0 rgba(0,0,0,.4);}
+  #chapterSelect .back-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.4);}
   #chapterSelect .cs-info{text-align:center;color:#FFF9DB;font-size:12px;opacity:.85;padding:0 10px;}
-  #chapterSelect .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(128px, 1fr));gap:8px;padding:8px 6px 24px;max-width:820px;width:100%;margin:0 auto;}
-  .ch-card{position:relative;padding:10px 8px;border-radius:12px;border:3px solid #FFD43B;background:linear-gradient(180deg,#C92A2A,#5A1A04);color:#FFE066;cursor:pointer;font-family:inherit;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.35);transition:transform .08s;min-height:96px;display:flex;flex-direction:column;justify-content:center;gap:4px;}
-  .ch-card:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.35);}
-  .ch-card.locked{background:linear-gradient(180deg,#343A40,#1A1D20);border-color:#6C757D;color:#ADB5BD;cursor:not-allowed;filter:grayscale(.5);}
-  .ch-card.cleared::after{content:"✓";position:absolute;top:4px;right:6px;color:#51CF66;font-size:14px;font-weight:900;text-shadow:0 1px 2px #000;}
+  #chapterSelect .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(128px, 1fr));gap:10px;padding:8px 6px 24px;max-width:820px;width:100%;margin:0 auto;}
+  .ch-card{position:relative;padding:12px 8px 10px;border-radius:14px;border:3px solid #FFD43B;background:linear-gradient(180deg,#C92A2A,#5A1A04);color:#FFE066;cursor:pointer;font-family:inherit;text-align:center;box-shadow:0 5px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.18);transition:transform .08s, box-shadow .08s;min-height:104px;display:flex;flex-direction:column;justify-content:center;gap:4px;overflow:hidden;}
+  .ch-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% -30%, rgba(255,255,255,.25) 0%, transparent 60%);pointer-events:none;}
+  .ch-card:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.18);}
+  .ch-card.locked{background:linear-gradient(180deg,#343A40,#1A1D20);border-color:#6C757D;color:#ADB5BD;cursor:not-allowed;filter:grayscale(.5);box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 0 12px rgba(0,0,0,.4);}
+  .ch-card.cleared::after{content:"✓";position:absolute;top:6px;right:8px;color:#51CF66;font-size:16px;font-weight:900;text-shadow:0 1px 2px #000;background:rgba(0,0,0,.5);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #51CF66;}
   .ch-card.current{animation:pulse 1.5s infinite;border-color:#FFF9DB;}
-  @keyframes pulse{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.35), 0 0 0 0 rgba(255,249,219,.6);}50%{box-shadow:0 4px 0 rgba(0,0,0,.35), 0 0 0 8px rgba(255,249,219,0);}}
-  .ch-card .ch-num{font-size:11px;font-weight:700;opacity:.8;}
-  .ch-card .ch-name{font-size:15px;font-weight:900;letter-spacing:-.5px;}
-  .ch-card .ch-mult{font-size:10px;opacity:.85;margin-top:2px;}
-  .ch-card .ch-lock{font-size:24px;margin:4px 0;}
+  @keyframes pulse{0%,100%{box-shadow:0 5px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.18), 0 0 0 0 rgba(255,249,219,.6);}50%{box-shadow:0 5px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.18), 0 0 0 10px rgba(255,249,219,0);}}
+  .ch-card .ch-num{font-size:10px;font-weight:700;opacity:.85;letter-spacing:1px;text-shadow:0 1px 0 rgba(0,0,0,.4);}
+  .ch-card .ch-name{font-size:15px;font-weight:900;letter-spacing:-.5px;text-shadow:0 1px 0 rgba(0,0,0,.45);}
+  .ch-card .ch-mult{font-size:10px;opacity:.9;margin-top:3px;font-weight:700;}
+  .ch-card .ch-lock{font-size:26px;margin:4px 0;filter:drop-shadow(0 2px 0 rgba(0,0,0,.5));}
 
   /* Responsive */
   @media (max-width:480px){
@@ -162,7 +248,7 @@
     </div>
     <div class="invbar" id="invBar"></div>
     <button class="hud-btn" id="pauseBtn" title="일시정지">⏸</button>
-    <button class="hud-btn danger" id="exitBtn" title="나가기">✕</button>
+    <div id="joyArea"></div>
     <div id="joystick"><div class="stick"></div></div>
     <button class="hud-btn" id="muteBtn" title="음소거">🔊</button>
   </div>
@@ -170,6 +256,16 @@
   <!-- Title screen -->
   <div id="title" class="overlay on">
     <div class="rays"></div>
+    <button id="titleShopPill" type="button" title="상점 열기">
+      <span class="awning"></span>
+      <span class="shop-front">
+        <span class="shop-icon">🛒</span>
+        <span class="shop-info">
+          <span class="shop-label">상점</span>
+          <span class="shop-coin">🪙 <span id="titleCoinTxt">0</span></span>
+        </span>
+      </span>
+    </button>
     <div class="sub">새우깡으로</div>
     <h1>한계돌파!</h1>
     <div class="pigeon-stage"><svg viewBox="-60 -60 120 120" id="titlePigeon"></svg></div>
@@ -179,6 +275,18 @@
       <button class="btn alt small" id="resetProgBtn" style="font-size:12px;">기록 초기화</button>
     </div>
     <div class="hint">근육질 비둘기가 되어 새우깡을 뿌려 적을 제압하세요!<br>30개 챕터 · 각 챕터 8스테이지 · 레벨업 카드로 빌드 완성.</div>
+  </div>
+
+  <!-- Shop screen — permanent meta-progression upgrades bought with coins earned in runs -->
+  <div id="shopScreen" class="overlay hidden">
+    <div class="cs-header">
+      <button class="back-btn" id="shopBackBtn" title="뒤로">◀</button>
+      <h2>🛒 비둘기 상점</h2>
+      <div style="width:40px;"></div>
+    </div>
+    <div class="coin-bar"><span class="coin-ic">🪙</span><span id="shopCoinTxt">0</span></div>
+    <div class="shop-hint">위 → 아래로 가지를 키워가는 스킬 트리예요.<br>아래 단계는 위 노드를 일정 레벨까지 올려야 열립니다.</div>
+    <div class="tree" id="shopGrid"></div>
   </div>
 
   <!-- Chapter select -->
@@ -229,7 +337,8 @@
       <h2>조작법 · 규칙</h2>
       <div style="font-size:13px;line-height:1.65;color:#FFF9DB;">
         <p><b style="color:#FFE066;">💻 PC:</b> WASD 또는 방향키로 이동. 자동으로 가장 가까운 적에게 새우깡을 던집니다. ESC로 일시정지.</p>
-        <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 하단 조이스틱으로 이동, 왼쪽 하단 ✕ 나가기 / ⏸ 일시정지 / 🔊 음소거 버튼 스택.</p>
+        <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 조이스틱으로 이동(탕탕특공대 식). 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ✕ 나가기 / ⏸ 일시정지 / 🔊 음소거 버튼 스택.</p>
+        <p><b style="color:#FFE066;">🛒 상점:</b> 타이틀에서 진입. 코인은 적/보스 처치, 코인 픽업, 챕터 클리어로 누적되며 영구 업그레이드(시작 HP·공격력·이속·자석 반경·치명타 등)를 살 수 있어 다음 런에 자동 적용됩니다.</p>
         <p><b style="color:#FFE066;">📕 챕터:</b> 총 30개 챕터. 각 챕터는 8스테이지로 구성되며 후반 챕터일수록 적이 강해집니다. 직전 챕터를 돌파하면 다음 챕터가 열립니다.</p>
         <p><b style="color:#FFE066;">⏱ 스테이지:</b> 60~90초 생존 → 보스 출현 → 격파하면 스테이지 클리어!</p>
         <p><b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.</p>
@@ -472,7 +581,7 @@ const TITLE_BGM_PACK = {
   interval:190, wave:'triangle', bassShift:'3', vol:.13
 };
 function currentBgmPack(){
-  if(state.scene === 'title' || state.scene === 'chapterSelect') return TITLE_BGM_PACK;
+  if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop') return TITLE_BGM_PACK;
   const idx = Math.min(Math.max(0, state.chapter - 1), BGM_CHAPTER_PACKS.length - 1);
   return BGM_CHAPTER_PACKS[idx];
 }
@@ -1320,8 +1429,9 @@ function drawEnemy(ctx, e, walkPhase){
 const TARGET_STAGES = 8;
 const MAX_CHAPTERS = 30;
 // Pickup hitbox spans the pigeon body (head→feet ≈ 90px tall, 60px wide).
-// 48 means anything brushing the body proper grabs the pickup.
-const PICKUP_RADIUS = 48;
+// Bumped from 48 → 60 for mobile play — fingers cover part of the screen, so pickups
+// snap a bit more generously than the visible body footprint.
+const PICKUP_RADIUS = 60;
 // Chapter names — each chapter is a location, not a difficulty label.
 // Difficulty is implicit in chapter number; higher chapters belong to harsher tiers.
 const CHAPTER_NAMES = [
@@ -1350,27 +1460,102 @@ function chapterName(c){ return CHAPTER_NAMES[Math.min(c-1, CHAPTER_NAMES.length
 function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.length-1)]; }
 function chapterMult(){
   const c = state.chapter;
+  // Mobile-friendly global softening: every chapter is gentler than before so thumb-driven play
+  // is fair end-to-end. Old: HP 1.42^(c-1), DMG 1+(c-1)*0.17. New: piecewise blend.
+  //   ch1 → 1.00/1.00, ch2 → 1.25/1.09, ch4 → 1.85/1.27, ch10 → 4.6/2.12, ch20 → ~17/3.52.
+  const hp    = c <= 6
+    ? 1 + (c-1)*0.28
+    : (1 + 5*0.28) * Math.pow(1.22, c-6);
+  const dmg   = c <= 6
+    ? 1 + (c-1)*0.09
+    : (1 + 5*0.09) * Math.pow(1.10, c-6);
+  const speed = 1 + Math.min(0.80, (c-1)*0.038);
   return {
-    // Softer HP/DMG curves so mid chapters (3-5) don't turn into a wall.
-    hp:    Math.pow(1.42, c-1),
-    dmg:   1 + (c-1)*0.17,
-    speed: 1 + Math.min(0.9, (c-1)*0.055),
+    hp,
+    dmg,
+    speed,
     score: Math.pow(1.4, c-1),
     xp:    1 + (c-1)*0.20,
   };
 }
 
-// Progress — persisted in localStorage
+// Progress — persisted in localStorage. Includes meta-currency (coins) and shop upgrade levels.
 const PROGRESS_KEY = 'saeukkang_progress_v1';
 const progress = (()=>{
+  let saved = null;
   try{
     const raw = localStorage.getItem(PROGRESS_KEY);
-    if(raw){ const p = JSON.parse(raw); if(p && typeof p.clearedChapter==='number') return p; }
+    if(raw){ const p = JSON.parse(raw); if(p && typeof p.clearedChapter==='number') saved = p; }
   }catch(e){}
-  return { clearedChapter: 0, highScore: 0, highChapter: 0, highStage: 0 };
+  const base = { clearedChapter: 0, highScore: 0, highChapter: 0, highStage: 0, coins: 0, shop: {} };
+  return Object.assign(base, saved || {}, { shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}) });
 })();
 function saveProgress(){ try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }catch(e){} }
 function unlockedChapters(){ return Math.min(MAX_CHAPTERS, progress.clearedChapter + 1); }
+
+// ---------- Meta-progression shop ----------
+// Three vertical branches (방어 / 공격 / 민첩) × 3 tiers each. Lower tiers gate higher tiers
+// so the shop reads like a 탕탕특공대 skill tree: pick a branch and grow it. Each node's
+// `apply(p)` runs in resetPlayer(). Cost grows with level so early picks feel impactful.
+const SHOP_BRANCHES = [
+  {
+    id:'def', label:'방어', color:'#FF6B9D', tip:'생존력',
+    nodes:[
+      { id:'hp',     icon:'❤️', name:'단단한 깃털',    desc:'시작 최대 HP +15',        max:10, cost:l=>30+l*25,
+        apply:(p,l)=>{ p.maxHp += 15*l; p.hp = p.maxHp; } },
+      { id:'magnet', icon:'🧲', name:'은빛 깃털 자석', desc:'XP 자석 반경 +25%',       max:5,  cost:l=>40+l*30, req:'hp',     reqLvl:2,
+        apply:(p,l)=>{ p.magnet *= Math.pow(1.25, l); } },
+      { id:'revive', icon:'🛡️', name:'예비 부활',      desc:'런 당 1회 부활 (HP 50%)', max:1,  cost:l=>500,    req:'magnet', reqLvl:2,
+        apply:(p,l,s)=>{ if(l>0) s.abilities.shield = 1; } },
+    ]
+  },
+  {
+    id:'atk', label:'공격', color:'#FFA94D', tip:'화력',
+    nodes:[
+      { id:'dmg',  icon:'💪', name:'근육질 한 방', desc:'시작 공격력 +6%',     max:10, cost:l=>40+l*30,
+        apply:(p,l)=>{ p.damage *= Math.pow(1.06, l); } },
+      { id:'rate', icon:'⚡', name:'빠른 손놀림', desc:'시작 연사 속도 +5%',  max:8,  cost:l=>50+l*40, req:'dmg',  reqLvl:2,
+        apply:(p,l)=>{ p.fireRate *= Math.pow(1.05, l); } },
+      { id:'proj', icon:'🎯', name:'추가 새우깡', desc:'시작 새우깡 발사 +1', max:3,  cost:l=>200+l*200, req:'rate', reqLvl:2,
+        apply:(p,l)=>{ p.projCount += l; } },
+    ]
+  },
+  {
+    id:'agi', label:'민첩', color:'#74C0FC', tip:'기동',
+    nodes:[
+      { id:'speed', icon:'👟', name:'잽싼 발걸음',   desc:'이동 속도 +4%',     max:8, cost:l=>35+l*25,
+        apply:(p,l)=>{ p.speed *= Math.pow(1.04, l); } },
+      { id:'crit',  icon:'🎲', name:'행운의 비둘기', desc:'시작 치명타 +3%',   max:5, cost:l=>60+l*45, req:'speed', reqLvl:2,
+        apply:(p,l)=>{ p.crit = Math.min(0.9, p.crit + 0.03*l); } },
+      { id:'xp',    icon:'🪶', name:'경험의 깃털',   desc:'경험치 획득 +6%',   max:5, cost:l=>70+l*55, req:'crit',  reqLvl:1,
+        apply:(p,l)=>{ p.xpMult *= Math.pow(1.06, l); } },
+    ]
+  },
+];
+// Flat lookup used by resetPlayer / shop logic.
+const SHOP_DEFS = SHOP_BRANCHES.flatMap(b => b.nodes.map(n => Object.assign({ branchId: b.id, branchColor: b.color }, n)));
+const SHOP_DEFS_BY_ID = Object.fromEntries(SHOP_DEFS.map(d => [d.id, d]));
+function shopLevel(id){ return progress.shop[id] || 0; }
+function shopCost(def){
+  const lvl = shopLevel(def.id);
+  if(lvl >= def.max) return null;
+  return def.cost(lvl);
+}
+function shopUnlocked(def){
+  if(!def.req) return true;
+  return shopLevel(def.req) >= (def.reqLvl || 1);
+}
+function awardCoins(n){
+  if(!n || n<=0) return;
+  progress.coins = (progress.coins||0) + Math.floor(n);
+  saveProgress();
+}
+function applyShopUpgrades(p, s){
+  for(const def of SHOP_DEFS){
+    const lvl = shopLevel(def.id);
+    if(lvl > 0) def.apply(p, lvl, s);
+  }
+}
 
 const state = {
   scene: 'title', // title, playing, levelup, paused, cleared, chapterCleared, gameover, victory
@@ -1405,12 +1590,12 @@ const state = {
 function resetPlayer(){
   state.player = {
     x:0, y:0, vx:0, vy:0,
-    hp:100, maxHp:100,
-    speed:220,
-    damage:10,
-    fireRate: 2.2,  // shots per second
+    hp:120, maxHp:120,
+    speed:230,
+    damage:11,
+    fireRate: 2.4,  // shots per second
     reloadT: 0,
-    projSpeed: 520,
+    projSpeed: 540,
     projCount: 1,
     projSize: 1,
     pierce: 0,
@@ -1418,7 +1603,7 @@ function resetPlayer(){
     critMult: 2.0,
     bounce: 0,
     xpMult: 1,
-    magnet: 90,
+    magnet: 110,
     invT: 0,
     walkPhase: 0,
     facing: 1,
@@ -1431,6 +1616,9 @@ function resetPlayer(){
     // Other weapons (shuriken, boomerang, missile) become available via level-up cards.
     weapons: { shrimp: { lvl:1, reloadT:0 } }
   };
+  // Apply permanent shop upgrades on top of base stats — must run after the player object exists
+  // and before the first stage spawns, so HUD/HP bars reflect bought upgrades immediately.
+  applyShopUpgrades(state.player, state);
 }
 
 function resetRun(startChapter){
@@ -1467,19 +1655,70 @@ window.addEventListener('keydown', e=>{
 });
 window.addEventListener('keyup', e=> keys.delete(e.key.toLowerCase()));
 
-// Joystick
+// Joystick — 탕탕특공대-style: a visible base sits at bottom-left by default, but a wide
+// invisible #joyArea over the lower-left of the screen captures any tap there and re-positions
+// the base under the finger. The stick then drags relative to wherever the base ended up.
 const joyEl = document.getElementById('joystick');
+const joyArea = document.getElementById('joyArea');
 const stickEl = joyEl.querySelector('.stick');
 let joyActive=false, joyDx=0, joyDy=0, joyTouchId=null;
-function isTouch(){ return 'ontouchstart' in window || navigator.maxTouchPoints>0; }
+let joyAnchorX=0, joyAnchorY=0; // page coords of base center while a drag is active
+let joyDefaultLeft = '', joyDefaultBottom = ''; // remembered so we can snap back on release
+// `?mobile=1` (or `?m=1`) forces mobile UI on a desktop browser — used for QA so we can
+// verify joystick layout and the touch-mode draw scale without an actual phone.
+const FORCE_MOBILE = /[?&](m|mobile)=1\b/.test(location.search);
+function isTouch(){ return FORCE_MOBILE || 'ontouchstart' in window || navigator.maxTouchPoints>0; }
 // PC users get a noticeably larger pigeon — desktop screens are far bigger than phones,
 // and the previous 0.95 scale made the player look tiny.
 const PLAYER_DRAW_SCALE = isTouch() ? 0.95 : 1.45;
-if(isTouch()) joyEl.style.display='block';
-function onJoyStart(e){
+if(isTouch()){ joyEl.style.display='block'; joyArea.style.display='block'; }
+
+function joyMaxR(){ return joyEl.offsetWidth/2 - 6; }
+function moveJoyBaseTo(pageX, pageY){
+  // Place the joystick base centered on (pageX,pageY), clamped so it doesn't clip out of view.
+  const half = joyEl.offsetWidth/2;
+  const margin = 8;
+  const x = Math.max(margin, Math.min(W - joyEl.offsetWidth - margin, pageX - half));
+  const y = Math.max(margin, Math.min(H - joyEl.offsetHeight - margin, pageY - half));
+  joyEl.style.left = x + 'px';
+  joyEl.style.top  = y + 'px';
+  joyEl.style.right = 'auto';
+  joyEl.style.bottom = 'auto';
+  joyAnchorX = x + half;
+  joyAnchorY = y + half;
+}
+function snapJoyBaseHome(){
+  joyEl.style.left = '';
+  joyEl.style.top = '';
+  joyEl.style.right = '';
+  joyEl.style.bottom = '';
+}
+function setStickTransform(dx, dy, maxR){
+  const len = Math.hypot(dx,dy);
+  if(len>maxR){
+    joyDx = dx/len; joyDy = dy/len;
+    stickEl.style.transform = `translate(calc(-50% + ${dx/len*maxR}px), calc(-50% + ${dy/len*maxR}px))`;
+  } else {
+    joyDx = dx/maxR; joyDy = dy/maxR;
+    stickEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  }
+  // Tiny dead-zone so resting thumbs don't drift the pigeon.
+  if(Math.abs(joyDx)<0.12 && Math.abs(joyDy)<0.12){ joyDx = 0; joyDy = 0; }
+}
+
+function onJoyStart(e, fromArea){
   const t = (e.touches ? e.touches[0] : e);
   joyTouchId = (e.touches ? e.touches[0].identifier : 'mouse');
-  joyActive=true;
+  joyActive = true;
+  if(fromArea){
+    moveJoyBaseTo(t.clientX, t.clientY);
+  } else {
+    const rect = joyEl.getBoundingClientRect();
+    joyAnchorX = rect.left + rect.width/2;
+    joyAnchorY = rect.top + rect.height/2;
+  }
+  joyEl.classList.add('active');
+  setStickTransform(t.clientX - joyAnchorX, t.clientY - joyAnchorY, joyMaxR());
 }
 function onJoyMove(e){
   if(!joyActive) return;
@@ -1488,13 +1727,8 @@ function onJoyMove(e){
     for(const tt of e.touches){ if(tt.identifier===joyTouchId){ t=tt; break; } }
   } else { t=e; }
   if(!t) return;
-  const rect = joyEl.getBoundingClientRect();
-  const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
-  const dx = t.clientX - cx, dy = t.clientY - cy;
-  const maxR = rect.width/2 - 4;
-  const len = Math.hypot(dx,dy);
-  if(len>maxR){ joyDx = dx/len; joyDy = dy/len; stickEl.style.transform = `translate(calc(-50% + ${dx/len*maxR}px), calc(-50% + ${dy/len*maxR}px))`; }
-  else { joyDx = dx/maxR; joyDy = dy/maxR; stickEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; }
+  const dx = t.clientX - joyAnchorX, dy = t.clientY - joyAnchorY;
+  setStickTransform(dx, dy, joyMaxR());
 }
 function onJoyEnd(e){
   if(e.changedTouches){
@@ -1504,12 +1738,21 @@ function onJoyEnd(e){
   }
   joyActive=false; joyDx=0; joyDy=0; joyTouchId=null;
   stickEl.style.transform = 'translate(-50%,-50%)';
+  joyEl.classList.remove('active');
+  snapJoyBaseHome();
 }
-joyEl.addEventListener('touchstart', e=>{ e.preventDefault(); onJoyStart(e); }, {passive:false});
+// Direct touches on the visible base
+joyEl.addEventListener('touchstart', e=>{ e.preventDefault(); onJoyStart(e, false); }, {passive:false});
 joyEl.addEventListener('touchmove', e=>{ e.preventDefault(); onJoyMove(e); }, {passive:false});
 joyEl.addEventListener('touchend', e=>{ e.preventDefault(); onJoyEnd(e); }, {passive:false});
 joyEl.addEventListener('touchcancel', e=>{ onJoyEnd(e); });
-joyEl.addEventListener('mousedown', e=>{ onJoyStart(e); });
+joyEl.addEventListener('mousedown', e=>{ onJoyStart(e, false); });
+// Floating capture: any touch in the lower-left zone teleports the base under the finger
+joyArea.addEventListener('touchstart', e=>{ e.preventDefault(); onJoyStart(e, true); }, {passive:false});
+joyArea.addEventListener('touchmove', e=>{ e.preventDefault(); onJoyMove(e); }, {passive:false});
+joyArea.addEventListener('touchend', e=>{ e.preventDefault(); onJoyEnd(e); }, {passive:false});
+joyArea.addEventListener('touchcancel', e=>{ onJoyEnd(e); });
+joyArea.addEventListener('mousedown', e=>{ onJoyStart(e, true); });
 window.addEventListener('mousemove', e=>{ if(joyActive) onJoyMove(e); });
 window.addEventListener('mouseup', e=>{ if(joyActive) onJoyEnd(e); });
 
@@ -1575,18 +1818,19 @@ function spawnBoss(){
   const b = spawnEnemy('boss');
   const chm = chapterMult();
   // Override base boss stats with stage-scaled values, then apply chapter mult.
-  // Stage 1-2 bosses are pushovers (warm-up); stage 7-8 are the real wall.
-  b.hp = b.maxHp = Math.ceil((140 + Math.pow(state.stage,1.7)*70) * chm.hp);
-  b.speed = (55 + state.stage*4) * chm.speed;
-  b.damage = Math.ceil((14 + state.stage*3) * chm.dmg);
+  // Mobile rebalance: gentler HP curve and slightly slower bosses so phone players have time
+  // to dodge between salvos. Stage 1-2 bosses still warm-up tier; stage 7-8 are the real wall.
+  b.hp = b.maxHp = Math.ceil((110 + Math.pow(state.stage,1.55)*52) * chm.hp);
+  b.speed = (50 + state.stage*3.5) * chm.speed;
+  b.damage = Math.ceil((11 + state.stage*2.4) * chm.dmg);
   b.collideRadius = 55;
   b.ranged = true;
-  b.rangedCd = 2;
-  b.specialCd = 5;
+  b.rangedCd = 2.4;
+  b.specialCd = 5.5;
   // Chapter's final boss (stage 8) gets extra flair — unlocks next chapter
   if(state.stage === TARGET_STAGES){
     b.isChapterBoss = true;
-    b.hp = b.maxHp = Math.ceil(b.maxHp * 1.35);
+    b.hp = b.maxHp = Math.ceil(b.maxHp * 1.25);
     b.size = 2.9;
     b.collideRadius = 68;
   }
@@ -1612,11 +1856,18 @@ function stageEnemyPool(stage){
   else base = ['dog','tank','tank','tank','cat','crow','crow']; // 8
   const c = state.chapter;
   const pool = base.slice();
+  // Chapter 4 was a difficulty wall — cut crow weight there so ranged spam is bearable.
+  if(c===4){
+    for(let i=pool.length-1; i>=0 && pool.length>4; i--){
+      if(pool[i]==='crow' && Math.random()<0.55) pool.splice(i,1);
+    }
+  }
   // Chapter-gated additions — every chapter from 2 onward feels a step harder & more varied.
   if(c>=2)  pool.push('ghost');
   if(c>=3)  pool.push('ghost');
-  if(c>=4)  pool.push('bomber');
-  if(c>=5)  pool.push('bomber','ghost');
+  // Bomber pushed to ch5 so ch4 doesn't double-stack new threats with the chapter mult spike.
+  if(c>=5)  pool.push('bomber');
+  if(c>=6)  pool.push('bomber','ghost');
   if(c>=6)  pool.push('reaper');
   if(c>=7)  pool.push('bomber','reaper');
   if(c>=8)  pool.push('sniper','ghost');
@@ -1634,9 +1885,10 @@ function stageEnemyPool(stage){
 }
 
 function spawnRateForStage(stage){
-  // 탕탕특공대-style swarm — rate climbs sharply with stage and slowly with chapter
-  // so the screen stays full of trash even with the lower per-mob HP.
-  return (1.6 + stage*0.45) * (1 + (state.chapter-1)*0.04);
+  // Mobile rebalance: swarm density softened across the board so the screen never becomes
+  // unreadable on a phone. Old peak (ch30 stage8): 5.2 * 2.16 = 11.2 spawns/sec — way too dense.
+  // New peak: 4.4 * 1.66 ≈ 7.3 — still busy but legible. Early chapters drop noticeably.
+  return (1.4 + stage*0.38) * (1 + (state.chapter-1)*0.023);
 }
 
 // ---------- Upgrades ----------
@@ -1901,6 +2153,13 @@ function killEnemy(e){
   e.dead = true;
   state.kills++;
   state.score += e.score;
+  // Trickle meta-coins for every kill so the shop fills up even from regular play.
+  // Boss/tyrant pay a richer bounty; trash mobs nudge the meter forward.
+  if(e.kind === 'boss')        awardCoins(20 + state.chapter*5);
+  else if(e.kind === 'tyrant') awardCoins(8);
+  else if(e.kind === 'summoner' || e.kind === 'reaper') awardCoins(3);
+  else if(e.kind === 'sniper' || e.kind === 'tank')     awardCoins(2);
+  else if(Math.random() < 0.35) awardCoins(1);
   sfxKill();
   // particles
   for(let i=0;i<14;i++){
@@ -2088,8 +2347,11 @@ function applyItem(item){
   } else if(item.kind==='coin'){
     const bonus = 25 + Math.floor(state.chapter*10);
     state.score += bonus;
+    // Meta currency: coin pickups feed the title-screen shop. Higher chapters drop more.
+    const metaCoins = 2 + Math.floor(state.chapter * 0.6);
+    awardCoins(metaCoins);
     sfxCoin();
-    state.pickupTexts.push({ x:p.x+10, y:p.y-28, t:.8, txt:`+${bonus}점`, color:'#FFE066' });
+    state.pickupTexts.push({ x:p.x+10, y:p.y-28, t:.8, txt:`+${bonus}점 · +${metaCoins}🪙`, color:'#FFE066' });
   }
   if(item.kind !== 'coin'){
     state.pickupTexts.push({ x:p.x, y:p.y-40, t:1.0, txt:def.label, color:def.glow });
@@ -2107,6 +2369,8 @@ function onBossDefeated(){
     }
     if(state.score > progress.highScore) progress.highScore = state.score;
     if(state.chapter > progress.highChapter){ progress.highChapter = state.chapter; progress.highStage = state.stage; }
+    // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
+    awardCoins(40 + state.chapter * 20);
     saveProgress();
     if(state.chapter >= MAX_CHAPTERS){
       // Final chapter cleared — ultimate victory
@@ -2321,11 +2585,11 @@ function update(dt){
       }
       e.rangedCd -= dt;
       if(e.rangedCd<=0){
-        // shoot hairballs fan
-        e.rangedCd = 1.7;
-        for(let k=-2;k<=2;k++){
-          const a = Math.atan2(dy,dx) + k*0.22;
-          state.enemyBullets.push({ x:e.x, y:e.y-20, vx:Math.cos(a)*220, vy:Math.sin(a)*220, r:10, life:3, damage:14 });
+        // shoot hairballs fan — narrower fan + slower cadence + lighter damage on mobile.
+        e.rangedCd = 2.4;
+        for(let k=-1;k<=1;k++){
+          const a = Math.atan2(dy,dx) + k*0.26;
+          state.enemyBullets.push({ x:e.x, y:e.y-20, vx:Math.cos(a)*200, vy:Math.sin(a)*200, r:10, life:3, damage:10 });
         }
       }
     } else if(e.kind==='sniper'){
@@ -2350,9 +2614,10 @@ function update(dt){
         e.y -= dy/d * e.speed * 0.5 * dt;
       }
       if(e.rangedCd<=0){
-        e.rangedCd = 1.5;
+        // Slower cadence + softer projectile damage so dodging on a phone is realistic.
+        e.rangedCd = 2.2 + Math.random()*0.4;
         const a = Math.atan2(dy,dx);
-        state.enemyBullets.push({ x:e.x, y:e.y, vx:Math.cos(a)*200, vy:Math.sin(a)*200, r:6, life:2.5, damage:e.damage });
+        state.enemyBullets.push({ x:e.x, y:e.y, vx:Math.cos(a)*170, vy:Math.sin(a)*170, r:6, life:2.4, damage:Math.max(4, Math.ceil(e.damage*0.7)) });
       }
     } else if(e.kind==='ghost'){
       // Phase movement — ignores separation, moves with slight zigzag
@@ -3460,7 +3725,7 @@ function render(){
   ctx.fillStyle=g;
   ctx.fillRect(0,0,W,H);
 
-  if(state.scene==='title') return; // overlay handles it
+  if(state.scene==='title' || state.scene==='shop' || state.scene==='chapterSelect') return; // overlay handles it
 
   const themeIdx = themeId();
 
@@ -3743,29 +4008,51 @@ function render(){
 
 // ---------- Main loop ----------
 let lastT = 0;
+// Mirror state.scene onto <body data-scene=...> so the CSS selectors that hide HUD controls
+// during non-playing scenes (gameover/victory/levelup/etc.) stay in sync without scene-change
+// boilerplate at every assignment site.
+let _lastScene = '';
+function syncBodyScene(){
+  if(state.scene !== _lastScene){
+    _lastScene = state.scene;
+    document.body.dataset.scene = state.scene;
+  }
+}
 function loop(ts){
   const dt = Math.min(0.05, (ts-lastT)/1000 || 0);
   lastT = ts;
   update(dt);
   render();
+  syncBodyScene();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
 
 // ---------- UI wiring ----------
 document.getElementById('startBtn').addEventListener('click', openChapterSelect);
+document.getElementById('titleShopPill').addEventListener('click', openShop);
+document.getElementById('shopBackBtn').addEventListener('click', ()=>{
+  state.scene = 'title';
+  document.getElementById('shopScreen').classList.add('hidden');
+  document.getElementById('title').classList.remove('hidden');
+  updateTitleCoinDisplay();
+});
 document.getElementById('howBtn').addEventListener('click', ()=>document.getElementById('howModal').classList.remove('hidden'));
 document.getElementById('howCloseBtn').addEventListener('click', ()=>document.getElementById('howModal').classList.add('hidden'));
 document.getElementById('resetProgBtn').addEventListener('click', ()=>{
-  if(confirm('진행 기록을 모두 초기화할까요? 이 동작은 되돌릴 수 없습니다.')){
+  if(confirm('진행 기록을 모두 초기화할까요? 코인과 상점 업그레이드도 함께 초기화됩니다. 이 동작은 되돌릴 수 없습니다.')){
     progress.clearedChapter = 0; progress.highChapter = 0; progress.highStage = 0; progress.highScore = 0;
+    progress.coins = 0; progress.shop = {};
     saveProgress();
+    updateTitleCoinDisplay();
     alert('기록이 초기화되었습니다.');
   }
 });
 document.getElementById('csBackBtn').addEventListener('click', ()=>{
+  state.scene = 'title';
   document.getElementById('chapterSelect').classList.add('hidden');
   document.getElementById('title').classList.remove('hidden');
+  updateTitleCoinDisplay();
 });
 document.getElementById('retryBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); startGame(state.chapter); });
 document.getElementById('goTitleBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); backToTitle(); });
@@ -3823,25 +4110,136 @@ document.getElementById('scNext').addEventListener('click', ()=>{
 document.getElementById('pauseBtn').addEventListener('click', togglePause);
 document.getElementById('resumeBtn').addEventListener('click', togglePause);
 document.getElementById('quitBtn').addEventListener('click', ()=>{ document.getElementById('pauseModal').classList.add('hidden'); backToTitle(); });
-document.getElementById('exitBtn').addEventListener('click', ()=>{
-  if(state.scene==='playing' || state.scene==='paused' || state.scene==='levelup' || state.scene==='cleared' || state.scene==='chapterCleared'){
-    if(confirm('게임을 나가고 타이틀로 돌아갈까요? 진행 중인 런은 저장되지 않습니다.')){
-      document.getElementById('pauseModal').classList.add('hidden');
-      document.getElementById('levelUp').classList.add('hidden');
-      document.getElementById('stageCleared').classList.add('hidden');
-      document.getElementById('chapterCleared').classList.add('hidden');
-      backToTitle();
-    }
-  }
-});
 
 function openChapterSelect(){
   initAudio();
   if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  state.scene = 'chapterSelect';
   document.getElementById('title').classList.add('hidden');
   renderChapterGrid();
   document.getElementById('chapterSelect').classList.remove('hidden');
   if(!bgmTimer) bgmStart();
+}
+
+// ---------- Shop screen ----------
+function updateTitleCoinDisplay(){
+  const el = document.getElementById('titleCoinTxt');
+  if(el) el.textContent = (progress.coins||0).toLocaleString();
+}
+function openShop(){
+  initAudio();
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  state.scene = 'shop';
+  document.getElementById('title').classList.add('hidden');
+  renderShop();
+  document.getElementById('shopScreen').classList.remove('hidden');
+  if(!bgmTimer) bgmStart();
+}
+function renderShop(){
+  document.getElementById('shopCoinTxt').textContent = (progress.coins||0).toLocaleString();
+  const grid = document.getElementById('shopGrid');
+  grid.innerHTML = '';
+  // Build one column per branch — a header pill + the chained nodes below it.
+  for(const branch of SHOP_BRANCHES){
+    const col = document.createElement('div');
+    col.className = 'branch';
+    col.style.setProperty('--branch-color', branch.color);
+
+    const head = document.createElement('div');
+    head.className = 'branch-head';
+    head.style.color = branch.color;
+    head.style.borderColor = branch.color;
+    head.innerHTML = `<span class="lbl">${branch.label}</span><span class="tip">${branch.tip}</span>`;
+    col.appendChild(head);
+
+    branch.nodes.forEach((def, idx) => {
+      const lvl = shopLevel(def.id);
+      const cost = shopCost(def);
+      const maxed = cost === null;
+      const unlocked = shopUnlocked(def);
+      const can = !maxed && unlocked && (progress.coins||0) >= cost;
+
+      const node = document.createElement('div');
+      node.className = 'node' + (maxed?' maxed':'') + (!unlocked?' locked':'') + (can?' affordable':'');
+
+      // Connector rail to the previous node in the same branch — color reflects met/unmet/locked.
+      if(idx > 0){
+        const prevDef = branch.nodes[idx-1];
+        const prevLvl = shopLevel(prevDef.id);
+        const railClass = (def.req && prevLvl >= (def.reqLvl||1)) ? 'rail met' : (unlocked ? 'rail' : 'rail locked');
+        const rail = document.createElement('div');
+        rail.className = railClass;
+        rail.style.background = railClass.includes('locked')
+          ? 'linear-gradient(180deg,#495057,#1A1D20)'
+          : (railClass.includes('met')
+              ? `linear-gradient(180deg,${branch.color},#51CF66)`
+              : `linear-gradient(180deg,${branch.color},#7A0F0F)`);
+        node.appendChild(rail);
+      }
+
+      const ring = document.createElement('button');
+      ring.className = 'ring';
+      ring.type = 'button';
+      ring.innerHTML = unlocked || lvl > 0 ? def.icon : '';
+      // Use the branch color as the ring's base when unlocked & not maxed for branch identity.
+      if(unlocked && !maxed){
+        ring.style.background = `radial-gradient(circle at 35% 30%, #FFF9DB 0%, ${branch.color} 45%, #2A1509 100%)`;
+        ring.style.borderColor = '#FFE066';
+      }
+      node.appendChild(ring);
+
+      const nm = document.createElement('div');
+      nm.className = 'nm';
+      nm.textContent = def.name;
+      node.appendChild(nm);
+
+      const desc = document.createElement('div');
+      desc.className = 'desc-tip';
+      if(!unlocked && def.req){
+        const reqDef = SHOP_DEFS_BY_ID[def.req];
+        desc.textContent = `${reqDef ? reqDef.name : def.req} Lv ${def.reqLvl||1} 필요`;
+      } else {
+        desc.textContent = def.desc;
+      }
+      node.appendChild(desc);
+
+      // Level dots — visual fill for current vs max.
+      const dots = document.createElement('div');
+      dots.className = 'dots';
+      const cap = Math.min(def.max, 10);
+      for(let i=0;i<cap;i++){
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (i < Math.min(lvl, cap) ? ' on' : '');
+        dots.appendChild(dot);
+      }
+      node.appendChild(dots);
+
+      const cBtn = document.createElement('button');
+      cBtn.className = 'cost' + (maxed?' maxed':'') + (!maxed && unlocked && !can?' poor':'');
+      cBtn.type = 'button';
+      cBtn.textContent = maxed ? `MAX ${def.max}/${def.max}` : (unlocked ? `🪙 ${cost}` : `Lv ${lvl}/${def.max}`);
+      node.appendChild(cBtn);
+
+      const tryBuy = ()=>{
+        if(!unlocked){ beep(220,.07,'square',.14,-120); return; }
+        const c2 = shopCost(def);
+        if(c2 === null) return;
+        if((progress.coins||0) < c2){ beep(220,.08,'square',.14,-120); return; }
+        progress.coins -= c2;
+        progress.shop[def.id] = (progress.shop[def.id]||0) + 1;
+        saveProgress();
+        sfxLevelUp();
+        renderShop();
+        updateTitleCoinDisplay();
+      };
+      ring.addEventListener('click', tryBuy);
+      cBtn.addEventListener('click', tryBuy);
+
+      col.appendChild(node);
+    });
+
+    grid.appendChild(col);
+  }
 }
 
 function renderChapterGrid(){
@@ -3890,7 +4288,9 @@ function backToTitle(){
   state.scene='title';
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('chapterSelect').classList.add('hidden');
+  document.getElementById('shopScreen').classList.add('hidden');
   document.getElementById('title').classList.remove('hidden');
+  updateTitleCoinDisplay();
   if(audioCtx) bgmStart();
 }
 function togglePause(){
@@ -3972,7 +4372,7 @@ document.body.addEventListener('touchmove', e=>{ if(state.scene==='playing') e.p
 // Delegated so newly-rendered elements (chapter grid, level-up choices) work without re-binding.
 document.addEventListener('click', e=>{
   if(!audioCtx) return; // wait until first interaction has unlocked audio
-  if(e.target.closest('.btn, .hud-btn, .back-btn, .ch-card:not(.locked), .choice')) sfxClick();
+  if(e.target.closest('.btn, .hud-btn, .back-btn, .ch-card:not(.locked), .choice, #titleShopPill, .shop-item .buy:not(.locked):not(.maxed)')) sfxClick();
 }, true);
 
 // Title BGM bootstrap — browsers block autoplay until a user gesture, so kick BGM off
@@ -3986,6 +4386,9 @@ function startTitleBgmOnce(){
 ['pointerdown','keydown','touchstart'].forEach(ev=>{
   window.addEventListener(ev, startTitleBgmOnce, {once:false, passive:true});
 });
+
+// First paint of the coin badge on the title screen.
+updateTitleCoinDisplay();
 
 </script>
 </body>
