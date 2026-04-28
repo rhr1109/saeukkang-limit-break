@@ -1460,15 +1460,22 @@ function chapterName(c){ return CHAPTER_NAMES[Math.min(c-1, CHAPTER_NAMES.length
 function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.length-1)]; }
 function chapterMult(){
   const c = state.chapter;
-  // Mobile-friendly global softening: every chapter is gentler than before so thumb-driven play
-  // is fair end-to-end. Old: HP 1.42^(c-1), DMG 1+(c-1)*0.17. New: piecewise blend.
-  //   ch1 → 1.00/1.00, ch2 → 1.25/1.09, ch4 → 1.85/1.27, ch10 → 4.6/2.12, ch20 → ~17/3.52.
-  const hp    = c <= 6
-    ? 1 + (c-1)*0.28
-    : (1 + 5*0.28) * Math.pow(1.22, c-6);
-  const dmg   = c <= 6
-    ? 1 + (c-1)*0.09
-    : (1 + 5*0.09) * Math.pow(1.10, c-6);
+  // Difficulty curve, v4 — three-band piecewise so a maxed-shop run can clear ch20 from a chapter-
+  // select fresh start, while ch20→ch30 still feels like the demanding endgame. Old curves spiked
+  // too early (ch15 was already an instant wipe on a fresh ch15 start with maxed shop).
+  //   1..10  : linear +0.28 hp / +0.09 dmg per chapter        (ch10 →  3.52 /  1.81)
+  //   10..20 : gentle exponent 1.10/1.04                       (ch20 →  9.13 /  2.68)
+  //   20..30 : steeper exponent 1.16/1.06 on top of the ch20   (ch30 → 40.3  /  4.80)
+  const HP_CH10  = 1 + 9*0.28;          // 3.52
+  const DMG_CH10 = 1 + 9*0.09;          // 1.81
+  const HP_CH20  = HP_CH10  * Math.pow(1.10, 10); // 9.13
+  const DMG_CH20 = DMG_CH10 * Math.pow(1.04, 10); // 2.68
+  const hp = c <= 10 ? 1 + (c-1)*0.28
+          : c <= 20 ? HP_CH10  * Math.pow(1.10, c-10)
+          :           HP_CH20  * Math.pow(1.16, c-20);
+  const dmg = c <= 10 ? 1 + (c-1)*0.09
+            : c <= 20 ? DMG_CH10 * Math.pow(1.04, c-10)
+            :           DMG_CH20 * Math.pow(1.06, c-20);
   const speed = 1 + Math.min(0.80, (c-1)*0.038);
   return {
     hp,
@@ -1621,9 +1628,25 @@ function resetPlayer(){
   applyShopUpgrades(state.player, state);
 }
 
+// Per-chapter starting buff. Each chapter (whether picked from the chapter-select fresh, or
+// reached by clearing the previous one) resets the player to baseline + shop, which makes ch15+
+// fresh starts an instant wipe before the player can build. We scale baseline maxHp/damage by
+// sqrt(chapterMult.hp), which keeps the build curve meaningful (cards still matter) while
+// letting a maxed-shop run survive the first 30s on a high-chapter pick.
+//   ch1 → 1.00x, ch10 → 1.88x, ch20 → 3.02x, ch30 → 6.35x
+function applyChapterStartBuff(){
+  const cm = chapterMult();
+  const buff = Math.sqrt(cm.hp);
+  if(buff <= 1.01) return;
+  state.player.maxHp = Math.round(state.player.maxHp * buff);
+  state.player.hp = state.player.maxHp;
+  state.player.damage *= buff;
+}
+
 function resetRun(startChapter){
-  resetPlayer();
   state.chapter = startChapter || 1;
+  resetPlayer();
+  applyChapterStartBuff();
   state.stage=1; state.score=0; state.kills=0; state.time=0;
   state.enemies=[]; state.bullets=[]; state.gems=[]; state.items=[]; state.particles=[]; state.damageNums=[]; state.orbits=[]; state.enemyBullets=[]; state.pickupTexts=[];
   state.toastBanner = null;
@@ -4070,8 +4093,9 @@ document.getElementById('ccNextBtn').addEventListener('click', ()=>{
   // Advance to next chapter: items/level reset (per spec) so each chapter is a fresh build.
   // Score & kills stay cumulative — that matches the stats shown on the chapter-cleared/victory screens.
   const nextChapter = state.chapter + 1;
-  resetPlayer();
   state.chapter = nextChapter;
+  resetPlayer();
+  applyChapterStartBuff();
   state.stage = 1;
   state.enemies = []; state.bullets = []; state.gems = []; state.items = [];
   state.particles = []; state.damageNums = []; state.orbits = []; state.enemyBullets = [];
