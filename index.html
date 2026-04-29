@@ -15,8 +15,9 @@
   .overlay.on{pointer-events:auto;}
   .hidden{display:none!important;}
 
-  /* Title screen — scrollable on short/notched viewports; content anchored to top with safe-area padding */
-  #title{background:radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.92) 0%, rgba(255,212,59,.88) 18%, rgba(247,103,7,.88) 45%, rgba(90,26,4,.94) 80%, rgba(18,3,0,.98) 100%);flex-direction:column;gap:14px;padding:calc(env(safe-area-inset-top, 0px) + 24px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 16px);align-items:center;justify-content:center;min-height:100%;}
+  /* Title screen — scrollable on short/notched viewports; content anchored to top with safe-area padding.
+     Top padding leaves headroom so the shop pill anchored top-right never crowds the title text on narrow phones. */
+  #title{background:radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.92) 0%, rgba(255,212,59,.88) 18%, rgba(247,103,7,.88) 45%, rgba(90,26,4,.94) 80%, rgba(18,3,0,.98) 100%);flex-direction:column;gap:14px;padding:calc(env(safe-area-inset-top, 0px) + 110px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 16px);align-items:center;justify-content:flex-start;min-height:100%;}
   #title > *{flex-shrink:0;}
   #title h1{margin:0;font-size:min(10.5vw,64px);font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A, 0 5px 0 #5A1A04, 0 8px 24px rgba(0,0,0,.6), 0 0 30px rgba(255,224,102,.4);letter-spacing:-1.5px;text-align:center;line-height:1;animation:titleBob 3.5s ease-in-out infinite;}
   @keyframes titleBob{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-4px) rotate(1deg);}}
@@ -39,7 +40,14 @@
   /* Title-screen shop entry — designed as a tiny shopfront card so it screams 'shop' at a glance:
      red/white striped awning roof, golden storefront body with a shopping cart, coin badge, and a
      pulsing 'NEW' tag + corner sparkle. Anchored top-right where the eye lands first on mobile. */
-  #titleShopPill{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 22px);right:calc(env(safe-area-inset-right, 0px) + 16px);width:138px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit;z-index:3;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(255,212,59,.45));animation:shopBob 2.6s ease-in-out infinite;overflow:visible;}
+  #titleShopPill{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 14px);right:calc(env(safe-area-inset-right, 0px) + 12px);width:118px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit;z-index:3;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(255,212,59,.45));animation:shopBob 2.6s ease-in-out infinite;overflow:visible;}
+  #titleCostumePill{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 14px);left:calc(env(safe-area-inset-left, 0px) + 12px);width:118px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit;z-index:3;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(190,75,219,.45));animation:shopBob 2.6s ease-in-out infinite reverse;overflow:visible;}
+  #titleCostumePill .awning{display:block;height:22px;background:repeating-linear-gradient(90deg,#7048E8 0 11px,#FFF9DB 11px 22px);border:3px solid #2C0A52;border-bottom-width:4px;border-radius:14px 14px 4px 4px;}
+  #titleCostumePill .shop-front{display:flex;align-items:center;gap:6px;padding:8px 8px 10px;background:linear-gradient(180deg,#E599F7 0%,#BE4BDB 55%,#5F3DC4 100%);border:3px solid #2C0A52;border-top:0;border-radius:4px 4px 14px 14px;color:#2C0A52;text-align:left;}
+  #titleCostumePill .shop-icon{font-size:22px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3));flex:0 0 auto;}
+  #titleCostumePill .shop-info{display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1;min-width:0;}
+  #titleCostumePill .shop-label{font-size:13px;font-weight:900;letter-spacing:-.4px;text-shadow:0 1px 0 rgba(255,255,255,.4);line-height:1;}
+  #titleCostumePill .shop-coin{font-size:10px;font-weight:900;background:rgba(44,10,82,.85);color:#E599F7;padding:2px 6px;border-radius:999px;display:inline-flex;align-items:center;gap:3px;line-height:1.2;text-shadow:0 1px 0 rgba(0,0,0,.4);}
   @keyframes shopBob{0%,100%{transform:translateY(0) rotate(-1.2deg);}50%{transform:translateY(-3px) rotate(1.2deg);}}
   #titleShopPill:active{animation:none;transform:translateY(3px);}
   #titleShopPill .awning{display:block;height:22px;background:repeating-linear-gradient(90deg,#C92A2A 0 11px,#FFF9DB 11px 22px);border:3px solid #5A1A04;border-bottom-width:4px;border-radius:14px 14px 4px 4px;position:relative;overflow:hidden;}
@@ -75,7 +83,7 @@
   #hud .inv-pill .lv{font-size:10px;opacity:.92;color:#A5D6A7;}
   #hud .inv-pill.l .lv{color:#FFE066;}
 
-  /* Joystick & buttons — 탕탕특공대 식 우측 조이스틱(오른손 엄지). 우하단 절반에 부동 캡처 영역을 두어
+  /* Joystick & buttons — 우측 부동 조이스틱(오른손 엄지). 우하단 절반에 부동 캡처 영역을 두어
      손가락을 가져다 댄 위치로 베이스가 따라옵니다. HUD 액션 버튼은 좌측에 스택. */
   #joystick{position:absolute;right:clamp(20px,7vw,48px);bottom:clamp(24px,8vw,52px);width:clamp(140px,32vw,180px);height:clamp(140px,32vw,180px);border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,.55) 0%, rgba(0,0,0,.42) 60%, rgba(0,0,0,.30) 100%);border:4px solid rgba(255,212,59,.75);pointer-events:auto;touch-action:none;display:none;z-index:6;box-shadow:0 6px 16px rgba(0,0,0,.5),inset 0 0 18px rgba(255,212,59,.18);}
   #joystick::before{content:'';position:absolute;inset:14%;border-radius:50%;border:1.5px dashed rgba(255,212,59,.42);pointer-events:none;}
@@ -102,7 +110,7 @@
   body[data-scene="cleared"] #hud,
   body[data-scene="levelup"] #hud { display: none !important; }
 
-  /* Shop screen — 탕탕특공대-style skill tree opened from title screen.
+  /* Shop screen — vertical skill tree opened from title screen.
      Three branches (방어/공격/민첩), each a vertical chain of 3 nodes connected by glowing rails. */
   #shopScreen{background:radial-gradient(ellipse at 50% 30%, #2A1509 0%, #120300 60%, #050000 100%);flex-direction:column;gap:8px;padding:calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 10px);overflow-y:auto;align-items:stretch;justify-content:flex-start;}
   #shopScreen .cs-header{display:flex;align-items:center;gap:10px;padding:4px 6px 6px;flex:0 0 auto;}
@@ -195,6 +203,78 @@
   .ch-card .ch-mult{font-size:10px;opacity:.9;margin-top:3px;font-weight:700;}
   .ch-card .ch-lock{font-size:26px;margin:4px 0;filter:drop-shadow(0 2px 0 rgba(0,0,0,.5));}
 
+  /* Stage/wave entry toast — DOM-rendered so it always sits above the inventory pill bar (z-index 2)
+     and any item glow on the canvas. Slides in from the top, fades out near the end. */
+  #toastBanner{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 130px);left:50%;transform:translateX(-50%);background:rgba(20,8,40,0.92);border:3px solid rgba(255,224,102,.95);border-radius:14px;padding:10px 22px;color:#FFE066;font-weight:900;font-family:inherit;font-size:18px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.7);box-shadow:0 6px 24px rgba(0,0,0,.6),inset 0 0 18px rgba(255,224,102,.18);pointer-events:none;z-index:9;opacity:0;transition:opacity .25s, transform .25s;line-height:1.3;}
+  #toastBanner.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toastBanner.enter{opacity:0;transform:translateX(-50%) translateY(-30px);}
+  #toastBanner .toast-sub{display:block;color:#A5D6A7;font-size:13px;margin-top:4px;font-weight:700;}
+
+  /* Costume screen — gacha + inventory + equip slots */
+  #costumeScreen{background:radial-gradient(ellipse at 50% 30%, #1B0830 0%, #0F0220 60%, #050000 100%);flex-direction:column;gap:10px;padding:calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 10px);overflow-y:auto;align-items:stretch;justify-content:flex-start;}
+  #costumeScreen .cs-header{display:flex;align-items:center;gap:10px;padding:4px 6px 6px;flex:0 0 auto;}
+  #costumeScreen .cs-header h2{margin:0;color:#E599F7;font-size:min(5.4vw,24px);text-shadow:0 2px 0 #5F3DC4,0 0 18px rgba(229,153,247,.35);flex:1;text-align:center;letter-spacing:-.5px;}
+  #costumeScreen .back-btn{width:42px;height:42px;border-radius:12px;background:linear-gradient(180deg,rgba(0,0,0,.7),rgba(0,0,0,.5));border:2px solid #BE4BDB;color:#E599F7;font-weight:900;font-size:18px;cursor:pointer;font-family:inherit;box-shadow:0 3px 0 rgba(0,0,0,.4);}
+  #costumeScreen .coin-bar{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(180deg,#FFD43B 0%,#FAB005 50%,#E67700 100%);border:3px solid #FFF9DB;border-radius:14px;padding:10px 18px;margin:0 auto 4px;font-weight:900;color:#5A1A04;font-size:18px;max-width:300px;width:100%;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 -3px 0 rgba(0,0,0,.18);letter-spacing:-.3px;}
+  #costumeScreen .coin-bar .coin-ic{font-size:22px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3));}
+  #costumeScreen .gacha-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0 12px;}
+  .gacha-btn{background:linear-gradient(180deg,#E599F7 0%,#BE4BDB 50%,#7048E8 100%);border:3px solid #FFF9DB;border-radius:14px;padding:12px 18px;color:#fff;font-weight:900;font-family:inherit;font-size:15px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.4),inset 0 -3px 0 rgba(0,0,0,.2);text-shadow:0 1px 2px rgba(0,0,0,.5);min-width:130px;letter-spacing:-.3px;}
+  .gacha-btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.4),inset 0 -3px 0 rgba(0,0,0,.2);}
+  .gacha-btn.poor{background:linear-gradient(180deg,#7A0F0F 0%,#3B0606 100%);border-color:#FF8787;color:#FFE3E3;}
+  .gacha-btn .cost{display:block;font-size:12px;opacity:.95;margin-top:2px;}
+
+  /* Equip slots row — three big slots showing currently-equipped costume per area */
+  .equip-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:560px;margin:6px auto 14px;width:100%;}
+  .equip-slot{background:linear-gradient(180deg,rgba(190,75,219,.18),rgba(20,8,40,.6));border:2px dashed #BE4BDB;border-radius:12px;padding:10px 6px;text-align:center;color:#FFF9DB;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;font-family:inherit;}
+  .equip-slot .slot-name{font-size:11px;color:#E599F7;font-weight:900;letter-spacing:.5px;}
+  .equip-slot .slot-icon{font-size:30px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4));}
+  .equip-slot .slot-empty{color:#868E96;font-size:11px;}
+  .equip-slot.has{border-style:solid;background:linear-gradient(180deg,rgba(190,75,219,.32),rgba(40,15,70,.7));}
+  .equip-slot .slot-grade{font-size:11px;font-weight:900;padding:2px 7px;border-radius:999px;}
+
+  /* Costume inventory — card grid below equip slots */
+  .costume-section{max-width:680px;width:100%;margin:0 auto 8px;}
+  .costume-section h3{margin:8px 6px 6px;color:#FFE066;font-size:14px;letter-spacing:.5px;}
+  .cos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;padding:0 6px 6px;}
+  .cos-card{position:relative;background:linear-gradient(180deg,rgba(40,15,70,.85),rgba(15,2,30,.95));border:3px solid #BE4BDB;border-radius:12px;padding:10px 8px;color:#fff;cursor:pointer;font-family:inherit;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform .08s;}
+  .cos-card:active{transform:translateY(2px);}
+  .cos-card.equipped{border-color:#FFE066;box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1),0 0 18px rgba(255,224,102,.5);}
+  .cos-card .cos-icon{font-size:32px;}
+  .cos-card .cos-name{font-size:11px;font-weight:900;color:#FFF9DB;line-height:1.2;}
+  .cos-card .cos-grade{position:absolute;top:6px;right:6px;font-size:10px;font-weight:900;padding:2px 7px;border-radius:999px;border:2px solid rgba(255,255,255,.6);}
+  .cos-card .cos-slot{font-size:9px;color:#868E96;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+  .cos-card .cos-stats{font-size:10px;color:#A5D8FF;margin-top:2px;line-height:1.3;}
+  .cos-card.equipped::after{content:'착용중';position:absolute;top:6px;left:6px;font-size:9px;font-weight:900;background:#FFE066;color:#5A1A04;padding:2px 6px;border-radius:999px;}
+  .cos-grade-S{background:linear-gradient(180deg,#FFE066,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);}
+  .cos-grade-A{background:linear-gradient(180deg,#E599F7,#7048E8);color:#fff;}
+  .cos-grade-B{background:linear-gradient(180deg,#74C0FC,#1864AB);color:#fff;}
+  .cos-grade-C{background:linear-gradient(180deg,#CED4DA,#495057);color:#fff;}
+
+  /* Gacha pull modal — celebratory reveal */
+  .gacha-reveal{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 8px;}
+  .gacha-reveal .pull-title{font-size:14px;color:#FFD43B;font-weight:900;letter-spacing:.5px;}
+  .gacha-reveal .pull-card{position:relative;width:160px;height:200px;background:linear-gradient(180deg,#2A1054,#0E0220);border:4px solid;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 0 30px rgba(255,224,102,.4);}
+  .gacha-reveal .pull-card .pc-icon{font-size:64px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6));}
+  .gacha-reveal .pull-card .pc-grade{position:absolute;top:-12px;font-size:14px;font-weight:900;padding:4px 14px;border-radius:999px;border:3px solid #fff;}
+  .gacha-reveal .pull-card .pc-name{font-size:14px;color:#FFE066;font-weight:900;text-align:center;padding:0 6px;}
+  .gacha-reveal .pull-card .pc-slot{font-size:10px;color:#868E96;text-transform:uppercase;letter-spacing:.5px;}
+  .gacha-reveal .pull-stats{font-size:12px;color:#A5D8FF;text-align:center;line-height:1.5;}
+
+  /* Costume album — shows every def with which grades have been collected */
+  .album-card{background:linear-gradient(180deg,rgba(40,15,70,.55),rgba(15,2,30,.85));border:2px solid #5F3DC4;border-radius:10px;padding:8px 6px;text-align:center;color:#FFF9DB;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .album-card.complete{border-color:#FFE066;box-shadow:0 0 14px rgba(255,224,102,.35);}
+  .album-card .a-icon{font-size:30px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4));}
+  .album-card .a-icon.locked{filter:grayscale(1) brightness(.4);}
+  .album-card .a-name{font-size:11px;font-weight:900;color:#FFE066;line-height:1.2;}
+  .album-card .a-slot{font-size:9px;color:#868E96;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+  .album-card .a-grades{display:flex;gap:3px;margin-top:2px;flex-wrap:wrap;justify-content:center;}
+  .album-grade-pip{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:1.5px solid rgba(255,255,255,.4);color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);}
+  .album-grade-pip.have{color:#fff;border-color:#fff;}
+  .album-grade-pip.have.S{background:linear-gradient(180deg,#FFE066,#E67700);color:#5A1A04;}
+  .album-grade-pip.have.A{background:linear-gradient(180deg,#E599F7,#7048E8);}
+  .album-grade-pip.have.B{background:linear-gradient(180deg,#74C0FC,#1864AB);}
+  .album-grade-pip.have.C{background:linear-gradient(180deg,#CED4DA,#495057);}
+
   /* Responsive */
   @media (max-width:480px){
     #hud .topbar{top:6px;left:6px;right:6px;}
@@ -206,6 +286,10 @@
     #hud .inv-pill .ic{font-size:11px;}
     #hud .inv-pill .lv{font-size:9px;}
     #title h1{font-size:min(11vw, 48px);}
+    #titleShopPill,#titleCostumePill{width:96px;}
+    #titleShopPill .shop-icon,#titleCostumePill .shop-icon{font-size:18px;}
+    #titleShopPill .shop-label,#titleCostumePill .shop-label{font-size:11px;}
+    #titleShopPill .shop-coin,#titleCostumePill .shop-coin{font-size:9px;}
     .card{padding:14px;}
     .card h2{font-size:20px;}
     #gameOver .card h2, #victory .card h2, #chapterCleared .card h2{font-size:24px;}
@@ -214,12 +298,15 @@
     .choice .desc{font-size:11px;}
     .btn{padding:12px 16px;font-size:16px;}
     .btn.small{padding:8px 12px;font-size:13px;}
+    #toastBanner{font-size:14px;padding:8px 16px;}
+    .gacha-btn{font-size:13px;padding:10px 14px;min-width:110px;}
   }
   @media (max-height:560px){
     #title h1{font-size:min(7vw, 38px);}
     #title .pigeon-stage{width:min(40vh, 180px);height:min(40vh, 180px);}
     #title .sub{font-size:12px;}
     #title .hint{display:none;}
+    #title{padding-top:calc(env(safe-area-inset-top, 0px) + 90px);}
   }
 </style>
 </head>
@@ -240,13 +327,15 @@
       </div>
       <div class="right">
         <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">비둘기 광장</span></div>
-        <div class="panel">스테이지 <span id="stageNum">1</span> / 8</div>
+        <div class="panel">웨이브 <span id="waveNum">1</span> / 3</div>
         <div class="panel" id="timerPanel">⏱ <span id="timerTxt">60</span></div>
         <div class="panel">⭐ <span id="scoreTxt">0</span></div>
         <div class="panel">💀 <span id="killsTxt">0</span></div>
+        <div class="panel" style="color:#FFD43B;">🪙 <span id="hudCoinTxt">0</span></div>
       </div>
     </div>
     <div class="invbar" id="invBar"></div>
+    <div id="toastBanner" class="enter"></div>
     <button class="hud-btn" id="pauseBtn" title="일시정지">⏸</button>
     <div id="joyArea"></div>
     <div id="joystick"><div class="stick"></div></div>
@@ -256,6 +345,16 @@
   <!-- Title screen -->
   <div id="title" class="overlay on">
     <div class="rays"></div>
+    <button id="titleCostumePill" type="button" title="코스튬">
+      <span class="awning"></span>
+      <span class="shop-front">
+        <span class="shop-icon">👗</span>
+        <span class="shop-info">
+          <span class="shop-label">코스튬</span>
+          <span class="shop-coin">🎁 <span id="titleCostumeCount">0</span></span>
+        </span>
+      </span>
+    </button>
     <button id="titleShopPill" type="button" title="상점 열기">
       <span class="awning"></span>
       <span class="shop-front">
@@ -274,7 +373,7 @@
       <button class="btn alt small" id="howBtn">조작법 · 규칙</button>
       <button class="btn alt small" id="resetProgBtn" style="font-size:12px;">기록 초기화</button>
     </div>
-    <div class="hint">근육질 비둘기가 되어 새우깡을 뿌려 적을 제압하세요!<br>30개 챕터 · 각 챕터 8스테이지 · 레벨업 카드로 빌드 완성.</div>
+    <div class="hint">근육질 비둘기가 되어 새우깡을 뿌려 적을 제압하세요!<br>50개 챕터 · 챕터당 3웨이브 + 보스 · 레벨업 카드와 코스튬으로 빌드 완성.</div>
   </div>
 
   <!-- Shop screen — permanent meta-progression upgrades bought with coins earned in runs -->
@@ -296,8 +395,43 @@
       <h2>챕터 선택</h2>
       <div style="width:40px;"></div>
     </div>
-    <div class="cs-info">잠금 해제된 챕터부터 원하는 난이도를 선택하세요. 각 챕터는 8스테이지로 구성됩니다.</div>
+    <div class="cs-info">잠금 해제된 챕터부터 원하는 난이도를 선택하세요. 각 챕터는 3웨이브 + 최종 보스로 진행됩니다.</div>
     <div class="grid" id="chapterGrid"></div>
+  </div>
+
+  <!-- Costume screen — gacha + inventory + equip -->
+  <div id="costumeScreen" class="overlay hidden">
+    <div class="cs-header">
+      <button class="back-btn" id="costumeBackBtn" title="뒤로">◀</button>
+      <h2>👗 비둘기 옷장</h2>
+      <div style="width:40px;"></div>
+    </div>
+    <div class="coin-bar"><span class="coin-ic">🪙</span><span id="costumeCoinTxt">0</span></div>
+    <div class="gacha-row">
+      <button class="gacha-btn" id="gachaSingleBtn">🎲 1회 뽑기<span class="cost">🪙 1,500</span></button>
+      <button class="gacha-btn" id="gachaTenBtn">🎰 10연 뽑기<span class="cost">🪙 12,000 (A 보장)</span></button>
+    </div>
+    <div class="costume-section">
+      <h3 style="text-align:center;color:#E599F7;">현재 착용 중</h3>
+      <div class="equip-row" id="equipRow"></div>
+    </div>
+    <div class="costume-section">
+      <h3>📦 보유 코스튬 (<span id="costumeCount">0</span>)</h3>
+      <div class="cos-grid" id="costumeGrid"></div>
+    </div>
+    <div class="costume-section">
+      <h3 style="display:flex;align-items:center;gap:8px;">📒 도감 <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span></h3>
+      <div id="albumGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:0 6px 6px;"></div>
+    </div>
+  </div>
+
+  <!-- Gacha reveal modal -->
+  <div id="gachaModal" class="modal hidden">
+    <div class="card" style="max-width:340px;">
+      <h2 style="color:#E599F7;">✨ 코스튬 획득!</h2>
+      <div id="gachaReveal" class="gacha-reveal"></div>
+      <button class="btn" id="gachaCloseBtn" style="width:100%;margin-top:8px;">확인</button>
+    </div>
   </div>
 
   <!-- Level up modal -->
@@ -321,13 +455,13 @@
     </div>
   </div>
 
-  <!-- Stage cleared -->
+  <!-- Wave cleared (legacy modal, retained for compatibility but unused under wave system) -->
   <div id="stageCleared" class="modal hidden">
     <div class="card" style="max-width:380px;text-align:center;">
-      <h2 id="scTitle">스테이지 클리어!</h2>
-      <div class="sub" id="scSub">다음 스테이지로 이동합니다...</div>
+      <h2 id="scTitle">웨이브 클리어!</h2>
+      <div class="sub" id="scSub">다음 웨이브로 이동합니다...</div>
       <div id="scStats" style="margin:10px 0;"></div>
-      <button class="btn" id="scNext">다음 스테이지 ▶</button>
+      <button class="btn" id="scNext">계속 ▶</button>
     </div>
   </div>
 
@@ -337,10 +471,11 @@
       <h2>조작법 · 규칙</h2>
       <div style="font-size:13px;line-height:1.65;color:#FFF9DB;">
         <p><b style="color:#FFE066;">💻 PC:</b> WASD 또는 방향키로 이동. 자동으로 가장 가까운 적에게 새우깡을 던집니다. ESC로 일시정지.</p>
-        <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 조이스틱으로 이동(탕탕특공대 식). 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ✕ 나가기 / ⏸ 일시정지 / 🔊 음소거 버튼 스택.</p>
+        <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 부동 조이스틱으로 이동. 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ⏸ 일시정지 / 🔊 음소거 버튼.</p>
         <p><b style="color:#FFE066;">🛒 상점:</b> 타이틀에서 진입. 코인은 적/보스 처치, 코인 픽업, 챕터 클리어로 누적되며 영구 업그레이드(시작 HP·공격력·이속·자석 반경·치명타 등)를 살 수 있어 다음 런에 자동 적용됩니다.</p>
-        <p><b style="color:#FFE066;">📕 챕터:</b> 총 30개 챕터. 각 챕터는 8스테이지로 구성되며 후반 챕터일수록 적이 강해집니다. 직전 챕터를 돌파하면 다음 챕터가 열립니다.</p>
-        <p><b style="color:#FFE066;">⏱ 스테이지:</b> 60~90초 생존 → 보스 출현 → 격파하면 스테이지 클리어!</p>
+        <p><b style="color:#FFE066;">👗 코스튬:</b> 머리·몸통·무기 슬롯에 1개씩 장착. 등급은 S/A/B/C이며, 상점에서 가챠로 뽑거나 챕터 클리어 보상으로 드물게 획득합니다. 10판마다 최소 한 번은 코스튬이 보장됩니다.</p>
+        <p><b style="color:#FFE066;">📕 챕터:</b> 총 50개 챕터. 각 챕터는 3웨이브 + 최종 보스로 진행됩니다. 챕터 1~10은 최장 10분, 11~50은 최장 15분 동안 생존하며 클리어를 노립니다.</p>
+        <p><b style="color:#FFE066;">⚔ 웨이브:</b> 시간이 지나면 웨이브가 자동으로 진행되고 적 밀도와 종류가 강해집니다. 웨이브 3 종료 시 챕터 보스 등장!</p>
         <p><b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.</p>
         <p><b style="color:#FFE066;">🎁 드롭 아이템:</b> 적이 확률로 5종 특수 아이템을 떨어뜨립니다 (5킬·10킬 pity 보장):
           <br>&nbsp;&nbsp;💖 포카칩 — HP 30% 회복
@@ -349,7 +484,7 @@
           <br>&nbsp;&nbsp;🌟 황금 새우깡 — 다음 레벨업 XP 35% 즉시 지급
           <br>&nbsp;&nbsp;🪙 코인 — 점수 +25 (챕터당 가산)
         </p>
-        <p><b style="color:#FFE066;">💡 팁:</b> 챕터마다 체력·공격력·속도가 배율로 상승합니다. 카드 선택을 전략적으로!</p>
+        <p><b style="color:#FFE066;">💡 팁:</b> 챕터마다 체력·공격력·속도가 배율로 상승합니다. 카드와 코스튬 선택을 전략적으로!</p>
       </div>
       <button class="btn" id="howCloseBtn" style="width:100%;margin-top:8px;">닫기</button>
     </div>
@@ -518,9 +653,17 @@ function sfxDash(){ noise(.06,.18); beep(900,.06,'square',.16,-700); }
 function sfxShuriken(){ beep(1500,.025,'square',.10,-600); setTimeout(()=>beep(2000,.02,'square',.07,-800),12); }
 function sfxBoomerang(){ noise(.07,.10); beep(280,.18,'sawtooth',.16,-90); }
 function sfxMissile(){ noise(.12,.14); beep(160,.22,'sawtooth',.20,260); setTimeout(()=>beep(80,.18,'sawtooth',.18,80),60); }
+// "구구" cooing — two soft round notes with a quick warble. Quiet so it sits behind action SFX.
+function sfxCoo(){
+  if(!audioCtx || muted) return;
+  // Two-syllable coo: low warm tone then slightly higher echo.
+  beep(420, .18, 'sine', .14, -60);
+  beep(380, .12, 'triangle', .08, -40);
+  setTimeout(()=>{ beep(460, .16, 'sine', .12, -80); beep(420, .10, 'triangle', .07, -50); }, 220);
+}
 
 // BGM — per-chapter chord progressions. Tier character (wave/vol) is preserved,
-// but each of the 30 chapters gets its own bar progression & tempo for distinct feel.
+// but each of the 50 chapters gets its own bar progression & tempo for distinct feel.
 let bgmTimer=null, bgmStep=0;
 const NOTE={
   'C3':131,'D3':147,'E3':165,'F3':175,'G3':196,'A3':220,'B3':247,
@@ -529,7 +672,7 @@ const NOTE={
   'Eb3':156,'Eb4':311,'Eb5':622,'Ab3':208,'Ab4':415,'Bb3':233,'Bb4':466,
   'F#3':185,'F#4':370,'C#4':277,'D#4':311,'G#4':415,
 };
-// 30 chapter BGM packs — index = chapter-1. Each: {label, bars:[[4-note bar]×4], interval, wave, bassShift, vol}
+// 50 chapter BGM packs — index = chapter-1. Each: {label, bars:[[4-note bar]×4], interval, wave, bassShift, vol}
 const BGM_CHAPTER_PACKS = [
   // === Tier 0 Day City (square, bright majors) ===
   { label:'비둘기 광장',  bars:[['C4','E4','G4','C5'],['G3','B3','D4','G4'],['A3','C4','E4','A4'],['F3','A3','C4','F4']], interval:160, wave:'square',   bassShift:'3', vol:.11 },
@@ -567,6 +710,30 @@ const BGM_CHAPTER_PACKS = [
   { label:'재의 평원',    bars:[['D4','F4','A4','D5'],['Eb3','G3','Bb3','Eb4'],['F3','A3','C4','F4'],['D4','F4','A4','D5']], interval:140, wave:'sawtooth', bassShift:'3', vol:.12 },
   { label:'심판의 문',    bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['E3','G3','B3','E4'],['A3','C#4','E4','A4']], interval:128, wave:'sawtooth', bassShift:'3', vol:.12 },
   { label:'한계돌파',     bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:120, wave:'sawtooth', bassShift:'3', vol:.13 },
+  // === Tier 6 Abyss / Deep Sea (Ch 31-35) — sine pads, slow ===
+  { label:'심연 입구',    bars:[['D4','F4','A4','D5'],['G3','Bb3','D4','G4'],['A3','C4','E4','A4'],['F3','A3','C4','F4']], interval:200, wave:'sine',     bassShift:'3', vol:.10 },
+  { label:'산호초',       bars:[['C4','E4','G4','C5'],['F3','A3','C4','F4'],['Bb3','D4','F4','Bb4'],['G3','B3','D4','G4']], interval:198, wave:'sine',     bassShift:'3', vol:.10 },
+  { label:'해저 폐허',    bars:[['A3','C4','E4','A4'],['Eb3','G3','Bb3','Eb4'],['D4','F4','A4','D5'],['G3','Bb3','D4','G4']], interval:204, wave:'sine',     bassShift:'3', vol:.10 },
+  { label:'심해 협곡',    bars:[['E3','G3','B3','E4'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4'],['A3','C4','E4','A4']], interval:208, wave:'sine',     bassShift:'3', vol:.10 },
+  { label:'해류의 끝',    bars:[['D4','F4','A4','D5'],['Bb3','D4','F4','Bb4'],['Eb4','G4','Bb4','Eb5'],['G3','Bb3','D4','G4']], interval:212, wave:'sine',     bassShift:'3', vol:.11 },
+  // === Tier 7 Crystal Dimension (Ch 36-40) — bell-like square shimmer ===
+  { label:'수정 차원',    bars:[['G4','B4','D5','G5'],['D4','F#4','A4','D5'],['C4','E4','G4','C5'],['A3','C#4','E4','A4']], interval:160, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'프리즘 회로',  bars:[['E4','G4','B4','E5'],['B3','D4','F#4','B4'],['F4','A4','C5','F5'],['D4','F#4','A4','D5']], interval:152, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'반사의 홀',    bars:[['D4','F#4','A4','D5'],['A3','C#4','E4','A4'],['E4','G4','B4','E5'],['C4','E4','G4','C5']], interval:158, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'유리 파편',    bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['G4','B4','D5','G5'],['D4','F4','A4','D5']], interval:164, wave:'square',   bassShift:'3', vol:.11 },
+  { label:'결정 왕좌',    bars:[['G4','B4','D5','G5'],['Eb4','G4','Bb4','Eb5'],['Bb4','D5','F5','Bb4'],['F4','A4','C5','F5']], interval:155, wave:'square',   bassShift:'3', vol:.12 },
+  // === Tier 8 Ash Wasteland (Ch 41-45) — sawtooth low, dirge ===
+  { label:'재의 들판',    bars:[['A3','C4','E4','A4'],['F3','A3','C4','F4'],['G3','Bb3','D4','G4'],['E3','G3','B3','E4']], interval:138, wave:'sawtooth', bassShift:'3', vol:.12 },
+  { label:'쇳가루 광야',  bars:[['E3','G3','B3','E4'],['Bb3','D4','F4','Bb4'],['F3','Ab3','C4','F4'],['A3','C4','E4','A4']], interval:132, wave:'sawtooth', bassShift:'3', vol:.12 },
+  { label:'침묵의 사막',  bars:[['D4','F4','A4','D5'],['G3','Bb3','D4','G4'],['F3','Ab3','C4','F4'],['Bb3','D4','F4','Bb4']], interval:144, wave:'sawtooth', bassShift:'3', vol:.12 },
+  { label:'재의 왕성',    bars:[['F3','A3','C4','F4'],['C4','Eb4','G4','C5'],['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4']], interval:128, wave:'sawtooth', bassShift:'3', vol:.13 },
+  { label:'숯의 정원',    bars:[['A3','C#4','E4','A4'],['F3','A3','C4','F4'],['Bb3','D4','F4','Bb4'],['E3','G3','B3','E4']], interval:140, wave:'sawtooth', bassShift:'3', vol:.12 },
+  // === Tier 9 Beyond the Limit (Ch 46-50) — finale, mixed waves ===
+  { label:'시간의 균열',  bars:[['C4','Eb4','G4','C5'],['Ab3','C4','Eb4','Ab4'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4']], interval:148, wave:'triangle', bassShift:'3', vol:.13 },
+  { label:'잊혀진 제국',  bars:[['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4'],['F3','A3','C4','F4'],['C4','Eb4','G4','C5']], interval:142, wave:'triangle', bassShift:'3', vol:.13 },
+  { label:'별먼지 회랑',  bars:[['A3','C4','E4','A4'],['D4','F4','A4','D5'],['Bb3','D4','F4','Bb4'],['G3','B3','D4','G4']], interval:138, wave:'square',   bassShift:'3', vol:.13 },
+  { label:'심판자의 옥좌',bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:122, wave:'sawtooth', bassShift:'3', vol:.14 },
+  { label:'무한 너머',    bars:[['C4','E4','G4','C5'],['F3','A3','C4','F4'],['G3','B3','D4','G4'],['C5','E5','G5','C5']], interval:108, wave:'sawtooth', bassShift:'3', vol:.15 },
 ];
 // Title / chapter-select BGM — calm, hopeful arcade loop in C major.
 // Slightly louder than chapter packs so the menu feels alive the moment audio unlocks.
@@ -581,7 +748,7 @@ const TITLE_BGM_PACK = {
   interval:190, wave:'triangle', bassShift:'3', vol:.13
 };
 function currentBgmPack(){
-  if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop') return TITLE_BGM_PACK;
+  if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop' || state.scene === 'costume') return TITLE_BGM_PACK;
   const idx = Math.min(Math.max(0, state.chapter - 1), BGM_CHAPTER_PACKS.length - 1);
   return BGM_CHAPTER_PACKS[idx];
 }
@@ -849,6 +1016,275 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
   }
 
   ctx.restore();
+
+  // ── Costume overlays ──
+  // Drawn outside the flipped scale so emoji-based icons read correctly regardless of facing.
+  // Covers head/body/weapon slots; high grades (S/A) get a glow halo for visual flex.
+  if(player && player.costumes){
+    const cos = player.costumes;
+    if(cos.head)   drawCostumeHeadOverlay(ctx, x, y - bodyBob, scale, cos.head);
+    if(cos.body)   drawCostumeBodyOverlay(ctx, x, y - bodyBob, scale, cos.body);
+    if(cos.weapon) drawCostumeWeaponOverlay(ctx, x, y - bodyBob, scale, facing, cos.weapon, attackPulse);
+  }
+}
+
+// ── Costume overlays (called by drawPigeon AFTER its main body restore) ──
+// All draw in world coords using the player's pivot, so they don't share drawPigeon's facing flip.
+function drawCostumeGlow(ctx, cx, cy, r, eq){
+  const g = COSTUME_GRADES[eq.grade];
+  if(eq.grade !== 'S' && eq.grade !== 'A') return;
+  ctx.save();
+  ctx.fillStyle = g.glow;
+  ctx.globalAlpha = eq.grade === 'S' ? 0.5 : 0.3;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function drawCostumeHeadOverlay(ctx, px, py, scale, eq){
+  const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
+  const g = COSTUME_GRADES[eq.grade];
+  // Pigeon head center in pigeon-local coords is around (0, -22) at scale, head radius 16.
+  // We pin the costume to the TOP of the head so hats sit snugly without floating.
+  const hx = px;
+  const hy = py + (-22 - 12)*scale; // top crown of head
+  drawCostumeGlow(ctx, hx, hy + 6*scale, 18*scale, eq);
+  ctx.save();
+  ctx.translate(hx, hy);
+  ctx.scale(scale, scale);
+  // Per-id distinct visuals so the same emoji doesn't read the same shape.
+  // All shapes are drawn in a 24x16 bounding box that sits flush with the head crown.
+  if(def.id === 'h_beanie'){
+    // Soft cap that hugs the head: a half-dome with a folded brim.
+    ctx.fillStyle = g.color;
+    ctx.beginPath(); ctx.arc(0, 4, 13, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = g.glow;
+    ctx.fillRect(-13, 2, 26, 4);
+    ctx.fillStyle = '#FFF9DB';
+    ctx.beginPath(); ctx.arc(0, -8, 3, 0, Math.PI*2); ctx.fill();
+  } else if(def.id === 'h_strawhat'){
+    // Wide brim + low crown
+    ctx.fillStyle = '#FAB005';
+    ctx.beginPath(); ctx.ellipse(0, 8, 20, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath(); ctx.ellipse(0, 4, 11, 8, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-10, 6, 20, 2);
+  } else if(def.id === 'h_helmet'){
+    // Dome helmet with chin strap and crest
+    ctx.fillStyle = '#495057';
+    ctx.beginPath(); ctx.arc(0, 6, 14, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#ADB5BD';
+    ctx.fillRect(-14, 5, 28, 3);
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-2, -8, 4, 10);
+    ctx.fillStyle = g.glow;
+    ctx.beginPath(); ctx.arc(0, -10, 2, 0, Math.PI*2); ctx.fill();
+  } else if(def.id === 'h_tophat'){
+    // Top hat with band
+    ctx.fillStyle = '#1A1D20';
+    ctx.fillRect(-13, 8, 26, 3);
+    ctx.fillRect(-8, -10, 16, 18);
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-8, 2, 16, 3);
+  } else if(def.id === 'h_crown'){
+    // Five-point crown rooted on the head crown line
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.moveTo(-13, 8); ctx.lineTo(-10, -2); ctx.lineTo(-6, 4);
+    ctx.lineTo(0, -8); ctx.lineTo(6, 4); ctx.lineTo(10, -2); ctx.lineTo(13, 8);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = '#FF1744';
+    ctx.beginPath(); ctx.arc(0, 3, 2.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = g.glow;
+    ctx.beginPath(); ctx.arc(-7, 1, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(7, 1, 1.4, 0, Math.PI*2); ctx.fill();
+  } else if(def.id === 'h_halo'){
+    // Rotating halo above the head
+    ctx.strokeStyle = g.glow;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(0, 0, 16, 5, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = g.color;
+    for(let i=0;i<6;i++){
+      const a = (i/6)*Math.PI*2 + state.time*1.4;
+      ctx.beginPath(); ctx.arc(Math.cos(a)*16, Math.sin(a)*5, 1.6, 0, Math.PI*2); ctx.fill();
+    }
+  } else {
+    ctx.font = 'bold 20px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(def.icon, 0, 2);
+  }
+  ctx.restore();
+}
+function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
+  const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
+  const g = COSTUME_GRADES[eq.grade];
+  // Pigeon body ellipse is centered at (0, 10) with rx 32, ry 28. We anchor the costume to
+  // the body center so it hugs the chest, not below the feet. Costume artwork uses a 24x18
+  // bounding box that sits inside the body silhouette without breaking out the sides.
+  const cx = px, cy = py + 10*scale;
+  drawCostumeGlow(ctx, cx, cy + 4*scale, 26*scale, eq);
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  // Use clipping to a body-shaped ellipse so costumes never leak outside the pigeon's silhouette.
+  ctx.save();
+  ctx.beginPath(); ctx.ellipse(0, 0, 24, 18, 0, 0, Math.PI*2); ctx.clip();
+  if(def.id === 'b_jersey'){
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-24, -18, 48, 36);
+    ctx.fillStyle = g.glow;
+    ctx.fillRect(-24, -3, 48, 4);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('1', 0, 4);
+  } else if(def.id === 'b_robe'){
+    ctx.fillStyle = '#3B2F6E';
+    ctx.fillRect(-24, -18, 48, 36);
+    ctx.fillStyle = g.color;
+    for(let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(0, -8 + i*8, 2.2, 0, Math.PI*2); ctx.fill(); }
+    ctx.fillStyle = g.glow;
+    ctx.fillRect(-22, 8, 44, 3);
+  } else if(def.id === 'b_tux'){
+    ctx.fillStyle = '#1A1D20';
+    ctx.fillRect(-24, -18, 48, 36);
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(-9, -18); ctx.lineTo(-7, 8); ctx.lineTo(0, 14); ctx.lineTo(7, 8); ctx.lineTo(9, -18);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = g.color;
+    ctx.beginPath();
+    ctx.moveTo(-3, -10); ctx.lineTo(0, -2); ctx.lineTo(3, -10); ctx.closePath();
+    ctx.fill();
+  } else if(def.id === 'b_armor'){
+    ctx.fillStyle = '#ADB5BD';
+    ctx.fillRect(-24, -18, 48, 36);
+    ctx.fillStyle = '#868E96';
+    ctx.fillRect(-22, -2, 44, 3);
+    ctx.fillRect(-22, 6, 44, 2);
+    ctx.fillStyle = g.color;
+    ctx.beginPath();
+    ctx.moveTo(0, -10); ctx.lineTo(8, -2); ctx.lineTo(0, 6); ctx.lineTo(-8, -2); ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = g.glow; ctx.lineWidth = 1.4;
+    ctx.stroke();
+  } else if(def.id === 'b_dragon'){
+    // Iridescent scaled plates that fully cover the body, with a gold seam down the middle.
+    for(let row=0; row<5; row++){
+      for(let col=-4; col<=4; col++){
+        const sx = col*5 + (row%2===0 ? 0 : 2.5);
+        const sy = -16 + row*8;
+        ctx.fillStyle = row%2===0 ? g.color : g.glow;
+        ctx.beginPath(); ctx.arc(sx, sy, 3.2, 0, Math.PI); ctx.fill();
+      }
+    }
+    ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(0, 16); ctx.stroke();
+  } else if(def.id === 'b_cape'){
+    // Cape — anchored at shoulders, draped behind the body. We allow it to extend slightly past the clip
+    // so the trailing edge looks like it flows behind. To do that, draw cape OUTSIDE the clip.
+  } else {
+    ctx.font = 'bold 18px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(def.icon, 0, 0);
+  }
+  ctx.restore();
+  // Cape is drawn after restore() so it can flow past the body clip.
+  if(def.id === 'b_cape'){
+    ctx.fillStyle = g.color;
+    ctx.beginPath();
+    ctx.moveTo(-20, -14);
+    ctx.quadraticCurveTo(-30, 12, -16, 24);
+    ctx.lineTo(-6, 16);
+    ctx.lineTo(0, 22);
+    ctx.lineTo(6, 16);
+    ctx.lineTo(16, 24);
+    ctx.quadraticCurveTo(30, 12, 20, -14);
+    ctx.lineTo(10, -10);
+    ctx.lineTo(-10, -10);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = g.glow; ctx.lineWidth = 2;
+    ctx.stroke();
+    // Front collar on the body
+    ctx.fillStyle = g.glow;
+    ctx.fillRect(-12, -12, 24, 4);
+  }
+  ctx.restore();
+}
+function drawCostumeWeaponOverlay(ctx, px, py, scale, facing, eq, attackPulse){
+  const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
+  const g = COSTUME_GRADES[eq.grade];
+  // Two fists on the pigeon — left at (-36,-36) right at (36,-36) in pigeon-local coords.
+  // Right arm flexes more on attack (ra_y_off = -armFlex*1.4 in drawPigeon), so the right-hand
+  // costume rises a touch faster too — keeps the costume locked to the fist.
+  const flex = (attackPulse||0) * 3;
+  const drawHand = (sign) => {
+    const lx = px + sign * 36 * scale * facing;
+    const flexY = sign > 0 ? flex * 1.4 : flex;
+    const ly = py + (-36 - flexY) * scale;
+    drawCostumeGlow(ctx, lx, ly, 14*scale, eq);
+    ctx.save();
+    ctx.translate(lx, ly);
+    ctx.scale(scale, scale);
+    if(def.id === 'w_ribbon'){
+      ctx.fillStyle = '#FFB3D9';
+      ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = g.color;
+      ctx.beginPath();
+      ctx.moveTo(-9, -6); ctx.lineTo(-2, 0); ctx.lineTo(-9, 6); ctx.closePath();
+      ctx.moveTo(9, -6); ctx.lineTo(2, 0); ctx.lineTo(9, 6); ctx.closePath();
+      ctx.fill();
+    } else if(def.id === 'w_brass'){
+      ctx.fillStyle = '#FFD43B';
+      for(let k=-1;k<=1;k++){
+        ctx.beginPath(); ctx.arc(k*4, 0, 3, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.fillStyle = g.color;
+      ctx.fillRect(-7, -4, 14, 2);
+    } else if(def.id === 'w_gauntlet'){
+      ctx.fillStyle = '#495057';
+      ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#ADB5BD';
+      ctx.fillRect(-8, -2, 16, 4);
+      ctx.fillStyle = g.color;
+      ctx.beginPath(); ctx.arc(0, -3, 2, 0, Math.PI*2); ctx.fill();
+    } else if(def.id === 'w_blade'){
+      ctx.fillStyle = '#CED4DA';
+      ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(3, 8); ctx.lineTo(-3, 8); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = g.color; ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = g.color;
+      ctx.fillRect(-5, 6, 10, 3);
+    } else if(def.id === 'w_thunder'){
+      ctx.fillStyle = '#5C6670';
+      ctx.fillRect(-4, -10, 8, 16);
+      ctx.fillStyle = g.color;
+      ctx.beginPath(); ctx.arc(0, -10, 7, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FFE066';
+      ctx.beginPath();
+      ctx.moveTo(-3, -16); ctx.lineTo(0, -10); ctx.lineTo(-2, -10); ctx.lineTo(2, -4);
+      ctx.lineTo(-1, -10); ctx.lineTo(2, -10); ctx.closePath(); ctx.fill();
+    } else if(def.id === 'w_phoenix'){
+      ctx.fillStyle = '#F76707';
+      ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FFE066';
+      for(let k=0;k<5;k++){
+        const a = k*(Math.PI*2/5) + state.time*2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(a)*12, Math.sin(a)*12);
+        ctx.lineTo(Math.cos(a+0.4)*8, Math.sin(a+0.4)*8);
+        ctx.closePath(); ctx.fill();
+      }
+    } else {
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(def.icon, 0, 1);
+    }
+    ctx.restore();
+  };
+  drawHand(-1);
+  drawHand(1);
 }
 
 // Fill title screen SVG with pigeon
@@ -1426,12 +1862,28 @@ function drawEnemy(ctx, e, walkPhase){
 }
 
 // ---------- Game state ----------
-const TARGET_STAGES = 8;
-const MAX_CHAPTERS = 30;
+// WAVES_PER_CHAPTER: each chapter is 3 swelling enemy waves followed by the chapter boss.
+// CHAPTER_TIME_CAP: hard ceiling on a single chapter's playtime — early chapters cap at 10 min,
+// later chapters cap at 15 min so the gauntlet of ch11-50 has more breathing room.
+const WAVES_PER_CHAPTER = 3;
+const MAX_CHAPTERS = 50;
 // Pickup hitbox spans the pigeon body (head→feet ≈ 90px tall, 60px wide).
 // Bumped from 48 → 60 for mobile play — fingers cover part of the screen, so pickups
 // snap a bit more generously than the visible body footprint.
 const PICKUP_RADIUS = 60;
+// Per-chapter wave timing. Returns array of [w1End, w2End, w3End, totalCap] in seconds.
+// w3End is when the boss spawns; the chapter cap is the absolute max time the chapter is allowed.
+function chapterWaveTimes(c){
+  // Ch 1-10: 10 min cap. Waves take 8 min total (2:40 each), boss has up to 2 min.
+  // Ch 11-50: 15 min cap. Waves take 11 min total (3:40 each), boss has up to 4 min.
+  if(c <= 10){
+    const each = 160; // 2:40
+    return [each, each*2, each*3, 600];
+  } else {
+    const each = 220; // 3:40
+    return [each, each*2, each*3, 900];
+  }
+}
 // Chapter names — each chapter is a location, not a difficulty label.
 // Difficulty is implicit in chapter number; higher chapters belong to harsher tiers.
 const CHAPTER_NAMES = [
@@ -1446,7 +1898,15 @@ const CHAPTER_NAMES = [
   // Tier 4: Cosmic
   '대기권 돌파','우주 정거장','소행성대','성운의 중심','블랙홀 경계',
   // Tier 5: Hellfire
-  '지옥 관문','화산 분화구','재의 평원','심판의 문','한계돌파'
+  '지옥 관문','화산 분화구','재의 평원','심판의 문','한계 1차 돌파',
+  // Tier 6: Abyss / Deep Sea (31-35)
+  '심연 입구','산호초의 그림자','해저 폐허','심해 협곡','해류의 끝',
+  // Tier 7: Crystal Dimension (36-40)
+  '수정 차원','프리즘 회로','반사의 홀','유리 파편 사막','결정 왕좌',
+  // Tier 8: Ash Wasteland (41-45)
+  '재의 들판','쇳가루 광야','침묵의 사막','재의 왕성','숯의 정원',
+  // Tier 9: Beyond the Limit (46-50)
+  '시간의 균열','잊혀진 제국','별먼지 회랑','심판자의 옥좌','무한 너머'
 ];
 const CHAPTER_COLORS = [
   '#FFE066','#FFD43B','#FFA94D','#FF922B','#FF6B6B',
@@ -1454,39 +1914,55 @@ const CHAPTER_COLORS = [
   '#5F3DC4','#9775FA','#FFA94D','#BE4BDB','#38D9A9',
   '#A5D8FF','#74C0FC','#339AF0','#1864AB','#22B8CF',
   '#20C997','#38D9A9','#B197FC','#7950F2','#4263EB',
-  '#FA5252','#FF6B6B','#FD7E14','#E03131','#FFE066'
+  '#FA5252','#FF6B6B','#FD7E14','#E03131','#FFE066',
+  // 31-50 (deep sea / crystal / ash / beyond)
+  '#0ABDC6','#2EBAC6','#1098AD','#0B7285','#22B8CF',
+  '#E599F7','#9775FA','#5C7CFA','#4DABF7','#74C0FC',
+  '#FFA94D','#FF8787','#FF6B6B','#E03131','#C92A2A',
+  '#FFE066','#FFD43B','#F783AC','#7048E8','#FFFFFF'
 ];
 function chapterName(c){ return CHAPTER_NAMES[Math.min(c-1, CHAPTER_NAMES.length-1)]; }
 function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.length-1)]; }
 function chapterMult(){
   const c = state.chapter;
-  // Difficulty curve, v4 — three-band piecewise so a maxed-shop run can clear ch20 from a chapter-
-  // select fresh start, while ch20→ch30 still feels like the demanding endgame. Old curves spiked
-  // too early (ch15 was already an instant wipe on a fresh ch15 start with maxed shop).
-  //   1..10  : linear +0.28 hp / +0.09 dmg per chapter        (ch10 →  3.52 /  1.81)
-  //   10..20 : gentle exponent 1.10/1.04                       (ch20 →  9.13 /  2.68)
-  //   20..30 : steeper exponent 1.16/1.06 on top of the ch20   (ch30 → 40.3  /  4.80)
-  const HP_CH10  = 1 + 9*0.28;          // 3.52
-  const DMG_CH10 = 1 + 9*0.09;          // 1.81
-  const HP_CH20  = HP_CH10  * Math.pow(1.10, 10); // 9.13
-  const DMG_CH20 = DMG_CH10 * Math.pow(1.04, 10); // 2.68
-  const hp = c <= 10 ? 1 + (c-1)*0.28
-          : c <= 20 ? HP_CH10  * Math.pow(1.10, c-10)
-          :           HP_CH20  * Math.pow(1.16, c-20);
-  const dmg = c <= 10 ? 1 + (c-1)*0.09
+  // Difficulty curve, v5 — extended for 50 chapters with wave system.
+  // Costume bonuses (up to S-grade ~0.5x global stat boost across slots) are factored in,
+  // so the curve assumes mid-grade costumes by ch30+.
+  //   1..10  : linear +0.26 hp / +0.08 dmg per chapter         (ch10 → 3.34 / 1.72)
+  //   10..20 : exp 1.09/1.04                                    (ch20 → 7.91 / 2.55)
+  //   20..30 : exp 1.13/1.05 on top of ch20                     (ch30 → 27.5 / 4.15)
+  //   30..40 : exp 1.10/1.04 on top of ch30                     (ch40 → 71.3 / 6.14)
+  //   40..50 : exp 1.08/1.035 on top of ch40                    (ch50 → 154 / 8.69)
+  const HP_CH10  = 1 + 9*0.26;
+  const DMG_CH10 = 1 + 9*0.08;
+  const HP_CH20  = HP_CH10  * Math.pow(1.09, 10);
+  const DMG_CH20 = DMG_CH10 * Math.pow(1.04, 10);
+  const HP_CH30  = HP_CH20  * Math.pow(1.13, 10);
+  const DMG_CH30 = DMG_CH20 * Math.pow(1.05, 10);
+  const HP_CH40  = HP_CH30  * Math.pow(1.10, 10);
+  const DMG_CH40 = DMG_CH30 * Math.pow(1.04, 10);
+  const hp = c <= 10 ? 1 + (c-1)*0.26
+          : c <= 20 ? HP_CH10  * Math.pow(1.09, c-10)
+          : c <= 30 ? HP_CH20  * Math.pow(1.13, c-20)
+          : c <= 40 ? HP_CH30  * Math.pow(1.10, c-30)
+          :           HP_CH40  * Math.pow(1.08, c-40);
+  const dmg = c <= 10 ? 1 + (c-1)*0.08
             : c <= 20 ? DMG_CH10 * Math.pow(1.04, c-10)
-            :           DMG_CH20 * Math.pow(1.06, c-20);
-  const speed = 1 + Math.min(0.80, (c-1)*0.038);
+            : c <= 30 ? DMG_CH20 * Math.pow(1.05, c-20)
+            : c <= 40 ? DMG_CH30 * Math.pow(1.04, c-30)
+            :           DMG_CH40 * Math.pow(1.035, c-40);
+  const speed = 1 + Math.min(0.95, (c-1)*0.028);
   return {
     hp,
     dmg,
     speed,
-    score: Math.pow(1.4, c-1),
-    xp:    1 + (c-1)*0.20,
+    score: Math.pow(1.32, c-1),
+    xp:    1 + (c-1)*0.16,
   };
 }
 
-// Progress — persisted in localStorage. Includes meta-currency (coins) and shop upgrade levels.
+// Progress — persisted in localStorage. Includes meta-currency (coins), shop upgrades,
+// costume inventory, equipped slots, and pity counter for chapter-clear costume drops.
 const PROGRESS_KEY = 'saeukkang_progress_v1';
 const progress = (()=>{
   let saved = null;
@@ -1494,47 +1970,215 @@ const progress = (()=>{
     const raw = localStorage.getItem(PROGRESS_KEY);
     if(raw){ const p = JSON.parse(raw); if(p && typeof p.clearedChapter==='number') saved = p; }
   }catch(e){}
-  const base = { clearedChapter: 0, highScore: 0, highChapter: 0, highStage: 0, coins: 0, shop: {} };
-  return Object.assign(base, saved || {}, { shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}) });
+  const base = {
+    clearedChapter: 0, highScore: 0, highChapter: 0, highStage: 0, coins: 0, shop: {},
+    costumes: [],                                       // [{uid, defId, grade}]
+    equipped: { head:null, body:null, weapon:null },    // uid or null per slot
+    chaptersSinceCostume: 0,                            // pity counter — guarantees a costume every 10 clears
+  };
+  const merged = Object.assign(base, saved || {}, {
+    shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}),
+    equipped: Object.assign({}, base.equipped, (saved&&saved.equipped)||{}),
+    costumes: (saved&&Array.isArray(saved.costumes)) ? saved.costumes : [],
+  });
+  // Sanity: drop equipped uids that no longer exist in inventory.
+  for(const slot of ['head','body','weapon']){
+    if(merged.equipped[slot] && !merged.costumes.find(c=>c.uid===merged.equipped[slot])){
+      merged.equipped[slot] = null;
+    }
+  }
+  return merged;
 })();
 function saveProgress(){ try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }catch(e){} }
 function unlockedChapters(){ return Math.min(MAX_CHAPTERS, progress.clearedChapter + 1); }
+
+// ---------- Costume / gacha system ----------
+// Grades — rarer = stronger multiplier on the slot's base stat package.
+const COSTUME_GRADES = {
+  S: { mult: 1.00, label:'S', color:'#FFE066', glow:'#FFF3BF', borderClass:'cos-grade-S' },
+  A: { mult: 0.65, label:'A', color:'#BE4BDB', glow:'#E599F7', borderClass:'cos-grade-A' },
+  B: { mult: 0.40, label:'B', color:'#339AF0', glow:'#A5D8FF', borderClass:'cos-grade-B' },
+  C: { mult: 0.20, label:'C', color:'#868E96', glow:'#DEE2E6', borderClass:'cos-grade-C' },
+};
+// Drop weights — higher = more common.
+//   Paid gacha (single):  S 2%, A 8%, B 30%, C 60%   (better than chapter drop)
+//   Chapter clear pity:   S 1%, A 5%, B 19%, C 75%   (rarer, but pity-guaranteed every 10)
+//   10-pull bonus:        guarantees at least one A on the bundle.
+const GACHA_RATES_PAID =    { S: 2, A: 8,  B: 30, C: 60 };
+const GACHA_RATES_CHAPTER = { S: 1, A: 5,  B: 19, C: 75 };
+function rollGachaGrade(rates){
+  let total = 0; for(const k in rates) total += rates[k];
+  let r = Math.random()*total;
+  for(const k of ['S','A','B','C']){
+    r -= (rates[k]||0);
+    if(r <= 0) return k;
+  }
+  return 'C';
+}
+// Costume catalogue — each entry can drop at any grade. Slot determines which body part it overlays.
+const COSTUME_DEFS = [
+  // ─── HEAD ───
+  { id:'h_beanie',     slot:'head',   name:'동네 비니',       icon:'🧢' },
+  { id:'h_strawhat',   slot:'head',   name:'밀짚모자',         icon:'👒' },
+  { id:'h_helmet',     slot:'head',   name:'전투용 헬멧',      icon:'⛑️' },
+  { id:'h_tophat',     slot:'head',   name:'마법 실크햇',      icon:'🎩' },
+  { id:'h_crown',      slot:'head',   name:'황금 왕관',        icon:'👑' },
+  { id:'h_halo',       slot:'head',   name:'별빛 후광',        icon:'💫' },
+  // ─── BODY ───
+  { id:'b_jersey',     slot:'body',   name:'운동복',           icon:'👕' },
+  { id:'b_cape',       slot:'body',   name:'영웅의 망토',      icon:'🦸' },
+  { id:'b_robe',       slot:'body',   name:'마법 로브',        icon:'🪄' },
+  { id:'b_tux',        slot:'body',   name:'턱시도',           icon:'🤵' },
+  { id:'b_armor',      slot:'body',   name:'기사 갑옷',        icon:'🛡️' },
+  { id:'b_dragon',     slot:'body',   name:'용비늘 갑주',      icon:'🐉' },
+  // ─── WEAPON (gloves/fists) ───
+  { id:'w_ribbon',     slot:'weapon', name:'리본 글러브',      icon:'🎀' },
+  { id:'w_brass',      slot:'weapon', name:'브라스 너클',      icon:'👊' },
+  { id:'w_gauntlet',   slot:'weapon', name:'전투 건틀릿',      icon:'🦾' },
+  { id:'w_blade',      slot:'weapon', name:'쌍수도',          icon:'⚔️' },
+  { id:'w_thunder',    slot:'weapon', name:'천둥의 메이스',    icon:'🔨' },
+  { id:'w_phoenix',    slot:'weapon', name:'불사조 클로',      icon:'🔥' },
+];
+const COSTUME_DEFS_BY_ID = Object.fromEntries(COSTUME_DEFS.map(d=>[d.id,d]));
+const COSTUME_DEFS_BY_SLOT = { head:[], body:[], weapon:[] };
+for(const d of COSTUME_DEFS) COSTUME_DEFS_BY_SLOT[d.slot].push(d);
+// Gacha pricing — coins are easy to earn, so a single pull costs a meaningful share of a chapter clear.
+const GACHA_COST_SINGLE = 1500;
+const GACHA_COST_TEN    = 12000;
+// Effects per slot. Each grade scales these by COSTUME_GRADES[g].mult.
+// Stat lines are carefully picked so the head/body/weapon slots feel different rather than redundant.
+function applyCostumeEffect(p, eq){
+  if(!eq) return;
+  const def = COSTUME_DEFS_BY_ID[eq.defId];
+  if(!def) return;
+  const m = COSTUME_GRADES[eq.grade].mult;
+  if(def.slot === 'head'){
+    // Head: +HP%, +magnet, +xp gain
+    p.maxHp = Math.round(p.maxHp * (1 + 0.25*m));
+    p.hp = p.maxHp;
+    p.magnet *= 1 + 0.20*m;
+    p.xpMult *= 1 + 0.12*m;
+  } else if(def.slot === 'body'){
+    // Body: +flat HP, damage reduction, regen tick
+    p.maxHp += Math.round(35 * m);
+    p.hp = p.maxHp;
+    p.damageReduction = (p.damageReduction || 0) + 0.12 * m;
+    p.regenPerSec = (p.regenPerSec || 0) + 0.5 * m;
+  } else if(def.slot === 'weapon'){
+    // Weapon: +damage, +fire rate, +projSpeed; S-grade adds a bonus projectile
+    p.damage *= 1 + 0.30*m;
+    p.fireRate *= 1 + 0.12*m;
+    p.projSpeed *= 1 + 0.18*m;
+    if(eq.grade === 'S') p.projCount += 1;
+  }
+}
+function applyEquippedCostumes(p){
+  for(const slot of ['head','body','weapon']){
+    const uid = progress.equipped[slot];
+    if(!uid) continue;
+    const eq = progress.costumes.find(c => c.uid === uid);
+    if(eq) applyCostumeEffect(p, eq);
+  }
+}
+function buildPlayerCostumeRefs(){
+  // Resolve equipped uids into the actual costume objects, used by drawPigeon to render overlays.
+  const refs = { head:null, body:null, weapon:null };
+  for(const slot of ['head','body','weapon']){
+    const uid = progress.equipped[slot];
+    if(!uid) continue;
+    refs[slot] = progress.costumes.find(c => c.uid === uid) || null;
+  }
+  return refs;
+}
+let _uidCounter = Date.now();
+function newCostumeUid(){ _uidCounter++; return 'c'+_uidCounter.toString(36); }
+function awardCostume(grade, slotFilter){
+  // Pick a random definition (optionally constrained to a specific slot).
+  const pool = slotFilter ? COSTUME_DEFS_BY_SLOT[slotFilter] : COSTUME_DEFS;
+  const def = pool[Math.floor(Math.random()*pool.length)];
+  const item = { uid:newCostumeUid(), defId:def.id, grade };
+  progress.costumes.push(item);
+  saveProgress();
+  return item;
+}
+function pullGachaSingle(rates){
+  return awardCostume(rollGachaGrade(rates || GACHA_RATES_PAID));
+}
+function pullGachaTen(rates){
+  rates = rates || GACHA_RATES_PAID;
+  const out = [];
+  let bestGrade = 'C';
+  const order = { S:4, A:3, B:2, C:1 };
+  for(let i=0;i<10;i++){
+    const g = rollGachaGrade(rates);
+    out.push(awardCostume(g));
+    if(order[g] > order[bestGrade]) bestGrade = g;
+  }
+  // 10-pull guarantee: at least one A. If best is below A, upgrade the highest one to A.
+  if(order[bestGrade] < order['A']){
+    let bestIdx = 0;
+    for(let i=1;i<out.length;i++) if(order[out[i].grade] > order[out[bestIdx].grade]) bestIdx = i;
+    const upgraded = out[bestIdx];
+    upgraded.grade = 'A';
+  }
+  saveProgress();
+  return out;
+}
+// Chapter-clear costume drop: 10% base rate, but every 10 clears guarantees one regardless.
+function rollChapterClearCostume(){
+  let dropped = null;
+  if(Math.random() < 0.10){
+    dropped = awardCostume(rollGachaGrade(GACHA_RATES_CHAPTER));
+    progress.chaptersSinceCostume = 0;
+  } else if((progress.chaptersSinceCostume || 0) >= 9){
+    // Pity: guarantee at least a C on the 10th clear without one.
+    dropped = awardCostume(rollGachaGrade({ S:0, A:2, B:18, C:80 }));
+    progress.chaptersSinceCostume = 0;
+  } else {
+    progress.chaptersSinceCostume = (progress.chaptersSinceCostume || 0) + 1;
+  }
+  saveProgress();
+  return dropped;
+}
 
 // ---------- Meta-progression shop ----------
 // Three vertical branches (방어 / 공격 / 민첩) × 3 tiers each. Lower tiers gate higher tiers
 // so the shop reads like a 탕탕특공대 skill tree: pick a branch and grow it. Each node's
 // `apply(p)` runs in resetPlayer(). Cost grows with level so early picks feel impactful.
+// All nodes now have an unlock condition — either a chapter-cleared gate or a previous-node level gate.
+// Coins inflated quickly under the old shop because every first-tier node was free; gating each branch
+// behind a chapter-cleared milestone gives shop progression actual structure.
 const SHOP_BRANCHES = [
   {
     id:'def', label:'방어', color:'#FF6B9D', tip:'생존력',
     nodes:[
-      { id:'hp',     icon:'❤️', name:'단단한 깃털',    desc:'시작 최대 HP +15',        max:10, cost:l=>30+l*25,
+      { id:'hp',     icon:'❤️', name:'단단한 깃털',    desc:'시작 최대 HP +15',        max:10, cost:l=>60+l*45,    reqClearedCh:1,
         apply:(p,l)=>{ p.maxHp += 15*l; p.hp = p.maxHp; } },
-      { id:'magnet', icon:'🧲', name:'은빛 깃털 자석', desc:'XP 자석 반경 +25%',       max:5,  cost:l=>40+l*30, req:'hp',     reqLvl:2,
+      { id:'magnet', icon:'🧲', name:'은빛 깃털 자석', desc:'XP 자석 반경 +25%',       max:5,  cost:l=>120+l*80,   req:'hp',     reqLvl:3, reqClearedCh:3,
         apply:(p,l)=>{ p.magnet *= Math.pow(1.25, l); } },
-      { id:'revive', icon:'🛡️', name:'예비 부활',      desc:'런 당 1회 부활 (HP 50%)', max:1,  cost:l=>500,    req:'magnet', reqLvl:2,
+      { id:'revive', icon:'🛡️', name:'예비 부활',      desc:'런 당 1회 부활 (HP 50%)', max:1,  cost:l=>1500,       req:'magnet', reqLvl:3, reqClearedCh:8,
         apply:(p,l,s)=>{ if(l>0) s.abilities.shield = 1; } },
     ]
   },
   {
     id:'atk', label:'공격', color:'#FFA94D', tip:'화력',
     nodes:[
-      { id:'dmg',  icon:'💪', name:'근육질 한 방', desc:'시작 공격력 +6%',     max:10, cost:l=>40+l*30,
+      { id:'dmg',  icon:'💪', name:'근육질 한 방', desc:'시작 공격력 +6%',     max:10, cost:l=>80+l*55,    reqClearedCh:1,
         apply:(p,l)=>{ p.damage *= Math.pow(1.06, l); } },
-      { id:'rate', icon:'⚡', name:'빠른 손놀림', desc:'시작 연사 속도 +5%',  max:8,  cost:l=>50+l*40, req:'dmg',  reqLvl:2,
+      { id:'rate', icon:'⚡', name:'빠른 손놀림', desc:'시작 연사 속도 +5%',  max:8,  cost:l=>140+l*95,   req:'dmg',  reqLvl:3, reqClearedCh:5,
         apply:(p,l)=>{ p.fireRate *= Math.pow(1.05, l); } },
-      { id:'proj', icon:'🎯', name:'추가 새우깡', desc:'시작 새우깡 발사 +1', max:3,  cost:l=>200+l*200, req:'rate', reqLvl:2,
+      { id:'proj', icon:'🎯', name:'추가 새우깡', desc:'시작 새우깡 발사 +1', max:3,  cost:l=>500+l*500,  req:'rate', reqLvl:3, reqClearedCh:12,
         apply:(p,l)=>{ p.projCount += l; } },
     ]
   },
   {
     id:'agi', label:'민첩', color:'#74C0FC', tip:'기동',
     nodes:[
-      { id:'speed', icon:'👟', name:'잽싼 발걸음',   desc:'이동 속도 +4%',     max:8, cost:l=>35+l*25,
+      { id:'speed', icon:'👟', name:'잽싼 발걸음',   desc:'이동 속도 +4%',     max:8, cost:l=>70+l*45,    reqClearedCh:2,
         apply:(p,l)=>{ p.speed *= Math.pow(1.04, l); } },
-      { id:'crit',  icon:'🎲', name:'행운의 비둘기', desc:'시작 치명타 +3%',   max:5, cost:l=>60+l*45, req:'speed', reqLvl:2,
+      { id:'crit',  icon:'🎲', name:'행운의 비둘기', desc:'시작 치명타 +3%',   max:5, cost:l=>180+l*120,  req:'speed', reqLvl:3, reqClearedCh:6,
         apply:(p,l)=>{ p.crit = Math.min(0.9, p.crit + 0.03*l); } },
-      { id:'xp',    icon:'🪶', name:'경험의 깃털',   desc:'경험치 획득 +6%',   max:5, cost:l=>70+l*55, req:'crit',  reqLvl:1,
+      { id:'xp',    icon:'🪶', name:'경험의 깃털',   desc:'경험치 획득 +6%',   max:5, cost:l=>260+l*180,  req:'crit',  reqLvl:2, reqClearedCh:10,
         apply:(p,l)=>{ p.xpMult *= Math.pow(1.06, l); } },
     ]
   },
@@ -1549,12 +2193,28 @@ function shopCost(def){
   return def.cost(lvl);
 }
 function shopUnlocked(def){
-  if(!def.req) return true;
-  return shopLevel(def.req) >= (def.reqLvl || 1);
+  // Two-part gate: chapter-cleared milestone AND previous-node level (if specified).
+  if(def.reqClearedCh && (progress.clearedChapter || 0) < def.reqClearedCh) return false;
+  if(def.req && shopLevel(def.req) < (def.reqLvl || 1)) return false;
+  return true;
+}
+function shopUnlockReason(def){
+  // Human-readable reason a node is locked, used by the shop screen to explain why a node is greyed out.
+  const parts = [];
+  if(def.reqClearedCh && (progress.clearedChapter || 0) < def.reqClearedCh){
+    parts.push(`Ch.${def.reqClearedCh} 클리어 필요`);
+  }
+  if(def.req && shopLevel(def.req) < (def.reqLvl || 1)){
+    const reqDef = SHOP_DEFS_BY_ID[def.req];
+    parts.push(`${reqDef ? reqDef.name : def.req} Lv ${def.reqLvl||1} 필요`);
+  }
+  return parts.join(' · ');
 }
 function awardCoins(n){
   if(!n || n<=0) return;
-  progress.coins = (progress.coins||0) + Math.floor(n);
+  const amt = Math.floor(n);
+  progress.coins = (progress.coins||0) + amt;
+  state.coinsThisRun = (state.coinsThisRun||0) + amt;
   saveProgress();
 }
 function applyShopUpgrades(p, s){
@@ -1565,17 +2225,25 @@ function applyShopUpgrades(p, s){
 }
 
 const state = {
-  scene: 'title', // title, playing, levelup, paused, cleared, chapterCleared, gameover, victory
+  scene: 'title', // title, playing, levelup, paused, chapterCleared, gameover, victory
   chapter: 1,
+  // Wave system: each chapter is 3 waves of swelling enemies + a final boss. We keep `stage`
+  // as a frozen 1 for legacy code paths, but the gameplay loop reads `wave` (1..3) and
+  // `chapterTime` (seconds since the chapter started) to drive spawning and the boss trigger.
   stage: 1,
-  stageTime: 0,
-  stageDuration: 60,
+  wave: 1,
+  chapterTime: 0,
+  waveTimes: [160, 320, 480, 600], // overwritten per-chapter from chapterWaveTimes()
+  stageTime: 0,                    // alias of chapterTime kept for old call sites
+  stageDuration: 60,               // legacy; not used by wave logic
   bossSpawned: false,
   bossAlive: false,
   bossFightStart: 0,
   score: 0,
   kills: 0,
   time: 0,
+  coinsThisRun: 0,                 // coins earned during the current chapter run — shown on chapter-clear modal
+  earnedCostumeThisChapter: null,  // populated when the chapter-clear drop fires
   camera: {x:0,y:0, shake:0},
   player: null,
   enemies: [],
@@ -1587,7 +2255,7 @@ const state = {
   orbits: [],
   enemyBullets: [],
   pickupTexts: [],
-  toastBanner: null, // { text, sub, t, maxT } — in-screen notice for stage transitions
+  toastBanner: null, // { text, sub, t, maxT } — in-screen notice for wave transitions
   spawnTimer: 0,
   abilities: { orbit:0, bomb:0, lightning:0, heal:0, shield:0 },
   abilityTimers: { orbit:0, bomb:0, lightning:0, heal:0 },
@@ -1611,6 +2279,9 @@ function resetPlayer(){
     bounce: 0,
     xpMult: 1,
     magnet: 110,
+    damageReduction: 0, // body costume contributes
+    regenPerSec: 0,     // body costume contributes
+    _regenAccum: 0,
     invT: 0,
     walkPhase: 0,
     facing: 1,
@@ -1621,11 +2292,16 @@ function resetPlayer(){
     upg: {},
     // Per-weapon state: only saeukkang is unlocked initially. Each entry has {lvl, reloadT}.
     // Other weapons (shuriken, boomerang, missile) become available via level-up cards.
-    weapons: { shrimp: { lvl:1, reloadT:0 } }
+    weapons: { shrimp: { lvl:1, reloadT:0 } },
+    // Costume references resolved from progress.equipped — used by drawPigeon to render overlays.
+    costumes: buildPlayerCostumeRefs()
   };
   // Apply permanent shop upgrades on top of base stats — must run after the player object exists
   // and before the first stage spawns, so HUD/HP bars reflect bought upgrades immediately.
   applyShopUpgrades(state.player, state);
+  // Costume bonuses stack on top of shop upgrades. Applied before chapterStartBuff so the buff
+  // sees the costume-modified maxHp/damage as its baseline.
+  applyEquippedCostumes(state.player);
 }
 
 // Per-chapter starting buff. Each chapter (whether picked from the chapter-select fresh, or
@@ -1647,7 +2323,9 @@ function resetRun(startChapter){
   state.chapter = startChapter || 1;
   resetPlayer();
   applyChapterStartBuff();
-  state.stage=1; state.score=0; state.kills=0; state.time=0;
+  state.stage=1; state.wave=1; state.chapterTime=0; state.score=0; state.kills=0; state.time=0;
+  state.coinsThisRun = 0;
+  state.earnedCostumeThisChapter = null;
   state.enemies=[]; state.bullets=[]; state.gems=[]; state.items=[]; state.particles=[]; state.damageNums=[]; state.orbits=[]; state.enemyBullets=[]; state.pickupTexts=[];
   state.toastBanner = null;
   state.abilities = { orbit:0, bomb:0, lightning:0, heal:0, shield:0 };
@@ -1655,19 +2333,24 @@ function resetRun(startChapter){
   killsSinceDrop = 0;
   _invBarCache = null; // force re-render
   updateInvBar();
-  initStage();
+  initChapter();
 }
 
-function initStage(){
-  state.stageTime=0;
-  state.bossSpawned=false;
-  state.bossAlive=false;
-  state.spawnTimer=0;
-  // Shorter stages — total chapter (~8 stages) lands around 6-7 min instead of 9-10.
-  state.stageDuration = 32 + state.stage*3;
+// Initialize a chapter's wave timers and reset boss/spawn state.
+function initChapter(){
+  state.wave = 1;
+  state.chapterTime = 0;
+  state.stageTime = 0;
+  state.bossSpawned = false;
+  state.bossAlive = false;
+  state.spawnTimer = 0;
+  state.waveTimes = chapterWaveTimes(state.chapter);
+  state.stageDuration = state.waveTimes[2]; // legacy alias — boss spawns at end of wave 3
   state.camera.x = state.player.x;
   state.camera.y = state.player.y;
 }
+// Legacy shim — older code paths still call initStage(). Routes to initChapter for the wave system.
+function initStage(){ initChapter(); }
 
 // ---------- Input ----------
 const keys = new Set();
@@ -1840,23 +2523,19 @@ function spawnEnemy(kind){
 function spawnBoss(){
   const b = spawnEnemy('boss');
   const chm = chapterMult();
-  // Override base boss stats with stage-scaled values, then apply chapter mult.
-  // Mobile rebalance: gentler HP curve and slightly slower bosses so phone players have time
-  // to dodge between salvos. Stage 1-2 bosses still warm-up tier; stage 7-8 are the real wall.
-  b.hp = b.maxHp = Math.ceil((110 + Math.pow(state.stage,1.55)*52) * chm.hp);
-  b.speed = (50 + state.stage*3.5) * chm.speed;
-  b.damage = Math.ceil((11 + state.stage*2.4) * chm.dmg);
-  b.collideRadius = 55;
+  // Wave system: there's only one boss per chapter, spawned at the end of wave 3, so it gets
+  // the chapter-boss treatment unconditionally. HP/damage scale with chapter (not stage).
+  const c = state.chapter;
+  b.hp = b.maxHp = Math.ceil((220 + Math.pow(c, 1.45)*46) * chm.hp);
+  b.speed = (52 + c*2.2) * chm.speed;
+  b.damage = Math.ceil((14 + c*1.8) * chm.dmg);
+  b.collideRadius = 60;
   b.ranged = true;
   b.rangedCd = 2.4;
   b.specialCd = 5.5;
-  // Chapter's final boss (stage 8) gets extra flair — unlocks next chapter
-  if(state.stage === TARGET_STAGES){
-    b.isChapterBoss = true;
-    b.hp = b.maxHp = Math.ceil(b.maxHp * 1.25);
-    b.size = 2.9;
-    b.collideRadius = 68;
-  }
+  b.isChapterBoss = true;
+  b.size = 2.9;
+  b.collideRadius = 68;
   state.bossSpawned = true;
   state.bossAlive = true;
   state.bossFightStart = state.time;
@@ -1865,33 +2544,26 @@ function spawnBoss(){
   sfxBossWarn();
 }
 
-// Pool of basic enemies per stage — mixed with chapter-gated new enemies.
-// Earlier chapters introduce new types steadily so each chapter feels distinct.
-function stageEnemyPool(stage){
+// Pool of basic enemies per wave (1..3) — mixed with chapter-gated new enemies.
+// Wave 1 = warmup (light), Wave 2 = main pressure (medium), Wave 3 = pre-boss surge (heavy).
+function waveEnemyPool(wave){
   let base;
-  if(stage===1) base = ['mouse','mouse','mouse','crow'];
-  else if(stage===2) base = ['mouse','mouse','crow','crow','cat'];
-  else if(stage===3) base = ['mouse','crow','cat','cat','dog'];
-  else if(stage===4) base = ['crow','cat','cat','dog','dog'];
-  else if(stage===5) base = ['cat','cat','dog','dog','crow','tank'];
-  else if(stage===6) base = ['cat','dog','dog','tank','crow','crow'];
-  else if(stage===7) base = ['dog','tank','tank','crow','cat','cat'];
-  else base = ['dog','tank','tank','tank','cat','crow','crow']; // 8
+  if(wave === 1)      base = ['mouse','mouse','mouse','crow','cat'];
+  else if(wave === 2) base = ['mouse','crow','crow','cat','cat','dog'];
+  else                base = ['cat','dog','dog','tank','crow','crow','tank']; // wave 3
   const c = state.chapter;
   const pool = base.slice();
-  // Chapter 4 was a difficulty wall — cut crow weight there so ranged spam is bearable.
+  // Chapter 4 — soften crow ranged spam.
   if(c===4){
     for(let i=pool.length-1; i>=0 && pool.length>4; i--){
       if(pool[i]==='crow' && Math.random()<0.55) pool.splice(i,1);
     }
   }
-  // Chapter-gated additions — every chapter from 2 onward feels a step harder & more varied.
+  // Chapter-gated additions — same threat-introduction schedule as before, but applied across all waves.
   if(c>=2)  pool.push('ghost');
   if(c>=3)  pool.push('ghost');
-  // Bomber pushed to ch5 so ch4 doesn't double-stack new threats with the chapter mult spike.
   if(c>=5)  pool.push('bomber');
-  if(c>=6)  pool.push('bomber','ghost');
-  if(c>=6)  pool.push('reaper');
+  if(c>=6)  pool.push('bomber','ghost','reaper');
   if(c>=7)  pool.push('bomber','reaper');
   if(c>=8)  pool.push('sniper','ghost');
   if(c>=10) pool.push('sniper','reaper');
@@ -1903,16 +2575,24 @@ function stageEnemyPool(stage){
   if(c>=23) pool.push('reaper','summoner');
   if(c>=26) pool.push('summoner','summoner');
   if(c>=28) pool.push('reaper','summoner','sniper','tyrant');
-  if(c>=30) pool.push('tyrant','tyrant','summoner','reaper'); // final chapter — reign of tyrants
+  if(c>=30) pool.push('tyrant','tyrant','summoner','reaper');
+  if(c>=35) pool.push('tyrant','reaper','summoner');
+  if(c>=40) pool.push('tyrant','tyrant','reaper','sniper');
+  if(c>=45) pool.push('tyrant','tyrant','summoner','summoner');
+  if(c>=50) pool.push('tyrant','tyrant','tyrant'); // final chapter — endless tyrant rush
   return pool;
 }
+// Backwards-compat shim for any code path still calling stageEnemyPool().
+function stageEnemyPool(){ return waveEnemyPool(state.wave || 1); }
 
-function spawnRateForStage(stage){
-  // Mobile rebalance: swarm density softened across the board so the screen never becomes
-  // unreadable on a phone. Old peak (ch30 stage8): 5.2 * 2.16 = 11.2 spawns/sec — way too dense.
-  // New peak: 4.4 * 1.66 ≈ 7.3 — still busy but legible. Early chapters drop noticeably.
-  return (1.4 + stage*0.38) * (1 + (state.chapter-1)*0.023);
+function spawnRateForWave(wave){
+  // Wave 1 baseline ~1.6/s, wave 2 ~2.6/s, wave 3 ~3.8/s (scaled by chapter).
+  // Late chapters multiply this further so ch50 wave 3 truly tests the player.
+  const baseByWave = wave === 1 ? 1.6 : wave === 2 ? 2.6 : 3.8;
+  return baseByWave * (1 + (state.chapter-1)*0.020);
 }
+// Legacy shim — older call sites that pass `state.stage` now get the equivalent wave-3 rate.
+function spawnRateForStage(){ return spawnRateForWave(state.wave || 1); }
 
 // ---------- Upgrades ----------
 // Upgrade format: id, title, icon, desc(lvl), max, rarity, apply(p, state)
@@ -2384,45 +3064,29 @@ function applyItem(item){
 }
 
 function onBossDefeated(){
-  if(state.stage>=TARGET_STAGES){
-    bgmStop();
-    // Update progress — unlock next chapter
-    if(state.chapter > progress.clearedChapter){
-      progress.clearedChapter = Math.min(MAX_CHAPTERS, state.chapter);
-    }
-    if(state.score > progress.highScore) progress.highScore = state.score;
-    if(state.chapter > progress.highChapter){ progress.highChapter = state.chapter; progress.highStage = state.stage; }
-    // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
-    awardCoins(40 + state.chapter * 20);
-    saveProgress();
-    if(state.chapter >= MAX_CHAPTERS){
-      // Final chapter cleared — ultimate victory
-      state.scene='victory';
-      sfxVictory();
-      renderVictory(true);
-      document.getElementById('victory').classList.remove('hidden');
-      return;
-    }
-    state.scene='chapterCleared';
-    sfxVictory();
-    renderChapterCleared();
-    document.getElementById('chapterCleared').classList.remove('hidden');
-  } else {
-    // Stage clear → auto-advance with on-screen banner. No modal, no BGM cut.
-    sfxLevelUp();
-    const p = state.player;
-    p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp*0.25));
-    state.stage++;
-    initStage();
-    state.toastBanner = {
-      text: `스테이지 ${state.stage} 진입!`,
-      sub: `HP +25% 회복`,
-      t: 2.6, maxT: 2.6
-    };
-    updateHUD();
-    // If level-ups were queued mid-fight, surface one now (doesn't block auto-advance flow).
-    if(pendingLevelUps > 0){ showLevelUp(); pendingLevelUps = Math.max(0, pendingLevelUps-1); }
+  // Wave system: every boss kill is the chapter clear (one boss per chapter, end of wave 3).
+  bgmStop();
+  if(state.chapter > progress.clearedChapter){
+    progress.clearedChapter = Math.min(MAX_CHAPTERS, state.chapter);
   }
+  if(state.score > progress.highScore) progress.highScore = state.score;
+  if(state.chapter > progress.highChapter){ progress.highChapter = state.chapter; progress.highStage = WAVES_PER_CHAPTER; }
+  // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
+  awardCoins(60 + state.chapter * 18);
+  // Chapter-clear costume drop: 10% rare drop, with pity guaranteeing one every 10 clears.
+  state.earnedCostumeThisChapter = rollChapterClearCostume();
+  saveProgress();
+  if(state.chapter >= MAX_CHAPTERS){
+    state.scene='victory';
+    sfxVictory();
+    renderVictory(true);
+    document.getElementById('victory').classList.remove('hidden');
+    return;
+  }
+  state.scene='chapterCleared';
+  sfxVictory();
+  renderChapterCleared();
+  document.getElementById('chapterCleared').classList.remove('hidden');
 }
 
 function gainXP(amount){
@@ -2449,6 +3113,11 @@ function queueLevelUp(){
 function damagePlayer(dmg){
   const p = state.player;
   if(p.invT>0) return;
+  // Body costumes can grant a damage-reduction multiplier capped at 70% so the costume can't
+  // make the player invulnerable.
+  if(p.damageReduction > 0){
+    dmg = Math.max(1, Math.ceil(dmg * (1 - Math.min(0.70, p.damageReduction))));
+  }
   p.hp -= dmg;
   p.invT = 0.5;
   sfxHurt();
@@ -2559,10 +3228,35 @@ function update(dt){
     }
   }
 
-  // Stage logic
-  const pool = stageEnemyPool(state.stage);
-  const baseRate = spawnRateForStage(state.stage);
-  const timeFactor = 1 + state.stageTime/60;
+  // Wave logic — chapter time advances waves automatically; boss spawns at end of wave 3.
+  // Wave transitions show a toast banner and a soft camera shake so the player feels the escalation.
+  state.chapterTime = (state.chapterTime||0) + dt;
+  state.stageTime = state.chapterTime; // legacy alias for any consumer that still reads stageTime
+  if(!state.bossSpawned){
+    const wt = state.waveTimes;
+    let nextWave = 1;
+    if(state.chapterTime >= wt[1]) nextWave = 3;
+    else if(state.chapterTime >= wt[0]) nextWave = 2;
+    if(nextWave !== state.wave){
+      state.wave = nextWave;
+      state.toastBanner = {
+        text: `웨이브 ${nextWave} 시작!`,
+        sub: `적이 더 거세집니다`,
+        t: 2.4, maxT: 2.4
+      };
+      state.camera.shake = Math.max(state.camera.shake, 10);
+      sfxLevelUp();
+      updateHUD();
+    }
+  }
+  const pool = waveEnemyPool(state.wave);
+  const baseRate = spawnRateForWave(state.wave);
+  // Mid-wave intensity ramp: rate drifts up by 30% from wave start to wave end.
+  const wt = state.waveTimes;
+  const waveStart = state.wave === 1 ? 0 : (state.wave === 2 ? wt[0] : wt[1]);
+  const waveEnd   = state.wave === 1 ? wt[0] : (state.wave === 2 ? wt[1] : wt[2]);
+  const waveProg  = Math.max(0, Math.min(1, (state.chapterTime - waveStart) / Math.max(1, waveEnd - waveStart)));
+  const timeFactor = 1 + waveProg * 0.30;
   if(!state.bossSpawned){
     state.spawnTimer -= dt;
     if(state.spawnTimer<=0){
@@ -2570,7 +3264,8 @@ function update(dt){
       const kind = pool[Math.floor(Math.random()*pool.length)];
       spawnEnemy(kind);
     }
-    if(state.stageTime >= state.stageDuration){
+    // Boss spawns at the end of wave 3 (= waveTimes[2]).
+    if(state.chapterTime >= wt[2]){
       spawnBoss();
     }
   } else if(state.bossAlive){
@@ -2580,6 +3275,38 @@ function update(dt){
       state.spawnTimer = 1 / (baseRate*0.5);
       const kind = pool[Math.floor(Math.random()*pool.length)];
       if(Math.random()<0.5) spawnEnemy(kind);
+    }
+    // Hard cap: if total chapter time exceeds the cap during the boss fight, force-finish the boss
+    // so a stalemate can't drag the chapter past 15 min.
+    const cap = state.waveTimes[3];
+    if(state.chapterTime > cap){
+      // Find boss & nuke it — guarantees the player walks away with the chapter clear.
+      for(const e of state.enemies){
+        if(e.kind === 'boss' && !e.dead){
+          damageEnemy(e, e.hp + 1);
+          break;
+        }
+      }
+    }
+  }
+  // Costume regen: body grants HP/sec.
+  if(p.regenPerSec > 0){
+    p._regenAccum = (p._regenAccum||0) + p.regenPerSec * dt;
+    if(p._regenAccum >= 1){
+      const gain = Math.floor(p._regenAccum);
+      p._regenAccum -= gain;
+      p.hp = Math.min(p.maxHp, p.hp + gain);
+    }
+  }
+
+  // Intermittent pigeon cooing — random idle vocalization every ~7-14s. Skipped during boss fight
+  // and while the player is dodging (vx/vy moving fast) so it doesn't compete with combat audio.
+  state._cooTimer = (state._cooTimer == null ? 6 + Math.random()*4 : state._cooTimer) - dt;
+  if(state._cooTimer <= 0){
+    state._cooTimer = 7 + Math.random()*7;
+    const movingFast = Math.abs(p.vx) + Math.abs(p.vy) > 280;
+    if(!state.bossSpawned && !movingFast && state.scene === 'playing'){
+      sfxCoo();
     }
   }
 
@@ -2942,15 +3669,55 @@ function updateHUD(){
   document.getElementById('xpFill').style.width = (100*p.xp/p.xpToNext)+'%';
   document.getElementById('hpFill').style.width = (100*p.hp/p.maxHp)+'%';
   document.getElementById('hpTxt').textContent = Math.max(0,Math.ceil(p.hp))+' / '+p.maxHp;
-  document.getElementById('stageNum').textContent = state.stage;
+  document.getElementById('waveNum').textContent = state.wave || 1;
   document.getElementById('chapterNum').textContent = state.chapter;
   const lbl = document.getElementById('chapterLabel');
   lbl.textContent = chapterName(state.chapter);
   lbl.style.color = chapterColor(state.chapter);
   document.getElementById('scoreTxt').textContent = state.score;
   document.getElementById('killsTxt').textContent = state.kills;
-  const t = state.bossSpawned ? 'BOSS!' : Math.max(0, Math.ceil(state.stageDuration - state.stageTime));
+  const coinEl = document.getElementById('hudCoinTxt');
+  if(coinEl) coinEl.textContent = (progress.coins||0).toLocaleString();
+  // Timer shows seconds remaining until boss spawns (end of wave 3); during boss fight shows BOSS!.
+  let t;
+  if(state.bossSpawned){
+    t = 'BOSS!';
+  } else {
+    const wt = state.waveTimes || [160,320,480,600];
+    t = Math.max(0, Math.ceil(wt[2] - (state.chapterTime||0)));
+  }
   document.getElementById('timerTxt').textContent = t;
+}
+
+// ---------- DOM toast banner ----------
+// The toast lives in the HUD overlay (z-index 9) so it sits on top of the inventory pill bar
+// and item glow rings. Updated every frame via syncToast() instead of being canvas-drawn.
+let _lastToastSig = '';
+function syncToast(){
+  const tb = state.toastBanner;
+  const el = document.getElementById('toastBanner');
+  if(!el) return;
+  if(!tb){
+    if(_lastToastSig !== 'OFF'){
+      el.classList.remove('show');
+      el.classList.add('enter');
+      el.innerHTML = '';
+      _lastToastSig = 'OFF';
+    }
+    return;
+  }
+  const sig = `${tb.text}|${tb.sub||''}`;
+  if(sig !== _lastToastSig){
+    el.innerHTML = `${tb.text}${tb.sub ? `<span class="toast-sub">${tb.sub}</span>` : ''}`;
+    _lastToastSig = sig;
+    // Trigger CSS transition by removing .enter shortly after we set the message.
+    requestAnimationFrame(()=>{
+      el.classList.remove('enter');
+      el.classList.add('show');
+    });
+  }
+  // Fade out gracefully in last 0.3s of the toast lifetime.
+  el.style.opacity = tb.t < 0.3 ? String(Math.max(0, tb.t / 0.3)) : '1';
 }
 
 // Inventory HUD — shows acquired upgrade cards with their current level.
@@ -2974,9 +3741,15 @@ function updateInvBar(){
 
 // ---------- Render ----------
 // ---------- Background helpers ----------
-// Tier map: 6 tiers × 5 chapters = 30
-// 0: city (1-5), 1: night city (6-10), 2: cave (11-15), 3: ice (16-20), 4: space (21-25), 5: hell (26-30)
-function chapterTier(ch){ return Math.min(5, Math.floor((ch-1)/5)); }
+// Tier map: 6 tier visuals are reused across 50 chapters. Chapters 1-30 fill tiers 0-5;
+// chapters 31-50 cycle back through tiers 0-3 with new BGM/names so the second loop feels fresh.
+// 0: city (1-5, 31-35), 1: neon night (6-10, 36-40), 2: cave (11-15, 41-45), 3: ice (16-20, 46-50),
+// 4: space (21-25), 5: hell (26-30)
+// Tier mapping. With 50 chapters spanning 10 tiers (5 chapters each), but the existing visual
+// systems (background props, tier hues) only have 6 tier-art sets. For chapters 31-50, we cycle
+// the tier index back through the early biomes — each cycle shifts the chapter palette via
+// (state.chapter-1)%5 indexing within the tier so the look is similar but not identical.
+function chapterTier(ch){ return Math.min(5, Math.floor(((ch-1) % 30)/5)); }
 function themeId(){
   // Each chapter has a fixed biome — stages inside a chapter share the same background.
   // Sub-theme rotates with chapter so the 5 chapters in each tier still feel distinct.
@@ -3737,8 +4510,8 @@ function render(){
     ],
   ];
   const tier = chapterTier(state.chapter);
-  // Sky gradient is fixed per chapter — varies across the 5 chapters within a tier,
-  // and stays constant across the 8 stages of a single chapter.
+  // Sky gradient is fixed per chapter — varies across the 5 chapters within a tier
+  // and stays constant across all 3 waves + boss inside the chapter.
   const stageHue = TIER_HUES[tier][(state.chapter-1) % 5];
   g.addColorStop(0, stageHue[0]);
   g.addColorStop(.20, stageHue[1]);
@@ -3748,7 +4521,7 @@ function render(){
   ctx.fillStyle=g;
   ctx.fillRect(0,0,W,H);
 
-  if(state.scene==='title' || state.scene==='shop' || state.scene==='chapterSelect') return; // overlay handles it
+  if(state.scene==='title' || state.scene==='shop' || state.scene==='chapterSelect' || state.scene==='costume') return; // overlay handles it
 
   const themeIdx = themeId();
 
@@ -3943,8 +4716,9 @@ function render(){
     const fade = sinceSpawn < 4 ? 1 : Math.max(0, 1 - (sinceSpawn-4)/1.2);
     if(fade > 0.02){
       const pulse = 0.6 + 0.4*Math.sin(state.time*4);
-      const isChapterBoss = state.stage === TARGET_STAGES;
-      const text = isChapterBoss ? '★ 챕터 보스 등장! ★' : '⚠ 보스 등장! ⚠';
+      // Wave system: every boss is a chapter boss (one per chapter).
+      const isChapterBoss = true;
+      const text = '★ 챕터 보스 등장! ★';
       const fontSize = Math.max(14, Math.min(22, Math.round(W/24)));
       ctx.save();
       ctx.font = `900 ${fontSize}px sans-serif`;
@@ -3979,53 +4753,69 @@ function render(){
     }
   }
 
-  // Stage transition toast — slides in at the top, fades out near the end.
-  if(state.toastBanner){
-    const tb = state.toastBanner;
-    const lr = Math.max(0, Math.min(1, tb.t / tb.maxT));
-    const enter = 1 - Math.max(0, (tb.maxT - tb.t) / 0.25); // first 0.25s slide-in
-    const slide = Math.max(0, enter) * 60; // px offset above final position
-    const fade = lr < 0.3 ? lr/0.3 : 1;
-    ctx.save();
-    const fontSize = Math.max(16, Math.min(26, Math.round(W/20)));
-    ctx.font = `900 ${fontSize}px sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    const text = tb.text;
-    const sub = tb.sub || '';
-    const metrics = ctx.measureText(text);
-    const subFontSize = Math.max(12, Math.round(fontSize*0.55));
-    ctx.font = `700 ${subFontSize}px sans-serif`;
-    const subMetrics = sub ? ctx.measureText(sub) : { width: 0 };
-    const padX = 24, padY = 12;
-    const pillW = Math.min(W - 24, Math.max(metrics.width, subMetrics.width) + padX*2);
-    const pillH = fontSize + (sub ? subFontSize + 6 : 0) + padY*2;
-    const cx = W/2;
-    const cy = Math.round(H * 0.22) - slide;
-    const x = cx - pillW/2, y = cy - pillH/2;
-    const radius = 14;
-    ctx.globalAlpha = fade * 0.92;
-    ctx.fillStyle = 'rgba(20,8,40,0.92)';
-    ctx.beginPath();
-    ctx.moveTo(x+radius, y);
-    ctx.lineTo(x+pillW-radius, y); ctx.arcTo(x+pillW, y, x+pillW, y+radius, radius);
-    ctx.lineTo(x+pillW, y+pillH-radius); ctx.arcTo(x+pillW, y+pillH, x+pillW-radius, y+pillH, radius);
-    ctx.lineTo(x+radius, y+pillH); ctx.arcTo(x, y+pillH, x, y+pillH-radius, radius);
-    ctx.lineTo(x, y+radius); ctx.arcTo(x, y, x+radius, y, radius);
-    ctx.closePath();
-    ctx.fill();
-    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,224,102,0.95)';
-    ctx.stroke();
-    ctx.globalAlpha = fade;
-    ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 4;
-    ctx.fillStyle = '#FFE066';
-    ctx.font = `900 ${fontSize}px sans-serif`;
-    ctx.fillText(text, cx, sub ? cy - subFontSize/2 - 2 : cy);
-    if(sub){
-      ctx.fillStyle = '#A5D6A7';
-      ctx.font = `700 ${subFontSize}px sans-serif`;
-      ctx.fillText(sub, cx, cy + fontSize/2 - 2);
+  // Stage transition toast — DOM-rendered (#toastBanner) so it always layers above the inventory
+  // pill bar and item glow. Sync state → DOM here once per frame.
+  syncToast();
+
+  // Boss direction indicator — when the chapter boss is alive but offscreen, draw an arrow
+  // pinned to the screen edge pointing toward it, with a distance pip so the player knows where to go.
+  if(state.bossAlive){
+    let camX = state.camera.x - W/2;
+    let camY = state.camera.y - H/2;
+    for(const e of state.enemies){
+      if(e.kind !== 'boss' || e.dead) continue;
+      const sx = e.x - camX, sy = e.y - camY;
+      const margin = 56;
+      const onscreen = sx > margin && sx < W - margin && sy > margin && sy < H - margin;
+      if(onscreen) break; // boss visible — no arrow needed
+      // Direction from screen center toward boss in world space.
+      const cx = W/2, cy = H/2;
+      const dx = e.x - state.camera.x;
+      const dy = e.y - state.camera.y;
+      const ang = Math.atan2(dy, dx);
+      // Clamp arrow to a rounded-rect inside-edge so it stays inset from the HUD chrome.
+      const padTop = 96, padBottom = 130, padX = 40;
+      const halfW = (W - padX*2) / 2;
+      const halfH = (H - padTop - padBottom) / 2;
+      const offY = (padTop - padBottom) / 2; // shift center down a bit for HUD
+      // Find intersection of the ray with the inset rectangle.
+      const dir = { x: Math.cos(ang), y: Math.sin(ang) };
+      const tX = halfW / Math.max(0.0001, Math.abs(dir.x));
+      const tY = halfH / Math.max(0.0001, Math.abs(dir.y));
+      const tt = Math.min(tX, tY);
+      const ax = cx + dir.x * tt;
+      const ay = cy + offY + dir.y * tt;
+      const dist = Math.hypot(dx, dy);
+      ctx.save();
+      // Pulsing outline ring + arrow pointing outward
+      const pulse = 0.6 + 0.4*Math.sin(state.time*5);
+      ctx.translate(ax, ay);
+      ctx.rotate(ang);
+      // Glow halo
+      ctx.fillStyle = `rgba(255,23,68,${0.35*pulse})`;
+      ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI*2); ctx.fill();
+      // Arrow body
+      ctx.fillStyle = '#FF1744';
+      ctx.strokeStyle = '#FFE066';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(22, 0); ctx.lineTo(-6, -14); ctx.lineTo(-6, -6);
+      ctx.lineTo(-22, -6); ctx.lineTo(-22, 6); ctx.lineTo(-6, 6);
+      ctx.lineTo(-6, 14); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+      // Distance text near arrow (un-rotated)
+      ctx.save();
+      ctx.font = '900 11px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const lbl = `보스 ${Math.round(dist/40)}m`;
+      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)';
+      ctx.strokeText(lbl, ax, ay + 32);
+      ctx.fillStyle = '#FFE066';
+      ctx.fillText(lbl, ax, ay + 32);
+      ctx.restore();
+      break;
     }
-    ctx.restore();
   }
 }
 
@@ -4054,6 +4844,20 @@ requestAnimationFrame(loop);
 // ---------- UI wiring ----------
 document.getElementById('startBtn').addEventListener('click', openChapterSelect);
 document.getElementById('titleShopPill').addEventListener('click', openShop);
+document.getElementById('titleCostumePill').addEventListener('click', openCostume);
+document.getElementById('costumeBackBtn').addEventListener('click', ()=>{
+  state.scene = 'title';
+  document.getElementById('costumeScreen').classList.add('hidden');
+  document.getElementById('title').classList.remove('hidden');
+  updateTitleCoinDisplay();
+});
+document.getElementById('gachaSingleBtn').addEventListener('click', ()=> doGachaPull(1));
+document.getElementById('gachaTenBtn').addEventListener('click', ()=> doGachaPull(10));
+document.getElementById('gachaCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('gachaModal').classList.add('hidden');
+  renderCostumeScreen();
+  updateTitleCoinDisplay();
+});
 document.getElementById('shopBackBtn').addEventListener('click', ()=>{
   state.scene = 'title';
   document.getElementById('shopScreen').classList.add('hidden');
@@ -4063,9 +4867,11 @@ document.getElementById('shopBackBtn').addEventListener('click', ()=>{
 document.getElementById('howBtn').addEventListener('click', ()=>document.getElementById('howModal').classList.remove('hidden'));
 document.getElementById('howCloseBtn').addEventListener('click', ()=>document.getElementById('howModal').classList.add('hidden'));
 document.getElementById('resetProgBtn').addEventListener('click', ()=>{
-  if(confirm('진행 기록을 모두 초기화할까요? 코인과 상점 업그레이드도 함께 초기화됩니다. 이 동작은 되돌릴 수 없습니다.')){
+  if(confirm('진행 기록을 모두 초기화할까요? 코인·상점 업그레이드·코스튬까지 함께 초기화됩니다. 이 동작은 되돌릴 수 없습니다.')){
     progress.clearedChapter = 0; progress.highChapter = 0; progress.highStage = 0; progress.highScore = 0;
     progress.coins = 0; progress.shop = {};
+    progress.costumes = []; progress.equipped = { head:null, body:null, weapon:null };
+    progress.chaptersSinceCostume = 0;
     saveProgress();
     updateTitleCoinDisplay();
     alert('기록이 초기화되었습니다.');
@@ -4096,7 +4902,8 @@ document.getElementById('ccNextBtn').addEventListener('click', ()=>{
   state.chapter = nextChapter;
   resetPlayer();
   applyChapterStartBuff();
-  state.stage = 1;
+  state.coinsThisRun = 0;
+  state.earnedCostumeThisChapter = null;
   state.enemies = []; state.bullets = []; state.gems = []; state.items = [];
   state.particles = []; state.damageNums = []; state.orbits = []; state.enemyBullets = [];
   state.pickupTexts = [];
@@ -4106,9 +4913,9 @@ document.getElementById('ccNextBtn').addEventListener('click', ()=>{
   killsSinceDrop = 0;
   _invBarCache = null;
   updateInvBar();
-  initStage();
+  initChapter();
   state.scene = 'playing';
-  updateHUD(); // refresh chapter/stage HUD before the level-up modal pauses updates
+  updateHUD(); // refresh chapter/wave HUD before the level-up modal pauses updates
   bgmStart();
   showLevelUp(); // first card pick of the new chapter
 });
@@ -4145,10 +4952,233 @@ function openChapterSelect(){
   if(!bgmTimer) bgmStart();
 }
 
-// ---------- Shop screen ----------
+// ---------- Shop / costume screens ----------
 function updateTitleCoinDisplay(){
   const el = document.getElementById('titleCoinTxt');
   if(el) el.textContent = (progress.coins||0).toLocaleString();
+  const c2 = document.getElementById('titleCostumeCount');
+  if(c2) c2.textContent = (progress.costumes||[]).length;
+}
+
+function openCostume(){
+  initAudio();
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  state.scene = 'costume';
+  document.getElementById('title').classList.add('hidden');
+  renderCostumeScreen();
+  document.getElementById('costumeScreen').classList.remove('hidden');
+  if(!bgmTimer) bgmStart();
+}
+
+function costumeStatLines(eq){
+  const def = COSTUME_DEFS_BY_ID[eq.defId];
+  const m = COSTUME_GRADES[eq.grade].mult;
+  if(!def) return '';
+  if(def.slot === 'head'){
+    return `HP +${Math.round(25*m)}% · 자석 +${Math.round(20*m)}% · XP +${Math.round(12*m)}%`;
+  }
+  if(def.slot === 'body'){
+    return `HP +${Math.round(35*m)} · 피해감소 +${Math.round(12*m)}% · 회복 ${(0.5*m).toFixed(1)}/s`;
+  }
+  // weapon
+  const proj = eq.grade === 'S' ? ' · 발사 +1' : '';
+  return `공격 +${Math.round(30*m)}% · 연사 +${Math.round(12*m)}% · 탄속 +${Math.round(18*m)}%${proj}`;
+}
+
+function renderCostumeScreen(){
+  document.getElementById('costumeCoinTxt').textContent = (progress.coins||0).toLocaleString();
+  // Gacha button affordability tinting.
+  const c1 = document.getElementById('gachaSingleBtn');
+  const c2 = document.getElementById('gachaTenBtn');
+  c1.classList.toggle('poor', (progress.coins||0) < GACHA_COST_SINGLE);
+  c2.classList.toggle('poor', (progress.coins||0) < GACHA_COST_TEN);
+
+  // Equip row — three slots.
+  const equipRow = document.getElementById('equipRow');
+  equipRow.innerHTML = '';
+  const slotLabels = { head:'머리', body:'몸통', weapon:'무기' };
+  for(const slot of ['head','body','weapon']){
+    const uid = progress.equipped[slot];
+    const eq = uid ? progress.costumes.find(c => c.uid === uid) : null;
+    const slotEl = document.createElement('div');
+    slotEl.className = 'equip-slot' + (eq ? ' has' : '');
+    if(eq){
+      const def = COSTUME_DEFS_BY_ID[eq.defId];
+      const g = COSTUME_GRADES[eq.grade];
+      slotEl.innerHTML = `
+        <div class="slot-name">${slotLabels[slot]}</div>
+        <div class="slot-icon">${def.icon}</div>
+        <div style="font-size:11px;color:#FFE066;font-weight:900;">${def.name}</div>
+        <div class="slot-grade ${g.borderClass}">${g.label}</div>
+      `;
+      slotEl.title = '클릭하여 해제';
+      slotEl.addEventListener('click', ()=>{
+        progress.equipped[slot] = null;
+        saveProgress();
+        renderCostumeScreen();
+      });
+    } else {
+      slotEl.innerHTML = `
+        <div class="slot-name">${slotLabels[slot]}</div>
+        <div class="slot-icon" style="opacity:.4;">＋</div>
+        <div class="slot-empty">미착용</div>
+      `;
+    }
+    equipRow.appendChild(slotEl);
+  }
+  // Inventory grid.
+  const grid = document.getElementById('costumeGrid');
+  grid.innerHTML = '';
+  const list = (progress.costumes || []).slice();
+  // Sort: equipped first, then S→A→B→C, then by defId.
+  const order = { S:4, A:3, B:2, C:1 };
+  list.sort((a, b) => {
+    const aEq = Object.values(progress.equipped).includes(a.uid) ? 1 : 0;
+    const bEq = Object.values(progress.equipped).includes(b.uid) ? 1 : 0;
+    if(aEq !== bEq) return bEq - aEq;
+    if(order[a.grade] !== order[b.grade]) return order[b.grade] - order[a.grade];
+    return a.defId.localeCompare(b.defId);
+  });
+  document.getElementById('costumeCount').textContent = list.length;
+  if(list.length === 0){
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#868E96;padding:18px;font-size:13px;">아직 코스튬이 없어요. 가챠로 뽑거나 챕터를 클리어하세요!</div>`;
+    renderAlbum();
+    return;
+  }
+  for(const eq of list){
+    const def = COSTUME_DEFS_BY_ID[eq.defId];
+    const g = COSTUME_GRADES[eq.grade];
+    const isEquipped = progress.equipped[def.slot] === eq.uid;
+    const card = document.createElement('button');
+    card.className = 'cos-card' + (isEquipped ? ' equipped' : '');
+    card.style.borderColor = g.color;
+    card.innerHTML = `
+      <div class="cos-grade ${g.borderClass}">${g.label}</div>
+      <div class="cos-icon">${def.icon}</div>
+      <div class="cos-name">${def.name}</div>
+      <div class="cos-slot">${def.slot === 'head' ? '머리' : def.slot === 'body' ? '몸통' : '무기'}</div>
+      <div class="cos-stats">${costumeStatLines(eq)}</div>
+    `;
+    card.addEventListener('click', ()=>{
+      if(isEquipped){
+        progress.equipped[def.slot] = null;
+      } else {
+        progress.equipped[def.slot] = eq.uid;
+      }
+      saveProgress();
+      renderCostumeScreen();
+    });
+    grid.appendChild(card);
+  }
+  renderAlbum();
+}
+
+// Build a per-def map of which grades the player has collected. Used for the album view
+// so players can see at-a-glance what they're missing — encourages chasing S/A.
+function buildCollectionMap(){
+  const map = {};
+  for(const def of COSTUME_DEFS) map[def.id] = { S:false, A:false, B:false, C:false };
+  for(const eq of (progress.costumes || [])){
+    if(map[eq.defId]) map[eq.defId][eq.grade] = true;
+  }
+  return map;
+}
+
+function renderAlbum(){
+  const albumGrid = document.getElementById('albumGrid');
+  if(!albumGrid) return;
+  const collected = buildCollectionMap();
+  // Progress: total grades collected across all defs (each def has 4 grade slots).
+  const totalSlots = COSTUME_DEFS.length * 4;
+  let filled = 0;
+  for(const id in collected){
+    for(const k of ['S','A','B','C']) if(collected[id][k]) filled++;
+  }
+  const progEl = document.getElementById('albumProgress');
+  if(progEl) progEl.textContent = `${filled} / ${totalSlots} 수집 (${Math.round(100*filled/totalSlots)}%)`;
+  // Group cards by slot for readability
+  albumGrid.innerHTML = '';
+  const slotLabels = { head:'머리', body:'몸통', weapon:'무기' };
+  for(const slot of ['head','body','weapon']){
+    const header = document.createElement('div');
+    header.style.cssText = 'grid-column:1/-1;color:#E599F7;font-weight:900;font-size:13px;margin-top:6px;padding-left:4px;letter-spacing:.5px;';
+    header.textContent = `— ${slotLabels[slot]} —`;
+    albumGrid.appendChild(header);
+    for(const def of COSTUME_DEFS_BY_SLOT[slot]){
+      const grades = collected[def.id];
+      const allFour = grades.S && grades.A && grades.B && grades.C;
+      const anyOwned = grades.S || grades.A || grades.B || grades.C;
+      const card = document.createElement('div');
+      card.className = 'album-card' + (allFour ? ' complete' : '');
+      card.innerHTML = `
+        <div class="a-icon ${anyOwned ? '' : 'locked'}">${anyOwned ? def.icon : '❓'}</div>
+        <div class="a-name">${anyOwned ? def.name : '???'}</div>
+        <div class="a-slot">${slotLabels[slot]}</div>
+        <div class="a-grades">
+          ${['S','A','B','C'].map(k => `<span class="album-grade-pip ${grades[k] ? 'have ' + k : ''}">${k}</span>`).join('')}
+        </div>
+      `;
+      albumGrid.appendChild(card);
+    }
+  }
+}
+
+function renderGachaResult(items){
+  const el = document.getElementById('gachaReveal');
+  el.innerHTML = '';
+  if(items.length === 1){
+    const eq = items[0];
+    const def = COSTUME_DEFS_BY_ID[eq.defId];
+    const g = COSTUME_GRADES[eq.grade];
+    el.innerHTML = `
+      <div class="pull-title">${eq.grade === 'S' ? '✨ S 등급! ✨' : eq.grade === 'A' ? '⭐ A 등급!' : eq.grade === 'B' ? '🔵 B 등급' : '⚪ C 등급'}</div>
+      <div class="pull-card" style="border-color:${g.color};box-shadow:0 0 30px ${g.color}aa;">
+        <div class="pc-grade ${g.borderClass}" style="background:${g.color};border-color:#fff;">${g.label}</div>
+        <div class="pc-icon">${def.icon}</div>
+        <div class="pc-name">${def.name}</div>
+        <div class="pc-slot">${def.slot === 'head' ? '머리' : def.slot === 'body' ? '몸통' : '무기'}</div>
+      </div>
+      <div class="pull-stats">${costumeStatLines(eq)}</div>
+    `;
+  } else {
+    // 10-pull: show grades-only summary.
+    const counts = { S:0, A:0, B:0, C:0 };
+    for(const eq of items) counts[eq.grade]++;
+    const summary = ['S','A','B','C']
+      .filter(k => counts[k] > 0)
+      .map(k => `<span class="cos-grade ${COSTUME_GRADES[k].borderClass}" style="background:${COSTUME_GRADES[k].color};color:#1A0033;padding:4px 10px;border-radius:999px;font-weight:900;margin:2px;">${k} × ${counts[k]}</span>`)
+      .join(' ');
+    el.innerHTML = `
+      <div class="pull-title">🎰 10연 결과</div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px 0;">${summary}</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:100%;max-width:300px;">
+        ${items.map(eq => {
+          const def = COSTUME_DEFS_BY_ID[eq.defId];
+          const g = COSTUME_GRADES[eq.grade];
+          return `<div style="background:${g.color};color:#1A0033;border:2px solid #fff;border-radius:8px;padding:6px 2px;text-align:center;font-size:11px;font-weight:900;">
+            <div style="font-size:18px;">${def.icon}</div>
+            <div>${g.label}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+}
+
+function doGachaPull(n){
+  const cost = n === 10 ? GACHA_COST_TEN : GACHA_COST_SINGLE;
+  if((progress.coins||0) < cost){
+    sfxHurt();
+    beep(220, .08, 'square', .14, -120);
+    return;
+  }
+  progress.coins -= cost;
+  saveProgress();
+  const items = n === 10 ? pullGachaTen() : [pullGachaSingle()];
+  sfxLevelUp();
+  renderGachaResult(items);
+  document.getElementById('gachaModal').classList.remove('hidden');
+  updateTitleCoinDisplay();
 }
 function openShop(){
   initAudio();
@@ -4219,9 +5249,8 @@ function renderShop(){
 
       const desc = document.createElement('div');
       desc.className = 'desc-tip';
-      if(!unlocked && def.req){
-        const reqDef = SHOP_DEFS_BY_ID[def.req];
-        desc.textContent = `${reqDef ? reqDef.name : def.req} Lv ${def.reqLvl||1} 필요`;
+      if(!unlocked){
+        desc.textContent = shopUnlockReason(def) || '잠김';
       } else {
         desc.textContent = def.desc;
       }
@@ -4282,11 +5311,13 @@ function renderChapterGrid(){
       card.style.borderColor = '#FFF9DB';
       card.style.color = '#120300';
     }
-    const hp = Math.pow(1.42, i-1);
-    const dmg = 1 + (i-1)*0.17;
+    // Compute scaling using the actual chapterMult formula (preview only — no state mutation).
+    const oldCh = state.chapter; state.chapter = i;
+    const chm = chapterMult();
+    state.chapter = oldCh;
     card.innerHTML = locked
       ? `<div class="ch-lock">🔒</div><div class="ch-num">Ch. ${i}</div><div class="ch-name" style="font-size:12px;opacity:.7;">미공개</div>`
-      : `<div class="ch-num">Ch. ${i}</div><div class="ch-name">${chapterName(i)}</div><div class="ch-mult">${i===1?'처음 시작':`적 ×${hp.toFixed(1)} HP · ×${dmg.toFixed(2)} DMG`}</div>`;
+      : `<div class="ch-num">Ch. ${i}</div><div class="ch-name">${chapterName(i)}</div><div class="ch-mult">${i===1?'처음 시작':`적 ×${chm.hp.toFixed(1)} HP · ×${chm.dmg.toFixed(2)} DMG`}</div>`;
     if(!locked){
       card.addEventListener('click', ()=>{
         document.getElementById('chapterSelect').classList.add('hidden');
@@ -4313,6 +5344,7 @@ function backToTitle(){
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('chapterSelect').classList.add('hidden');
   document.getElementById('shopScreen').classList.add('hidden');
+  document.getElementById('costumeScreen').classList.add('hidden');
   document.getElementById('title').classList.remove('hidden');
   updateTitleCoinDisplay();
   if(audioCtx) bgmStart();
@@ -4351,34 +5383,54 @@ function renderChapterCleared(){
   } else {
     nextLabelEl.parentElement.style.display = '';
     nextBtn.textContent = '⚔ 다음 챕터 도전 ▶';
-    const chm = {
-      hp:    Math.pow(1.42, nextCh-1),
-      dmg:   1 + (nextCh-1)*0.17,
-      speed: 1 + Math.min(0.9,(nextCh-1)*0.055),
-    };
+    // Show next-chapter scaling pulled from the actual chapterMult formula instead of a stale formula.
+    const oldCh = state.chapter; state.chapter = nextCh;
+    const chm = chapterMult();
+    state.chapter = oldCh;
     nextLabelEl.innerHTML = `<span style="color:${chapterColor(nextCh)};font-weight:900;">챕터 ${nextCh} · ${nextName}</span> — 체력 ×${chm.hp.toFixed(1)}, 공격력 ×${chm.dmg.toFixed(2)}, 속도 ×${chm.speed.toFixed(2)}`;
+  }
+  // Reward block: coins earned this run + costume drop (if any).
+  const earnedCoins = state.coinsThisRun || 0;
+  const dropped = state.earnedCostumeThisChapter;
+  let costumeLine = '';
+  if(dropped){
+    const def = COSTUME_DEFS_BY_ID[dropped.defId];
+    const g = COSTUME_GRADES[dropped.grade];
+    costumeLine = `
+      <div class="statline" style="border-bottom:none;color:${g.color};">
+        <span>🎁 코스튬 획득</span>
+        <b>${def.icon} ${def.name} <span style="background:${g.color};color:#1A0033;padding:1px 8px;border-radius:999px;font-size:11px;margin-left:4px;">${g.label}</span></b>
+      </div>`;
+  } else {
+    const since = (progress.chaptersSinceCostume || 0);
+    const tilPity = Math.max(0, 10 - since);
+    costumeLine = `<div class="statline" style="opacity:.7;font-size:12px;"><span>🎁 코스튬</span><b>${tilPity}판 후 보장</b></div>`;
   }
   document.getElementById('ccStats').innerHTML = `
     <div class="statline"><span>누적 처치</span><b>${state.kills}</b></div>
     <div class="statline"><span>점수</span><b>${state.score}</b></div>
     <div class="statline"><span>레벨</span><b>${state.player.level}</b></div>
-    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time)}초</b></div>`;
+    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time)}초</b></div>
+    <div class="statline" style="color:#FFD43B;"><span>🪙 이번 챕터 획득 코인</span><b>${earnedCoins.toLocaleString()}</b></div>
+    <div class="statline"><span>🪙 보유 코인</span><b>${(progress.coins||0).toLocaleString()}</b></div>
+    ${costumeLine}`;
 }
 function renderGameOver(){
   document.getElementById('goStats').innerHTML = `
     <div class="statline"><span>도달 챕터</span><b>${state.chapter} · ${chapterName(state.chapter)}</b></div>
-    <div class="statline"><span>도달 스테이지</span><b>${state.stage} / ${TARGET_STAGES}</b></div>
+    <div class="statline"><span>도달 웨이브</span><b>${state.wave || 1} / ${WAVES_PER_CHAPTER}${state.bossSpawned?' (보스)':''}</b></div>
     <div class="statline"><span>최종 레벨</span><b>${state.player.level}</b></div>
     <div class="statline"><span>처치 수</span><b>${state.kills}</b></div>
     <div class="statline"><span>점수</span><b>${state.score}</b></div>
-    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time)}초</b></div>`;
+    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time)}초</b></div>
+    <div class="statline" style="color:#FFD43B;"><span>🪙 이번 런 획득 코인</span><b>${(state.coinsThisRun||0).toLocaleString()}</b></div>`;
 }
 function renderVictory(finalEnding){
   const h2 = document.querySelector('#victory .card h2');
   h2.textContent = finalEnding ? '🌟 전 챕터 정복!' : '🏆 한계돌파 성공!';
   const sub = document.querySelector('#victory .card .sub');
   if(sub) sub.textContent = finalEnding
-    ? `30개 챕터(${chapterName(MAX_CHAPTERS)})까지 모두 정복한 전설의 비둘기가 되었습니다.`
+    ? `${MAX_CHAPTERS}개 챕터(${chapterName(MAX_CHAPTERS)})까지 모두 정복한 전설의 비둘기가 되었습니다.`
     : '여기까지의 전설이 기록되었습니다.';
   document.getElementById('vStats').innerHTML = `
     <div class="statline"><span>정복 챕터</span><b>${state.chapter} · ${chapterName(state.chapter)}</b></div>
@@ -4386,6 +5438,7 @@ function renderVictory(finalEnding){
     <div class="statline"><span>처치 수</span><b>${state.kills}</b></div>
     <div class="statline"><span>점수</span><b>${state.score}</b></div>
     <div class="statline"><span>생존 시간</span><b>${Math.round(state.time)}초</b></div>
+    <div class="statline" style="color:#FFD43B;"><span>🪙 보유 코인</span><b>${(progress.coins||0).toLocaleString()}</b></div>
     <div class="statline"><span>최고 기록</span><b>챕터 ${progress.highChapter||state.chapter} · ${progress.highScore||state.score}점</b></div>`;
 }
 
