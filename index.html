@@ -989,6 +989,11 @@ function roundRect(ctx,x,y,w,h,r){
 // centered at (0,0); total footprint about 110x110
 // Animation params: idle breathing, walk bob, attack wind-up, blink, head bob
 function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, player=null){
+  // Capture the screen-space transform BEFORE applying drawPigeon's own flip/scale, so we can
+  // pop back to it inside the function whenever we need to draw a costume overlay (which expects
+  // un-flipped screen coords). This is what enables proper layering — body costume can sit
+  // between the pigeon body and the head/face, and the hat lands on top of the face.
+  const _baseTransform = ctx.getTransform();
   ctx.save();
 
   // Anim time — idle pulse
@@ -1011,6 +1016,15 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
 
   ctx.translate(x, y - bodyBob);
   ctx.scale(scale*facing, scale);
+
+  // Helper: draw a costume overlay in screen space (un-flipped/un-scaled), then restore the
+  // pigeon's flipped scale so subsequent body parts continue rendering correctly.
+  const drawCostumeAtBase = (fn) => {
+    ctx.save();
+    ctx.setTransform(_baseTransform);
+    fn();
+    ctx.restore();
+  };
 
   // Shadow (stable on ground)
   ctx.fillStyle='rgba(0,0,0,.55)';
@@ -1041,6 +1055,13 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
   ctx.moveTo(-14, 6); ctx.quadraticCurveTo(0, 10+breath, 14, 6);
   ctx.moveTo(-12, 14); ctx.quadraticCurveTo(0, 18+breath, 12, 14);
   ctx.stroke();
+
+  // ── BODY COSTUME LAYER ── drawn between body and arms/head, so the face naturally renders
+  // above the clothing. (Earlier we tried to position the costume around the face — proper
+  // layering is the right answer.)
+  if(player && player.costumes && player.costumes.body){
+    drawCostumeAtBase(() => drawCostumeBodyOverlay(ctx, x, y - bodyBob, scale, player.costumes.body));
+  }
 
   // Arm positions — flex extra when attacking
   const armFlex = attackPulse * 3;
@@ -1121,6 +1142,12 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
   ctx.beginPath(); ctx.moveTo(5, -37); ctx.lineTo(3 + fp, -44); ctx.stroke();
   ctx.restore();
 
+  // ── HEAD COSTUME LAYER ── drawn AFTER the head/face section so the hat sits cleanly on top
+  // of eyes/beak. Body costume already rendered earlier, beneath the head.
+  if(player && player.costumes && player.costumes.head){
+    drawCostumeAtBase(() => drawCostumeHeadOverlay(ctx, x, y - bodyBob, scale, player.costumes.head));
+  }
+
   // Attack aura flash
   if(attackPulse > 0.7){
     ctx.save();
@@ -1133,14 +1160,10 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
 
   ctx.restore();
 
-  // ── Costume overlays ──
-  // Drawn outside the flipped scale so emoji-based icons read correctly regardless of facing.
-  // Covers head/body/weapon slots; high grades (S/A) get a glow halo for visual flex.
-  if(player && player.costumes){
-    const cos = player.costumes;
-    if(cos.head)   drawCostumeHeadOverlay(ctx, x, y - bodyBob, scale, cos.head);
-    if(cos.body)   drawCostumeBodyOverlay(ctx, x, y - bodyBob, scale, cos.body);
-    if(cos.weapon) drawCostumeWeaponOverlay(ctx, x, y - bodyBob, scale, facing, cos.weapon, attackPulse);
+  // Weapon costume — drawn after restore (in screen space) so it sits ON TOP of the fists.
+  // Body and head costumes were already injected at the proper z-depth inside drawPigeon.
+  if(player && player.costumes && player.costumes.weapon){
+    drawCostumeWeaponOverlay(ctx, x, y - bodyBob, scale, facing, player.costumes.weapon, attackPulse);
   }
 }
 
@@ -1322,13 +1345,13 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
     return;
   }
 
-  // ── Other body costumes — clip to the body silhouette so nothing leaks past the edges.
-  // Clip top is offset down so the costume doesn't intrude on the head/neck/beak above the body.
-  // Body ellipse in pigeon-local is centered at (0,10) with rx=32, ry=28; we leave a small buffer
-  // at the top so the beak (drawn at pigeon-local y=-12 to -20) is never overlapped by clothing.
+  // ── Other body costumes — clip to the actual body silhouette. Now that the head/face renders
+  // ABOVE this layer (drawPigeon injects body costume between body and arms/head), we can use the
+  // full body ellipse without worrying about beak coverage — the face naturally occludes any
+  // bleed-up.
   ctx.save();
   ctx.beginPath();
-  ctx.ellipse(0, 4, 30, 22, 0, 0, Math.PI*2);
+  ctx.ellipse(0, 0, 30, 26, 0, 0, Math.PI*2);
   ctx.clip();
 
   if(def.id === 'b_jersey'){
