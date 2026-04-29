@@ -191,8 +191,12 @@
   .tree .node .cost.maxed{background:linear-gradient(180deg,#FAB005,#E67700);border-color:#FFF9DB;color:#fff;cursor:default;}
   .tree .node .cost:active{transform:translateY(2px);box-shadow:0 0 0 rgba(0,0,0,.4);}
 
-  /* Modals — respect notches/safe-area, scrollable when content > viewport */
-  .modal{position:absolute;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-right, 0px) + 14px) calc(env(safe-area-inset-bottom, 0px) + 16px) calc(env(safe-area-inset-left, 0px) + 14px);z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  /* Modals — respect notches/safe-area, scrollable when content > viewport.
+     position:fixed + z-index:1000 sits above the fixed back button (z=5) in the same viewport
+     stacking context, so the backdrop fully covers it both visually and for click-handling.
+     Earlier this used position:absolute, but Chrome painted the position:fixed back button
+     above the absolute backdrop even when z-indices said otherwise. */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-right, 0px) + 14px) calc(env(safe-area-inset-bottom, 0px) + 16px) calc(env(safe-area-inset-left, 0px) + 14px);z-index:1000;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .card{background:linear-gradient(180deg,#2A1509,#120300);border:3px solid #FFD43B;border-radius:14px;padding:20px;max-width:520px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.6);max-height:calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px);overflow-y:auto;}
   .card h2{margin:0 0 6px;color:#FFE066;font-size:24px;text-align:center;text-shadow:0 2px 0 #C92A2A;}
   .card .sub{text-align:center;color:#FFF9DB;opacity:.9;margin-bottom:16px;font-size:13px;}
@@ -392,14 +396,20 @@
 
   /* Back button — pinned to the viewport's top-left so it stays in place regardless of how the
      overlay content is centered. Without this, PC centering pushed the cs-header (and the back
-     button inside it) to the middle of the screen. */
+     button inside it) to the middle of the screen. z-index 5 keeps it above scrollable overlay
+     content but well below modals (z=1000) so popup backdrops fully cover it. */
   #shopScreen .back-btn,
   #chapterSelect .back-btn{
     position: fixed;
     top: calc(env(safe-area-inset-top, 0px) + 14px);
     left: calc(env(safe-area-inset-left, 0px) + 14px);
-    z-index: 100;
+    z-index: 5;
   }
+  /* When any modal is open we hard-hide the back button — the modal backdrop's z-index already
+     wins on click handling, but Chrome paints the position:fixed back button on top in some
+     viewports. Hiding it removes the visual confusion entirely. */
+  body.modal-open #shopScreen .back-btn,
+  body.modal-open #chapterSelect .back-btn{ visibility: hidden; }
   /* The header still centers its h2 since the back button is no longer in the flex flow. */
   #shopScreen .cs-header,
   #chapterSelect .cs-header{ justify-content: center; }
@@ -607,6 +617,44 @@
       <div class="sub" id="epSlotLabel">머리 슬롯에 장착할 코스튬을 골라주세요</div>
       <div id="epOptions" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:10px 0;max-height:60vh;overflow-y:auto;"></div>
       <button class="btn alt small" id="epCloseBtn" style="width:100%;">닫기</button>
+    </div>
+  </div>
+
+  <!-- Costume preview — shown when the player taps any grade chip (S/A/B/C) on a costume card.
+       Owned grades show an equip/unequip button; unowned grades just show the silhouette + a
+       gacha hint so players know what they're chasing without needing to actually own it. -->
+  <div id="costumePreviewModal" class="modal hidden">
+    <div class="card" style="max-width:380px;text-align:center;">
+      <div id="cpmGradeChip" style="display:inline-block;padding:4px 14px;border-radius:999px;font-weight:900;font-size:14px;margin-bottom:8px;"></div>
+      <h2 id="cpmTitle" style="margin:0 0 4px;">코스튬</h2>
+      <div class="sub" id="cpmSlotLabel">머리 슬롯</div>
+      <div id="cpmPreviewWrap" style="display:flex;justify-content:center;align-items:center;background:linear-gradient(180deg,rgba(190,75,219,.18),rgba(20,8,40,.6));border:2px solid rgba(255,255,255,.18);border-radius:16px;padding:18px;margin:8px auto 12px;width:180px;height:180px;">
+        <canvas id="cpmCanvas"></canvas>
+      </div>
+      <div id="cpmStats" style="background:rgba(255,224,102,.08);border:1px solid rgba(255,224,102,.3);border-radius:10px;padding:10px;font-size:13px;color:#FFF9DB;margin-bottom:10px;font-weight:700;"></div>
+      <div id="cpmOwnership" style="font-size:12px;color:#868E96;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn alt small" id="cpmCloseBtn" style="flex:1;">닫기</button>
+        <button class="btn small" id="cpmActionBtn" style="flex:2;display:none;">장착</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skin preview — shown when the player taps a skin card. Lets the player see how the title
+       screen will look BEFORE committing to buy/equip. -->
+  <div id="skinPreviewModal" class="modal hidden">
+    <div class="card" style="max-width:440px;text-align:center;">
+      <h2 id="spmTitle" style="margin:0 0 4px;">배경 스킨</h2>
+      <div class="sub">적용 시 타이틀 화면 미리보기</div>
+      <div id="spmPreview" style="position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;border:2px solid rgba(255,255,255,.2);overflow:hidden;margin:8px 0 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);">
+        <div style="font-size:14px;font-weight:900;letter-spacing:1px;opacity:.95;">새우깡으로</div>
+        <div style="font-size:28px;font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A,0 0 22px rgba(255,224,102,.5);margin-top:2px;">한계돌파!</div>
+      </div>
+      <div id="spmOwnership" style="font-size:13px;color:#FFF9DB;margin-bottom:12px;font-weight:700;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn alt small" id="spmCloseBtn" style="flex:1;">닫기</button>
+        <button class="btn small" id="spmActionBtn" style="flex:2;">적용</button>
+      </div>
     </div>
   </div>
 
@@ -7022,6 +7070,12 @@ document.getElementById('gachaCloseBtn').addEventListener('click', ()=>{
 document.getElementById('epCloseBtn').addEventListener('click', ()=>{
   document.getElementById('equipPickerModal').classList.add('hidden');
 });
+document.getElementById('cpmCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('costumePreviewModal').classList.add('hidden');
+});
+document.getElementById('spmCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('skinPreviewModal').classList.add('hidden');
+});
 document.getElementById('shopBackBtn').addEventListener('click', ()=>{
   state.scene = 'title';
   document.getElementById('shopScreen').classList.add('hidden');
@@ -7351,24 +7405,13 @@ function renderCosDetailGrid(){
       chip.className = `grade-chip ${gKey}` + (owned ? ' owned' : '') + (equippedHere ? ' equipped' : '') + (dup > 1 ? ' dup' : '');
       chip.textContent = gKey;
       if(dup > 1) chip.dataset.count = dup;
-      if(owned){
-        chip.title = equippedHere ? '클릭하여 해제' : `${gKey} 등급 ${def.name} 장착`;
-        chip.addEventListener('click', () => {
-          const eqItem = progress.costumes.find(c => c.defId === def.id && c.grade === gKey);
-          if(!eqItem) return;
-          if(equippedHere){
-            progress.equipped[slot] = null;
-          } else {
-            progress.equipped[slot] = eqItem.uid;
-          }
-          saveProgress();
-          renderCostumeScreen();
-        });
-      } else {
-        chip.title = '아직 보유하지 않음 — 가챠로 뽑아 수집';
-        chip.disabled = true;
-        chip.style.cursor = 'not-allowed';
-      }
+      // Every chip — owned or not — opens the preview modal so players can see the costume's
+      // appearance at any grade. Owned chips include an equip/unequip action; unowned chips only
+      // show the silhouette + a gacha hint.
+      chip.title = owned
+        ? (equippedHere ? '클릭하여 미리보기 / 해제' : `${gKey} 등급 ${def.name} 미리보기 · 장착`)
+        : `${gKey} 등급 ${def.name} 미리보기 (미보유)`;
+      chip.addEventListener('click', () => openCostumePreviewModal(def.id, gKey, slot));
       gradesRow.appendChild(chip);
     }
     card.appendChild(gradesRow);
@@ -7381,6 +7424,106 @@ function renderCosDetailGrid(){
     grid.appendChild(card);
     renderCostumePreview(canvas, previewEq, 80);
   }
+}
+
+// Open the costume preview modal — unified entry point for ANY grade chip click. Renders the
+// costume at the requested grade so players can see what they're chasing even when unowned;
+// owned grades expose an equip/unequip action.
+function openCostumePreviewModal(defId, grade, slot){
+  const def = COSTUME_DEFS_BY_ID[defId]; if(!def) return;
+  const g = COSTUME_GRADES[grade];
+  const owned = (progress.costumes||[]).some(c => c.defId === defId && c.grade === grade);
+  const eqItem = progress.costumes.find(c => c.defId === defId && c.grade === grade);
+  const equippedUid = progress.equipped[slot];
+  const equippedHere = !!(eqItem && equippedUid === eqItem.uid);
+  const slotLabel = { head:'머리', body:'몸통', weapon:'무기' }[slot] || '';
+  const chipEl = document.getElementById('cpmGradeChip');
+  chipEl.textContent = grade + ' 등급';
+  chipEl.style.background = g.color;
+  chipEl.style.color = grade === 'S' || grade === 'C' ? '#1A1300' : '#fff';
+  chipEl.style.border = '2px solid #fff';
+  chipEl.style.boxShadow = `0 0 16px ${g.color}aa`;
+  document.getElementById('cpmTitle').textContent = def.name;
+  document.getElementById('cpmSlotLabel').textContent = `${slotLabel} 슬롯`;
+  // Render the costume at the requested grade — works for unowned grades too because
+  // renderCostumePreview only needs {defId, grade}, not an actual owned eq item.
+  const cv = document.getElementById('cpmCanvas');
+  renderCostumePreview(cv, { defId, grade }, 140);
+  document.getElementById('cpmStats').textContent = costumeStatLines({ defId, grade });
+  const ownEl = document.getElementById('cpmOwnership');
+  if(equippedHere){
+    ownEl.innerHTML = '★ <b style="color:#51CF66;">현재 장착 중</b>';
+  } else if(owned){
+    ownEl.innerHTML = '<b style="color:#FFE066;">보유 중</b> — 장착할 수 있어요';
+  } else {
+    ownEl.innerHTML = '🔒 <b style="color:#868E96;">미보유</b> — 가챠로 뽑아 수집해보세요';
+  }
+  const actBtn = document.getElementById('cpmActionBtn');
+  actBtn.style.display = owned ? '' : 'none';
+  if(owned){
+    actBtn.textContent = equippedHere ? '해제' : '장착';
+    actBtn.onclick = () => {
+      if(equippedHere){ progress.equipped[slot] = null; }
+      else { progress.equipped[slot] = eqItem.uid; }
+      saveProgress();
+      document.getElementById('costumePreviewModal').classList.add('hidden');
+      renderCostumeScreen();
+    };
+  }
+  document.getElementById('costumePreviewModal').classList.remove('hidden');
+}
+
+// Open the skin preview modal — shows the title screen background as it would appear, with
+// a buy/equip action at the bottom. Players see what they're paying for before committing.
+function openSkinPreviewModal(skinId){
+  const skin = TITLE_SKINS_BY_ID[skinId]; if(!skin) return;
+  const owned = (progress.ownedSkins||[]).includes(skin.id);
+  const equipped = progress.skin === skin.id;
+  const canAfford = (progress.coins||0) >= skin.price;
+  document.getElementById('spmTitle').textContent = skin.name;
+  const preview = document.getElementById('spmPreview');
+  preview.style.background = skin.grad;
+  const ownEl = document.getElementById('spmOwnership');
+  if(equipped) ownEl.innerHTML = '★ <b style="color:#51CF66;">현재 적용 중</b>';
+  else if(owned) ownEl.innerHTML = '<b style="color:#FFE066;">보유 중</b> — 적용할 수 있어요';
+  else ownEl.innerHTML = `🪙 <b style="color:#FFE066;">${skin.price.toLocaleString()}</b> 코인으로 구매`;
+  const actBtn = document.getElementById('spmActionBtn');
+  actBtn.classList.remove('alt');
+  if(equipped){
+    actBtn.textContent = '적용 중';
+    actBtn.disabled = true;
+    actBtn.onclick = null;
+  } else if(owned){
+    actBtn.textContent = '적용';
+    actBtn.disabled = false;
+    actBtn.onclick = () => {
+      progress.skin = skin.id;
+      saveProgress();
+      applyTitleSkin();
+      document.getElementById('skinPreviewModal').classList.add('hidden');
+      renderSkinShop();
+    };
+  } else if(canAfford){
+    actBtn.textContent = `🪙 ${skin.price.toLocaleString()} 구매 후 적용`;
+    actBtn.disabled = false;
+    actBtn.onclick = () => {
+      if((progress.coins||0) < skin.price){ sfxHurt(); return; }
+      progress.coins -= skin.price;
+      if(!progress.ownedSkins.includes(skin.id)) progress.ownedSkins.push(skin.id);
+      progress.skin = skin.id;
+      sfxLevelUp();
+      saveProgress();
+      applyTitleSkin();
+      updateTitleCoinDisplay();
+      document.getElementById('skinPreviewModal').classList.add('hidden');
+      renderSkinShop();
+    };
+  } else {
+    actBtn.textContent = `🪙 ${skin.price.toLocaleString()} (코인 부족)`;
+    actBtn.disabled = true;
+    actBtn.onclick = null;
+  }
+  document.getElementById('skinPreviewModal').classList.remove('hidden');
 }
 
 // Build a per-def map of which grades the player has collected. Used for the album view
@@ -7539,27 +7682,10 @@ function renderSkinShop(){
       <div class="skin-name">${skin.name}</div>
       ${actionHtml}
     `;
-    const btn = card.querySelector('.skin-action');
-    btn.addEventListener('click', () => {
-      if(equipped) return;
-      if(owned){
-        progress.skin = skin.id;
-      } else {
-        if((progress.coins||0) < skin.price){
-          sfxHurt();
-          beep(220, .08, 'square', .14, -120);
-          return;
-        }
-        progress.coins -= skin.price;
-        if(!progress.ownedSkins.includes(skin.id)) progress.ownedSkins.push(skin.id);
-        progress.skin = skin.id; // auto-equip on purchase
-        sfxLevelUp();
-      }
-      saveProgress();
-      applyTitleSkin();
-      updateTitleCoinDisplay();
-      renderSkinShop();
-    });
+    // Tapping anywhere on the card — including the action button — opens the preview modal
+    // first so the player sees how the title screen will look before committing.
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => openSkinPreviewModal(skin.id));
     grid.appendChild(card);
   }
 }
@@ -7965,6 +8091,21 @@ function startTitleBgmOnce(){
 updateTitleCoinDisplay();
 // Apply currently-selected title skin so the start screen reflects the player's choice on load.
 applyTitleSkin();
+
+// Toggle body.modal-open whenever any .modal becomes visible/hidden. We use this class to
+// hide the fixed back button while a popup is up — without it Chrome paints the back button
+// over the modal backdrop in some viewports (z-index alone wasn't enough).
+(function watchModals(){
+  const modals = document.querySelectorAll('.modal');
+  function refresh(){
+    let anyOpen = false;
+    for(const m of modals) if(!m.classList.contains('hidden')) { anyOpen = true; break; }
+    document.body.classList.toggle('modal-open', anyOpen);
+  }
+  const obs = new MutationObserver(refresh);
+  for(const m of modals) obs.observe(m, { attributes: true, attributeFilter: ['class'] });
+  refresh();
+})();
 
 </script>
 </body>

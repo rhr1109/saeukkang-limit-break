@@ -380,9 +380,11 @@ S 코스튬 풀세트 + 상점 만렙 + 가능한 비장의 카드 픽 + 일반 
 #### UI
 
 - 현재 착용 중 슬롯 3개 (실제 코스튬 모양 캔버스 미리보기 + 등급 칩)
-- 빈 슬롯 클릭 → 보유 코스튬 픽커 모달
-- 도감: 슬롯 탭(머리/몸통/무기) + 코스튬 정의별 카드 (4등급 칩 인라인, 보유 칩만 클릭 가능)
-- 미보유 코스튬도 실제 모양 실루엣(그레이스케일)로 노출
+- 빈 슬롯 클릭 → 보유 코스튬 픽커 모달 (`equipPickerModal`)
+- 도감: 슬롯 탭(머리/몸통/무기) + 코스튬 정의별 카드 (4등급 칩 인라인)
+- **모든 등급 칩 클릭** → `costumePreviewModal`이 열려 해당 등급의 외형을 큰 캔버스로 보여준다.
+  - 보유 등급: "장착" / "해제" 액션 노출
+  - 미보유 등급: "🔒 미보유 — 가챠로 뽑아 수집해보세요" 안내 (액션 버튼 숨김). 모양은 그대로 렌더링되므로 어떤 코스튬을 노릴지 미리 확인 가능
 - 중복 보유 시 ×N 배지
 
 ### 🎨 배경 스킨
@@ -404,7 +406,7 @@ S 코스튬 풀세트 + 상점 만렙 + 가능한 비장의 카드 픽 + 일반 
 | fireworks | 불꽃축제 | 8,500 | **밤하늘 + 컬러 폭죽 부스트** |
 | wheatfield | 풍요의 들판 | 6,500 | **노을 태양 + 밀밭 사선 텍스처** |
 
-구매 시 자동 장착. 카드별 그라데이션 썸네일 + 보유/적용중 라벨.
+스킨 카드 클릭 → `skinPreviewModal`이 열려 적용 시 타이틀 화면 모습을 16:9 영역에 미리 보여준다 (그라데이션 + "새우깡으로 / 한계돌파!" 오버레이). 모달에서 적용/구매 후 적용 액션을 실행한다 (보유 시 "적용", 미보유·코인 충분 시 "🪙 N 구매 후 적용", 코인 부족 시 비활성). 카드 자체에는 그라데이션 썸네일 + 보유/적용중 라벨이 유지된다.
 
 ## 11. 챕터 선택 UI v2
 
@@ -450,9 +452,15 @@ S 코스튬 풀세트 + 상점 만렙 + 가능한 비장의 카드 픽 + 일반 
 - `#chapterSelect` — 포커스 카드 + 정복 스트립 + 다가올 스트립 (또는 전체 보기 그리드)
 - `#shopScreen` — 코인 바 + 3 탭(스킬/코스튬/스킨)
 - `#hud` — 인게임 (위에 설명)
-- 모달: `levelUp`, `pauseModal`, `chapterCleared`, `gameOver`, `victory`, `gachaModal`, `equipPickerModal`, `howModal`
+- 모달: `levelUp`, `pauseModal`, `chapterCleared`, `gameOver`, `victory`, `gachaModal`, `equipPickerModal`, `costumePreviewModal`, `skinPreviewModal`, `howModal`
 
 PC(≥768×700)에서는 오버레이 컨텐츠가 수직 중앙 정렬된다 (`::before`/`::after` flex 스페이서). 모바일은 top-anchored. 백 버튼은 `position:fixed`로 항상 좌상단에 고정.
+
+### 모달 스태킹 규칙
+
+- `.modal`은 `position:fixed; z-index:1000`으로 뷰포트 전체를 덮는다.
+- 백 버튼(`.back-btn`)은 `position:fixed; z-index:5` — 일반 상황에서는 보이지만 모달이 떠있으면 가려져야 한다.
+- z-index만으로는 Chrome이 일부 뷰포트에서 `position:fixed` 백 버튼을 모달 백드롭 위에 페인트하는 문제가 있어, **MutationObserver**로 어떤 `.modal`이라도 `.hidden`이 풀리면 `body.modal-open` 클래스를 토글한다. CSS는 이 클래스가 있을 때 `.back-btn { visibility:hidden }`로 강제로 가린다. 클릭 흡수와 시각 일관성 모두 확보.
 
 ## 15. 배경 (탑뷰 전용)
 
