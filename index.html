@@ -1228,12 +1228,29 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
 // All draw in world coords using the player's pivot, so they don't share drawPigeon's facing flip.
 function drawCostumeGlow(ctx, cx, cy, r, eq){
   const g = COSTUME_GRADES[eq.grade];
+  // Glow tier — A and S get a halo, S much bigger and brighter than A. B and C have no halo.
   if(eq.grade !== 'S' && eq.grade !== 'A') return;
   ctx.save();
   ctx.fillStyle = g.glow;
-  ctx.globalAlpha = eq.grade === 'S' ? 0.5 : 0.3;
-  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  if(eq.grade === 'S'){
+    // Outer pulsing halo
+    const pulse = 0.7 + 0.3*Math.sin(state.time*4);
+    ctx.globalAlpha = 0.55 * pulse;
+    ctx.beginPath(); ctx.arc(cx, cy, r*1.6, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 0.40;
+    ctx.beginPath(); ctx.arc(cx, cy, r*1.2, 0, Math.PI*2); ctx.fill();
+  } else {
+    // A — single solid halo, slightly bigger than the costume
+    ctx.globalAlpha = 0.35;
+    ctx.beginPath(); ctx.arc(cx, cy, r*1.15, 0, Math.PI*2); ctx.fill();
+  }
   ctx.restore();
+}
+
+// Tier-based size scale so grades differ in SILHOUETTE size, not just color/decoration.
+// C is noticeably smaller (looks like a starter item), S is large and ornate.
+function tierScaleFor(grade){
+  return ({ C:0.80, B:0.95, A:1.12, S:1.30 })[grade] || 1.0;
 }
 // Grade tier 0..3 — used to layer visual details so S looks visibly richer than C even on the
 // same base shape. Each tier inherits all lower-tier details and adds new flourishes.
@@ -1244,13 +1261,14 @@ function drawCostumeHeadOverlay(ctx, px, py, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
   const tier = gradeTier(eq.grade);
+  const ts = tierScaleFor(eq.grade); // C 0.80, B 0.95, A 1.12, S 1.30
   // Pigeon head center is at (0, -22) in pigeon-local coords with radius 16.
   const hx = px;
   const hy = py + (-22)*scale;
-  drawCostumeGlow(ctx, hx, hy - 14*scale, 22*scale, eq);
+  drawCostumeGlow(ctx, hx, hy - 14*scale*ts, 22*scale*ts, eq);
   ctx.save();
   ctx.translate(hx, hy);
-  ctx.scale(scale, scale);
+  ctx.scale(scale*ts, scale*ts); // tier-scaled — S costumes are ~63% bigger than C
   // NOTE: head center at costume-local (0,0). Eyes/beak below y=-7. All shapes stay above.
   if(def.id === 'h_beanie'){
     // Beanie progression: C bare cap → B + small pom → A + stripe + bigger pom → S + sparkle
@@ -1473,32 +1491,40 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
   const tier = gradeTier(eq.grade);
-  // Pigeon body ellipse centered at (0, 10) pigeon-local with rx 32, ry 28.
+  const ts = tierScaleFor(eq.grade);
+  // Body silhouette is fixed (the pigeon body itself). We DON'T tier-scale the whole context
+  // because the clip ellipse must stay at body size in canvas coords. Tier scaling for body is
+  // expressed via larger glow halo, more decorations, and for cape/dragon — protrusions OUTSIDE
+  // the silhouette that DO tier-scale.
   const cx = px, cy = py + 10*scale;
-  drawCostumeGlow(ctx, cx, cy, 30*scale, eq);
+  drawCostumeGlow(ctx, cx, cy, 30*scale*ts, eq);
 
   ctx.save();
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
 
-  // ── Cape: progression — C plain panels → B + clasp → A + medallion gem → S animated flow
+  // ── Cape: progression — C tiny short panels → B small + clasp → A medallion + flowing →
+  //                       S massive animated cape with gold trim
   if(def.id === 'b_cape'){
     ctx.save();
-    // Back drape — bigger and more flowing at higher grades
-    const flowOffset = tier >= 3 ? Math.sin(state.time*1.5)*1 : 0;
+    // Back drape — bigger and more flowing at higher grades. Cape size scales DRAMATICALLY by tier.
+    const capeScale = ts; // C 0.80, B 0.95, A 1.12, S 1.30
+    const flowOffset = tier >= 3 ? Math.sin(state.time*1.5)*2 : 0;
     ctx.fillStyle = g.color;
+    // Left panel — coords scaled by capeScale
     ctx.beginPath();
-    ctx.moveTo(-14, -20);
-    ctx.quadraticCurveTo(-32 + flowOffset, -6, -28, 22);
-    ctx.lineTo(-22, 26);
-    ctx.quadraticCurveTo(-12, 14, -8, -10);
+    ctx.moveTo(-14*capeScale, -20*capeScale);
+    ctx.quadraticCurveTo((-32 + flowOffset)*capeScale, -6*capeScale, -28*capeScale, 22*capeScale);
+    ctx.lineTo(-22*capeScale, 26*capeScale);
+    ctx.quadraticCurveTo(-12*capeScale, 14*capeScale, -8*capeScale, -10*capeScale);
     ctx.closePath();
     ctx.fill();
+    // Right panel
     ctx.beginPath();
-    ctx.moveTo(14, -20);
-    ctx.quadraticCurveTo(32 - flowOffset, -6, 28, 22);
-    ctx.lineTo(22, 26);
-    ctx.quadraticCurveTo(12, 14, 8, -10);
+    ctx.moveTo(14*capeScale, -20*capeScale);
+    ctx.quadraticCurveTo((32 - flowOffset)*capeScale, -6*capeScale, 28*capeScale, 22*capeScale);
+    ctx.lineTo(22*capeScale, 26*capeScale);
+    ctx.quadraticCurveTo(12*capeScale, 14*capeScale, 8*capeScale, -10*capeScale);
     ctx.closePath();
     ctx.fill();
     // B+: highlight stripe
@@ -1762,10 +1788,11 @@ function drawWeaponCostumeAt(ctx, lx, ly, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
   const tier = gradeTier(eq.grade);
-  drawCostumeGlow(ctx, lx, ly, 12*scale, eq);
+  const ts = tierScaleFor(eq.grade);
+  drawCostumeGlow(ctx, lx, ly, 12*scale*ts, eq);
   ctx.save();
   ctx.translate(lx, ly);
-  ctx.scale(scale, scale);
+  ctx.scale(scale*ts, scale*ts); // tier-scaled — S weapons noticeably bigger than C
   if(def.id === 'w_ribbon'){
     // Ribbon glove: C plain mitten → B + small bow → A + bow + heart → S + multiple sparkly hearts
     ctx.fillStyle = '#FFB3D9';
