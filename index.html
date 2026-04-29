@@ -324,6 +324,37 @@
   .gacha-reveal .pull-card .pc-slot{font-size:10px;color:#868E96;text-transform:uppercase;letter-spacing:.5px;}
   .gacha-reveal .pull-stats{font-size:12px;color:#A5D8FF;text-align:center;line-height:1.5;}
 
+  /* Costume browse v2 — slot tabs + per-def detail card with all 4 grade chips.
+     Replaces the flat inventory + album with a single unified per-costume view. */
+  .cos-slot-tabs{display:flex;gap:8px;justify-content:center;margin:6px 0 12px;flex-wrap:wrap;}
+  .cos-slot-tab{padding:8px 18px;background:rgba(0,0,0,.4);border:2px solid #BE4BDB;color:#E599F7;font-weight:900;font-family:inherit;font-size:13px;border-radius:999px;cursor:pointer;letter-spacing:-.2px;}
+  .cos-slot-tab.on{background:linear-gradient(180deg,#BE4BDB,#7048E8);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);box-shadow:0 3px 0 rgba(0,0,0,.4);border-color:#FFF9DB;}
+
+  .cos-detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;padding:0 6px 14px;}
+  .cos-detail-card{position:relative;padding:12px 10px 10px;border-radius:14px;border:2px solid #5F3DC4;background:linear-gradient(180deg,rgba(40,15,70,.7),rgba(15,2,30,.92));display:flex;flex-direction:column;align-items:center;gap:6px;min-height:200px;font-family:inherit;}
+  .cos-detail-card.unowned{background:linear-gradient(180deg,rgba(28,22,48,.7),rgba(8,2,18,.92));border-color:#3A2C58;}
+  .cos-detail-card.owned{border-color:#FFE066;box-shadow:0 0 14px rgba(255,224,102,.25);}
+  .cos-detail-card.equipped{border-color:#51CF66;box-shadow:0 0 22px rgba(81,207,102,.55);}
+  .cos-detail-card .preview{width:80px;height:80px;background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.06), rgba(0,0,0,.18));border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .cos-detail-card.unowned .preview canvas{filter:grayscale(1) brightness(.45) contrast(1.1);opacity:.55;}
+  .cos-detail-card .name{font-weight:900;color:#FFE066;font-size:13px;text-align:center;letter-spacing:-.2px;}
+  .cos-detail-card.unowned .name{color:#6C7280;}
+  .cos-detail-card .desc{font-size:10px;color:#A5D8FF;text-align:center;line-height:1.3;padding:0 4px;}
+  .cos-detail-card.unowned .desc{color:#4D525C;}
+  .cos-detail-card .grades-row{display:flex;gap:4px;margin-top:auto;padding-top:6px;justify-content:center;flex-wrap:wrap;}
+  .cos-detail-card .grade-chip{position:relative;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:900;cursor:pointer;min-width:32px;text-align:center;font-family:inherit;border:2px solid rgba(255,255,255,.15);background:rgba(0,0,0,.4);color:rgba(255,255,255,.4);transition:transform .08s, box-shadow .12s;}
+  .cos-detail-card .grade-chip.owned{cursor:pointer;color:#fff;border-color:#fff;}
+  .cos-detail-card .grade-chip.owned.S{background:linear-gradient(180deg,#FFE066,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 2px 0 rgba(0,0,0,.4),0 0 8px rgba(255,224,102,.45);}
+  .cos-detail-card .grade-chip.owned.A{background:linear-gradient(180deg,#E599F7,#7048E8);box-shadow:0 2px 0 rgba(0,0,0,.4),0 0 8px rgba(229,153,247,.45);}
+  .cos-detail-card .grade-chip.owned.B{background:linear-gradient(180deg,#74C0FC,#1864AB);box-shadow:0 2px 0 rgba(0,0,0,.4),0 0 6px rgba(116,192,252,.4);}
+  .cos-detail-card .grade-chip.owned.C{background:linear-gradient(180deg,#CED4DA,#495057);box-shadow:0 2px 0 rgba(0,0,0,.4);}
+  .cos-detail-card .grade-chip:active{transform:translateY(1px);}
+  .cos-detail-card .grade-chip.equipped::after{content:'★';position:absolute;top:-6px;right:-6px;width:14px;height:14px;background:#51CF66;border-radius:999px;color:#052;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+  .cos-detail-card .grade-chip.dup{position:relative;}
+  .cos-detail-card .grade-chip.dup::before{content:attr(data-count);position:absolute;top:-6px;left:-6px;background:#fff;color:#5A1A04;font-size:9px;font-weight:900;padding:1px 5px;border-radius:999px;border:1.5px solid #FFD43B;}
+  .cos-detail-card .equip-hint{font-size:9px;color:#868E96;letter-spacing:.5px;}
+  .cos-detail-card.equipped .equip-hint{color:#51CF66;font-weight:900;}
+
   /* Costume album — shows every def with which grades have been collected.
      Unowned entries display the real icon dimmed/desaturated so the player can see what they're chasing. */
   .album-card{background:linear-gradient(180deg,rgba(40,15,70,.55),rgba(15,2,30,.85));border:2px solid #5F3DC4;border-radius:10px;padding:8px 6px;text-align:center;color:#FFF9DB;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .12s, box-shadow .12s;}
@@ -471,12 +502,15 @@
         <div class="equip-row" id="equipRow"></div>
       </div>
       <div class="costume-section">
-        <h3>📦 보유 코스튬 (<span id="costumeCount">0</span>)</h3>
-        <div class="cos-grid" id="costumeGrid"></div>
-      </div>
-      <div class="costume-section">
-        <h3 style="display:flex;align-items:center;gap:8px;">📒 도감 <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span></h3>
-        <div id="albumGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:0 6px 6px;"></div>
+        <h3 style="display:flex;align-items:center;gap:8px;">
+          📒 코스튬 도감 <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span>
+        </h3>
+        <div class="cos-slot-tabs">
+          <button class="cos-slot-tab on" type="button" data-slot="head">🎩 머리</button>
+          <button class="cos-slot-tab" type="button" data-slot="body">👕 몸통</button>
+          <button class="cos-slot-tab" type="button" data-slot="weapon">⚔ 무기</button>
+        </div>
+        <div class="cos-detail-grid" id="cosDetailGrid"></div>
       </div>
     </div>
   </div>
@@ -530,7 +564,8 @@
       <div class="sub">한숨 돌리는 중...</div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
         <button class="btn" id="resumeBtn">계속하기</button>
-        <button class="btn alt small" id="quitBtn">포기하고 타이틀로</button>
+        <button class="btn alt small" id="quitToChapterBtn">🗺 챕터 선택으로</button>
+        <button class="btn alt small" id="quitBtn">🏠 포기하고 타이틀로</button>
       </div>
     </div>
   </div>
@@ -1132,73 +1167,76 @@ function drawCostumeHeadOverlay(ctx, px, py, scale, eq){
   ctx.save();
   ctx.translate(hx, hy);
   ctx.scale(scale, scale);
+  // NOTE on coordinates: head center is at costume-local (0,0). Pigeon eyes sit at y=-4 with
+  // ~3px radius, beak extends to y=2 toward x=+18. Anything below y=-9 in costume-local would
+  // intrude on the eye/beak — so all brims and bands stay above that line.
   if(def.id === 'h_beanie'){
     // Knit beanie: rounded cap that wraps the top half of the head with a folded brim.
     ctx.fillStyle = g.color;
-    ctx.beginPath(); ctx.ellipse(0, -8, 16, 14, 0, Math.PI, 0); ctx.fill();
-    // Brim — slightly darker
+    ctx.beginPath(); ctx.ellipse(0, -10, 15, 12, 0, Math.PI, 0); ctx.fill();
+    // Brim — slightly darker, well above eye line
     ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.ellipse(0, -4, 17, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -10, 16, 3, 0, 0, Math.PI*2); ctx.fill();
     // Pom
     ctx.fillStyle = '#FFF9DB';
-    ctx.beginPath(); ctx.arc(0, -20, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -22, 4, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = g.color;
-    ctx.beginPath(); ctx.arc(-1, -21, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-1, -23, 2, 0, Math.PI*2); ctx.fill();
   } else if(def.id === 'h_strawhat'){
-    // Wide-brim straw hat: big oval brim + low crown
+    // Wide-brim straw hat: brim sits on the head crown, NOT across the eyes.
     ctx.fillStyle = '#FAB005';
-    ctx.beginPath(); ctx.ellipse(0, -4, 24, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -10, 22, 4, 0, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
     ctx.stroke();
     ctx.fillStyle = '#FFE066';
-    ctx.beginPath(); ctx.ellipse(0, -10, 11, 8, 0, Math.PI, 0); ctx.fill();
-    // Hat band
+    ctx.beginPath(); ctx.ellipse(0, -14, 11, 7, 0, Math.PI, 0); ctx.fill();
+    // Hat band — sits on the brim above the eyes
     ctx.fillStyle = g.color;
-    ctx.beginPath(); ctx.ellipse(0, -6, 11, 2, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -12, 11, 2, 0, 0, Math.PI*2); ctx.fill();
   } else if(def.id === 'h_helmet'){
-    // Combat helmet — covers the top of the head with a visor band
+    // Combat helmet — dome only, no visor band crossing the eyes.
     ctx.fillStyle = '#495057';
-    ctx.beginPath(); ctx.ellipse(0, -8, 16, 12, 0, Math.PI, 0); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -10, 15, 12, 0, Math.PI, 0); ctx.fill();
     ctx.fillStyle = '#343A40';
-    ctx.beginPath(); ctx.ellipse(0, -6, 16, 3, 0, 0, Math.PI*2); ctx.fill();
-    // Visor strap accent
+    ctx.beginPath(); ctx.ellipse(0, -10, 15, 3, 0, 0, Math.PI*2); ctx.fill();
+    // Crest stud at top
     ctx.fillStyle = g.color;
-    ctx.fillRect(-2, -22, 4, 8);
+    ctx.fillRect(-2, -24, 4, 8);
     ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.arc(0, -22, 2.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -24, 2.4, 0, Math.PI*2); ctx.fill();
   } else if(def.id === 'h_tophat'){
-    // Top hat: flat brim disc + tall cylindrical crown sitting on top of the pigeon's head.
+    // Top hat: brim above the head crown, tall cylindrical crown on top.
     ctx.fillStyle = '#1A1D20';
-    // Brim
-    ctx.beginPath(); ctx.ellipse(0, -10, 17, 4, 0, 0, Math.PI*2); ctx.fill();
+    // Brim sits at the head crown, well above the eyes.
+    ctx.beginPath(); ctx.ellipse(0, -12, 17, 3, 0, 0, Math.PI*2); ctx.fill();
     // Crown body
-    ctx.fillRect(-9, -28, 18, 18);
+    ctx.fillRect(-9, -28, 18, 16);
     // Crown top
     ctx.beginPath(); ctx.ellipse(0, -28, 9, 3, 0, 0, Math.PI*2); ctx.fill();
     // Hat band — accent
     ctx.fillStyle = g.color;
-    ctx.fillRect(-9, -16, 18, 4);
+    ctx.fillRect(-9, -18, 18, 3);
     // Highlight on crown for fancy look
     ctx.fillStyle = 'rgba(255,255,255,0.18)';
-    ctx.fillRect(-7, -26, 2, 14);
+    ctx.fillRect(-7, -26, 2, 12);
   } else if(def.id === 'h_crown'){
-    // Royal crown — five points sitting on the brow line
+    // Royal crown — five points rooted ABOVE the eyes; base band sits on the head crown line.
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.moveTo(-14, -4); ctx.lineTo(-11, -16); ctx.lineTo(-6, -8);
-    ctx.lineTo(0, -22); ctx.lineTo(6, -8); ctx.lineTo(11, -16); ctx.lineTo(14, -4);
+    ctx.moveTo(-14, -10); ctx.lineTo(-11, -20); ctx.lineTo(-6, -14);
+    ctx.lineTo(0, -26); ctx.lineTo(6, -14); ctx.lineTo(11, -20); ctx.lineTo(14, -10);
     ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
     ctx.stroke();
-    // Base band
+    // Base band — at y=-12 (above eyes)
     ctx.fillStyle = '#E0A700';
-    ctx.fillRect(-14, -6, 28, 3);
+    ctx.fillRect(-14, -12, 28, 3);
     // Gemstones
     ctx.fillStyle = '#FF1744';
-    ctx.beginPath(); ctx.arc(0, -10, 2.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -16, 2.2, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.arc(-8, -12, 1.4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(8, -12, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-8, -17, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(8, -17, 1.4, 0, Math.PI*2); ctx.fill();
   } else if(def.id === 'h_halo'){
     // Floating angelic halo above the head with rotating sparkles
     ctx.strokeStyle = g.glow;
@@ -1266,28 +1304,31 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
     ctx.lineTo(19, 18); ctx.quadraticCurveTo(21, -2, 10, -16);
     ctx.closePath(); ctx.fill();
     ctx.globalAlpha = 1;
-    // ── Shoulder collar — small band running across the top of the body
+    // ── Shoulder collar — sits at the top of the body, well below the head/beak.
     ctx.fillStyle = g.color;
     ctx.beginPath();
-    ctx.ellipse(0, -22, 16, 5, 0, 0, Math.PI*2);
+    ctx.ellipse(0, -14, 14, 4, 0, 0, Math.PI*2);
     ctx.fill();
     ctx.strokeStyle = g.glow; ctx.lineWidth = 1.4;
     ctx.stroke();
     // Center clasp medallion on the chest
     ctx.fillStyle = '#FFD700';
-    ctx.beginPath(); ctx.arc(0, -22, 3.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -14, 3.0, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8; ctx.stroke();
     ctx.fillStyle = '#FF1744';
-    ctx.beginPath(); ctx.arc(0, -22, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -14, 1.2, 0, Math.PI*2); ctx.fill();
     ctx.restore();
     ctx.restore();
     return;
   }
 
   // ── Other body costumes — clip to the body silhouette so nothing leaks past the edges.
+  // Clip top is offset down so the costume doesn't intrude on the head/neck/beak above the body.
+  // Body ellipse in pigeon-local is centered at (0,10) with rx=32, ry=28; we leave a small buffer
+  // at the top so the beak (drawn at pigeon-local y=-12 to -20) is never overlapped by clothing.
   ctx.save();
   ctx.beginPath();
-  ctx.ellipse(0, 0, 30, 26, 0, 0, Math.PI*2);
+  ctx.ellipse(0, 4, 30, 22, 0, 0, Math.PI*2);
   ctx.clip();
 
   if(def.id === 'b_jersey'){
@@ -1417,125 +1458,112 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
   ctx.restore();
   ctx.restore();
 }
-function drawCostumeWeaponOverlay(ctx, px, py, scale, facing, eq, attackPulse){
+// Draw a single weapon costume centered on the given screen-space point. Used by the dual-fist
+// overlay AND the costume preview cards so both render the exact same shapes.
+function drawWeaponCostumeAt(ctx, lx, ly, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
+  drawCostumeGlow(ctx, lx, ly, 12*scale, eq);
+  ctx.save();
+  ctx.translate(lx, ly);
+  ctx.scale(scale, scale);
+  if(def.id === 'w_ribbon'){
+    ctx.fillStyle = '#FFB3D9';
+    ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#F783AC'; ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = g.color;
+    ctx.beginPath();
+    ctx.moveTo(-7, -3); ctx.lineTo(-2, 0); ctx.lineTo(-7, 3); ctx.closePath();
+    ctx.moveTo(7, -3); ctx.lineTo(2, 0); ctx.lineTo(7, 3); ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = g.glow;
+    ctx.fillRect(-1.5, -2, 3, 4);
+  } else if(def.id === 'w_brass'){
+    ctx.fillStyle = g.color;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-9, -2, 18, 4, 1.5) : ctx.rect(-9, -2, 18, 4);
+    ctx.fill();
+    ctx.fillStyle = '#FFD700';
+    for(let k=-1;k<=1;k++){
+      ctx.beginPath(); ctx.arc(k*5, -3, 3.4, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#FFF9DB';
+    for(let k=-1;k<=1;k++){
+      ctx.beginPath(); ctx.arc(k*5 - 1, -4, 1, 0, Math.PI*2); ctx.fill();
+    }
+  } else if(def.id === 'w_gauntlet'){
+    ctx.fillStyle = '#495057';
+    ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#6C757D';
+    ctx.fillRect(-9, -2, 18, 4);
+    ctx.fillStyle = '#212529';
+    ctx.beginPath(); ctx.arc(-6, 0, 1.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 0, 1.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6, 0, 1.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = g.color;
+    ctx.beginPath(); ctx.arc(0, -5, 2.4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = g.glow;
+    ctx.beginPath(); ctx.arc(0, -5, 1, 0, Math.PI*2); ctx.fill();
+  } else if(def.id === 'w_blade'){
+    ctx.fillStyle = '#CED4DA';
+    ctx.beginPath();
+    ctx.moveTo(0, -16); ctx.lineTo(3, 4); ctx.lineTo(-3, 4); ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#495057'; ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-6, 4, 12, 3);
+    ctx.fillStyle = '#3E2723';
+    ctx.fillRect(-1.5, 7, 3, 6);
+    ctx.fillStyle = g.glow;
+    ctx.beginPath(); ctx.arc(0, 13, 2, 0, Math.PI*2); ctx.fill();
+  } else if(def.id === 'w_thunder'){
+    ctx.fillStyle = '#3E2723';
+    ctx.fillRect(-1.6, 0, 3.2, 12);
+    ctx.fillStyle = g.color;
+    ctx.beginPath(); ctx.arc(0, -4, 7, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath();
+    ctx.moveTo(-2, -9); ctx.lineTo(1, -5); ctx.lineTo(-1, -5); ctx.lineTo(2, 1);
+    ctx.lineTo(0, -3); ctx.lineTo(2, -3); ctx.closePath();
+    ctx.fill();
+  } else if(def.id === 'w_phoenix'){
+    ctx.fillStyle = '#F76707';
+    ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFE066';
+    for(let k=0;k<5;k++){
+      const a = k*(Math.PI*2/5) + state.time*2;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(a)*11, Math.sin(a)*11);
+      ctx.lineTo(Math.cos(a+0.5)*6, Math.sin(a+0.5)*6);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#FFF9DB';
+    ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
+  } else {
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(def.icon, 0, 1);
+  }
+  ctx.restore();
+}
+
+function drawCostumeWeaponOverlay(ctx, px, py, scale, facing, eq, attackPulse){
+  if(!COSTUME_DEFS_BY_ID[eq.defId]) return;
   // Pigeon fists are at (±36, -36) in pigeon-local coords with radius ~10.
-  // Costumes draw centered on each fist; right arm flexes 1.4× per drawPigeon's ra_y_off.
-  // All shapes are bounded inside an ~14px radius so they don't sprout from the body.
+  // Right arm flexes 1.4× per drawPigeon's ra_y_off so the right-hand costume rises a touch faster.
   const flex = (attackPulse||0) * 3;
-  const drawHand = (sign) => {
+  for(const sign of [-1, 1]){
     const lx = px + sign * 36 * scale * facing;
     const flexY = sign > 0 ? flex * 1.4 : flex;
     const ly = py + (-36 - flexY) * scale;
-    drawCostumeGlow(ctx, lx, ly, 12*scale, eq);
-    ctx.save();
-    ctx.translate(lx, ly);
-    ctx.scale(scale, scale);
-    if(def.id === 'w_ribbon'){
-      // Pink ribbon glove — round mitten with a bow tie on the wrist
-      ctx.fillStyle = '#FFB3D9';
-      ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#F783AC'; ctx.lineWidth = 1.2;
-      ctx.stroke();
-      // Ribbon bow on the back of the glove
-      ctx.fillStyle = g.color;
-      ctx.beginPath();
-      ctx.moveTo(-7, -3); ctx.lineTo(-2, 0); ctx.lineTo(-7, 3); ctx.closePath();
-      ctx.moveTo(7, -3); ctx.lineTo(2, 0); ctx.lineTo(7, 3); ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = g.glow;
-      ctx.fillRect(-1.5, -2, 3, 4);
-    } else if(def.id === 'w_brass'){
-      // Brass knuckles — three gold knuckles on a strap that wraps the fist
-      ctx.fillStyle = g.color;
-      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-9, -2, 18, 4, 1.5) : ctx.rect(-9, -2, 18, 4);
-      ctx.fill();
-      ctx.fillStyle = '#FFD700';
-      for(let k=-1;k<=1;k++){
-        ctx.beginPath(); ctx.arc(k*5, -3, 3.4, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8;
-        ctx.stroke();
-      }
-      // Highlights
-      ctx.fillStyle = '#FFF9DB';
-      for(let k=-1;k<=1;k++){
-        ctx.beginPath(); ctx.arc(k*5 - 1, -4, 1, 0, Math.PI*2); ctx.fill();
-      }
-    } else if(def.id === 'w_gauntlet'){
-      // Combat gauntlet — armored sleeve over the fist with rivets
-      ctx.fillStyle = '#495057';
-      ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#6C757D';
-      ctx.fillRect(-9, -2, 18, 4);
-      // Rivets
-      ctx.fillStyle = '#212529';
-      ctx.beginPath(); ctx.arc(-6, 0, 1.2, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(0, 0, 1.2, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(6, 0, 1.2, 0, Math.PI*2); ctx.fill();
-      // Knuckle stud
-      ctx.fillStyle = g.color;
-      ctx.beginPath(); ctx.arc(0, -5, 2.4, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = g.glow;
-      ctx.beginPath(); ctx.arc(0, -5, 1, 0, Math.PI*2); ctx.fill();
-    } else if(def.id === 'w_blade'){
-      // Twin daggers — a short sword pointing up and a small handle
-      ctx.fillStyle = '#CED4DA';
-      ctx.beginPath();
-      ctx.moveTo(0, -16); ctx.lineTo(3, 4); ctx.lineTo(-3, 4); ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = '#495057'; ctx.lineWidth = 0.8;
-      ctx.stroke();
-      // Cross-guard
-      ctx.fillStyle = g.color;
-      ctx.fillRect(-6, 4, 12, 3);
-      // Handle
-      ctx.fillStyle = '#3E2723';
-      ctx.fillRect(-1.5, 7, 3, 6);
-      // Pommel gem
-      ctx.fillStyle = g.glow;
-      ctx.beginPath(); ctx.arc(0, 13, 2, 0, Math.PI*2); ctx.fill();
-    } else if(def.id === 'w_thunder'){
-      // Thunder mace — short shaft, round head, with a lightning bolt etched on top
-      ctx.fillStyle = '#3E2723';
-      ctx.fillRect(-1.6, 0, 3.2, 12);
-      // Head
-      ctx.fillStyle = g.color;
-      ctx.beginPath(); ctx.arc(0, -4, 7, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
-      ctx.stroke();
-      // Lightning
-      ctx.fillStyle = '#FFE066';
-      ctx.beginPath();
-      ctx.moveTo(-2, -9); ctx.lineTo(1, -5); ctx.lineTo(-1, -5); ctx.lineTo(2, 1);
-      ctx.lineTo(0, -3); ctx.lineTo(2, -3); ctx.closePath();
-      ctx.fill();
-    } else if(def.id === 'w_phoenix'){
-      // Phoenix claw — flame burst with rotating fiery petals around a glowing core
-      ctx.fillStyle = '#F76707';
-      ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI*2); ctx.fill();
-      // Petals
-      ctx.fillStyle = '#FFE066';
-      for(let k=0;k<5;k++){
-        const a = k*(Math.PI*2/5) + state.time*2;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(a)*11, Math.sin(a)*11);
-        ctx.lineTo(Math.cos(a+0.5)*6, Math.sin(a+0.5)*6);
-        ctx.closePath(); ctx.fill();
-      }
-      // Core
-      ctx.fillStyle = '#FFF9DB';
-      ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
-    } else {
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(def.icon, 0, 1);
-    }
-    ctx.restore();
-  };
-  drawHand(-1);
-  drawHand(1);
+    drawWeaponCostumeAt(ctx, lx, ly, scale, eq);
+  }
 }
 
 // Fill title screen SVG with pigeon
@@ -2124,16 +2152,19 @@ const MAX_CHAPTERS = 50;
 const PICKUP_RADIUS = 60;
 // Per-chapter wave timing. Returns array of [w1End, w2End, w3End, totalCap] in seconds.
 // w3End is when the boss spawns; the chapter cap is the absolute max time the chapter is allowed.
+// Lower-difficulty chapters have noticeably shorter waves so quick-play feels snackable.
 function chapterWaveTimes(c){
-  // Ch 1-10: 10 min cap. Waves take 8 min total (2:40 each), boss has up to 2 min.
-  // Ch 11-50: 15 min cap. Waves take 11 min total (3:40 each), boss has up to 4 min.
+  let each, cap;
   if(c <= 10){
-    const each = 160; // 2:40
-    return [each, each*2, each*3, 600];
+    each = 80;   cap = 360;   // 1:20 waves → 4 min waves + 2 min boss = 6 min cap
+  } else if(c <= 25){
+    each = 130;  cap = 540;   // 2:10 waves → 6:30 + 2:30 = 9 min cap
+  } else if(c <= 40){
+    each = 170;  cap = 750;   // 2:50 waves → 8:30 + 4:00 = 12:30 cap
   } else {
-    const each = 220; // 3:40
-    return [each, each*2, each*3, 900];
+    each = 200;  cap = 900;   // 3:20 waves → 10 min waves + 5 min boss = 15 min cap
   }
+  return [each, each*2, each*3, cap];
 }
 // Chapter names — each chapter is a location, not a difficulty label.
 // Difficulty is implicit in chapter number; higher chapters belong to harsher tiers.
@@ -3929,13 +3960,18 @@ function updateHUD(){
   document.getElementById('killsTxt').textContent = state.kills;
   const coinEl = document.getElementById('hudCoinTxt');
   if(coinEl) coinEl.textContent = (progress.coins||0).toLocaleString();
-  // Timer shows seconds remaining until boss spawns (end of wave 3); during boss fight shows BOSS!.
+  // Timer now shows the CURRENT wave's remaining time (mm:ss), so the player always knows
+  // when the next wave (or the boss) arrives — not the full chapter countdown.
   let t;
   if(state.bossSpawned){
     t = 'BOSS!';
   } else {
-    const wt = state.waveTimes || [160,320,480,600];
-    t = Math.max(0, Math.ceil(wt[2] - (state.chapterTime||0)));
+    const wt = state.waveTimes || [80,160,240,360];
+    const w = state.wave || 1;
+    const waveEnd = w === 1 ? wt[0] : (w === 2 ? wt[1] : wt[2]);
+    const secs = Math.max(0, Math.ceil(waveEnd - (state.chapterTime||0)));
+    const m = Math.floor(secs / 60), s = secs % 60;
+    t = m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}초`;
   }
   document.getElementById('timerTxt').textContent = t;
 }
@@ -5509,6 +5545,11 @@ document.getElementById('startBtn').addEventListener('click', openChapterSelect)
 document.getElementById('titleShopPill').addEventListener('click', ()=> openShop('skill'));
 document.getElementById('shopTabSkill').addEventListener('click', ()=> setShopTab('skill'));
 document.getElementById('shopTabCostume').addEventListener('click', ()=> setShopTab('costume'));
+// Costume slot tabs (머리/몸통/무기) — delegated since the grid is re-rendered.
+document.addEventListener('click', e => {
+  const tab = e.target.closest('.cos-slot-tab');
+  if(tab && tab.dataset.slot) setCosBrowseSlot(tab.dataset.slot);
+});
 document.getElementById('gachaSingleBtn').addEventListener('click', ()=> doGachaPull(1));
 document.getElementById('gachaTenBtn').addEventListener('click', ()=> doGachaPull(10));
 document.getElementById('gachaCloseBtn').addEventListener('click', ()=>{
@@ -5585,6 +5626,12 @@ document.getElementById('scNext').addEventListener('click', ()=>{
 document.getElementById('pauseBtn').addEventListener('click', togglePause);
 document.getElementById('resumeBtn').addEventListener('click', togglePause);
 document.getElementById('quitBtn').addEventListener('click', ()=>{ document.getElementById('pauseModal').classList.add('hidden'); backToTitle(); });
+document.getElementById('quitToChapterBtn').addEventListener('click', ()=>{
+  document.getElementById('pauseModal').classList.add('hidden');
+  document.getElementById('hud').classList.add('hidden');
+  bgmStop();
+  openChapterSelect();
+});
 
 function openChapterSelect(){
   initAudio();
@@ -5607,6 +5654,37 @@ function updateTitleCoinDisplay(){
 // Legacy entry point — costume now lives inside the shop. Routes to the shop's costume tab.
 function openCostume(){ openShop('costume'); }
 
+// Render an actual costume shape (the same draw used on the pigeon) into a small canvas.
+// Used for inventory/album/gacha cards so players see the real silhouette, not an emoji proxy.
+function renderCostumePreview(canvas, eq, size){
+  size = size || 72;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  const c = canvas.getContext('2d');
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.clearRect(0, 0, size, size);
+  const def = COSTUME_DEFS_BY_ID[eq.defId];
+  if(!def) return;
+  const cx = size/2, cy = size/2;
+  if(def.slot === 'head'){
+    // Head overlay translates internally to (px, py + (-22)*scale). To center the cosume in the
+    // canvas we offset py so the costume's anchor lands at canvas mid.
+    const scale = size / 50;
+    drawCostumeHeadOverlay(c, cx, cy + 16*scale, scale, eq);
+  } else if(def.slot === 'body'){
+    // Body translates to (px, py + 10*scale). Offset py so body center sits at canvas mid.
+    const scale = size / 80;
+    drawCostumeBodyOverlay(c, cx, cy - 10*scale, scale, eq);
+  } else {
+    // Single weapon — draw one fist's worth, centered.
+    const scale = size / 38;
+    drawWeaponCostumeAt(c, cx, cy, scale, eq);
+  }
+}
+
 function costumeStatLines(eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId];
   const m = COSTUME_GRADES[eq.grade].mult;
@@ -5622,6 +5700,10 @@ function costumeStatLines(eq){
   return `공격 +${Math.round(30*m)}% · 연사 +${Math.round(12*m)}% · 탄속 +${Math.round(18*m)}%${proj}`;
 }
 
+// Active slot for the per-def browse grid. Persisted across re-renders so equip clicks don't
+// kick the player back to "head".
+let _cosBrowseSlot = 'head';
+
 function renderCostumeScreen(){
   // Shop screen owns the coin bar (#shopCoinTxt) — both tabs share it.
   const sc = document.getElementById('shopCoinTxt');
@@ -5633,8 +5715,15 @@ function renderCostumeScreen(){
   c1.classList.toggle('poor', (progress.coins||0) < GACHA_COST_SINGLE);
   c2.classList.toggle('poor', (progress.coins||0) < GACHA_COST_TEN);
 
-  // Equip row — three slots.
+  // Equip row — three slots showing what's currently worn (with real costume preview).
+  renderEquipRow();
+  // Slot tabs + per-def grid (replaces the old flat inventory + album)
+  renderCosDetailGrid();
+}
+
+function renderEquipRow(){
   const equipRow = document.getElementById('equipRow');
+  if(!equipRow) return;
   equipRow.innerHTML = '';
   const slotLabels = { head:'머리', body:'몸통', weapon:'무기' };
   for(const slot of ['head','body','weapon']){
@@ -5647,7 +5736,7 @@ function renderCostumeScreen(){
       const g = COSTUME_GRADES[eq.grade];
       slotEl.innerHTML = `
         <div class="slot-name">${slotLabels[slot]}</div>
-        <div class="slot-icon">${def.icon}</div>
+        <div class="slot-icon"><canvas></canvas></div>
         <div style="font-size:11px;color:#FFE066;font-weight:900;">${def.name}</div>
         <div class="slot-grade ${g.borderClass}">${g.label}</div>
       `;
@@ -5657,60 +5746,124 @@ function renderCostumeScreen(){
         saveProgress();
         renderCostumeScreen();
       });
+      equipRow.appendChild(slotEl);
+      // Render the actual costume shape into the canvas (post-DOM-attach so it has a size).
+      const canvas = slotEl.querySelector('canvas');
+      if(canvas) renderCostumePreview(canvas, eq, 56);
     } else {
       slotEl.innerHTML = `
         <div class="slot-name">${slotLabels[slot]}</div>
         <div class="slot-icon" style="opacity:.4;">＋</div>
         <div class="slot-empty">미착용</div>
       `;
+      equipRow.appendChild(slotEl);
     }
-    equipRow.appendChild(slotEl);
   }
-  // Inventory grid.
-  const grid = document.getElementById('costumeGrid');
-  grid.innerHTML = '';
-  const list = (progress.costumes || []).slice();
-  // Sort: equipped first, then S→A→B→C, then by defId.
-  const order = { S:4, A:3, B:2, C:1 };
-  list.sort((a, b) => {
-    const aEq = Object.values(progress.equipped).includes(a.uid) ? 1 : 0;
-    const bEq = Object.values(progress.equipped).includes(b.uid) ? 1 : 0;
-    if(aEq !== bEq) return bEq - aEq;
-    if(order[a.grade] !== order[b.grade]) return order[b.grade] - order[a.grade];
-    return a.defId.localeCompare(b.defId);
+}
+
+function setCosBrowseSlot(slot){
+  _cosBrowseSlot = slot;
+  document.querySelectorAll('.cos-slot-tab').forEach(t => {
+    t.classList.toggle('on', t.dataset.slot === slot);
   });
-  document.getElementById('costumeCount').textContent = list.length;
-  if(list.length === 0){
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#868E96;padding:18px;font-size:13px;">아직 코스튬이 없어요. 가챠로 뽑거나 챕터를 클리어하세요!</div>`;
-    renderAlbum();
-    return;
+  renderCosDetailGrid();
+}
+
+// Per-def detail card grid for the active slot. Each card shows the actual costume shape
+// (rendered via canvas) plus all 4 grade chips. Owned grades are bright + clickable to equip;
+// unowned grades are dim + non-interactive (the player still sees what they're chasing).
+function renderCosDetailGrid(){
+  const grid = document.getElementById('cosDetailGrid');
+  if(!grid) return;
+  // Album progress count
+  const collected = buildCollectionMap();
+  const totalSlots = COSTUME_DEFS.length * 4;
+  let filled = 0;
+  for(const id in collected){ for(const k of ['S','A','B','C']) if(collected[id][k]) filled++; }
+  const progEl = document.getElementById('albumProgress');
+  if(progEl) progEl.textContent = `${filled} / ${totalSlots} 수집 (${Math.round(100*filled/totalSlots)}%)`;
+
+  grid.innerHTML = '';
+  const slot = _cosBrowseSlot;
+  const slotLabel = { head:'머리', body:'몸통', weapon:'무기' }[slot];
+  const equippedUid = progress.equipped[slot];
+  const equippedItem = equippedUid ? progress.costumes.find(c=>c.uid===equippedUid) : null;
+  // Count duplicates of each def×grade so the player knows they have spares.
+  const dupCount = {};
+  for(const c of (progress.costumes || [])){
+    const k = c.defId + '|' + c.grade;
+    dupCount[k] = (dupCount[k] || 0) + 1;
   }
-  for(const eq of list){
-    const def = COSTUME_DEFS_BY_ID[eq.defId];
-    const g = COSTUME_GRADES[eq.grade];
-    const isEquipped = progress.equipped[def.slot] === eq.uid;
-    const card = document.createElement('button');
-    card.className = 'cos-card' + (isEquipped ? ' equipped' : '');
-    card.style.borderColor = g.color;
-    card.innerHTML = `
-      <div class="cos-grade ${g.borderClass}">${g.label}</div>
-      <div class="cos-icon">${def.icon}</div>
-      <div class="cos-name">${def.name}</div>
-      <div class="cos-slot">${def.slot === 'head' ? '머리' : def.slot === 'body' ? '몸통' : '무기'}</div>
-      <div class="cos-stats">${costumeStatLines(eq)}</div>
-    `;
-    card.addEventListener('click', ()=>{
-      if(isEquipped){
-        progress.equipped[def.slot] = null;
+
+  for(const def of COSTUME_DEFS_BY_SLOT[slot]){
+    const grades = collected[def.id];
+    const anyOwned = grades.S || grades.A || grades.B || grades.C;
+    const isEquippedDef = equippedItem && equippedItem.defId === def.id;
+    // Pick the highest-grade owned for the preview; if none, default to C for shape display.
+    let previewGrade = 'C';
+    for(const g of ['S','A','B','C']) if(grades[g]) { previewGrade = g; break; }
+    const previewEq = { defId: def.id, grade: previewGrade };
+
+    const card = document.createElement('div');
+    card.className = 'cos-detail-card' + (anyOwned ? ' owned' : ' unowned') + (isEquippedDef ? ' equipped' : '');
+
+    const preview = document.createElement('div');
+    preview.className = 'preview';
+    const canvas = document.createElement('canvas');
+    preview.appendChild(canvas);
+    card.appendChild(preview);
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = def.name;
+    card.appendChild(name);
+
+    const desc = document.createElement('div');
+    desc.className = 'desc';
+    desc.textContent = anyOwned ? costumeStatLines(previewEq) : `${slotLabel} · 가챠로 뽑아 수집`;
+    card.appendChild(desc);
+
+    const gradesRow = document.createElement('div');
+    gradesRow.className = 'grades-row';
+    for(const gKey of ['S','A','B','C']){
+      const owned = !!grades[gKey];
+      const equippedHere = isEquippedDef && equippedItem.grade === gKey;
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      const dup = dupCount[def.id + '|' + gKey] || 0;
+      chip.className = `grade-chip ${gKey}` + (owned ? ' owned' : '') + (equippedHere ? ' equipped' : '') + (dup > 1 ? ' dup' : '');
+      chip.textContent = gKey;
+      if(dup > 1) chip.dataset.count = dup;
+      if(owned){
+        chip.title = equippedHere ? '클릭하여 해제' : `${gKey} 등급 ${def.name} 장착`;
+        chip.addEventListener('click', () => {
+          const eqItem = progress.costumes.find(c => c.defId === def.id && c.grade === gKey);
+          if(!eqItem) return;
+          if(equippedHere){
+            progress.equipped[slot] = null;
+          } else {
+            progress.equipped[slot] = eqItem.uid;
+          }
+          saveProgress();
+          renderCostumeScreen();
+        });
       } else {
-        progress.equipped[def.slot] = eq.uid;
+        chip.title = '아직 보유하지 않음 — 가챠로 뽑아 수집';
+        chip.disabled = true;
+        chip.style.cursor = 'not-allowed';
       }
-      saveProgress();
-      renderCostumeScreen();
-    });
+      gradesRow.appendChild(chip);
+    }
+    card.appendChild(gradesRow);
+
+    const hint = document.createElement('div');
+    hint.className = 'equip-hint';
+    hint.textContent = isEquippedDef ? '★ 착용 중 — 등급 클릭으로 해제' : (anyOwned ? '등급 클릭으로 장착' : '미보유');
+    card.appendChild(hint);
+
     grid.appendChild(card);
+    renderCostumePreview(canvas, previewEq, 80);
   }
-  renderAlbum();
 }
 
 // Build a per-def map of which grades the player has collected. Used for the album view
