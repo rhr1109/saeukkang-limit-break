@@ -23,7 +23,7 @@
   @keyframes titleBob{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-4px) rotate(1deg);}}
   #title .sub{font-size:min(3.5vw,18px);color:#FFF9DB;font-weight:800;opacity:.95;letter-spacing:6px;text-shadow:0 2px 0 #5A1A04;}
   #title .pigeon-stage{position:relative;width:min(60vw,240px);height:min(60vw,240px);display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 12px 22px rgba(0,0,0,.55));}
-  #title .pigeon-stage svg{width:100%;height:100%;animation:floatY 3.5s ease-in-out infinite;}
+  #title .pigeon-stage canvas, #title .pigeon-stage svg{width:100%;height:100%;animation:floatY 3.5s ease-in-out infinite;display:block;}
   @keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
   #title .rays{position:absolute;inset:-30%;background:conic-gradient(from 0deg, transparent 0deg, rgba(255,224,102,.28) 10deg, transparent 20deg, transparent 40deg, rgba(255,224,102,.28) 50deg, transparent 60deg);animation:spin 12s linear infinite;z-index:-1;border-radius:50%;}
   @keyframes spin{to{transform:rotate(360deg);}}
@@ -455,7 +455,7 @@
     </button>
     <div class="sub">새우깡으로</div>
     <h1>한계돌파!</h1>
-    <div class="pigeon-stage"><svg viewBox="-60 -60 120 120" id="titlePigeon"></svg></div>
+    <div class="pigeon-stage"><canvas id="titlePigeon"></canvas></div>
     <div class="btns">
       <button class="btn" id="startBtn">▶ 챕터 선택</button>
       <button class="btn alt small" id="howBtn">조작법 · 규칙</button>
@@ -1566,42 +1566,37 @@ function drawCostumeWeaponOverlay(ctx, px, py, scale, facing, eq, attackPulse){
   }
 }
 
-// Fill title screen SVG with pigeon
-function renderTitlePigeon(){
-  const svg = document.getElementById('titlePigeon');
-  svg.innerHTML = `
-    <g transform="translate(0,4)">
-      <ellipse cx="0" cy="52" rx="32" ry="5" fill="#000" opacity="0.5"/>
-      <rect x="-10" y="34" width="7" height="18" fill="#FFA500"/>
-      <rect x="3" y="34" width="7" height="18" fill="#FFA500"/>
-      <polygon points="-15,50 0,50 -8,56" fill="#FFA500"/>
-      <polygon points="0,50 15,50 8,56" fill="#FFA500"/>
-      <ellipse cx="0" cy="10" rx="32" ry="28" fill="#8B95A1"/>
-      <ellipse cx="0" cy="14" rx="22" ry="18" fill="#C9D1DB"/>
-      <rect x="-46" y="-8" width="22" height="16" fill="#6D7680" rx="3"/>
-      <rect x="-44" y="-34" width="16" height="26" fill="#6D7680" rx="3"/>
-      <rect x="-42" y="-30" width="8" height="14" fill="#A8B4C0" rx="2"/>
-      <circle cx="-36" cy="-36" r="10" fill="#5C6670"/>
-      <rect x="-42" y="-40" width="12" height="2" fill="#2E3440" rx="1"/>
-      <rect x="-42" y="-35" width="12" height="1.5" fill="#2E3440" rx=".8"/>
-      <rect x="24" y="-8" width="22" height="16" fill="#6D7680" rx="3"/>
-      <rect x="28" y="-34" width="16" height="26" fill="#6D7680" rx="3"/>
-      <rect x="34" y="-30" width="8" height="14" fill="#A8B4C0" rx="2"/>
-      <circle cx="36" cy="-36" r="10" fill="#5C6670"/>
-      <rect x="30" y="-40" width="12" height="2" fill="#2E3440" rx="1"/>
-      <rect x="30" y="-35" width="12" height="1.5" fill="#2E3440" rx=".8"/>
-      <circle cx="0" cy="-22" r="16" fill="#8B95A1"/>
-      <circle cx="-5" cy="-26" r="6" fill="#C9D1DB" opacity=".7"/>
-      <polygon points="-2,-20 16,-16 -2,-12" fill="#FFA500"/>
-      <circle cx="-4" cy="-26" r="3" fill="#000"/>
-      <circle cx="-3" cy="-27" r="1" fill="#fff"/>
-      <path d="M-11 -33 L-1 -30" stroke="#000" stroke-width="3.2" stroke-linecap="round"/>
-      <path d="M-5 -37 L-2 -44" stroke="#5C6670" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M0 -38 L0 -45" stroke="#5C6670" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M5 -37 L3 -44" stroke="#5C6670" stroke-width="3.5" stroke-linecap="round"/>
-    </g>`;
+// Title-screen pigeon — drawn into a canvas via the same drawPigeon used in-game so the pigeon
+// shows the player's currently-equipped costumes on the start screen. Runs each frame from the
+// main loop while the title scene is visible.
+function drawTitlePigeonFrame(){
+  const c = document.getElementById('titlePigeon');
+  if(!c) return;
+  // Skip when the title is hidden (display:none → offsetParent null).
+  if(c.offsetParent === null) return;
+  const cssW = c.clientWidth, cssH = c.clientHeight;
+  if(cssW <= 0 || cssH <= 0) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if(c.width !== cssW * dpr || c.height !== cssH * dpr){
+    c.width = cssW * dpr;
+    c.height = cssH * dpr;
+  }
+  const ctx2 = c.getContext('2d');
+  ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx2.clearRect(0, 0, cssW, cssH);
+  // Fake player carrying the current costume refs — drawPigeon reads .costumes for overlays.
+  // Using a stable fireRate/reloadT keeps the attack pulse from ever ticking on the title pigeon.
+  const fakePlayer = {
+    fireRate: 1, reloadT: 1, vx: 0, vy: 0,
+    costumes: buildPlayerCostumeRefs()
+  };
+  const cx = cssW / 2;
+  // Pigeon footprint is roughly 110px tall at scale 1, with origin at body center; we anchor a
+  // bit below center so the head + crown area has headroom in the canvas frame.
+  const scale = Math.min(cssW, cssH) / 130;
+  const cy = cssH * 0.62;
+  drawPigeon(ctx2, cx, cy, scale, 1, state.time * 1.4, false, 1, fakePlayer);
 }
-renderTitlePigeon();
 
 // Draw a saeukkang (shrimp-chip bag) — used as projectile
 function drawSaeukkang(ctx, x, y, angle, scale){
@@ -3430,6 +3425,13 @@ function gameOver(){
 
 // ---------- Update ----------
 function update(dt){
+  // Tick the global time clock for menu scenes too — the title pigeon, costume previews, and
+  // shop screens use state.time for breathing/halo animation, so freezing it would lock them solid.
+  // The gameplay simulation still bails below the early return for non-playing scenes.
+  if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop'){
+    state.time += dt;
+    return;
+  }
   if(state.scene!=='playing') return;
   const p = state.player;
   state.time += dt;
@@ -5536,6 +5538,9 @@ function loop(ts){
   update(dt);
   render();
   syncBodyScene();
+  // Title pigeon — drawn separately into its own canvas so the player sees their equipped costumes
+  // on the start screen. Drawing every frame keeps breath/blink/animations live.
+  if(state.scene === 'title') drawTitlePigeonFrame();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
