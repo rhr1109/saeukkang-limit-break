@@ -183,6 +183,19 @@
   .statline{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed rgba(255,224,102,.3);font-size:13px;}
   .statline b{color:#FFE066;}
 
+  /* Cinematic victory — the canvas scene fills the upper portion of the screen; the modal is a
+     compact bottom-anchored panel that doesn't black out the celebration behind it. */
+  #victory{background:transparent;align-items:flex-end;justify-content:center;padding:0 14px calc(env(safe-area-inset-bottom, 0px) + 14px) 14px;pointer-events:none;}
+  #victory .card{pointer-events:auto;background:linear-gradient(180deg,rgba(40,15,70,.92),rgba(15,2,30,.97));border-color:#FFD43B;box-shadow:0 -10px 40px rgba(0,0,0,.6),0 0 22px rgba(255,224,102,.4);max-width:560px;width:100%;padding:14px 18px;max-height:42vh;overflow-y:auto;}
+  #victory .card h2{background:linear-gradient(90deg,#FFE066,#FF6B6B,#E599F7,#74C0FC,#FFE066);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;animation:rainbowText 4s linear infinite;font-size:min(6.5vw,22px);margin:0 0 4px;}
+  #victory .card .sub{margin-bottom:8px;font-size:11px;}
+  #victory .card .statline{padding:3px 0;font-size:12px;}
+  @keyframes rainbowText{to{background-position:200% center;}}
+  @media (max-width:480px){
+    #victory .card{max-height:38vh;padding:12px 14px;}
+    #victory .card h2{font-size:18px;}
+  }
+
   /* Chapter select */
   #chapterSelect{background:radial-gradient(ellipse at 50% 30%, rgba(60,28,12,.96), rgba(18,3,0,.96) 70%, rgba(5,0,0,.98) 100%);flex-direction:column;gap:10px;padding:calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 10px);overflow-y:auto;align-items:stretch;justify-content:flex-start;}
   #chapterSelect .cs-header{display:flex;align-items:center;gap:10px;padding:4px 6px 10px;flex:0 0 auto;}
@@ -202,6 +215,35 @@
   .ch-card .ch-name{font-size:15px;font-weight:900;letter-spacing:-.5px;text-shadow:0 1px 0 rgba(0,0,0,.45);}
   .ch-card .ch-mult{font-size:10px;opacity:.9;margin-top:3px;font-weight:700;}
   .ch-card .ch-lock{font-size:26px;margin:4px 0;filter:drop-shadow(0 2px 0 rgba(0,0,0,.5));}
+
+  /* Chapter select v2 — focused hero card + horizontal cleared strip + collapsed locked preview.
+     The full 50-grid stays available behind a "전체 보기" toggle for replays/picking earlier chapters. */
+  #chapterSelect .cs-tabs{display:flex;gap:6px;justify-content:center;margin:2px 0 10px;}
+  #chapterSelect .cs-tab{background:rgba(0,0,0,.4);border:2px solid #FFD43B;color:#FFE066;font-weight:900;font-family:inherit;font-size:13px;padding:8px 16px;border-radius:999px;cursor:pointer;letter-spacing:-.2px;}
+  #chapterSelect .cs-tab.on{background:linear-gradient(180deg,#FFD43B,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 3px 0 rgba(0,0,0,.4);}
+  #chapterSelect .cs-focus{max-width:520px;width:100%;margin:0 auto 14px;display:flex;flex-direction:column;gap:8px;}
+  .ch-hero{position:relative;background:linear-gradient(180deg,var(--ch-color,#FFD43B) 0%, rgba(0,0,0,.55) 100%);border:4px solid #FFF9DB;border-radius:20px;padding:22px 18px;text-align:center;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 0 28px rgba(255,255,255,.12);overflow:hidden;}
+  .ch-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%, rgba(255,255,255,.35) 0%, transparent 60%);pointer-events:none;}
+  .ch-hero::after{content:'';position:absolute;inset:-50%;background:conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,.18) 12deg, transparent 24deg, transparent 60deg, rgba(255,255,255,.18) 72deg, transparent 84deg);animation:spin 18s linear infinite;pointer-events:none;}
+  .ch-hero .h-num{font-size:13px;font-weight:900;letter-spacing:3px;color:rgba(255,255,255,.9);text-shadow:0 2px 0 rgba(0,0,0,.5);position:relative;z-index:1;}
+  .ch-hero .h-name{font-size:min(7.5vw,32px);font-weight:900;letter-spacing:-.5px;color:#FFF9DB;text-shadow:0 3px 0 rgba(0,0,0,.6),0 0 22px rgba(255,255,255,.3);margin:4px 0 8px;position:relative;z-index:1;line-height:1.1;}
+  .ch-hero .h-stats{font-size:13px;color:#fff;opacity:.95;font-weight:700;margin-bottom:14px;text-shadow:0 1px 0 rgba(0,0,0,.5);position:relative;z-index:1;}
+  .ch-hero .h-play{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#FF6B6B,#C92A2A);border:3px solid #FFE066;color:#fff;font-family:inherit;font-weight:900;font-size:18px;padding:14px 32px;border-radius:14px;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.25);text-shadow:0 1px 0 rgba(0,0,0,.5);position:relative;z-index:1;letter-spacing:-.3px;animation:heroPulse 2.4s ease-in-out infinite;}
+  @keyframes heroPulse{0%,100%{box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.25),0 0 0 0 rgba(255,224,102,.7);}50%{box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.25),0 0 0 10px rgba(255,224,102,0);}}
+  .ch-hero .h-play:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.25);animation:none;}
+  .ch-hero .h-celebration{position:absolute;top:8px;right:12px;background:rgba(0,0,0,.55);color:#FFE066;font-size:11px;font-weight:900;padding:4px 10px;border-radius:999px;border:2px solid #FFE066;z-index:1;}
+  .ch-hero .h-locked{font-size:14px;color:#ADB5BD;background:rgba(0,0,0,.45);padding:8px 14px;border-radius:10px;display:inline-block;font-weight:700;}
+
+  /* Cleared chapter mini-strip — horizontal scroll, compact tiles */
+  #chapterSelect .cs-section-title{font-size:12px;color:#FFE066;font-weight:900;letter-spacing:1px;padding:0 4px;margin:6px 0 4px;text-align:left;max-width:520px;width:100%;margin-left:auto;margin-right:auto;}
+  .cs-strip{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 6px 14px;max-width:520px;width:100%;margin:0 auto;scrollbar-width:none;}
+  .cs-strip::-webkit-scrollbar{display:none;}
+  .cs-mini{flex:0 0 auto;width:100px;padding:8px 6px;border-radius:12px;border:2px solid #FFD43B;background:linear-gradient(180deg,var(--ch-color,#C92A2A),#5A1A04);color:#FFE066;font-family:inherit;cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:2px;box-shadow:0 4px 0 rgba(0,0,0,.4);position:relative;}
+  .cs-mini:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.4);}
+  .cs-mini.locked{background:linear-gradient(180deg,#343A40,#1A1D20);border-color:#6C757D;color:#ADB5BD;filter:grayscale(.6);cursor:default;}
+  .cs-mini .m-num{font-size:9px;letter-spacing:1px;opacity:.85;font-weight:700;}
+  .cs-mini .m-name{font-size:11px;font-weight:900;letter-spacing:-.3px;text-shadow:0 1px 0 rgba(0,0,0,.5);line-height:1.15;}
+  .cs-mini.cleared::after{content:'✓';position:absolute;top:4px;right:6px;color:#51CF66;font-size:12px;font-weight:900;}
 
   /* Stage/wave entry toast — DOM-rendered so it always sits above the inventory pill bar (z-index 2)
      and any item glow on the canvas. Slides in from the top, fades out near the end. */
@@ -395,8 +437,20 @@
       <h2>챕터 선택</h2>
       <div style="width:40px;"></div>
     </div>
-    <div class="cs-info">잠금 해제된 챕터부터 원하는 난이도를 선택하세요. 각 챕터는 3웨이브 + 최종 보스로 진행됩니다.</div>
-    <div class="grid" id="chapterGrid"></div>
+    <div class="cs-tabs">
+      <button class="cs-tab on" id="csTabFocus" type="button">⭐ 진행</button>
+      <button class="cs-tab" id="csTabAll" type="button">🗺 전체 보기</button>
+    </div>
+    <!-- Focused view: hero card + cleared strip + locked preview -->
+    <div id="csFocusView">
+      <div class="cs-focus" id="csFocusHero"></div>
+      <div class="cs-section-title">🏆 정복한 챕터 (다시 도전 가능)</div>
+      <div class="cs-strip" id="csClearedStrip"></div>
+      <div class="cs-section-title">🔒 다가올 챕터</div>
+      <div class="cs-strip" id="csUpcomingStrip"></div>
+    </div>
+    <!-- Legacy view: full 50-card grid for free navigation -->
+    <div class="grid hidden" id="chapterGrid"></div>
   </div>
 
   <!-- Costume screen — gacha + inventory + equip -->
@@ -521,15 +575,16 @@
     </div>
   </div>
 
-  <!-- Final victory -->
+  <!-- Final victory — modal is a slim bottom panel so the cinematic canvas scene
+       (drawn in render() when scene === 'victory') stays visible behind the stats. -->
   <div id="victory" class="modal hidden">
-    <div class="card" style="max-width:420px;text-align:center;background:linear-gradient(180deg,#5A1A04,#120300);">
-      <h2 style="color:#FFE066;">🏆 한계돌파 성공!</h2>
-      <div class="sub">모든 스테이지를 정복했습니다!</div>
-      <div id="vStats" style="margin:12px 0;"></div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button class="btn" id="vAgainBtn">🔁 처음부터 다시 플레이</button>
-        <button class="btn alt" id="vHomeBtn">🏠 홈으로</button>
+    <div class="card" style="max-width:520px;text-align:center;">
+      <h2>🏆 한계돌파 성공!</h2>
+      <div class="sub" style="color:#FFE066;font-weight:700;">전 챕터를 정복한 전설의 비둘기</div>
+      <div id="vStats" style="margin:10px 0;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" id="vAgainBtn" style="flex:1;min-width:140px;">🔁 처음부터 다시</button>
+        <button class="btn alt" id="vHomeBtn" style="flex:1;min-width:140px;">🏠 홈으로</button>
       </div>
     </div>
   </div>
@@ -4436,6 +4491,405 @@ function drawAshPile(x, y, h){
   ctx.beginPath(); ctx.ellipse(x-1, y-1, 4, 2, 0, 0, Math.PI*2); ctx.fill();
 }
 
+// ── Cinematic ending scene ──
+// Plays whenever state.scene === 'victory'. Composes a layered scene:
+//   • Star-field + aurora gradient (already drawn by the gradient before render returns)
+//   • Big rotating Earth at the bottom-center
+//   • Giant pigeon (with equipped costumes) standing on top of the globe with a victory pose
+//   • Bowing defeated cats/mice/crows arrayed behind the globe
+//   • Pulsing crown above the pigeon, surrounded by orbiting stars
+//   • Fireworks bursting from random screen positions
+//   • Confetti drifting downward
+// All time-based animation reads from state.time so it loops smoothly across frames.
+const _victory = {
+  fireworks: [],
+  confetti: [],
+  bowEnemies: null, // built once on first frame, cached for stable layout
+  initT: 0
+};
+function drawVictoryScene(){
+  const t = state.time;
+  if(_victory.bowEnemies == null) initVictoryScene();
+  // ── Sky overlay — dark cosmic violet so the celebration glows against it
+  ctx.save();
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, 'rgba(10,2,30,.85)');
+  sky.addColorStop(0.5, 'rgba(60,18,90,.65)');
+  sky.addColorStop(1, 'rgba(120,40,140,.4)');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0,0,W,H);
+  // Twinkling stars
+  for(let i=0;i<70;i++){
+    const sx = ((i*89) % W);
+    const sy = ((i*151) % (H*0.7));
+    const tw = 0.4 + 0.6*Math.abs(Math.sin(t*2 + i*0.7));
+    ctx.globalAlpha = tw;
+    ctx.fillStyle = i%5===0 ? '#FFE066' : '#fff';
+    const r = i%7===0 ? 2.2 : 1.2;
+    ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // ── Aurora ribbons ──
+  ctx.save();
+  for(let band=0; band<3; band++){
+    const grad = ctx.createLinearGradient(0, H*0.15 + band*40, W, H*0.15 + band*40);
+    const cols = [['#FF6B6B','#E599F7','#74C0FC'],['#FFD43B','#A5D8FF','#B197FC'],['#74C0FC','#FFE066','#F783AC']][band];
+    grad.addColorStop(0, cols[0]+'00');
+    grad.addColorStop(0.5, cols[1]+'66');
+    grad.addColorStop(1, cols[2]+'00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    const yBase = H*(0.18 + band*0.08);
+    const wave = Math.sin(t*0.5 + band*1.2)*30;
+    ctx.moveTo(0, yBase);
+    for(let x=0; x<=W; x+=20){
+      const yy = yBase + Math.sin(x*0.013 + t*(0.6 + band*0.2))*30 + wave;
+      ctx.lineTo(x, yy);
+    }
+    ctx.lineTo(W, yBase + 60);
+    for(let x=W; x>=0; x-=20){
+      const yy = yBase + 60 + Math.sin(x*0.013 + t*(0.4 + band*0.15))*22;
+      ctx.lineTo(x, yy);
+    }
+    ctx.closePath();
+    ctx.globalAlpha = 0.35;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // ── Layout — three vertical bands: headline (top 18%), pigeon+globe (middle band),
+  // modal (bottom ~38%). Computed from viewport so layout stays clean across phone/desktop.
+  const headlineEndsAt = H * 0.20;
+  const modalStartsAt = H * 0.62;
+  const sceneTop = headlineEndsAt;
+  const sceneBottom = modalStartsAt;
+  // Globe at the bottom of the scene band, pigeon above it, all bounded inside the scene window.
+  const earthCx = W/2;
+  const earthR = Math.min(W*0.16, (sceneBottom - sceneTop)*0.32, 110);
+  const earthCy = sceneBottom - earthR * 0.55;
+  drawVictoryEarth(earthCx, earthCy, earthR, t);
+
+  // ── Bowing enemies arranged in a semicircle behind the globe ──
+  for(const be of _victory.bowEnemies){
+    const ex = earthCx + Math.cos(be.angle) * (earthR + be.distance);
+    const ey = earthCy - Math.abs(Math.sin(be.angle)) * earthR * 0.55 + be.yJitter;
+    drawBowingEnemy(ex, ey, be.kind, be.scale, t * 1.2 + be.phase);
+  }
+
+  // ── Giant pigeon on top of the globe — uses player costumes if present, else fresh refs.
+  // Scale is bounded by the available scene band height so the pigeon never breaches the headline
+  // or the modal. Floor at 1.0, ceiling computed from the scene window.
+  const pigCx = earthCx;
+  const sceneAvail = (earthCy - earthR * 0.92) - sceneTop;
+  // Pigeon body is ~110px tall at scale 1; reserve ~80px for the crown above. So the largest
+  // safe scale is sceneAvail / (110 + 80).
+  const pigScaleMax = Math.max(1.0, Math.min(2.0, sceneAvail / 190));
+  const pigScale = pigScaleMax;
+  const pigBodyHalfH = 55 * pigScale;
+  const pigCy = earthCy - earthR * 0.92 - pigBodyHalfH * 0.4;
+  const fakePlayer = {
+    fireRate: 1, reloadT: 0, vx: 0, vy: 0,
+    costumes: state.player ? state.player.costumes : buildPlayerCostumeRefs()
+  };
+  drawPigeon(ctx, pigCx, pigCy, pigScale, 1, t * 1.5, false, 1.4, fakePlayer);
+
+  // ── Crown floating above pigeon ── (compact distance so it stays under the headline)
+  const crownY = Math.max(sceneTop + 30, pigCy - 60*pigScale);
+  drawFloatingCrown(pigCx, crownY, pigScale, t);
+
+  // ── Fireworks ──
+  spawnVictoryFireworks(t);
+  for(const fw of _victory.fireworks){
+    drawFireworkParticle(fw, t);
+  }
+  _victory.fireworks = _victory.fireworks.filter(fw => fw.t > 0);
+
+  // ── Confetti drift ──
+  spawnVictoryConfetti(t);
+  for(const c of _victory.confetti){
+    c.x += c.vx;
+    c.y += c.vy;
+    c.rot += c.vr;
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.rot);
+    ctx.fillStyle = c.color;
+    ctx.fillRect(-c.size, -c.size*0.4, c.size*2, c.size*0.8);
+    ctx.restore();
+  }
+  _victory.confetti = _victory.confetti.filter(c => c.y < H + 30);
+
+  // ── Big "전 세계 정복!" headline near the top of the screen ──
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const headlineY = H * 0.10;
+  const fs = Math.max(26, Math.min(60, Math.round(Math.min(W, H*1.6) * 0.058)));
+  // Earth emoji to the left of the text — drawn separately so the text outline doesn't
+  // wrap the emoji and create a weird halo around it.
+  ctx.font = `900 ${fs}px sans-serif`;
+  const text = '전 세계 정복!';
+  const textW = ctx.measureText(text).width;
+  const emojiSize = fs * 0.95;
+  const gap = fs * 0.25;
+  const totalW = emojiSize + gap + textW;
+  const startX = W/2 - totalW/2;
+  const emojiX = startX + emojiSize/2;
+  const textX = startX + emojiSize + gap + textW/2;
+  // Earth emoji — floating slightly above the text baseline to feel celebratory.
+  const eBob = Math.sin(t*1.8)*4;
+  ctx.font = `${emojiSize}px sans-serif`;
+  ctx.shadowColor = 'rgba(116,192,252,0.65)';
+  ctx.shadowBlur = 18;
+  ctx.fillText('🌍', emojiX, headlineY + eBob);
+  ctx.shadowBlur = 0;
+  // Title text — yellow with red drop shadow + glow
+  ctx.font = `900 ${fs}px sans-serif`;
+  ctx.shadowColor = 'rgba(255,224,102,0.8)';
+  ctx.shadowBlur = 22;
+  ctx.fillStyle = '#FFE066';
+  ctx.fillText(text, textX, headlineY);
+  ctx.shadowBlur = 0;
+  // Outline punch
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#5A1A04';
+  ctx.strokeText(text, textX, headlineY);
+  ctx.fillText(text, textX, headlineY);
+  // Sub-tagline
+  ctx.font = `700 ${Math.round(fs*0.36)}px sans-serif`;
+  ctx.fillStyle = '#FFF9DB';
+  ctx.shadowColor = 'rgba(0,0,0,0.7)';
+  ctx.shadowBlur = 6;
+  ctx.fillText('전설의 비둘기, 새우깡으로 한계를 돌파하다', W/2, headlineY + fs*0.85);
+  ctx.restore();
+}
+
+function initVictoryScene(){
+  _victory.bowEnemies = [];
+  // Five enemies arranged on either side of the globe, bowing.
+  const kinds = ['cat','mouse','crow','dog','cat','mouse','crow'];
+  const cx = W/2;
+  for(let i=0; i<7; i++){
+    const sign = i%2===0 ? -1 : 1;
+    const layer = Math.floor(i/2);
+    const angle = sign * (Math.PI*0.30 + layer*0.18);
+    _victory.bowEnemies.push({
+      kind: kinds[i],
+      angle,
+      distance: 30 + layer*40,
+      scale: 1.4 - layer*0.18,
+      yJitter: -layer*8,
+      phase: i*0.7
+    });
+  }
+  _victory.initT = state.time;
+  // Pre-seed some fireworks so the scene isn't empty on first frame
+  for(let i=0;i<5;i++){
+    _victory.fireworks.push(makeFirework(Math.random()*W, H*0.2 + Math.random()*H*0.4));
+  }
+}
+
+function makeFirework(x, y){
+  const colorPicks = ['#FFE066','#FF6B6B','#74C0FC','#E599F7','#A5D6A7','#FFA94D'];
+  const color = colorPicks[Math.floor(Math.random()*colorPicks.length)];
+  const parts = [];
+  const n = 18 + Math.floor(Math.random()*10);
+  for(let i=0;i<n;i++){
+    const a = (i/n)*Math.PI*2;
+    const sp = 80 + Math.random()*120;
+    parts.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp });
+  }
+  return { x, y, parts, color, t: 1.2, max: 1.2 };
+}
+
+function spawnVictoryFireworks(t){
+  // Stagger spawns so we always have ~3-5 active.
+  if(_victory.fireworks.length < 5 && Math.random() < 0.06){
+    _victory.fireworks.push(makeFirework(
+      80 + Math.random()*(W-160),
+      H*0.15 + Math.random()*H*0.45
+    ));
+  }
+}
+
+function drawFireworkParticle(fw){
+  const lr = fw.t / fw.max;
+  ctx.save();
+  ctx.fillStyle = fw.color;
+  ctx.globalAlpha = lr;
+  for(const p of fw.parts){
+    p.x += p.vx * 0.016;
+    p.y += p.vy * 0.016 + (1-lr)*1.5;
+    p.vx *= 0.96;
+    p.vy *= 0.96;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2.5*lr + 0.6, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = lr*0.6;
+  ctx.fillStyle = '#fff';
+  for(const p of fw.parts){
+    ctx.beginPath(); ctx.arc(p.x, p.y, 1.2*lr, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  fw.t -= 0.016;
+}
+
+function spawnVictoryConfetti(){
+  if(_victory.confetti.length < 80 && Math.random() < 0.4){
+    const colors = ['#FFE066','#FF6B6B','#74C0FC','#E599F7','#A5D6A7','#FFA94D','#fff'];
+    _victory.confetti.push({
+      x: Math.random()*W,
+      y: -10,
+      vx: -0.6 + Math.random()*1.2,
+      vy: 1.5 + Math.random()*1.6,
+      rot: Math.random()*Math.PI*2,
+      vr: -0.08 + Math.random()*0.16,
+      size: 3 + Math.random()*3,
+      color: colors[Math.floor(Math.random()*colors.length)]
+    });
+  }
+}
+
+function drawVictoryEarth(cx, cy, r, t){
+  ctx.save();
+  // Outer glow
+  const glow = ctx.createRadialGradient(cx, cy, r*0.9, cx, cy, r*1.4);
+  glow.addColorStop(0, 'rgba(116,192,252,0.55)');
+  glow.addColorStop(1, 'rgba(116,192,252,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(cx, cy, r*1.4, 0, Math.PI*2); ctx.fill();
+  // Ocean
+  const ocean = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, r*0.2, cx, cy, r);
+  ocean.addColorStop(0, '#74C0FC');
+  ocean.addColorStop(0.6, '#1864AB');
+  ocean.addColorStop(1, '#0B3A6B');
+  ctx.fillStyle = ocean;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  // Continents (simple deterministic blobs that "rotate" via offset)
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
+  const rotPhase = t * 0.15;
+  const continents = [
+    { ox:-0.4, oy:-0.2, w:0.55, h:0.32 },
+    { ox: 0.25, oy: 0.05, w:0.40, h:0.28 },
+    { ox: 0.55, oy:-0.35, w:0.35, h:0.20 },
+    { ox:-0.15, oy: 0.45, w:0.50, h:0.25 },
+    { ox: 0.70, oy: 0.40, w:0.30, h:0.18 },
+  ];
+  for(let lap=0; lap<2; lap++){
+    const slide = ((rotPhase + lap) % 2 - 1) * r * 2.4; // wraps around the globe
+    for(const cc of continents){
+      const px = cx + cc.ox*r + slide;
+      const py = cy + cc.oy*r;
+      // Land green
+      ctx.fillStyle = '#3F8C4D';
+      ctx.beginPath();
+      ctx.ellipse(px, py, cc.w*r*0.6, cc.h*r*0.6, 0, 0, Math.PI*2);
+      ctx.fill();
+      // Highlight
+      ctx.fillStyle = '#7BC07A';
+      ctx.beginPath();
+      ctx.ellipse(px - cc.w*r*0.15, py - cc.h*r*0.2, cc.w*r*0.3, cc.h*r*0.3, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+  // Cloud streaks
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = '#fff';
+  for(let cl=0; cl<6; cl++){
+    const slide2 = ((rotPhase*1.4 + cl*0.5) % 2 - 1) * r * 2.4;
+    const cy2 = cy + (cl - 3) * (r*0.20);
+    ctx.beginPath();
+    ctx.ellipse(cx + slide2, cy2, r*0.30, r*0.06, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore(); // unclip
+
+  // Atmosphere highlight
+  ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+  ctx.lineWidth = r*0.04;
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.98, Math.PI*1.05, Math.PI*1.55); ctx.stroke();
+  // Equator line
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(cx, cy, r, r*0.2, 0, 0, Math.PI*2); ctx.stroke();
+  ctx.restore();
+}
+
+function drawFloatingCrown(cx, cy, scale, t){
+  const bob = Math.sin(t*2)*4;
+  const cyBob = cy + bob;
+  ctx.save();
+  // Halo
+  const halo = ctx.createRadialGradient(cx, cyBob, 4, cx, cyBob, 60*scale);
+  halo.addColorStop(0, 'rgba(255,224,102,0.7)');
+  halo.addColorStop(1, 'rgba(255,224,102,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cyBob, 60*scale, 0, Math.PI*2); ctx.fill();
+  // Orbiting stars
+  for(let i=0;i<5;i++){
+    const a = t*1.6 + (i/5)*Math.PI*2;
+    const ox = cx + Math.cos(a)*38*scale;
+    const oy = cyBob + Math.sin(a)*18*scale;
+    ctx.fillStyle = i%2 ? '#FFD43B' : '#FFF9DB';
+    ctx.beginPath(); ctx.arc(ox, oy, 4*scale, 0, Math.PI*2); ctx.fill();
+  }
+  // Crown body — drawn at scale relative to pigeon
+  ctx.save();
+  ctx.translate(cx, cyBob);
+  ctx.scale(scale*1.6, scale*1.6);
+  ctx.fillStyle = '#FFD700';
+  ctx.beginPath();
+  ctx.moveTo(-16, 8); ctx.lineTo(-12, -6); ctx.lineTo(-6, 4);
+  ctx.lineTo(0, -12); ctx.lineTo(6, 4); ctx.lineTo(12, -6); ctx.lineTo(16, 8);
+  ctx.lineTo(-16, 8);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#7A4F00'; ctx.lineWidth = 1.5; ctx.stroke();
+  // Gemstones
+  ctx.fillStyle = '#FF1744';
+  ctx.beginPath(); ctx.arc(0, 2, 2.6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#74C0FC';
+  ctx.beginPath(); ctx.arc(-9, 3, 1.6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(9, 3, 1.6, 0, Math.PI*2); ctx.fill();
+  // Base band
+  ctx.fillStyle = '#FFC400';
+  ctx.fillRect(-16, 6, 32, 3);
+  ctx.restore();
+  ctx.restore();
+}
+
+function drawBowingEnemy(x, y, kind, scale, phase){
+  // Reuse drawEnemy but in a "bowing" pose — translate down a bit and tilt forward via a faux rotation.
+  ctx.save();
+  ctx.translate(x, y);
+  // Soft sway + slow bow
+  const bowAmt = 0.25 + Math.sin(phase)*0.15;
+  ctx.rotate(bowAmt);
+  ctx.scale(scale, scale);
+  // Build a fake enemy object that drawEnemy can consume
+  const e = {
+    x: 0, y: 0, kind, hp: 1, maxHp: 1, hitT: 0, size: 1,
+    bobSeed: phase, shockTelegraph: 0, rangedCd: 99
+  };
+  drawEnemy(ctx, e, phase * 2);
+  ctx.restore();
+  // Speech-bubble "..." dots above head — sign of submission
+  ctx.save();
+  ctx.fillStyle = '#FFF9DB';
+  ctx.globalAlpha = 0.7;
+  for(let i=0;i<3;i++){
+    ctx.beginPath();
+    ctx.arc(x + (i-1)*5, y - 30*scale, 2, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 function render(){
   ctx.clearRect(0,0,W,H);
   // Background — arcade burst gradient from thumbnail
@@ -4522,6 +4976,12 @@ function render(){
   ctx.fillRect(0,0,W,H);
 
   if(state.scene==='title' || state.scene==='shop' || state.scene==='chapterSelect' || state.scene==='costume') return; // overlay handles it
+  // Cinematic victory scene — full-screen canvas celebration that plays behind the modal stats panel.
+  // Drawn instead of the gameplay world so the player sees the pigeon, not a paused arena.
+  if(state.scene === 'victory'){
+    drawVictoryScene();
+    return;
+  }
 
   const themeIdx = themeId();
 
@@ -4829,6 +5289,13 @@ function syncBodyScene(){
   if(state.scene !== _lastScene){
     _lastScene = state.scene;
     document.body.dataset.scene = state.scene;
+    // Whenever we leave the cinematic ending, drop its caches so the next entry recomputes
+    // based on the current viewport (player may have rotated their phone, etc.).
+    if(state.scene !== 'victory'){
+      _victory.bowEnemies = null;
+      _victory.fireworks = [];
+      _victory.confetti = [];
+    }
   }
 }
 function loop(ts){
@@ -4883,6 +5350,8 @@ document.getElementById('csBackBtn').addEventListener('click', ()=>{
   document.getElementById('title').classList.remove('hidden');
   updateTitleCoinDisplay();
 });
+document.getElementById('csTabFocus').addEventListener('click', ()=> setChapterSelectMode('focus'));
+document.getElementById('csTabAll').addEventListener('click', ()=> setChapterSelectMode('all'));
 document.getElementById('retryBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); startGame(state.chapter); });
 document.getElementById('goTitleBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); backToTitle(); });
 document.getElementById('vAgainBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); startGame(1); });
@@ -4896,28 +5365,12 @@ document.getElementById('ccNextBtn').addEventListener('click', ()=>{
     document.getElementById('victory').classList.remove('hidden');
     return;
   }
-  // Advance to next chapter: items/level reset (per spec) so each chapter is a fresh build.
-  // Score & kills stay cumulative — that matches the stats shown on the chapter-cleared/victory screens.
-  const nextChapter = state.chapter + 1;
-  state.chapter = nextChapter;
-  resetPlayer();
-  applyChapterStartBuff();
-  state.coinsThisRun = 0;
-  state.earnedCostumeThisChapter = null;
-  state.enemies = []; state.bullets = []; state.gems = []; state.items = [];
-  state.particles = []; state.damageNums = []; state.orbits = []; state.enemyBullets = [];
-  state.pickupTexts = [];
-  state.toastBanner = null;
-  state.abilities = { orbit:0, bomb:0, lightning:0, heal:0, shield:0 };
-  state.abilityTimers = { orbit:0, bomb:0, lightning:0, heal:0 };
-  killsSinceDrop = 0;
-  _invBarCache = null;
-  updateInvBar();
-  initChapter();
-  state.scene = 'playing';
-  updateHUD(); // refresh chapter/wave HUD before the level-up modal pauses updates
-  bgmStart();
-  showLevelUp(); // first card pick of the new chapter
+  // After a clear, the player goes back to the chapter-select where the just-unlocked
+  // chapter is now the hero "play" card. This avoids a hidden auto-jump and gives the
+  // player a clear sense of progression — they can also re-equip costumes between runs.
+  document.getElementById('hud').classList.add('hidden');
+  bgmStop();
+  openChapterSelect();
 });
 document.getElementById('ccHomeBtn').addEventListener('click', ()=>{
   document.getElementById('chapterCleared').classList.add('hidden');
@@ -4947,7 +5400,9 @@ function openChapterSelect(){
   if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
   state.scene = 'chapterSelect';
   document.getElementById('title').classList.add('hidden');
+  renderChapterFocus();
   renderChapterGrid();
+  setChapterSelectMode('focus');
   document.getElementById('chapterSelect').classList.remove('hidden');
   if(!bgmTimer) bgmStart();
 }
@@ -5328,6 +5783,117 @@ function renderChapterGrid(){
   }
 }
 
+// Focused chapter view — hero card for the next playable chapter, plus a horizontal strip of
+// cleared chapters (re-playable) and one of upcoming chapters (locked preview). Replaces the
+// 50-tile scroll for the common case of "I just cleared something, what's next".
+function renderChapterFocus(){
+  const heroEl = document.getElementById('csFocusHero');
+  const clearedStrip = document.getElementById('csClearedStrip');
+  const upcomingStrip = document.getElementById('csUpcomingStrip');
+  const cleared = progress.clearedChapter || 0;
+  const allDone = cleared >= MAX_CHAPTERS;
+  // The "current" focus is the next un-cleared chapter, capped at MAX.
+  const focusCh = Math.min(MAX_CHAPTERS, cleared + 1);
+  const color = chapterColor(focusCh);
+  // Compute scaling preview without mutating state.
+  const oldCh = state.chapter; state.chapter = focusCh;
+  const chm = chapterMult();
+  state.chapter = oldCh;
+  const isFresh = cleared === 0;
+  const heroLabel = allDone ? '🌟 모든 챕터 정복!' : (isFresh ? '⚔ 첫 도전' : `${cleared}챕터 정복 — 다음 도전`);
+  heroEl.innerHTML = '';
+  const hero = document.createElement('div');
+  hero.className = 'ch-hero';
+  hero.style.setProperty('--ch-color', color);
+  if(allDone){
+    // Player has cleared everything — show a celebration card and a "최종 엔딩 보기" button that
+    // routes to the cinematic victory screen instead of starting a new run.
+    hero.innerHTML = `
+      <div class="h-celebration">🏆 한계돌파</div>
+      <div class="h-num">CHAPTER ${MAX_CHAPTERS}</div>
+      <div class="h-name">${chapterName(MAX_CHAPTERS)}</div>
+      <div class="h-stats">전 챕터를 정복한 전설의 비둘기</div>
+      <button class="h-play" id="heroPlayBtn">🌟 최종 엔딩 다시 보기</button>
+    `;
+  } else {
+    hero.innerHTML = `
+      <div class="h-celebration">${heroLabel}</div>
+      <div class="h-num">CHAPTER ${focusCh}</div>
+      <div class="h-name">${chapterName(focusCh)}</div>
+      <div class="h-stats">${focusCh === 1 ? '체력 ×1.0 · 공격력 ×1.0 · 속도 ×1.0' : `체력 ×${chm.hp.toFixed(1)} · 공격력 ×${chm.dmg.toFixed(2)} · 속도 ×${chm.speed.toFixed(2)}`}</div>
+      <button class="h-play" id="heroPlayBtn">▶ 챕터 ${focusCh} 도전</button>
+    `;
+  }
+  heroEl.appendChild(hero);
+  const playBtn = document.getElementById('heroPlayBtn');
+  if(playBtn){
+    playBtn.addEventListener('click', ()=>{
+      if(allDone){
+        // Show ending again
+        document.getElementById('chapterSelect').classList.add('hidden');
+        state.scene = 'victory';
+        state.chapter = MAX_CHAPTERS;
+        renderVictory(true);
+        document.getElementById('victory').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('chapterSelect').classList.add('hidden');
+      startGame(focusCh);
+    });
+  }
+  // Cleared strip — last 10 cleared chapters in reverse order so the most recent is first.
+  clearedStrip.innerHTML = '';
+  if(cleared === 0){
+    clearedStrip.innerHTML = `<div style="color:#868E96;font-size:12px;padding:8px 6px;">아직 정복한 챕터가 없습니다. 위 버튼으로 첫 도전을 시작하세요!</div>`;
+  } else {
+    const start = cleared, end = Math.max(1, cleared - 9);
+    for(let i = start; i >= end; i--){
+      const tile = document.createElement('button');
+      tile.className = 'cs-mini cleared';
+      tile.style.setProperty('--ch-color', chapterColor(i));
+      tile.innerHTML = `<div class="m-num">CH.${i}</div><div class="m-name">${chapterName(i)}</div>`;
+      tile.addEventListener('click', ()=>{
+        document.getElementById('chapterSelect').classList.add('hidden');
+        startGame(i);
+      });
+      clearedStrip.appendChild(tile);
+    }
+  }
+  // Upcoming strip — next 6 chapters after the focus, all locked (display-only).
+  upcomingStrip.innerHTML = '';
+  const upStart = focusCh + 1;
+  const upEnd = Math.min(MAX_CHAPTERS, upStart + 5);
+  if(allDone || upStart > MAX_CHAPTERS){
+    upcomingStrip.innerHTML = `<div style="color:#868E96;font-size:12px;padding:8px 6px;">더 이상 챕터가 없습니다. 끝까지 정복하셨습니다!</div>`;
+  } else {
+    for(let i = upStart; i <= upEnd; i++){
+      const tile = document.createElement('div');
+      tile.className = 'cs-mini locked';
+      tile.innerHTML = `<div class="m-num">CH.${i}</div><div class="m-name">🔒 ???</div>`;
+      upcomingStrip.appendChild(tile);
+    }
+  }
+}
+
+// Toggle between focused-card view and the legacy 50-grid.
+function setChapterSelectMode(mode){
+  const focusView = document.getElementById('csFocusView');
+  const grid = document.getElementById('chapterGrid');
+  const tabFocus = document.getElementById('csTabFocus');
+  const tabAll = document.getElementById('csTabAll');
+  if(mode === 'all'){
+    focusView.classList.add('hidden');
+    grid.classList.remove('hidden');
+    tabFocus.classList.remove('on');
+    tabAll.classList.add('on');
+  } else {
+    focusView.classList.remove('hidden');
+    grid.classList.add('hidden');
+    tabFocus.classList.add('on');
+    tabAll.classList.remove('on');
+  }
+}
+
 function startGame(startChapter){
   initAudio();
   if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
@@ -5382,7 +5948,7 @@ function renderChapterCleared(){
     nextBtn.textContent = '🏆 최종 엔딩 보기 ▶';
   } else {
     nextLabelEl.parentElement.style.display = '';
-    nextBtn.textContent = '⚔ 다음 챕터 도전 ▶';
+    nextBtn.textContent = '🗺 챕터 선택으로 ▶';
     // Show next-chapter scaling pulled from the actual chapterMult formula instead of a stale formula.
     const oldCh = state.chapter; state.chapter = nextCh;
     const chm = chapterMult();
