@@ -299,16 +299,7 @@
   /* Costume inventory — card grid below equip slots */
   .costume-section{max-width:680px;width:100%;margin:0 auto 8px;}
   .costume-section h3{margin:8px 6px 6px;color:#FFE066;font-size:14px;letter-spacing:.5px;}
-  .cos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;padding:0 6px 6px;}
-  .cos-card{position:relative;background:linear-gradient(180deg,rgba(40,15,70,.85),rgba(15,2,30,.95));border:3px solid #BE4BDB;border-radius:12px;padding:10px 8px;color:#fff;cursor:pointer;font-family:inherit;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform .08s;}
-  .cos-card:active{transform:translateY(2px);}
-  .cos-card.equipped{border-color:#FFE066;box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1),0 0 18px rgba(255,224,102,.5);}
-  .cos-card .cos-icon{font-size:32px;}
-  .cos-card .cos-name{font-size:11px;font-weight:900;color:#FFF9DB;line-height:1.2;}
-  .cos-card .cos-grade{position:absolute;top:6px;right:6px;font-size:10px;font-weight:900;padding:2px 7px;border-radius:999px;border:2px solid rgba(255,255,255,.6);}
-  .cos-card .cos-slot{font-size:9px;color:#868E96;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
-  .cos-card .cos-stats{font-size:10px;color:#A5D8FF;margin-top:2px;line-height:1.3;}
-  .cos-card.equipped::after{content:'착용중';position:absolute;top:6px;left:6px;font-size:9px;font-weight:900;background:#FFE066;color:#5A1A04;padding:2px 6px;border-radius:999px;}
+  /* Grade pill colors — used in equip slot grade label and gacha reveal card grade chip. */
   .cos-grade-S{background:linear-gradient(180deg,#FFE066,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);}
   .cos-grade-A{background:linear-gradient(180deg,#E599F7,#7048E8);color:#fff;}
   .cos-grade-B{background:linear-gradient(180deg,#74C0FC,#1864AB);color:#fff;}
@@ -355,23 +346,6 @@
   .cos-detail-card .equip-hint{font-size:9px;color:#868E96;letter-spacing:.5px;}
   .cos-detail-card.equipped .equip-hint{color:#51CF66;font-weight:900;}
 
-  /* Costume album — shows every def with which grades have been collected.
-     Unowned entries display the real icon dimmed/desaturated so the player can see what they're chasing. */
-  .album-card{background:linear-gradient(180deg,rgba(40,15,70,.55),rgba(15,2,30,.85));border:2px solid #5F3DC4;border-radius:10px;padding:8px 6px;text-align:center;color:#FFF9DB;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .12s, box-shadow .12s;}
-  .album-card.complete{border-color:#FFE066;box-shadow:0 0 14px rgba(255,224,102,.35);}
-  .album-card.silhouette{background:linear-gradient(180deg,rgba(30,30,40,.55),rgba(10,5,20,.85));border-color:#3A2C58;}
-  .album-card .a-icon{font-size:30px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4));}
-  .album-card .a-icon.silhouette-icon{filter:grayscale(1) brightness(.45) contrast(1.2);opacity:.55;}
-  .album-card .a-name{font-size:11px;font-weight:900;color:#FFE066;line-height:1.2;}
-  .album-card .a-name.silhouette-name{color:#6C7280;}
-  .album-card .a-slot{font-size:9px;color:#868E96;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
-  .album-card .a-grades{display:flex;gap:3px;margin-top:2px;flex-wrap:wrap;justify-content:center;}
-  .album-grade-pip{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:1.5px solid rgba(255,255,255,.4);color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);}
-  .album-grade-pip.have{color:#fff;border-color:#fff;}
-  .album-grade-pip.have.S{background:linear-gradient(180deg,#FFE066,#E67700);color:#5A1A04;}
-  .album-grade-pip.have.A{background:linear-gradient(180deg,#E599F7,#7048E8);}
-  .album-grade-pip.have.B{background:linear-gradient(180deg,#74C0FC,#1864AB);}
-  .album-grade-pip.have.C{background:linear-gradient(180deg,#CED4DA,#495057);}
 
   /* Responsive */
   @media (max-width:480px){
@@ -5905,47 +5879,6 @@ function buildCollectionMap(){
   return map;
 }
 
-function renderAlbum(){
-  const albumGrid = document.getElementById('albumGrid');
-  if(!albumGrid) return;
-  const collected = buildCollectionMap();
-  // Progress: total grades collected across all defs (each def has 4 grade slots).
-  const totalSlots = COSTUME_DEFS.length * 4;
-  let filled = 0;
-  for(const id in collected){
-    for(const k of ['S','A','B','C']) if(collected[id][k]) filled++;
-  }
-  const progEl = document.getElementById('albumProgress');
-  if(progEl) progEl.textContent = `${filled} / ${totalSlots} 수집 (${Math.round(100*filled/totalSlots)}%)`;
-  // Group cards by slot for readability
-  albumGrid.innerHTML = '';
-  const slotLabels = { head:'머리', body:'몸통', weapon:'무기' };
-  for(const slot of ['head','body','weapon']){
-    const header = document.createElement('div');
-    header.style.cssText = 'grid-column:1/-1;color:#E599F7;font-weight:900;font-size:13px;margin-top:6px;padding-left:4px;letter-spacing:.5px;';
-    header.textContent = `— ${slotLabels[slot]} —`;
-    albumGrid.appendChild(header);
-    for(const def of COSTUME_DEFS_BY_SLOT[slot]){
-      const grades = collected[def.id];
-      const allFour = grades.S && grades.A && grades.B && grades.C;
-      const anyOwned = grades.S || grades.A || grades.B || grades.C;
-      const card = document.createElement('div');
-      card.className = 'album-card' + (allFour ? ' complete' : '') + (!anyOwned ? ' silhouette' : '');
-      // Always show the actual icon — unowned entries get a grayscale dim so the player
-      // sees what they're chasing, not a generic "?".
-      card.innerHTML = `
-        <div class="a-icon ${anyOwned ? '' : 'silhouette-icon'}">${def.icon}</div>
-        <div class="a-name${anyOwned ? '' : ' silhouette-name'}">${def.name}</div>
-        <div class="a-slot">${slotLabels[slot]}</div>
-        <div class="a-grades">
-          ${['S','A','B','C'].map(k => `<span class="album-grade-pip ${grades[k] ? 'have ' + k : ''}">${k}</span>`).join('')}
-        </div>
-      `;
-      albumGrid.appendChild(card);
-    }
-  }
-}
-
 function renderGachaResult(items){
   const el = document.getElementById('gachaReveal');
   el.innerHTML = '';
@@ -5957,34 +5890,49 @@ function renderGachaResult(items){
       <div class="pull-title">${eq.grade === 'S' ? '✨ S 등급! ✨' : eq.grade === 'A' ? '⭐ A 등급!' : eq.grade === 'B' ? '🔵 B 등급' : '⚪ C 등급'}</div>
       <div class="pull-card" style="border-color:${g.color};box-shadow:0 0 30px ${g.color}aa;">
         <div class="pc-grade ${g.borderClass}" style="background:${g.color};border-color:#fff;">${g.label}</div>
-        <div class="pc-icon">${def.icon}</div>
+        <div class="pc-icon"><canvas></canvas></div>
         <div class="pc-name">${def.name}</div>
         <div class="pc-slot">${def.slot === 'head' ? '머리' : def.slot === 'body' ? '몸통' : '무기'}</div>
       </div>
       <div class="pull-stats">${costumeStatLines(eq)}</div>
     `;
+    // Render the actual costume shape into the reveal card's canvas.
+    const cv = el.querySelector('.pc-icon canvas');
+    if(cv) renderCostumePreview(cv, eq, 80);
   } else {
-    // 10-pull: show grades-only summary.
+    // 10-pull: per-item mini cards using actual costume shapes (canvas) instead of emoji.
     const counts = { S:0, A:0, B:0, C:0 };
     for(const eq of items) counts[eq.grade]++;
     const summary = ['S','A','B','C']
       .filter(k => counts[k] > 0)
-      .map(k => `<span class="cos-grade ${COSTUME_GRADES[k].borderClass}" style="background:${COSTUME_GRADES[k].color};color:#1A0033;padding:4px 10px;border-radius:999px;font-weight:900;margin:2px;">${k} × ${counts[k]}</span>`)
+      .map(k => `<span style="background:${COSTUME_GRADES[k].color};color:#1A0033;padding:4px 10px;border-radius:999px;font-weight:900;margin:2px;">${k} × ${counts[k]}</span>`)
       .join(' ');
+    const gridHtml = items.map((_, i) => `
+      <div class="g-mini" data-idx="${i}" style="background:rgba(0,0,0,0.35);border:2px solid #fff;border-radius:8px;padding:4px 2px;text-align:center;font-size:11px;font-weight:900;display:flex;flex-direction:column;align-items:center;gap:2px;">
+        <canvas></canvas>
+        <div></div>
+      </div>`).join('');
     el.innerHTML = `
       <div class="pull-title">🎰 10연 결과</div>
       <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px 0;">${summary}</div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:100%;max-width:300px;">
-        ${items.map(eq => {
-          const def = COSTUME_DEFS_BY_ID[eq.defId];
-          const g = COSTUME_GRADES[eq.grade];
-          return `<div style="background:${g.color};color:#1A0033;border:2px solid #fff;border-radius:8px;padding:6px 2px;text-align:center;font-size:11px;font-weight:900;">
-            <div style="font-size:18px;">${def.icon}</div>
-            <div>${g.label}</div>
-          </div>`;
-        }).join('')}
-      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:100%;max-width:320px;">${gridHtml}</div>
     `;
+    // Populate canvases + grade labels.
+    el.querySelectorAll('.g-mini').forEach(card => {
+      const idx = parseInt(card.dataset.idx, 10);
+      const eq = items[idx];
+      const g = COSTUME_GRADES[eq.grade];
+      card.style.borderColor = g.color;
+      card.style.background = g.color + '33';
+      const cv = card.querySelector('canvas');
+      const lbl = card.querySelector('div');
+      if(cv) renderCostumePreview(cv, eq, 38);
+      lbl.textContent = eq.grade;
+      lbl.style.color = g.label === 'S' ? '#5A1A04' : '#fff';
+      lbl.style.background = g.color;
+      lbl.style.padding = '1px 6px';
+      lbl.style.borderRadius = '999px';
+    });
   }
 }
 
@@ -5999,9 +5947,12 @@ function doGachaPull(n){
   saveProgress();
   const items = n === 10 ? pullGachaTen() : [pullGachaSingle()];
   sfxLevelUp();
+  // Refresh the visible coin bar(s) immediately so the deduction is felt before the modal closes.
+  const sc = document.getElementById('shopCoinTxt');
+  if(sc) sc.textContent = (progress.coins||0).toLocaleString();
+  updateTitleCoinDisplay();
   renderGachaResult(items);
   document.getElementById('gachaModal').classList.remove('hidden');
-  updateTitleCoinDisplay();
 }
 function openShop(initialTab){
   initAudio();
