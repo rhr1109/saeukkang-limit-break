@@ -315,6 +315,28 @@
   .gacha-reveal .pull-card .pc-slot{font-size:10px;color:#868E96;text-transform:uppercase;letter-spacing:.5px;}
   .gacha-reveal .pull-stats{font-size:12px;color:#A5D8FF;text-align:center;line-height:1.5;}
 
+  /* Background skin shop tab */
+  .skin-banner{max-width:560px;width:100%;margin:0 auto 14px;padding:10px 14px;background:linear-gradient(90deg,rgba(74,210,189,.18),rgba(255,224,102,.18),rgba(186,104,200,.18));border:2px dashed #74C0FC;border-radius:14px;text-align:center;color:#FFF9DB;font-size:12px;line-height:1.5;}
+  .skin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:0 6px 18px;max-width:680px;width:100%;margin:0 auto;}
+  .skin-card{position:relative;border-radius:14px;border:2px solid #5F3DC4;background:linear-gradient(180deg,rgba(40,15,70,.55),rgba(15,2,30,.85));padding:10px;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit;color:#FFF9DB;}
+  .skin-card.equipped{border-color:#51CF66;box-shadow:0 0 22px rgba(81,207,102,.4);}
+  .skin-card.owned{border-color:#FFE066;}
+  .skin-card .skin-thumb{width:100%;height:90px;border-radius:10px;border:2px solid rgba(255,255,255,.2);background:#000;}
+  .skin-card .skin-name{font-weight:900;color:#FFE066;font-size:13px;text-align:center;}
+  .skin-card .skin-action{padding:8px 16px;border-radius:999px;background:linear-gradient(180deg,#51CF66,#2F9E44);border:2px solid #FFE066;color:#fff;font-weight:900;font-family:inherit;font-size:12px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.4);text-shadow:0 1px 0 rgba(0,0,0,.4);min-width:90px;}
+  .skin-card .skin-action.poor{background:linear-gradient(180deg,#7A0F0F,#3B0606);border-color:#FF8787;color:#FFE3E3;}
+  .skin-card .skin-action.equipped{background:linear-gradient(180deg,#FFD43B,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);cursor:default;}
+  .skin-card .skin-action.equip{background:linear-gradient(180deg,#74C0FC,#1864AB);}
+  .skin-card .skin-tag{position:absolute;top:8px;right:8px;font-size:10px;font-weight:900;padding:2px 8px;border-radius:999px;background:rgba(0,0,0,.6);color:#FFE066;border:1.5px solid #FFE066;}
+  .skin-card .skin-tag.eq{background:#51CF66;color:#052;border-color:#fff;}
+
+  /* Equip picker — modal grid that lets the player pick which owned costume to equip. */
+  .ep-option{position:relative;background:linear-gradient(180deg,rgba(40,15,70,.7),rgba(15,2,30,.92));border:2px solid #BE4BDB;border-radius:12px;padding:8px 6px;color:#fff;cursor:pointer;font-family:inherit;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .ep-option:hover{border-color:#FFE066;}
+  .ep-option canvas{width:60px;height:60px;}
+  .ep-option .ep-name{font-size:11px;font-weight:900;color:#FFE066;line-height:1.15;}
+  .ep-option .ep-grade{position:absolute;top:4px;right:4px;font-size:10px;font-weight:900;padding:2px 7px;border-radius:999px;border:2px solid rgba(255,255,255,.5);}
+
   /* Costume browse v2 — slot tabs + per-def detail card with all 4 grade chips.
      Replaces the flat inventory + album with a single unified per-costume view. */
   .cos-slot-tabs{display:flex;gap:8px;justify-content:center;margin:6px 0 12px;flex-wrap:wrap;}
@@ -346,6 +368,19 @@
   .cos-detail-card .equip-hint{font-size:9px;color:#868E96;letter-spacing:.5px;}
   .cos-detail-card.equipped .equip-hint{color:#51CF66;font-weight:900;}
 
+
+  /* PC center-alignment — on wider/taller viewports the title/shop/chapter-select content should
+     sit in the vertical middle of the screen instead of glued to the top. We use ::before/::after
+     flex spacers (flex:1) so when content fits the viewport it centers, and when it overflows the
+     spacers shrink to 0 and content scrolls naturally. */
+  @media (min-width: 768px) and (min-height: 700px){
+    #title, #shopScreen, #chapterSelect{ justify-content: flex-start; }
+    #title::before, #title::after,
+    #shopScreen::before, #shopScreen::after,
+    #chapterSelect::before, #chapterSelect::after{ content:''; flex: 1 0 auto; min-height: 12px; }
+    /* Title gets less top padding on PC since the shop pill is anchored absolute and content is centered */
+    #title{ padding-top: calc(env(safe-area-inset-top, 0px) + 24px); }
+  }
 
   /* Responsive */
   @media (max-width:480px){
@@ -450,6 +485,7 @@
     <div class="shop-tabs">
       <button class="shop-tab on" id="shopTabSkill" type="button">🌳 스킬 트리</button>
       <button class="shop-tab" id="shopTabCostume" type="button">👗 코스튬 가챠</button>
+      <button class="shop-tab" id="shopTabSkin" type="button">🎨 배경 스킨</button>
     </div>
     <!-- Skill tree section -->
     <div id="shopSkillSection">
@@ -487,6 +523,13 @@
         <div class="cos-detail-grid" id="cosDetailGrid"></div>
       </div>
     </div>
+    <!-- Background skin section — purely cosmetic title-screen backgrounds. -->
+    <div id="shopSkinSection" class="hidden">
+      <div class="skin-banner">
+        🎨 <b style="color:#FFE066;">타이틀 배경 스킨</b> — 시작 화면의 분위기를 바꾸는 코스메틱 아이템. 게임 난이도엔 영향 없음.
+      </div>
+      <div class="skin-grid" id="skinGrid"></div>
+    </div>
   </div>
 
   <!-- Chapter select -->
@@ -519,6 +562,16 @@
       <h2 style="color:#E599F7;">✨ 코스튬 획득!</h2>
       <div id="gachaReveal" class="gacha-reveal"></div>
       <button class="btn" id="gachaCloseBtn" style="width:100%;margin-top:8px;">확인</button>
+    </div>
+  </div>
+
+  <!-- Equip picker — shown when the player taps an empty + slot in the costume tab -->
+  <div id="equipPickerModal" class="modal hidden">
+    <div class="card" style="max-width:480px;">
+      <h2 style="color:#E599F7;">코스튬 선택</h2>
+      <div class="sub" id="epSlotLabel">머리 슬롯에 장착할 코스튬을 골라주세요</div>
+      <div id="epOptions" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:10px 0;max-height:60vh;overflow-y:auto;"></div>
+      <button class="btn alt small" id="epCloseBtn" style="width:100%;">닫기</button>
     </div>
   </div>
 
@@ -1152,100 +1205,232 @@ function drawCostumeGlow(ctx, cx, cy, r, eq){
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 }
+// Grade tier 0..3 — used to layer visual details so S looks visibly richer than C even on the
+// same base shape. Each tier inherits all lower-tier details and adds new flourishes.
+const _GRADE_TIER = { C:0, B:1, A:2, S:3 };
+function gradeTier(grade){ return _GRADE_TIER[grade] || 0; }
+
 function drawCostumeHeadOverlay(ctx, px, py, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
+  const tier = gradeTier(eq.grade);
   // Pigeon head center is at (0, -22) in pigeon-local coords with radius 16.
-  // We anchor the costume's coordinate origin AT the head center so each shape can
-  // describe itself relative to the dome (top at y=-16, sides at x=±16).
   const hx = px;
   const hy = py + (-22)*scale;
   drawCostumeGlow(ctx, hx, hy - 14*scale, 22*scale, eq);
   ctx.save();
   ctx.translate(hx, hy);
   ctx.scale(scale, scale);
-  // NOTE on coordinates: head center is at costume-local (0,0). Pigeon eyes sit at y=-4 with
-  // ~3px radius, beak extends to y=2 toward x=+18. Anything below y=-9 in costume-local would
-  // intrude on the eye/beak — so all brims and bands stay above that line.
+  // NOTE: head center at costume-local (0,0). Eyes/beak below y=-7. All shapes stay above.
   if(def.id === 'h_beanie'){
-    // Knit beanie: rounded cap that wraps the top half of the head with a folded brim.
-    ctx.fillStyle = g.color;
+    // Beanie progression: C bare cap → B + small pom → A + stripe + bigger pom → S + sparkle
+    const capColor = tier === 0 ? '#5C6670' : g.color;
+    ctx.fillStyle = capColor;
     ctx.beginPath(); ctx.ellipse(0, -10, 15, 12, 0, Math.PI, 0); ctx.fill();
-    // Brim — slightly darker, well above eye line
-    ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.ellipse(0, -10, 16, 3, 0, 0, Math.PI*2); ctx.fill();
-    // Pom
-    ctx.fillStyle = '#FFF9DB';
-    ctx.beginPath(); ctx.arc(0, -22, 4, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = g.color;
-    ctx.beginPath(); ctx.arc(-1, -23, 2, 0, Math.PI*2); ctx.fill();
+    // Brim — only B+
+    if(tier >= 1){
+      ctx.fillStyle = g.glow;
+      ctx.beginPath(); ctx.ellipse(0, -10, 16, 3, 0, 0, Math.PI*2); ctx.fill();
+    }
+    // Pom — B+: small, A+: bigger, S: sparkly
+    if(tier >= 1){
+      const pomR = tier >= 2 ? 4 : 3;
+      ctx.fillStyle = '#FFF9DB';
+      ctx.beginPath(); ctx.arc(0, -22, pomR, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = g.color;
+      ctx.beginPath(); ctx.arc(-1, -23, pomR*0.5, 0, Math.PI*2); ctx.fill();
+    }
+    // A+: side stripe band
+    if(tier >= 2){
+      ctx.fillStyle = '#FFF9DB';
+      ctx.beginPath(); ctx.ellipse(0, -14, 14, 1.4, 0, 0, Math.PI*2); ctx.fill();
+    }
+    // S: rotating sparkles around the pom
+    if(tier >= 3){
+      for(let i=0;i<4;i++){
+        const a = (i/4)*Math.PI*2 + state.time*2;
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath(); ctx.arc(Math.cos(a)*7, -22 + Math.sin(a)*3, 1, 0, Math.PI*2); ctx.fill();
+      }
+    }
   } else if(def.id === 'h_strawhat'){
-    // Wide-brim straw hat: brim sits on the head crown, NOT across the eyes.
+    // Strawhat: C plain → B + band → A + flower → S + butterflies
     ctx.fillStyle = '#FAB005';
     ctx.beginPath(); ctx.ellipse(0, -10, 22, 4, 0, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1; ctx.stroke();
     ctx.fillStyle = '#FFE066';
     ctx.beginPath(); ctx.ellipse(0, -14, 11, 7, 0, Math.PI, 0); ctx.fill();
-    // Hat band — sits on the brim above the eyes
-    ctx.fillStyle = g.color;
-    ctx.beginPath(); ctx.ellipse(0, -12, 11, 2, 0, 0, Math.PI*2); ctx.fill();
+    // B+: ribbon band
+    if(tier >= 1){
+      ctx.fillStyle = g.color;
+      ctx.beginPath(); ctx.ellipse(0, -12, 11, 2, 0, 0, Math.PI*2); ctx.fill();
+    }
+    // A+: flower on the band
+    if(tier >= 2){
+      ctx.fillStyle = '#FF6B9D';
+      for(let p=0;p<5;p++){
+        const a = p*(Math.PI*2/5);
+        ctx.beginPath(); ctx.arc(7 + Math.cos(a)*1.5, -12 + Math.sin(a)*1.5, 1.4, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.fillStyle = '#FFE066';
+      ctx.beginPath(); ctx.arc(7, -12, 0.9, 0, Math.PI*2); ctx.fill();
+    }
+    // S: gold trim outline + butterfly fluttering
+    if(tier >= 3){
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.ellipse(0, -10, 22, 4, 0, 0, Math.PI*2); ctx.stroke();
+      const bx = -10 + Math.sin(state.time*3)*2;
+      const by = -16 + Math.cos(state.time*2)*1.5;
+      ctx.fillStyle = '#74C0FC';
+      ctx.beginPath();
+      ctx.ellipse(bx-1.5, by, 1.4, 0.9, -0.3, 0, Math.PI*2);
+      ctx.ellipse(bx+1.5, by, 1.4, 0.9, 0.3, 0, Math.PI*2);
+      ctx.fill();
+    }
   } else if(def.id === 'h_helmet'){
-    // Combat helmet — dome only, no visor band crossing the eyes.
+    // Helmet: C plain dome → B + crest stud → A + visor stripe → S + glowing pulse + wings
     ctx.fillStyle = '#495057';
     ctx.beginPath(); ctx.ellipse(0, -10, 15, 12, 0, Math.PI, 0); ctx.fill();
     ctx.fillStyle = '#343A40';
     ctx.beginPath(); ctx.ellipse(0, -10, 15, 3, 0, 0, Math.PI*2); ctx.fill();
-    // Crest stud at top
-    ctx.fillStyle = g.color;
-    ctx.fillRect(-2, -24, 4, 8);
-    ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.arc(0, -24, 2.4, 0, Math.PI*2); ctx.fill();
+    // B+: crest stud
+    if(tier >= 1){
+      ctx.fillStyle = g.color;
+      ctx.fillRect(-2, -24, 4, 8);
+      ctx.fillStyle = g.glow;
+      ctx.beginPath(); ctx.arc(0, -24, 2.4, 0, Math.PI*2); ctx.fill();
+    }
+    // A+: side rivets + visor stripe
+    if(tier >= 2){
+      ctx.fillStyle = '#868E96';
+      ctx.beginPath(); ctx.arc(-12, -11, 1.2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(12, -11, 1.2, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = g.color;
+      ctx.fillRect(-15, -12, 30, 1.5);
+    }
+    // S: pulsing crest + side wings
+    if(tier >= 3){
+      const pulse = 0.6 + 0.4*Math.sin(state.time*4);
+      ctx.fillStyle = `rgba(255,224,102,${pulse*0.55})`;
+      ctx.beginPath(); ctx.arc(0, -24, 5, 0, Math.PI*2); ctx.fill();
+      // Side wings
+      ctx.fillStyle = g.glow;
+      ctx.beginPath();
+      ctx.moveTo(-15, -16); ctx.lineTo(-22, -10); ctx.lineTo(-15, -8);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(15, -16); ctx.lineTo(22, -10); ctx.lineTo(15, -8);
+      ctx.closePath(); ctx.fill();
+    }
   } else if(def.id === 'h_tophat'){
-    // Top hat: brim above the head crown, tall cylindrical crown on top.
+    // Tophat: C plain black → B + band → A + buckle + ribbon → S + magical sparkles
     ctx.fillStyle = '#1A1D20';
-    // Brim sits at the head crown, well above the eyes.
     ctx.beginPath(); ctx.ellipse(0, -12, 17, 3, 0, 0, Math.PI*2); ctx.fill();
-    // Crown body
     ctx.fillRect(-9, -28, 18, 16);
-    // Crown top
     ctx.beginPath(); ctx.ellipse(0, -28, 9, 3, 0, 0, Math.PI*2); ctx.fill();
-    // Hat band — accent
-    ctx.fillStyle = g.color;
-    ctx.fillRect(-9, -18, 18, 3);
-    // Highlight on crown for fancy look
-    ctx.fillStyle = 'rgba(255,255,255,0.18)';
-    ctx.fillRect(-7, -26, 2, 12);
+    // B+: hat band accent
+    if(tier >= 1){
+      ctx.fillStyle = g.color;
+      ctx.fillRect(-9, -18, 18, 3);
+    }
+    // A+: gold buckle on band + ribbon trail
+    if(tier >= 2){
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-2, -19, 4, 5);
+      ctx.fillStyle = '#A57400';
+      ctx.fillRect(-1, -18, 2, 3);
+      // Ribbon flowing back
+      ctx.fillStyle = g.color;
+      ctx.beginPath();
+      ctx.moveTo(9, -16); ctx.lineTo(15, -10); ctx.lineTo(11, -8);
+      ctx.closePath(); ctx.fill();
+    }
+    // S: floating magical sparkles around the hat
+    if(tier >= 3){
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.fillRect(-7, -26, 2, 12);
+      ctx.fillStyle = '#FFE066';
+      for(let i=0;i<5;i++){
+        const a = (i/5)*Math.PI*2 + state.time*1.5;
+        const r = 13 + Math.sin(state.time*3 + i)*1.5;
+        ctx.beginPath(); ctx.arc(Math.cos(a)*r, -22 + Math.sin(a)*4, 1.2, 0, Math.PI*2); ctx.fill();
+      }
+    }
   } else if(def.id === 'h_crown'){
-    // Royal crown — five points rooted ABOVE the eyes; base band sits on the head crown line.
-    ctx.fillStyle = '#FFD700';
-    ctx.beginPath();
-    ctx.moveTo(-14, -10); ctx.lineTo(-11, -20); ctx.lineTo(-6, -14);
-    ctx.lineTo(0, -26); ctx.lineTo(6, -14); ctx.lineTo(11, -20); ctx.lineTo(14, -10);
-    ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
-    ctx.stroke();
-    // Base band — at y=-12 (above eyes)
-    ctx.fillStyle = '#E0A700';
-    ctx.fillRect(-14, -12, 28, 3);
-    // Gemstones
-    ctx.fillStyle = '#FF1744';
-    ctx.beginPath(); ctx.arc(0, -16, 2.2, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.arc(-8, -17, 1.4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(8, -17, 1.4, 0, Math.PI*2); ctx.fill();
+    // Crown: C minimal band → B 3 points → A 5 points + center gem → S full crown + animated stars
+    if(tier === 0){
+      // C: simple gold band, no points
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-14, -14, 28, 5);
+      ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
+      ctx.strokeRect(-14, -14, 28, 5);
+    } else {
+      // B+: full crown shape with progressively more points
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      if(tier === 1){
+        // 3 points
+        ctx.moveTo(-12, -10); ctx.lineTo(-8, -18); ctx.lineTo(0, -14);
+        ctx.lineTo(0, -22); ctx.lineTo(0, -14); ctx.lineTo(8, -18); ctx.lineTo(12, -10);
+      } else {
+        // 5 points (A and S)
+        ctx.moveTo(-14, -10); ctx.lineTo(-11, -20); ctx.lineTo(-6, -14);
+        ctx.lineTo(0, -26); ctx.lineTo(6, -14); ctx.lineTo(11, -20); ctx.lineTo(14, -10);
+      }
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1; ctx.stroke();
+      // Base band
+      ctx.fillStyle = '#E0A700';
+      ctx.fillRect(-14, -12, 28, 3);
+    }
+    // A+: center red gem
+    if(tier >= 2){
+      ctx.fillStyle = '#FF1744';
+      ctx.beginPath(); ctx.arc(0, -16, 2.2, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FFB3B3';
+      ctx.beginPath(); ctx.arc(-0.6, -16.8, 0.8, 0, Math.PI*2); ctx.fill();
+    }
+    // S: side gems + animated rotating stars + glow halo
+    if(tier >= 3){
+      ctx.fillStyle = '#74C0FC';
+      ctx.beginPath(); ctx.arc(-8, -17, 1.4, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#51CF66';
+      ctx.beginPath(); ctx.arc(8, -17, 1.4, 0, Math.PI*2); ctx.fill();
+      // Rotating stars
+      for(let i=0;i<5;i++){
+        const a = (i/5)*Math.PI*2 + state.time*1.6;
+        const r = 18;
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath(); ctx.arc(Math.cos(a)*r, -18 + Math.sin(a)*3, 1.2, 0, Math.PI*2); ctx.fill();
+      }
+    }
   } else if(def.id === 'h_halo'){
-    // Floating angelic halo above the head with rotating sparkles
+    // Halo: C single thin → B thicker + glow → A + 3 sparkles → S + double halo + 6 sparkles + pulse
+    const haloThick = tier === 0 ? 2 : tier === 1 ? 3 : 3.5;
     ctx.strokeStyle = g.glow;
-    ctx.lineWidth = 3.5;
+    ctx.lineWidth = haloThick;
     ctx.beginPath(); ctx.ellipse(0, -22, 16, 5, 0, 0, Math.PI*2); ctx.stroke();
-    ctx.strokeStyle = g.color;
-    ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.ellipse(0, -22, 12, 3.5, 0, 0, Math.PI*2); ctx.stroke();
-    ctx.fillStyle = g.color;
-    for(let i=0;i<6;i++){
-      const a = (i/6)*Math.PI*2 + state.time*1.4;
-      ctx.beginPath(); ctx.arc(Math.cos(a)*15, -22 + Math.sin(a)*4, 1.6, 0, Math.PI*2); ctx.fill();
+    // B+: inner ring
+    if(tier >= 1){
+      ctx.strokeStyle = g.color;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.ellipse(0, -22, 12, 3.5, 0, 0, Math.PI*2); ctx.stroke();
+    }
+    // A+: rotating sparkles (3)
+    if(tier >= 2){
+      ctx.fillStyle = g.color;
+      const sparkleCount = tier >= 3 ? 6 : 3;
+      for(let i=0;i<sparkleCount;i++){
+        const a = (i/sparkleCount)*Math.PI*2 + state.time*1.4;
+        ctx.beginPath(); ctx.arc(Math.cos(a)*15, -22 + Math.sin(a)*4, 1.6, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    // S: outer pulsing ring
+    if(tier >= 3){
+      const pulse = 0.5 + 0.5*Math.sin(state.time*3);
+      ctx.strokeStyle = `rgba(255,224,102,${pulse*0.6})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(0, -22, 19, 6, 0, 0, Math.PI*2); ctx.stroke();
     }
   } else {
     ctx.font = 'bold 20px sans-serif';
@@ -1257,9 +1442,8 @@ function drawCostumeHeadOverlay(ctx, px, py, scale, eq){
 function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
-  // Pigeon body ellipse is centered at (0, 10) in pigeon-local coords with rx 32, ry 28.
-  // Costume coord origin sits at body center; clip ellipse matches body for tight silhouette fit.
-  // Cape is the lone exception that draws behind the body (pre-clip) so it flows past the silhouette.
+  const tier = gradeTier(eq.grade);
+  // Pigeon body ellipse centered at (0, 10) pigeon-local with rx 32, ry 28.
   const cx = px, cy = py + 10*scale;
   drawCostumeGlow(ctx, cx, cy, 30*scale, eq);
 
@@ -1267,53 +1451,74 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
 
-  // ── Cape: a proper cape — narrow shoulder collar + back drape that flows behind/beyond the body
-  // silhouette. Body of the pigeon stays visible; cape only adds wings at the back.
+  // ── Cape: progression — C plain panels → B + clasp → A + medallion gem → S animated flow
   if(def.id === 'b_cape'){
     ctx.save();
-    // ── Back drape — two side panels that hang behind the shoulders, slightly past the silhouette.
+    // Back drape — bigger and more flowing at higher grades
+    const flowOffset = tier >= 3 ? Math.sin(state.time*1.5)*1 : 0;
     ctx.fillStyle = g.color;
-    // Left back panel
     ctx.beginPath();
     ctx.moveTo(-14, -20);
-    ctx.quadraticCurveTo(-32, -6, -28, 22);
+    ctx.quadraticCurveTo(-32 + flowOffset, -6, -28, 22);
     ctx.lineTo(-22, 26);
     ctx.quadraticCurveTo(-12, 14, -8, -10);
     ctx.closePath();
     ctx.fill();
-    // Right back panel
     ctx.beginPath();
     ctx.moveTo(14, -20);
-    ctx.quadraticCurveTo(32, -6, 28, 22);
+    ctx.quadraticCurveTo(32 - flowOffset, -6, 28, 22);
     ctx.lineTo(22, 26);
     ctx.quadraticCurveTo(12, 14, 8, -10);
     ctx.closePath();
     ctx.fill();
-    // Highlight stripe down the inside fold
-    ctx.fillStyle = g.glow;
-    ctx.globalAlpha = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(-12, -18); ctx.quadraticCurveTo(-26, -2, -22, 18);
-    ctx.lineTo(-19, 18); ctx.quadraticCurveTo(-21, -2, -10, -16);
-    ctx.closePath(); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(12, -18); ctx.quadraticCurveTo(26, -2, 22, 18);
-    ctx.lineTo(19, 18); ctx.quadraticCurveTo(21, -2, 10, -16);
-    ctx.closePath(); ctx.fill();
-    ctx.globalAlpha = 1;
-    // ── Shoulder collar — sits at the top of the body, well below the head/beak.
+    // B+: highlight stripe
+    if(tier >= 1){
+      ctx.fillStyle = g.glow;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-12, -18); ctx.quadraticCurveTo(-26, -2, -22, 18);
+      ctx.lineTo(-19, 18); ctx.quadraticCurveTo(-21, -2, -10, -16);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(12, -18); ctx.quadraticCurveTo(26, -2, 22, 18);
+      ctx.lineTo(19, 18); ctx.quadraticCurveTo(21, -2, 10, -16);
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    // Shoulder collar (always)
     ctx.fillStyle = g.color;
-    ctx.beginPath();
-    ctx.ellipse(0, -14, 14, 4, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = g.glow; ctx.lineWidth = 1.4;
-    ctx.stroke();
-    // Center clasp medallion on the chest
-    ctx.fillStyle = '#FFD700';
-    ctx.beginPath(); ctx.arc(0, -14, 3.0, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8; ctx.stroke();
-    ctx.fillStyle = '#FF1744';
-    ctx.beginPath(); ctx.arc(0, -14, 1.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -14, 14, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = g.glow; ctx.lineWidth = 1.4; ctx.stroke();
+    // C: simple metal stud
+    if(tier === 0){
+      ctx.fillStyle = '#A57400';
+      ctx.beginPath(); ctx.arc(0, -14, 2, 0, Math.PI*2); ctx.fill();
+    }
+    // B+: gold clasp
+    if(tier >= 1){
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath(); ctx.arc(0, -14, 3.0, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8; ctx.stroke();
+    }
+    // A+: red medallion gem inside the clasp
+    if(tier >= 2){
+      ctx.fillStyle = '#FF1744';
+      ctx.beginPath(); ctx.arc(0, -14, 1.4, 0, Math.PI*2); ctx.fill();
+    }
+    // S: gold trim along cape edges + sparkles
+    if(tier >= 3){
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-22, 26); ctx.quadraticCurveTo(-12, 14, -8, -10);
+      ctx.moveTo(22, 26); ctx.quadraticCurveTo(12, 14, 8, -10);
+      ctx.stroke();
+      // Sparkles
+      for(let i=0;i<3;i++){
+        const a = state.time*1.5 + i*2;
+        ctx.fillStyle = '#FFF9DB';
+        ctx.beginPath(); ctx.arc(-20 + i*8, 20 + Math.sin(a)*1.5, 0.9, 0, Math.PI*2); ctx.fill();
+      }
+    }
     ctx.restore();
     ctx.restore();
     return;
@@ -1329,101 +1534,153 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
   ctx.clip();
 
   if(def.id === 'b_jersey'){
-    // Sports jersey — full-body fill with a horizontal accent stripe and a "1" number.
+    // Jersey: C plain → B + horizontal stripe → A + sleeve patches + "1" → S + sparkle outline
     ctx.fillStyle = g.color;
     ctx.fillRect(-32, -28, 64, 56);
-    ctx.fillStyle = g.glow;
-    ctx.fillRect(-32, -2, 64, 5);
-    // Sleeve accents
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(-30, -22, 8, 20);
-    ctx.fillRect(22, -22, 8, 20);
-    // Number
-    ctx.fillStyle = '#fff';
-    ctx.font = '900 16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('1', 0, 8);
+    if(tier >= 1){
+      ctx.fillStyle = g.glow;
+      ctx.fillRect(-32, -2, 64, 5);
+    }
+    if(tier >= 2){
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(-30, -22, 8, 20);
+      ctx.fillRect(22, -22, 8, 20);
+      ctx.fillStyle = '#fff';
+      ctx.font = '900 16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('1', 0, 8);
+    }
+    if(tier >= 3){
+      // Gold sleeve trim + sparkles
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-30, -23, 8, 1.5);
+      ctx.fillRect(22, -23, 8, 1.5);
+      for(let i=0;i<3;i++){
+        const a = state.time*2 + i*2;
+        ctx.fillStyle = '#FFF9DB';
+        ctx.beginPath(); ctx.arc(-26 + i*26, -10 + Math.sin(a)*2, 1, 0, Math.PI*2); ctx.fill();
+      }
+    }
   } else if(def.id === 'b_robe'){
-    // Wizard robe — dark base + glowing trim down the front
+    // Robe: C plain dark → B + center piping → A + 3 stars → S + glowing animated stars + gold trim
     ctx.fillStyle = '#2A1B4E';
     ctx.fillRect(-32, -28, 64, 56);
-    // Rim shading
     ctx.fillStyle = '#1A0E33';
     ctx.fillRect(-32, 16, 64, 12);
-    // Center piping
-    ctx.fillStyle = g.color;
-    ctx.fillRect(-2, -28, 4, 56);
-    // Stars / runes down the front
-    ctx.fillStyle = g.glow;
-    for(let i=0;i<3;i++){
-      const yy = -12 + i*10;
-      ctx.beginPath();
-      for(let k=0;k<5;k++){
-        const a = -Math.PI/2 + k*Math.PI*2/5;
-        const r = k%2 ? 1.4 : 2.6;
-        const xx = Math.cos(a)*r, yy2 = Math.sin(a)*r;
-        if(k===0) ctx.moveTo(xx, yy + yy2); else ctx.lineTo(xx, yy + yy2);
+    if(tier >= 1){
+      ctx.fillStyle = g.color;
+      ctx.fillRect(-2, -28, 4, 56);
+    }
+    if(tier >= 2){
+      const starCount = tier >= 3 ? 3 : 2;
+      for(let i=0;i<starCount;i++){
+        const yy = -12 + i*10;
+        const pulse = tier >= 3 ? 0.7 + 0.3*Math.sin(state.time*2 + i) : 1;
+        ctx.fillStyle = g.glow;
+        ctx.globalAlpha = pulse;
+        ctx.beginPath();
+        for(let k=0;k<10;k++){
+          const a = -Math.PI/2 + k*Math.PI/5;
+          const r = k%2 ? 1.4 : 2.6;
+          const xx = Math.cos(a)*r, yy2 = Math.sin(a)*r;
+          if(k===0) ctx.moveTo(xx, yy + yy2); else ctx.lineTo(xx, yy + yy2);
+        }
+        ctx.closePath(); ctx.fill();
       }
-      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    if(tier >= 3){
+      // Gold trim along bottom + hood point
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(-30, 16); ctx.lineTo(30, 16); ctx.stroke();
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath(); ctx.moveTo(-2, -28); ctx.lineTo(2, -28); ctx.lineTo(0, -32); ctx.closePath(); ctx.fill();
     }
   } else if(def.id === 'b_tux'){
-    // Tuxedo — black with white shirt panel and a colored bow tie
+    // Tux: C plain black → B + bow tie → A + lapels + buttons → S + diamond pin + gold buttons
     ctx.fillStyle = '#1A1D20';
     ctx.fillRect(-32, -28, 64, 56);
-    // White shirt triangle from neckline down
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.moveTo(-11, -22); ctx.lineTo(-9, 20); ctx.lineTo(0, 26); ctx.lineTo(9, 20); ctx.lineTo(11, -22);
     ctx.closePath(); ctx.fill();
-    // Lapels — V on either side of the shirt
-    ctx.fillStyle = '#0E0F11';
-    ctx.beginPath();
-    ctx.moveTo(-12, -22); ctx.lineTo(-6, 0); ctx.lineTo(-13, -22); ctx.closePath(); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(12, -22); ctx.lineTo(6, 0); ctx.lineTo(13, -22); ctx.closePath(); ctx.fill();
-    // Bow tie
-    ctx.fillStyle = g.color;
-    ctx.beginPath();
-    ctx.moveTo(-7, -16); ctx.lineTo(-1, -12); ctx.lineTo(-7, -8); ctx.closePath();
-    ctx.moveTo(7, -16); ctx.lineTo(1, -12); ctx.lineTo(7, -8); ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = g.glow;
-    ctx.fillRect(-1, -14, 2, 4);
-    // Buttons
-    ctx.fillStyle = '#FFD700';
-    for(let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(0, -2 + i*8, 1.6, 0, Math.PI*2); ctx.fill(); }
+    if(tier >= 1){
+      // Bow tie at neck
+      ctx.fillStyle = g.color;
+      ctx.beginPath();
+      ctx.moveTo(-7, -16); ctx.lineTo(-1, -12); ctx.lineTo(-7, -8); ctx.closePath();
+      ctx.moveTo(7, -16); ctx.lineTo(1, -12); ctx.lineTo(7, -8); ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = g.glow;
+      ctx.fillRect(-1, -14, 2, 4);
+    }
+    if(tier >= 2){
+      // Lapels
+      ctx.fillStyle = '#0E0F11';
+      ctx.beginPath();
+      ctx.moveTo(-12, -22); ctx.lineTo(-6, 0); ctx.lineTo(-13, -22); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(12, -22); ctx.lineTo(6, 0); ctx.lineTo(13, -22); ctx.closePath(); ctx.fill();
+      // Buttons
+      const btnColor = tier >= 3 ? '#FFD700' : '#fff';
+      ctx.fillStyle = btnColor;
+      for(let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(0, -2 + i*8, 1.6, 0, Math.PI*2); ctx.fill(); }
+    }
+    if(tier >= 3){
+      // Diamond pin on lapel
+      ctx.fillStyle = '#74C0FC';
+      ctx.beginPath();
+      ctx.moveTo(-9, -16); ctx.lineTo(-7, -14); ctx.lineTo(-9, -12); ctx.lineTo(-11, -14);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(-9.5, -14.5, 0.6, 0, Math.PI*2); ctx.fill();
+    }
   } else if(def.id === 'b_armor'){
-    // Steel chest plate — broad metal sheen with a centered emblem
+    // Armor: C plain plate → B + highlight band → A + emblem → S + spaulders + pulsing emblem
     ctx.fillStyle = '#9AA3AC';
     ctx.fillRect(-32, -28, 64, 56);
-    // Highlight band (light reflection on the chest)
-    ctx.fillStyle = '#CFD4DA';
-    ctx.fillRect(-30, -16, 60, 6);
-    // Pectoral grooves
-    ctx.strokeStyle = '#5A6371'; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.moveTo(-26, -10); ctx.lineTo(0, 4); ctx.lineTo(26, -10); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-22, 4); ctx.lineTo(22, 4); ctx.stroke();
-    // Belt at waist
-    ctx.fillStyle = '#5A6371';
-    ctx.fillRect(-32, 12, 64, 6);
-    ctx.fillStyle = '#FFD700';
-    ctx.fillRect(-4, 12, 8, 6);
-    // Center emblem
-    ctx.fillStyle = g.color;
-    ctx.beginPath();
-    ctx.moveTo(0, -8); ctx.lineTo(8, 0); ctx.lineTo(0, 8); ctx.lineTo(-8, 0); ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = g.glow; ctx.lineWidth = 1.4;
-    ctx.stroke();
+    if(tier >= 1){
+      ctx.fillStyle = '#CFD4DA';
+      ctx.fillRect(-30, -16, 60, 6);
+      ctx.strokeStyle = '#5A6371'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(-26, -10); ctx.lineTo(0, 4); ctx.lineTo(26, -10); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-22, 4); ctx.lineTo(22, 4); ctx.stroke();
+      ctx.fillStyle = '#5A6371';
+      ctx.fillRect(-32, 12, 64, 6);
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-4, 12, 8, 6);
+    }
+    if(tier >= 2){
+      ctx.fillStyle = g.color;
+      ctx.beginPath();
+      ctx.moveTo(0, -8); ctx.lineTo(8, 0); ctx.lineTo(0, 8); ctx.lineTo(-8, 0); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = g.glow; ctx.lineWidth = 1.4; ctx.stroke();
+    }
+    if(tier >= 3){
+      // Pulsing emblem center
+      const pulse = 0.6 + 0.4*Math.sin(state.time*3);
+      ctx.fillStyle = `rgba(255,224,102,${pulse*0.7})`;
+      ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI*2); ctx.fill();
+      // Gold rivets
+      ctx.fillStyle = '#FFD700';
+      for(let i=-2;i<=2;i+=2){
+        ctx.beginPath(); ctx.arc(i*7, -22, 1.2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(i*7, 22, 1.2, 0, Math.PI*2); ctx.fill();
+      }
+    }
   } else if(def.id === 'b_dragon'){
-    // Iridescent dragon scales — overlapping arcs covering the body, gold spine seam
-    ctx.fillStyle = g.color;
+    // Dragon: C dull → B + spine seam → A + belly emblem → S + animated color shift + glow
+    const baseColor = tier === 0 ? '#5C5052' : g.color;
+    ctx.fillStyle = baseColor;
     ctx.fillRect(-32, -28, 64, 56);
-    // Scales
+    // Scales (always present, but shimmer at S)
+    const shimmerOffset = tier >= 3 ? Math.sin(state.time*2)*0.5 : 0;
     for(let row=-3; row<5; row++){
       for(let col=-5; col<=5; col++){
         const sx = col*6 + (row%2===0 ? 0 : 3);
-        const sy = -20 + row*7;
-        ctx.fillStyle = (row+col)%2===0 ? g.glow : '#fff';
+        const sy = -20 + row*7 + shimmerOffset;
+        const altColor = tier === 0 ? '#7B6F75' : g.glow;
+        ctx.fillStyle = (row+col)%2===0 ? altColor : '#fff';
         ctx.beginPath();
         ctx.arc(sx, sy, 4.5, Math.PI, 0);
         ctx.lineTo(sx + 4.5, sy);
@@ -1434,14 +1691,28 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
         ctx.beginPath(); ctx.arc(sx, sy, 4.5, Math.PI, 0); ctx.stroke();
       }
     }
-    // Gold spine
-    ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(0, 22); ctx.stroke();
-    // Belly emblem
-    ctx.fillStyle = '#FFD700';
-    ctx.beginPath(); ctx.arc(0, 8, 4, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#FF1744';
-    ctx.beginPath(); ctx.arc(0, 8, 1.8, 0, Math.PI*2); ctx.fill();
+    if(tier >= 1){
+      // Spine seam
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(0, 22); ctx.stroke();
+    }
+    if(tier >= 2){
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath(); ctx.arc(0, 8, 4, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FF1744';
+      ctx.beginPath(); ctx.arc(0, 8, 1.8, 0, Math.PI*2); ctx.fill();
+    }
+    if(tier >= 3){
+      // Fire wisps trailing from edges
+      ctx.fillStyle = '#FFA94D';
+      ctx.globalAlpha = 0.6;
+      for(let i=0;i<4;i++){
+        const a = state.time*2 + i*Math.PI/2;
+        const r = 24 + Math.sin(a)*1.5;
+        ctx.beginPath(); ctx.arc(Math.cos(a)*r, Math.sin(a)*r*0.8, 1.6, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
   } else {
     // Fallback emoji rendering — uses a translucent backing inside the silhouette
     ctx.fillStyle = g.color;
@@ -1460,88 +1731,209 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
 function drawWeaponCostumeAt(ctx, lx, ly, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
+  const tier = gradeTier(eq.grade);
   drawCostumeGlow(ctx, lx, ly, 12*scale, eq);
   ctx.save();
   ctx.translate(lx, ly);
   ctx.scale(scale, scale);
   if(def.id === 'w_ribbon'){
+    // Ribbon glove: C plain mitten → B + small bow → A + bow + heart → S + multiple sparkly hearts
     ctx.fillStyle = '#FFB3D9';
     ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#F783AC'; ctx.lineWidth = 1.2;
-    ctx.stroke();
-    ctx.fillStyle = g.color;
-    ctx.beginPath();
-    ctx.moveTo(-7, -3); ctx.lineTo(-2, 0); ctx.lineTo(-7, 3); ctx.closePath();
-    ctx.moveTo(7, -3); ctx.lineTo(2, 0); ctx.lineTo(7, 3); ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = g.glow;
-    ctx.fillRect(-1.5, -2, 3, 4);
+    ctx.strokeStyle = '#F783AC'; ctx.lineWidth = 1.2; ctx.stroke();
+    if(tier >= 1){
+      // Bow
+      ctx.fillStyle = g.color;
+      ctx.beginPath();
+      ctx.moveTo(-7, -3); ctx.lineTo(-2, 0); ctx.lineTo(-7, 3); ctx.closePath();
+      ctx.moveTo(7, -3); ctx.lineTo(2, 0); ctx.lineTo(7, 3); ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = g.glow;
+      ctx.fillRect(-1.5, -2, 3, 4);
+    }
+    if(tier >= 2){
+      // Heart in the center
+      ctx.fillStyle = '#FF6B9D';
+      ctx.beginPath();
+      ctx.arc(-1.5, -0.5, 1.2, 0, Math.PI*2);
+      ctx.arc(1.5, -0.5, 1.2, 0, Math.PI*2);
+      ctx.moveTo(-2.5, 0); ctx.lineTo(0, 2.5); ctx.lineTo(2.5, 0);
+      ctx.fill();
+    }
+    if(tier >= 3){
+      // Sparkle hearts orbiting
+      for(let i=0;i<3;i++){
+        const a = (i/3)*Math.PI*2 + state.time*2;
+        const x = Math.cos(a)*10, y = Math.sin(a)*10;
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath(); ctx.arc(x, y, 0.9, 0, Math.PI*2); ctx.fill();
+      }
+    }
   } else if(def.id === 'w_brass'){
+    // Brass: C 1 stud → B 2 studs → A 3 studs → S 3 studs + spikes + glow center
     ctx.fillStyle = g.color;
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-9, -2, 18, 4, 1.5) : ctx.rect(-9, -2, 18, 4);
     ctx.fill();
+    const studCount = tier === 0 ? 1 : tier === 1 ? 2 : 3;
+    const positions = studCount === 1 ? [0] : studCount === 2 ? [-4, 4] : [-5, 0, 5];
     ctx.fillStyle = '#FFD700';
-    for(let k=-1;k<=1;k++){
-      ctx.beginPath(); ctx.arc(k*5, -3, 3.4, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8;
-      ctx.stroke();
+    for(const px of positions){
+      ctx.beginPath(); ctx.arc(px, -3, 3.4, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8; ctx.stroke();
     }
     ctx.fillStyle = '#FFF9DB';
-    for(let k=-1;k<=1;k++){
-      ctx.beginPath(); ctx.arc(k*5 - 1, -4, 1, 0, Math.PI*2); ctx.fill();
+    for(const px of positions){
+      ctx.beginPath(); ctx.arc(px - 1, -4, 1, 0, Math.PI*2); ctx.fill();
+    }
+    if(tier >= 3){
+      // Spikes between studs
+      ctx.fillStyle = '#CED4DA';
+      ctx.beginPath();
+      ctx.moveTo(-2, -6); ctx.lineTo(0, -10); ctx.lineTo(2, -6); ctx.closePath();
+      ctx.fill();
+      // Glowing center
+      const pulse = 0.6 + 0.4*Math.sin(state.time*4);
+      ctx.fillStyle = `rgba(255,224,102,${pulse})`;
+      ctx.beginPath(); ctx.arc(0, -3, 1.4, 0, Math.PI*2); ctx.fill();
     }
   } else if(def.id === 'w_gauntlet'){
+    // Gauntlet: C plain glove → B + plate stripe + 1 rivet → A + 3 rivets + stud → S + crystal + runes
     ctx.fillStyle = '#495057';
     ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#6C757D';
-    ctx.fillRect(-9, -2, 18, 4);
-    ctx.fillStyle = '#212529';
-    ctx.beginPath(); ctx.arc(-6, 0, 1.2, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(0, 0, 1.2, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(6, 0, 1.2, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = g.color;
-    ctx.beginPath(); ctx.arc(0, -5, 2.4, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.arc(0, -5, 1, 0, Math.PI*2); ctx.fill();
+    if(tier >= 1){
+      ctx.fillStyle = '#6C757D';
+      ctx.fillRect(-9, -2, 18, 4);
+      ctx.fillStyle = '#212529';
+      ctx.beginPath(); ctx.arc(0, 0, 1.2, 0, Math.PI*2); ctx.fill();
+    }
+    if(tier >= 2){
+      // 3 rivets
+      ctx.fillStyle = '#212529';
+      ctx.beginPath(); ctx.arc(-6, 0, 1.2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6, 0, 1.2, 0, Math.PI*2); ctx.fill();
+      // Knuckle stud
+      ctx.fillStyle = g.color;
+      ctx.beginPath(); ctx.arc(0, -5, 2.4, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = g.glow;
+      ctx.beginPath(); ctx.arc(0, -5, 1, 0, Math.PI*2); ctx.fill();
+    }
+    if(tier >= 3){
+      // Glowing crystal stud + runes
+      const pulse = 0.5 + 0.5*Math.sin(state.time*4);
+      ctx.fillStyle = `rgba(116,192,252,${pulse})`;
+      ctx.beginPath(); ctx.arc(0, -5, 3, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#74C0FC';
+      ctx.beginPath();
+      ctx.moveTo(0, -8); ctx.lineTo(2.4, -5); ctx.lineTo(0, -2); ctx.lineTo(-2.4, -5);
+      ctx.closePath(); ctx.fill();
+      // Side runes
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-7, 4); ctx.lineTo(-5, 6);
+      ctx.moveTo(7, 4); ctx.lineTo(5, 6);
+      ctx.stroke();
+    }
   } else if(def.id === 'w_blade'){
+    // Blade: C bare knife → B + cross-guard → A + pommel gem → S + glowing edge + rune
     ctx.fillStyle = '#CED4DA';
     ctx.beginPath();
     ctx.moveTo(0, -16); ctx.lineTo(3, 4); ctx.lineTo(-3, 4); ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#495057'; ctx.lineWidth = 0.8;
-    ctx.stroke();
-    ctx.fillStyle = g.color;
-    ctx.fillRect(-6, 4, 12, 3);
-    ctx.fillStyle = '#3E2723';
-    ctx.fillRect(-1.5, 7, 3, 6);
-    ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.arc(0, 13, 2, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#495057'; ctx.lineWidth = 0.8; ctx.stroke();
+    if(tier >= 1){
+      ctx.fillStyle = g.color;
+      ctx.fillRect(-6, 4, 12, 3);
+      ctx.fillStyle = '#3E2723';
+      ctx.fillRect(-1.5, 7, 3, 6);
+    }
+    if(tier >= 2){
+      // Pommel gem
+      ctx.fillStyle = g.glow;
+      ctx.beginPath(); ctx.arc(0, 13, 2, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(-0.5, 12.5, 0.6, 0, Math.PI*2); ctx.fill();
+    }
+    if(tier >= 3){
+      // Glowing edge
+      const pulse = 0.5 + 0.5*Math.sin(state.time*5);
+      ctx.strokeStyle = `rgba(255,224,102,${pulse*0.8})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -16); ctx.lineTo(3, 4);
+      ctx.moveTo(0, -16); ctx.lineTo(-3, 4);
+      ctx.stroke();
+      // Rune on blade
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath(); ctx.arc(0, -8, 0.9, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, -4, 0.9, 0, Math.PI*2); ctx.fill();
+    }
   } else if(def.id === 'w_thunder'){
+    // Thunder mace: C plain head → B + handle band → A + lightning bolt → S + electric arc + glow
     ctx.fillStyle = '#3E2723';
     ctx.fillRect(-1.6, 0, 3.2, 12);
     ctx.fillStyle = g.color;
     ctx.beginPath(); ctx.arc(0, -4, 7, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = '#FFE066';
-    ctx.beginPath();
-    ctx.moveTo(-2, -9); ctx.lineTo(1, -5); ctx.lineTo(-1, -5); ctx.lineTo(2, 1);
-    ctx.lineTo(0, -3); ctx.lineTo(2, -3); ctx.closePath();
-    ctx.fill();
+    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1; ctx.stroke();
+    if(tier >= 1){
+      // Handle gold band
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(-2, 6, 4, 1.5);
+    }
+    if(tier >= 2){
+      // Lightning etched on head
+      ctx.fillStyle = '#FFE066';
+      ctx.beginPath();
+      ctx.moveTo(-2, -9); ctx.lineTo(1, -5); ctx.lineTo(-1, -5); ctx.lineTo(2, 1);
+      ctx.lineTo(0, -3); ctx.lineTo(2, -3); ctx.closePath();
+      ctx.fill();
+    }
+    if(tier >= 3){
+      // Animated electric arcs
+      const flick = (Math.sin(state.time*15) + 1) * 0.5;
+      ctx.strokeStyle = `rgba(255,224,102,${flick})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-7, -4); ctx.lineTo(-9 - flick*2, -8);
+      ctx.moveTo(7, -4); ctx.lineTo(9 + flick*2, -8);
+      ctx.stroke();
+      // Glow ring around head
+      const pulse = 0.5 + 0.5*Math.sin(state.time*4);
+      ctx.strokeStyle = `rgba(255,224,102,${pulse*0.7})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, -4, 9, 0, Math.PI*2); ctx.stroke();
+    }
   } else if(def.id === 'w_phoenix'){
+    // Phoenix: C single flame core → B + 3 petals → A + 5 petals (animated) → S + outer ring + sparkles
+    const petalCount = tier === 0 ? 0 : tier === 1 ? 3 : 5;
     ctx.fillStyle = '#F76707';
     ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#FFE066';
-    for(let k=0;k<5;k++){
-      const a = k*(Math.PI*2/5) + state.time*2;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(Math.cos(a)*11, Math.sin(a)*11);
-      ctx.lineTo(Math.cos(a+0.5)*6, Math.sin(a+0.5)*6);
-      ctx.closePath(); ctx.fill();
+    if(petalCount > 0){
+      ctx.fillStyle = '#FFE066';
+      for(let k=0;k<petalCount;k++){
+        const a = k*(Math.PI*2/petalCount) + state.time*(tier >= 2 ? 2 : 0);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(a)*11, Math.sin(a)*11);
+        ctx.lineTo(Math.cos(a+0.5)*6, Math.sin(a+0.5)*6);
+        ctx.closePath(); ctx.fill();
+      }
     }
-    ctx.fillStyle = '#FFF9DB';
-    ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
+    if(tier >= 2){
+      // Bright core
+      ctx.fillStyle = '#FFF9DB';
+      ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
+    }
+    if(tier >= 3){
+      // Outer ring + counter-rotating sparkles
+      ctx.strokeStyle = `rgba(255,107,107,${0.5 + 0.3*Math.sin(state.time*4)})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI*2); ctx.stroke();
+      for(let i=0;i<6;i++){
+        const a = (i/6)*Math.PI*2 - state.time*1.5;
+        ctx.fillStyle = '#FFF9DB';
+        ctx.beginPath(); ctx.arc(Math.cos(a)*13, Math.sin(a)*13, 0.9, 0, Math.PI*2); ctx.fill();
+      }
+    }
   } else {
     ctx.font = 'bold 14px sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -2249,11 +2641,15 @@ const progress = (()=>{
     costumes: [],                                       // [{uid, defId, grade}]
     equipped: { head:null, body:null, weapon:null },    // uid or null per slot
     chaptersSinceCostume: 0,                            // pity counter — guarantees a costume every 10 clears
+    skin: 'default',                                    // currently selected title-screen background skin
+    ownedSkins: ['default'],                            // skin ids the player has unlocked
   };
   const merged = Object.assign(base, saved || {}, {
     shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}),
     equipped: Object.assign({}, base.equipped, (saved&&saved.equipped)||{}),
     costumes: (saved&&Array.isArray(saved.costumes)) ? saved.costumes : [],
+    ownedSkins: (saved&&Array.isArray(saved.ownedSkins) && saved.ownedSkins.length) ? saved.ownedSkins : ['default'],
+    skin: (saved && saved.skin) || 'default',
   });
   // Sanity: drop equipped uids that no longer exist in inventory.
   for(const slot of ['head','body','weapon']){
@@ -2261,10 +2657,43 @@ const progress = (()=>{
       merged.equipped[slot] = null;
     }
   }
+  // Make sure default skin is always owned and that the selected skin is valid.
+  if(!merged.ownedSkins.includes('default')) merged.ownedSkins.unshift('default');
+  if(!merged.ownedSkins.includes(merged.skin)) merged.skin = 'default';
   return merged;
 })();
 function saveProgress(){ try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }catch(e){} }
 function unlockedChapters(){ return Math.min(MAX_CHAPTERS, progress.clearedChapter + 1); }
+
+// ---------- Title background skins ----------
+// Pure-cosmetic skins for the start screen. Themed to the chapter biomes so the player can
+// pick whatever world fits their mood. No gameplay impact — they only swap the radial gradient.
+const TITLE_SKINS = [
+  { id:'default',  name:'비둘기 광장',   price: 0,
+    grad:'radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.92) 0%, rgba(255,212,59,.88) 18%, rgba(247,103,7,.88) 45%, rgba(90,26,4,.94) 80%, rgba(18,3,0,.98) 100%)' },
+  { id:'neon',     name:'네온 야경',     price: 1500,
+    grad:'radial-gradient(ellipse at 50% 65%, rgba(186,104,200,.92) 0%, rgba(106,27,154,.88) 25%, rgba(255,64,129,.88) 60%, rgba(13,0,26,.96) 100%)' },
+  { id:'crystal',  name:'수정 동굴',     price: 3000,
+    grad:'radial-gradient(ellipse at 50% 65%, rgba(177,151,252,.92) 0%, rgba(95,61,196,.88) 30%, rgba(45,27,105,.94) 70%, rgba(5,1,27,.98) 100%)' },
+  { id:'glacier',  name:'빙하 새벽',     price: 4500,
+    grad:'radial-gradient(ellipse at 50% 65%, rgba(227,250,252,.92) 0%, rgba(116,192,252,.88) 30%, rgba(33,150,243,.85) 60%, rgba(13,71,161,.96) 100%)' },
+  { id:'cosmos',   name:'우주 정거장',   price: 6000,
+    grad:'radial-gradient(ellipse at 50% 65%, rgba(83,109,254,.85) 0%, rgba(123,31,162,.88) 35%, rgba(26,15,90,.94) 70%, rgba(0,0,30,.98) 100%)' },
+  { id:'hellfire', name:'지옥 분화구',   price: 7500,
+    grad:'radial-gradient(ellipse at 50% 65%, rgba(255,167,38,.92) 0%, rgba(244,67,54,.88) 30%, rgba(150,21,21,.92) 65%, rgba(13,0,0,.98) 100%)' },
+  { id:'abyss',    name:'심해 협곡',     price: 9000,
+    grad:'radial-gradient(ellipse at 50% 65%, rgba(74,210,189,.85) 0%, rgba(0,121,107,.88) 30%, rgba(13,71,79,.94) 70%, rgba(0,18,29,.98) 100%)' },
+  { id:'stardust', name:'별빛 회랑',     price: 12000,
+    grad:'radial-gradient(ellipse at 50% 65%, rgba(255,224,102,.85) 0%, rgba(229,153,247,.85) 30%, rgba(116,64,255,.92) 65%, rgba(13,2,30,.98) 100%)' },
+];
+const TITLE_SKINS_BY_ID = Object.fromEntries(TITLE_SKINS.map(s => [s.id, s]));
+
+function applyTitleSkin(){
+  const skinId = progress.skin || 'default';
+  const skin = TITLE_SKINS_BY_ID[skinId] || TITLE_SKINS[0];
+  const titleEl = document.getElementById('title');
+  if(titleEl) titleEl.style.background = skin.grad;
+}
 
 // ---------- Costume / gacha system ----------
 // Grades — rarer = stronger multiplier on the slot's base stat package.
@@ -5548,6 +5977,7 @@ document.getElementById('startBtn').addEventListener('click', openChapterSelect)
 document.getElementById('titleShopPill').addEventListener('click', ()=> openShop('skill'));
 document.getElementById('shopTabSkill').addEventListener('click', ()=> setShopTab('skill'));
 document.getElementById('shopTabCostume').addEventListener('click', ()=> setShopTab('costume'));
+document.getElementById('shopTabSkin').addEventListener('click', ()=> setShopTab('skin'));
 // Costume slot tabs (머리/몸통/무기) — delegated since the grid is re-rendered.
 document.addEventListener('click', e => {
   const tab = e.target.closest('.cos-slot-tab');
@@ -5560,6 +5990,9 @@ document.getElementById('gachaCloseBtn').addEventListener('click', ()=>{
   renderCostumeScreen();
   updateTitleCoinDisplay();
 });
+document.getElementById('epCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('equipPickerModal').classList.add('hidden');
+});
 document.getElementById('shopBackBtn').addEventListener('click', ()=>{
   state.scene = 'title';
   document.getElementById('shopScreen').classList.add('hidden');
@@ -5569,12 +6002,14 @@ document.getElementById('shopBackBtn').addEventListener('click', ()=>{
 document.getElementById('howBtn').addEventListener('click', ()=>document.getElementById('howModal').classList.remove('hidden'));
 document.getElementById('howCloseBtn').addEventListener('click', ()=>document.getElementById('howModal').classList.add('hidden'));
 document.getElementById('resetProgBtn').addEventListener('click', ()=>{
-  if(confirm('진행 기록을 모두 초기화할까요? 코인·상점 업그레이드·코스튬까지 함께 초기화됩니다. 이 동작은 되돌릴 수 없습니다.')){
+  if(confirm('진행 기록을 모두 초기화할까요? 코인·상점 업그레이드·코스튬·배경 스킨까지 함께 초기화됩니다. 이 동작은 되돌릴 수 없습니다.')){
     progress.clearedChapter = 0; progress.highChapter = 0; progress.highStage = 0; progress.highScore = 0;
     progress.coins = 0; progress.shop = {};
     progress.costumes = []; progress.equipped = { head:null, body:null, weapon:null };
     progress.chaptersSinceCostume = 0;
+    progress.skin = 'default'; progress.ownedSkins = ['default'];
     saveProgress();
+    applyTitleSkin();
     updateTitleCoinDisplay();
     alert('기록이 초기화되었습니다.');
   }
@@ -5757,11 +6192,61 @@ function renderEquipRow(){
       slotEl.innerHTML = `
         <div class="slot-name">${slotLabels[slot]}</div>
         <div class="slot-icon" style="opacity:.4;">＋</div>
-        <div class="slot-empty">미착용</div>
+        <div class="slot-empty">미착용 — 클릭하여 선택</div>
       `;
+      slotEl.title = `${slotLabels[slot]} 슬롯에 장착할 코스튬 선택`;
+      slotEl.style.cursor = 'pointer';
+      slotEl.addEventListener('click', ()=> openEquipPicker(slot));
       equipRow.appendChild(slotEl);
     }
   }
+}
+
+// Modal popup that lets the player pick which owned costume to equip into an empty slot.
+// Listed cards show the actual costume shape + grade chip + duplicate count if applicable.
+function openEquipPicker(slot){
+  const slotLabels = { head:'머리', body:'몸통', weapon:'무기' };
+  const modal = document.getElementById('equipPickerModal');
+  document.getElementById('epSlotLabel').textContent = `${slotLabels[slot]} 슬롯에 장착할 코스튬을 골라주세요`;
+  const optsEl = document.getElementById('epOptions');
+  optsEl.innerHTML = '';
+  // Find owned costumes whose def belongs to this slot. Sort S→A→B→C, then by name.
+  const owned = (progress.costumes || []).filter(c => {
+    const def = COSTUME_DEFS_BY_ID[c.defId];
+    return def && def.slot === slot;
+  });
+  if(owned.length === 0){
+    optsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#868E96;padding:24px 8px;font-size:13px;">이 슬롯에 장착할 코스튬이 없어요.<br>가챠로 뽑거나 챕터를 클리어해 모아보세요!</div>`;
+    modal.classList.remove('hidden');
+    return;
+  }
+  const order = { S:4, A:3, B:2, C:1 };
+  owned.sort((a, b) => {
+    if(order[b.grade] !== order[a.grade]) return order[b.grade] - order[a.grade];
+    return a.defId.localeCompare(b.defId);
+  });
+  for(const eq of owned){
+    const def = COSTUME_DEFS_BY_ID[eq.defId];
+    const g = COSTUME_GRADES[eq.grade];
+    const card = document.createElement('button');
+    card.className = 'ep-option';
+    card.type = 'button';
+    card.innerHTML = `
+      <span class="ep-grade ${g.borderClass}">${g.label}</span>
+      <canvas></canvas>
+      <div class="ep-name">${def.name}</div>
+    `;
+    card.addEventListener('click', () => {
+      progress.equipped[slot] = eq.uid;
+      saveProgress();
+      modal.classList.add('hidden');
+      renderCostumeScreen();
+    });
+    optsEl.appendChild(card);
+    const cv = card.querySelector('canvas');
+    if(cv) renderCostumePreview(cv, eq, 60);
+  }
+  modal.classList.remove('hidden');
 }
 
 function setCosBrowseSlot(slot){
@@ -5970,20 +6455,83 @@ function openShop(initialTab){
 function setShopTab(which){
   const skillSec = document.getElementById('shopSkillSection');
   const costumeSec = document.getElementById('shopCostumeSection');
+  const skinSec = document.getElementById('shopSkinSection');
   const tabSkill = document.getElementById('shopTabSkill');
   const tabCostume = document.getElementById('shopTabCostume');
+  const tabSkin = document.getElementById('shopTabSkin');
+  // Reset all
+  skillSec.classList.add('hidden'); costumeSec.classList.add('hidden'); skinSec.classList.add('hidden');
+  tabSkill.classList.remove('on'); tabCostume.classList.remove('on'); tabSkin.classList.remove('on');
   if(which === 'costume'){
-    skillSec.classList.add('hidden');
     costumeSec.classList.remove('hidden');
-    tabSkill.classList.remove('on');
     tabCostume.classList.add('on');
     renderCostumeScreen();
+  } else if(which === 'skin'){
+    skinSec.classList.remove('hidden');
+    tabSkin.classList.add('on');
+    renderSkinShop();
   } else {
     skillSec.classList.remove('hidden');
-    costumeSec.classList.add('hidden');
     tabSkill.classList.add('on');
-    tabCostume.classList.remove('on');
     renderShop();
+  }
+}
+
+function renderSkinShop(){
+  const grid = document.getElementById('skinGrid');
+  if(!grid) return;
+  // Refresh shared coin bar
+  const sc = document.getElementById('shopCoinTxt');
+  if(sc) sc.textContent = (progress.coins||0).toLocaleString();
+  grid.innerHTML = '';
+  for(const skin of TITLE_SKINS){
+    const owned = (progress.ownedSkins||[]).includes(skin.id);
+    const equipped = progress.skin === skin.id;
+    const canAfford = (progress.coins||0) >= skin.price;
+
+    const card = document.createElement('div');
+    card.className = 'skin-card' + (owned ? ' owned' : '') + (equipped ? ' equipped' : '');
+    const tag = equipped
+      ? `<span class="skin-tag eq">★ 적용중</span>`
+      : owned ? `<span class="skin-tag">보유</span>` : '';
+    let actionHtml;
+    if(equipped){
+      actionHtml = `<button class="skin-action equipped" type="button">적용 중</button>`;
+    } else if(owned){
+      actionHtml = `<button class="skin-action equip" type="button">장착</button>`;
+    } else if(canAfford){
+      actionHtml = `<button class="skin-action" type="button">🪙 ${skin.price.toLocaleString()}</button>`;
+    } else {
+      actionHtml = `<button class="skin-action poor" type="button">🪙 ${skin.price.toLocaleString()}</button>`;
+    }
+    card.innerHTML = `
+      ${tag}
+      <div class="skin-thumb" style="background:${skin.grad}"></div>
+      <div class="skin-name">${skin.name}</div>
+      ${actionHtml}
+    `;
+    const btn = card.querySelector('.skin-action');
+    btn.addEventListener('click', () => {
+      if(equipped) return;
+      if(owned){
+        progress.skin = skin.id;
+      } else {
+        if((progress.coins||0) < skin.price){
+          sfxHurt();
+          beep(220, .08, 'square', .14, -120);
+          return;
+        }
+        progress.coins -= skin.price;
+        if(!progress.ownedSkins.includes(skin.id)) progress.ownedSkins.push(skin.id);
+        progress.skin = skin.id; // auto-equip on purchase
+        sfxLevelUp();
+      }
+      saveProgress();
+      applyTitleSkin();
+      updateTitleCoinDisplay();
+      renderSkinShop();
+    });
+    grid.appendChild(card);
   }
 }
 function renderShop(){
@@ -6375,6 +6923,8 @@ function startTitleBgmOnce(){
 
 // First paint of the coin badge on the title screen.
 updateTitleCoinDisplay();
+// Apply currently-selected title skin so the start screen reflects the player's choice on load.
+applyTitleSkin();
 
 </script>
 </body>
