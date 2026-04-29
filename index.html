@@ -42,12 +42,35 @@
      pulsing 'NEW' tag + corner sparkle. Anchored top-right where the eye lands first on mobile. */
   #titleShopPill{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 14px);right:calc(env(safe-area-inset-right, 0px) + 12px);width:138px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit;z-index:3;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(255,212,59,.45));animation:shopBob 2.6s ease-in-out infinite;overflow:visible;}
 
-  /* Shop tabs — switches between skill tree and costume gacha sections inside the shop screen. */
-  #shopScreen .shop-tabs{display:flex;gap:6px;justify-content:center;margin:6px 0 12px;}
-  #shopScreen .shop-tab{background:rgba(0,0,0,.4);border:2px solid #FFD43B;color:#FFE066;font-weight:900;font-family:inherit;font-size:13px;padding:9px 18px;border-radius:999px;cursor:pointer;letter-spacing:-.2px;}
-  #shopScreen .shop-tab.on{background:linear-gradient(180deg,#FFD43B,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 3px 0 rgba(0,0,0,.4);border-color:#FFF9DB;}
+  /* Shop tabs — switches between skill tree and costume gacha sections inside the shop screen.
+     Costume tab is intentionally extra-flashy with a rainbow border + NEW badge so players notice the gacha. */
+  #shopScreen .shop-tabs{display:flex;gap:8px;justify-content:center;margin:8px 0 14px;flex-wrap:wrap;}
+  #shopScreen .shop-tab{position:relative;background:rgba(0,0,0,.4);border:2px solid #FFD43B;color:#FFE066;font-weight:900;font-family:inherit;font-size:13px;padding:10px 20px;border-radius:999px;cursor:pointer;letter-spacing:-.2px;transition:transform .08s, box-shadow .12s;}
+  #shopScreen .shop-tab:active{transform:translateY(2px);}
+  #shopScreen #shopTabSkill.on{background:linear-gradient(180deg,#FFD43B,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 3px 0 rgba(0,0,0,.4);border-color:#FFF9DB;}
+  /* Costume tab: rainbow gradient backdrop + animated border so it looks like a premium feature.
+     Stays visually loud whether or not it is the active tab — the active state just adds a punch shadow. */
+  #shopScreen #shopTabCostume{background:linear-gradient(90deg,#E599F7,#74C0FC,#FFE066,#FF8787,#E599F7);background-size:300% 100%;animation:rainbowSlide 4s linear infinite;border-color:#FFF9DB;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);box-shadow:0 3px 0 rgba(0,0,0,.4),0 0 14px rgba(229,153,247,.55);font-size:14px;padding:10px 22px;}
+  #shopScreen #shopTabCostume.on{box-shadow:0 4px 0 rgba(0,0,0,.45),0 0 24px rgba(255,224,102,.65),inset 0 0 8px rgba(255,255,255,.4);transform:translateY(-1px);}
+  #shopScreen #shopTabCostume::after{content:'NEW';position:absolute;top:-9px;right:-6px;background:linear-gradient(180deg,#FF6B6B,#C92A2A);color:#fff;font-size:9px;font-weight:900;padding:2px 6px;border-radius:999px;border:2px solid #FFF9DB;letter-spacing:.5px;box-shadow:0 2px 4px rgba(0,0,0,.5);animation:newPulse 1.6s ease-in-out infinite;}
+  @keyframes rainbowSlide{to{background-position:300% 0;}}
+  @keyframes newPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
   #shopScreen #shopCostumeSection .costume-section{padding:0 6px;max-width:680px;width:100%;margin:0 auto 8px;}
   #shopScreen #shopCostumeSection .equip-row{margin:6px auto 14px;}
+
+  /* Gacha hero strip — make the gacha row read as the central CTA of the costume tab. */
+  .gacha-hero-banner{max-width:560px;width:100%;margin:0 auto 8px;padding:10px 14px;background:linear-gradient(90deg,rgba(229,153,247,.18),rgba(255,224,102,.18),rgba(116,192,252,.18));border:2px dashed #E599F7;border-radius:14px;text-align:center;color:#FFF9DB;font-size:12px;line-height:1.5;}
+  .gacha-hero-banner .ratebox{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:6px;}
+  .gacha-hero-banner .rate-pip{display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:999px;font-weight:900;font-size:11px;}
+  .gacha-hero-banner .rate-pip .grade{padding:1px 6px;border-radius:999px;font-size:10px;color:#fff;}
+  .gacha-hero-banner .rate-pip .grade.S{background:linear-gradient(180deg,#FFE066,#E67700);color:#5A1A04;}
+  .gacha-hero-banner .rate-pip .grade.A{background:linear-gradient(180deg,#E599F7,#7048E8);}
+  .gacha-hero-banner .rate-pip .grade.B{background:linear-gradient(180deg,#74C0FC,#1864AB);}
+  .gacha-hero-banner .rate-pip .grade.C{background:linear-gradient(180deg,#CED4DA,#495057);}
+
+  /* Re-style gacha buttons to feel premium — bigger, with grade halo on hover */
+  .gacha-btn{background:linear-gradient(180deg,#E599F7 0%,#BE4BDB 50%,#7048E8 100%);border:3px solid #FFF9DB;border-radius:16px;padding:14px 22px;color:#fff;font-weight:900;font-family:inherit;font-size:16px;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.2),0 0 18px rgba(229,153,247,.45);text-shadow:0 1px 2px rgba(0,0,0,.5);min-width:150px;letter-spacing:-.3px;transition:transform .08s, box-shadow .12s;}
+  .gacha-btn.gacha-ten{background:linear-gradient(180deg,#FFD43B 0%,#FF6B6B 50%,#C92A2A 100%);box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.2),0 0 22px rgba(255,107,107,.5);}
   @keyframes shopBob{0%,100%{transform:translateY(0) rotate(-1.2deg);}50%{transform:translateY(-3px) rotate(1.2deg);}}
   #titleShopPill:active{animation:none;transform:translateY(3px);}
   #titleShopPill .awning{display:block;height:22px;background:repeating-linear-gradient(90deg,#C92A2A 0 11px,#FFF9DB 11px 22px);border:3px solid #5A1A04;border-bottom-width:4px;border-radius:14px 14px 4px 4px;position:relative;overflow:hidden;}
@@ -121,26 +144,31 @@
   #shopScreen .coin-bar .coin-ic{font-size:22px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3));}
   #shopScreen .shop-hint{text-align:center;color:#FFF9DB;font-size:11px;opacity:.7;margin-bottom:10px;line-height:1.45;}
 
-  /* The tree itself — three columns of nodes with connecting rails drawn via pseudo-elements */
-  #shopScreen .tree{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:0 4px;padding:6px 6px 32px;max-width:560px;width:100%;margin:0 auto;}
-  .tree .branch{display:flex;flex-direction:column;align-items:center;gap:38px;position:relative;padding:6px 0;}
-  .tree .branch-head{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 14px 8px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.18));border:2px solid;font-weight:900;letter-spacing:0.5px;text-shadow:0 1px 0 rgba(0,0,0,.55);box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 0 14px rgba(255,255,255,.05);min-width:78px;}
-  .tree .branch-head .lbl{font-size:15px;}
-  .tree .branch-head .tip{font-size:9px;font-weight:700;opacity:.75;letter-spacing:1px;}
+  /* The tree itself — three columns of nodes with connecting rails drawn via pseudo-elements.
+     Branch columns get a soft tinted backdrop so each branch reads as its own "shop aisle". */
+  #shopScreen .tree{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:6px 8px;padding:6px 6px 32px;max-width:580px;width:100%;margin:0 auto;}
+  .tree .branch{position:relative;display:flex;flex-direction:column;align-items:center;gap:42px;padding:10px 4px 18px;border-radius:18px;background:linear-gradient(180deg,var(--branch-tint,rgba(255,212,59,.05)),rgba(0,0,0,0));border:1px solid rgba(255,255,255,.05);}
+  .tree .branch-head{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 16px 10px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(0,0,0,.22));border:3px solid;font-weight:900;letter-spacing:0.5px;text-shadow:0 1px 0 rgba(0,0,0,.55);box-shadow:0 5px 0 rgba(0,0,0,.4),inset 0 0 14px rgba(255,255,255,.10);min-width:88px;}
+  .tree .branch-head .lbl{font-size:16px;}
+  .tree .branch-head .tip{font-size:9px;font-weight:700;opacity:.85;letter-spacing:1px;}
 
   /* Node — circular badge with icon, name & cost stacked below */
   .tree .node{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;}
   /* Connector rail — drawn from each node's center up to the previous node */
-  .tree .node .rail{position:absolute;left:50%;top:-44px;width:6px;height:46px;transform:translateX(-50%);border-radius:3px;background:linear-gradient(180deg,#FFD43B,#7A0F0F);box-shadow:0 0 8px rgba(255,212,59,.4);z-index:0;}
+  .tree .node .rail{position:absolute;left:50%;top:-50px;width:6px;height:50px;transform:translateX(-50%);border-radius:3px;background:linear-gradient(180deg,#FFD43B,#7A0F0F);box-shadow:0 0 8px rgba(255,212,59,.4);z-index:0;}
   .tree .node .rail.locked{background:linear-gradient(180deg,#495057,#1A1D20);box-shadow:none;opacity:.65;}
   .tree .node .rail.met{background:linear-gradient(180deg,#FFE066,#51CF66);box-shadow:0 0 10px rgba(81,207,102,.55);}
 
-  .tree .ring{position:relative;width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;background:radial-gradient(circle at 35% 30%, #FFF3BF 0%, #FFD43B 35%, #C92A2A 100%);border:4px solid #FFE066;box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 18px rgba(255,212,59,.35);z-index:1;cursor:pointer;font-family:inherit;color:#fff;padding:0;transition:transform .08s;}
-  .tree .ring:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 18px rgba(255,212,59,.35);}
+  .tree .ring{position:relative;width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;background:radial-gradient(circle at 35% 30%, #FFF3BF 0%, #FFD43B 35%, #C92A2A 100%);border:5px solid #FFE066;box-shadow:0 7px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(255,212,59,.4);z-index:1;cursor:pointer;font-family:inherit;color:#fff;padding:0;transition:transform .08s, box-shadow .12s;}
+  .tree .ring:active{transform:translateY(3px);box-shadow:0 4px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(255,212,59,.4);}
   .tree .node.locked .ring{background:radial-gradient(circle at 50% 50%, #495057 0%, #1A1D20 100%);border-color:#6C757D;box-shadow:0 4px 0 rgba(0,0,0,.45),inset 0 0 12px rgba(0,0,0,.6);cursor:not-allowed;filter:grayscale(.6);}
-  .tree .node.maxed .ring{background:radial-gradient(circle at 35% 30%, #FFF9DB 0%, #FAB005 50%, #E67700 100%);border-color:#FFF9DB;box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(250,176,5,.6);animation:nodepulse 2.4s ease-in-out infinite;}
-  @keyframes nodepulse{0%,100%{box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(250,176,5,.6);}50%{box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 32px rgba(250,176,5,.85);}}
-  .tree .node.affordable .ring{box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(81,207,102,.6);}
+  .tree .node.maxed .ring{background:radial-gradient(circle at 35% 30%, #FFF9DB 0%, #FAB005 50%, #E67700 100%);border-color:#FFF9DB;box-shadow:0 7px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 26px rgba(250,176,5,.7);animation:nodepulse 2.4s ease-in-out infinite;}
+  @keyframes nodepulse{0%,100%{box-shadow:0 7px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 22px rgba(250,176,5,.6);}50%{box-shadow:0 7px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 36px rgba(250,176,5,.95);}}
+  .tree .node.affordable .ring{box-shadow:0 7px 0 rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.25),0 0 28px rgba(81,207,102,.85);animation:affordPulse 1.6s ease-in-out infinite;}
+  @keyframes affordPulse{0%,100%{filter:brightness(1);transform:translateY(0);}50%{filter:brightness(1.15);transform:translateY(-2px);}}
+  /* "구매가능" badge floats above affordable nodes so they pop visually */
+  .tree .node.affordable .ring::before{content:'BUY!';position:absolute;top:-14px;right:-12px;background:linear-gradient(180deg,#51CF66,#2F9E44);color:#fff;font-size:9px;font-weight:900;padding:3px 7px;border-radius:999px;border:2px solid #FFF9DB;letter-spacing:1px;box-shadow:0 2px 4px rgba(0,0,0,.5);text-shadow:0 1px 0 rgba(0,0,0,.4);animation:newPulse 1.4s ease-in-out infinite;}
+  .tree .node.maxed .ring::before{content:'MAX';position:absolute;top:-14px;right:-12px;background:linear-gradient(180deg,#FFD43B,#E67700);color:#5A1A04;font-size:9px;font-weight:900;padding:3px 7px;border-radius:999px;border:2px solid #FFF9DB;letter-spacing:1px;box-shadow:0 2px 4px rgba(0,0,0,.5);}
 
   /* Lock badge overlays the ring when the node's prerequisite isn't met */
   .tree .node.locked .ring::after{content:'🔒';position:absolute;font-size:24px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6));}
@@ -153,7 +181,7 @@
   .tree .node .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);}
   .tree .node .dot.on{background:#FFD43B;border-color:#FFF9DB;box-shadow:0 0 4px rgba(255,212,59,.7);}
   .tree .node.maxed .dot.on{background:#FFF9DB;}
-  .tree .node .cost{margin-top:6px;display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:999px;background:linear-gradient(180deg,#51CF66,#2F9E44);border:2px solid #FFE066;color:#fff;font-weight:900;font-size:11px;cursor:pointer;font-family:inherit;box-shadow:0 2px 0 rgba(0,0,0,.4);min-width:54px;justify-content:center;}
+  .tree .node .cost{margin-top:8px;display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:999px;background:linear-gradient(180deg,#51CF66,#2F9E44);border:2px solid #FFE066;color:#fff;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;box-shadow:0 3px 0 rgba(0,0,0,.4);min-width:64px;justify-content:center;text-shadow:0 1px 0 rgba(0,0,0,.4);}
   .tree .node.locked .cost{background:linear-gradient(180deg,#495057,#212529);border-color:#6C757D;color:#ADB5BD;cursor:not-allowed;box-shadow:0 2px 0 rgba(0,0,0,.4);}
   .tree .node .cost.poor{background:linear-gradient(180deg,#7A0F0F,#3B0606);border-color:#FF8787;color:#FFE3E3;}
   .tree .node .cost.maxed{background:linear-gradient(180deg,#FAB005,#E67700);border-color:#FFF9DB;color:#fff;cursor:default;}
@@ -296,12 +324,15 @@
   .gacha-reveal .pull-card .pc-slot{font-size:10px;color:#868E96;text-transform:uppercase;letter-spacing:.5px;}
   .gacha-reveal .pull-stats{font-size:12px;color:#A5D8FF;text-align:center;line-height:1.5;}
 
-  /* Costume album — shows every def with which grades have been collected */
-  .album-card{background:linear-gradient(180deg,rgba(40,15,70,.55),rgba(15,2,30,.85));border:2px solid #5F3DC4;border-radius:10px;padding:8px 6px;text-align:center;color:#FFF9DB;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  /* Costume album — shows every def with which grades have been collected.
+     Unowned entries display the real icon dimmed/desaturated so the player can see what they're chasing. */
+  .album-card{background:linear-gradient(180deg,rgba(40,15,70,.55),rgba(15,2,30,.85));border:2px solid #5F3DC4;border-radius:10px;padding:8px 6px;text-align:center;color:#FFF9DB;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .12s, box-shadow .12s;}
   .album-card.complete{border-color:#FFE066;box-shadow:0 0 14px rgba(255,224,102,.35);}
+  .album-card.silhouette{background:linear-gradient(180deg,rgba(30,30,40,.55),rgba(10,5,20,.85));border-color:#3A2C58;}
   .album-card .a-icon{font-size:30px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4));}
-  .album-card .a-icon.locked{filter:grayscale(1) brightness(.4);}
+  .album-card .a-icon.silhouette-icon{filter:grayscale(1) brightness(.45) contrast(1.2);opacity:.55;}
   .album-card .a-name{font-size:11px;font-weight:900;color:#FFE066;line-height:1.2;}
+  .album-card .a-name.silhouette-name{color:#6C7280;}
   .album-card .a-slot{font-size:9px;color:#868E96;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
   .album-card .a-grades{display:flex;gap:3px;margin-top:2px;flex-wrap:wrap;justify-content:center;}
   .album-grade-pip{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:1.5px solid rgba(255,255,255,.4);color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);}
@@ -422,9 +453,18 @@
     </div>
     <!-- Costume gacha section (was the standalone costume screen) -->
     <div id="shopCostumeSection" class="hidden">
+      <div class="gacha-hero-banner">
+        ✨ <b style="color:#FFE066;">비둘기 코스튬 가챠</b> — 머리 · 몸통 · 무기 슬롯에 장착하면 강력한 능력치 보너스!
+        <div class="ratebox">
+          <span class="rate-pip"><span class="grade S">S</span>2%</span>
+          <span class="rate-pip"><span class="grade A">A</span>8%</span>
+          <span class="rate-pip"><span class="grade B">B</span>30%</span>
+          <span class="rate-pip"><span class="grade C">C</span>60%</span>
+        </div>
+      </div>
       <div class="gacha-row">
         <button class="gacha-btn" id="gachaSingleBtn">🎲 1회 뽑기<span class="cost">🪙 1,500</span></button>
-        <button class="gacha-btn" id="gachaTenBtn">🎰 10연 뽑기<span class="cost">🪙 12,000 (A 보장)</span></button>
+        <button class="gacha-btn gacha-ten" id="gachaTenBtn">🎰 10연 뽑기<span class="cost">🪙 12,000 · A 보장</span></button>
       </div>
       <div class="costume-section">
         <h3 style="text-align:center;color:#E599F7;">현재 착용 중</h3>
@@ -1083,242 +1123,412 @@ function drawCostumeGlow(ctx, cx, cy, r, eq){
 function drawCostumeHeadOverlay(ctx, px, py, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
-  // Pigeon head center in pigeon-local coords is around (0, -22) at scale, head radius 16.
-  // We pin the costume to the TOP of the head so hats sit snugly without floating.
+  // Pigeon head center is at (0, -22) in pigeon-local coords with radius 16.
+  // We anchor the costume's coordinate origin AT the head center so each shape can
+  // describe itself relative to the dome (top at y=-16, sides at x=±16).
   const hx = px;
-  const hy = py + (-22 - 12)*scale; // top crown of head
-  drawCostumeGlow(ctx, hx, hy + 6*scale, 18*scale, eq);
+  const hy = py + (-22)*scale;
+  drawCostumeGlow(ctx, hx, hy - 14*scale, 22*scale, eq);
   ctx.save();
   ctx.translate(hx, hy);
   ctx.scale(scale, scale);
-  // Per-id distinct visuals so the same emoji doesn't read the same shape.
-  // All shapes are drawn in a 24x16 bounding box that sits flush with the head crown.
   if(def.id === 'h_beanie'){
-    // Soft cap that hugs the head: a half-dome with a folded brim.
+    // Knit beanie: rounded cap that wraps the top half of the head with a folded brim.
     ctx.fillStyle = g.color;
-    ctx.beginPath(); ctx.arc(0, 4, 13, Math.PI, 0); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -8, 16, 14, 0, Math.PI, 0); ctx.fill();
+    // Brim — slightly darker
     ctx.fillStyle = g.glow;
-    ctx.fillRect(-13, 2, 26, 4);
+    ctx.beginPath(); ctx.ellipse(0, -4, 17, 4, 0, 0, Math.PI*2); ctx.fill();
+    // Pom
     ctx.fillStyle = '#FFF9DB';
-    ctx.beginPath(); ctx.arc(0, -8, 3, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -20, 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = g.color;
+    ctx.beginPath(); ctx.arc(-1, -21, 2, 0, Math.PI*2); ctx.fill();
   } else if(def.id === 'h_strawhat'){
-    // Wide brim + low crown
+    // Wide-brim straw hat: big oval brim + low crown
     ctx.fillStyle = '#FAB005';
-    ctx.beginPath(); ctx.ellipse(0, 8, 20, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -4, 24, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.fillStyle = '#FFE066';
-    ctx.beginPath(); ctx.ellipse(0, 4, 11, 8, 0, Math.PI, 0); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -10, 11, 8, 0, Math.PI, 0); ctx.fill();
+    // Hat band
     ctx.fillStyle = g.color;
-    ctx.fillRect(-10, 6, 20, 2);
+    ctx.beginPath(); ctx.ellipse(0, -6, 11, 2, 0, 0, Math.PI*2); ctx.fill();
   } else if(def.id === 'h_helmet'){
-    // Dome helmet with chin strap and crest
+    // Combat helmet — covers the top of the head with a visor band
     ctx.fillStyle = '#495057';
-    ctx.beginPath(); ctx.arc(0, 6, 14, Math.PI, 0); ctx.fill();
-    ctx.fillStyle = '#ADB5BD';
-    ctx.fillRect(-14, 5, 28, 3);
+    ctx.beginPath(); ctx.ellipse(0, -8, 16, 12, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#343A40';
+    ctx.beginPath(); ctx.ellipse(0, -6, 16, 3, 0, 0, Math.PI*2); ctx.fill();
+    // Visor strap accent
     ctx.fillStyle = g.color;
-    ctx.fillRect(-2, -8, 4, 10);
+    ctx.fillRect(-2, -22, 4, 8);
     ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.arc(0, -10, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -22, 2.4, 0, Math.PI*2); ctx.fill();
   } else if(def.id === 'h_tophat'){
-    // Top hat with band
+    // Top hat: flat brim disc + tall cylindrical crown sitting on top of the pigeon's head.
     ctx.fillStyle = '#1A1D20';
-    ctx.fillRect(-13, 8, 26, 3);
-    ctx.fillRect(-8, -10, 16, 18);
+    // Brim
+    ctx.beginPath(); ctx.ellipse(0, -10, 17, 4, 0, 0, Math.PI*2); ctx.fill();
+    // Crown body
+    ctx.fillRect(-9, -28, 18, 18);
+    // Crown top
+    ctx.beginPath(); ctx.ellipse(0, -28, 9, 3, 0, 0, Math.PI*2); ctx.fill();
+    // Hat band — accent
     ctx.fillStyle = g.color;
-    ctx.fillRect(-8, 2, 16, 3);
+    ctx.fillRect(-9, -16, 18, 4);
+    // Highlight on crown for fancy look
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fillRect(-7, -26, 2, 14);
   } else if(def.id === 'h_crown'){
-    // Five-point crown rooted on the head crown line
+    // Royal crown — five points sitting on the brow line
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.moveTo(-13, 8); ctx.lineTo(-10, -2); ctx.lineTo(-6, 4);
-    ctx.lineTo(0, -8); ctx.lineTo(6, 4); ctx.lineTo(10, -2); ctx.lineTo(13, 8);
+    ctx.moveTo(-14, -4); ctx.lineTo(-11, -16); ctx.lineTo(-6, -8);
+    ctx.lineTo(0, -22); ctx.lineTo(6, -8); ctx.lineTo(11, -16); ctx.lineTo(14, -4);
     ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
     ctx.stroke();
+    // Base band
+    ctx.fillStyle = '#E0A700';
+    ctx.fillRect(-14, -6, 28, 3);
+    // Gemstones
     ctx.fillStyle = '#FF1744';
-    ctx.beginPath(); ctx.arc(0, 3, 2.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -10, 2.2, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = g.glow;
-    ctx.beginPath(); ctx.arc(-7, 1, 1.4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(7, 1, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-8, -12, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(8, -12, 1.4, 0, Math.PI*2); ctx.fill();
   } else if(def.id === 'h_halo'){
-    // Rotating halo above the head
+    // Floating angelic halo above the head with rotating sparkles
     ctx.strokeStyle = g.glow;
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.ellipse(0, 0, 16, 5, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.ellipse(0, -22, 16, 5, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = g.color;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.ellipse(0, -22, 12, 3.5, 0, 0, Math.PI*2); ctx.stroke();
     ctx.fillStyle = g.color;
     for(let i=0;i<6;i++){
       const a = (i/6)*Math.PI*2 + state.time*1.4;
-      ctx.beginPath(); ctx.arc(Math.cos(a)*16, Math.sin(a)*5, 1.6, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(Math.cos(a)*15, -22 + Math.sin(a)*4, 1.6, 0, Math.PI*2); ctx.fill();
     }
   } else {
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(def.icon, 0, 2);
+    ctx.fillText(def.icon, 0, -16);
   }
   ctx.restore();
 }
 function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
-  // Pigeon body ellipse is centered at (0, 10) with rx 32, ry 28. We anchor the costume to
-  // the body center so it hugs the chest, not below the feet. Costume artwork uses a 24x18
-  // bounding box that sits inside the body silhouette without breaking out the sides.
+  // Pigeon body ellipse is centered at (0, 10) in pigeon-local coords with rx 32, ry 28.
+  // Costume coord origin sits at body center; clip ellipse matches body for tight silhouette fit.
+  // Cape is the lone exception that draws behind the body (pre-clip) so it flows past the silhouette.
   const cx = px, cy = py + 10*scale;
-  drawCostumeGlow(ctx, cx, cy + 4*scale, 26*scale, eq);
+  drawCostumeGlow(ctx, cx, cy, 30*scale, eq);
+
   ctx.save();
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
-  // Use clipping to a body-shaped ellipse so costumes never leak outside the pigeon's silhouette.
-  ctx.save();
-  ctx.beginPath(); ctx.ellipse(0, 0, 24, 18, 0, 0, Math.PI*2); ctx.clip();
-  if(def.id === 'b_jersey'){
+
+  // ── Cape: a proper cape — narrow shoulder collar + back drape that flows behind/beyond the body
+  // silhouette. Body of the pigeon stays visible; cape only adds wings at the back.
+  if(def.id === 'b_cape'){
+    ctx.save();
+    // ── Back drape — two side panels that hang behind the shoulders, slightly past the silhouette.
     ctx.fillStyle = g.color;
-    ctx.fillRect(-24, -18, 48, 36);
-    ctx.fillStyle = g.glow;
-    ctx.fillRect(-24, -3, 48, 4);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 14px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('1', 0, 4);
-  } else if(def.id === 'b_robe'){
-    ctx.fillStyle = '#3B2F6E';
-    ctx.fillRect(-24, -18, 48, 36);
-    ctx.fillStyle = g.color;
-    for(let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(0, -8 + i*8, 2.2, 0, Math.PI*2); ctx.fill(); }
-    ctx.fillStyle = g.glow;
-    ctx.fillRect(-22, 8, 44, 3);
-  } else if(def.id === 'b_tux'){
-    ctx.fillStyle = '#1A1D20';
-    ctx.fillRect(-24, -18, 48, 36);
-    ctx.fillStyle = '#fff';
+    // Left back panel
     ctx.beginPath();
-    ctx.moveTo(-9, -18); ctx.lineTo(-7, 8); ctx.lineTo(0, 14); ctx.lineTo(7, 8); ctx.lineTo(9, -18);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = g.color;
-    ctx.beginPath();
-    ctx.moveTo(-3, -10); ctx.lineTo(0, -2); ctx.lineTo(3, -10); ctx.closePath();
+    ctx.moveTo(-14, -20);
+    ctx.quadraticCurveTo(-32, -6, -28, 22);
+    ctx.lineTo(-22, 26);
+    ctx.quadraticCurveTo(-12, 14, -8, -10);
+    ctx.closePath();
     ctx.fill();
-  } else if(def.id === 'b_armor'){
-    ctx.fillStyle = '#ADB5BD';
-    ctx.fillRect(-24, -18, 48, 36);
-    ctx.fillStyle = '#868E96';
-    ctx.fillRect(-22, -2, 44, 3);
-    ctx.fillRect(-22, 6, 44, 2);
+    // Right back panel
+    ctx.beginPath();
+    ctx.moveTo(14, -20);
+    ctx.quadraticCurveTo(32, -6, 28, 22);
+    ctx.lineTo(22, 26);
+    ctx.quadraticCurveTo(12, 14, 8, -10);
+    ctx.closePath();
+    ctx.fill();
+    // Highlight stripe down the inside fold
+    ctx.fillStyle = g.glow;
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(-12, -18); ctx.quadraticCurveTo(-26, -2, -22, 18);
+    ctx.lineTo(-19, 18); ctx.quadraticCurveTo(-21, -2, -10, -16);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(12, -18); ctx.quadraticCurveTo(26, -2, 22, 18);
+    ctx.lineTo(19, 18); ctx.quadraticCurveTo(21, -2, 10, -16);
+    ctx.closePath(); ctx.fill();
+    ctx.globalAlpha = 1;
+    // ── Shoulder collar — small band running across the top of the body
     ctx.fillStyle = g.color;
     ctx.beginPath();
-    ctx.moveTo(0, -10); ctx.lineTo(8, -2); ctx.lineTo(0, 6); ctx.lineTo(-8, -2); ctx.closePath();
+    ctx.ellipse(0, -22, 16, 5, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = g.glow; ctx.lineWidth = 1.4;
+    ctx.stroke();
+    // Center clasp medallion on the chest
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath(); ctx.arc(0, -22, 3.4, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8; ctx.stroke();
+    ctx.fillStyle = '#FF1744';
+    ctx.beginPath(); ctx.arc(0, -22, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+    ctx.restore();
+    return;
+  }
+
+  // ── Other body costumes — clip to the body silhouette so nothing leaks past the edges.
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 30, 26, 0, 0, Math.PI*2);
+  ctx.clip();
+
+  if(def.id === 'b_jersey'){
+    // Sports jersey — full-body fill with a horizontal accent stripe and a "1" number.
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-32, -28, 64, 56);
+    ctx.fillStyle = g.glow;
+    ctx.fillRect(-32, -2, 64, 5);
+    // Sleeve accents
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(-30, -22, 8, 20);
+    ctx.fillRect(22, -22, 8, 20);
+    // Number
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('1', 0, 8);
+  } else if(def.id === 'b_robe'){
+    // Wizard robe — dark base + glowing trim down the front
+    ctx.fillStyle = '#2A1B4E';
+    ctx.fillRect(-32, -28, 64, 56);
+    // Rim shading
+    ctx.fillStyle = '#1A0E33';
+    ctx.fillRect(-32, 16, 64, 12);
+    // Center piping
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-2, -28, 4, 56);
+    // Stars / runes down the front
+    ctx.fillStyle = g.glow;
+    for(let i=0;i<3;i++){
+      const yy = -12 + i*10;
+      ctx.beginPath();
+      for(let k=0;k<5;k++){
+        const a = -Math.PI/2 + k*Math.PI*2/5;
+        const r = k%2 ? 1.4 : 2.6;
+        const xx = Math.cos(a)*r, yy2 = Math.sin(a)*r;
+        if(k===0) ctx.moveTo(xx, yy + yy2); else ctx.lineTo(xx, yy + yy2);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+  } else if(def.id === 'b_tux'){
+    // Tuxedo — black with white shirt panel and a colored bow tie
+    ctx.fillStyle = '#1A1D20';
+    ctx.fillRect(-32, -28, 64, 56);
+    // White shirt triangle from neckline down
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(-11, -22); ctx.lineTo(-9, 20); ctx.lineTo(0, 26); ctx.lineTo(9, 20); ctx.lineTo(11, -22);
+    ctx.closePath(); ctx.fill();
+    // Lapels — V on either side of the shirt
+    ctx.fillStyle = '#0E0F11';
+    ctx.beginPath();
+    ctx.moveTo(-12, -22); ctx.lineTo(-6, 0); ctx.lineTo(-13, -22); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(12, -22); ctx.lineTo(6, 0); ctx.lineTo(13, -22); ctx.closePath(); ctx.fill();
+    // Bow tie
+    ctx.fillStyle = g.color;
+    ctx.beginPath();
+    ctx.moveTo(-7, -16); ctx.lineTo(-1, -12); ctx.lineTo(-7, -8); ctx.closePath();
+    ctx.moveTo(7, -16); ctx.lineTo(1, -12); ctx.lineTo(7, -8); ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = g.glow;
+    ctx.fillRect(-1, -14, 2, 4);
+    // Buttons
+    ctx.fillStyle = '#FFD700';
+    for(let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(0, -2 + i*8, 1.6, 0, Math.PI*2); ctx.fill(); }
+  } else if(def.id === 'b_armor'){
+    // Steel chest plate — broad metal sheen with a centered emblem
+    ctx.fillStyle = '#9AA3AC';
+    ctx.fillRect(-32, -28, 64, 56);
+    // Highlight band (light reflection on the chest)
+    ctx.fillStyle = '#CFD4DA';
+    ctx.fillRect(-30, -16, 60, 6);
+    // Pectoral grooves
+    ctx.strokeStyle = '#5A6371'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(-26, -10); ctx.lineTo(0, 4); ctx.lineTo(26, -10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-22, 4); ctx.lineTo(22, 4); ctx.stroke();
+    // Belt at waist
+    ctx.fillStyle = '#5A6371';
+    ctx.fillRect(-32, 12, 64, 6);
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(-4, 12, 8, 6);
+    // Center emblem
+    ctx.fillStyle = g.color;
+    ctx.beginPath();
+    ctx.moveTo(0, -8); ctx.lineTo(8, 0); ctx.lineTo(0, 8); ctx.lineTo(-8, 0); ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = g.glow; ctx.lineWidth = 1.4;
     ctx.stroke();
   } else if(def.id === 'b_dragon'){
-    // Iridescent scaled plates that fully cover the body, with a gold seam down the middle.
-    for(let row=0; row<5; row++){
-      for(let col=-4; col<=4; col++){
-        const sx = col*5 + (row%2===0 ? 0 : 2.5);
-        const sy = -16 + row*8;
-        ctx.fillStyle = row%2===0 ? g.color : g.glow;
-        ctx.beginPath(); ctx.arc(sx, sy, 3.2, 0, Math.PI); ctx.fill();
+    // Iridescent dragon scales — overlapping arcs covering the body, gold spine seam
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-32, -28, 64, 56);
+    // Scales
+    for(let row=-3; row<5; row++){
+      for(let col=-5; col<=5; col++){
+        const sx = col*6 + (row%2===0 ? 0 : 3);
+        const sy = -20 + row*7;
+        ctx.fillStyle = (row+col)%2===0 ? g.glow : '#fff';
+        ctx.beginPath();
+        ctx.arc(sx, sy, 4.5, Math.PI, 0);
+        ctx.lineTo(sx + 4.5, sy);
+        ctx.lineTo(sx - 4.5, sy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.arc(sx, sy, 4.5, Math.PI, 0); ctx.stroke();
       }
     }
-    ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(0, 16); ctx.stroke();
-  } else if(def.id === 'b_cape'){
-    // Cape — anchored at shoulders, draped behind the body. We allow it to extend slightly past the clip
-    // so the trailing edge looks like it flows behind. To do that, draw cape OUTSIDE the clip.
+    // Gold spine
+    ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(0, 22); ctx.stroke();
+    // Belly emblem
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath(); ctx.arc(0, 8, 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FF1744';
+    ctx.beginPath(); ctx.arc(0, 8, 1.8, 0, Math.PI*2); ctx.fill();
   } else {
-    ctx.font = 'bold 18px sans-serif';
+    // Fallback emoji rendering — uses a translucent backing inside the silhouette
+    ctx.fillStyle = g.color;
+    ctx.globalAlpha = 0.8;
+    ctx.fillRect(-32, -28, 64, 56);
+    ctx.globalAlpha = 1;
+    ctx.font = 'bold 22px sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(def.icon, 0, 0);
   }
   ctx.restore();
-  // Cape is drawn after restore() so it can flow past the body clip.
-  if(def.id === 'b_cape'){
-    ctx.fillStyle = g.color;
-    ctx.beginPath();
-    ctx.moveTo(-20, -14);
-    ctx.quadraticCurveTo(-30, 12, -16, 24);
-    ctx.lineTo(-6, 16);
-    ctx.lineTo(0, 22);
-    ctx.lineTo(6, 16);
-    ctx.lineTo(16, 24);
-    ctx.quadraticCurveTo(30, 12, 20, -14);
-    ctx.lineTo(10, -10);
-    ctx.lineTo(-10, -10);
-    ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = g.glow; ctx.lineWidth = 2;
-    ctx.stroke();
-    // Front collar on the body
-    ctx.fillStyle = g.glow;
-    ctx.fillRect(-12, -12, 24, 4);
-  }
   ctx.restore();
 }
 function drawCostumeWeaponOverlay(ctx, px, py, scale, facing, eq, attackPulse){
   const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
   const g = COSTUME_GRADES[eq.grade];
-  // Two fists on the pigeon — left at (-36,-36) right at (36,-36) in pigeon-local coords.
-  // Right arm flexes more on attack (ra_y_off = -armFlex*1.4 in drawPigeon), so the right-hand
-  // costume rises a touch faster too — keeps the costume locked to the fist.
+  // Pigeon fists are at (±36, -36) in pigeon-local coords with radius ~10.
+  // Costumes draw centered on each fist; right arm flexes 1.4× per drawPigeon's ra_y_off.
+  // All shapes are bounded inside an ~14px radius so they don't sprout from the body.
   const flex = (attackPulse||0) * 3;
   const drawHand = (sign) => {
     const lx = px + sign * 36 * scale * facing;
     const flexY = sign > 0 ? flex * 1.4 : flex;
     const ly = py + (-36 - flexY) * scale;
-    drawCostumeGlow(ctx, lx, ly, 14*scale, eq);
+    drawCostumeGlow(ctx, lx, ly, 12*scale, eq);
     ctx.save();
     ctx.translate(lx, ly);
     ctx.scale(scale, scale);
     if(def.id === 'w_ribbon'){
+      // Pink ribbon glove — round mitten with a bow tie on the wrist
       ctx.fillStyle = '#FFB3D9';
       ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#F783AC'; ctx.lineWidth = 1.2;
+      ctx.stroke();
+      // Ribbon bow on the back of the glove
       ctx.fillStyle = g.color;
       ctx.beginPath();
-      ctx.moveTo(-9, -6); ctx.lineTo(-2, 0); ctx.lineTo(-9, 6); ctx.closePath();
-      ctx.moveTo(9, -6); ctx.lineTo(2, 0); ctx.lineTo(9, 6); ctx.closePath();
+      ctx.moveTo(-7, -3); ctx.lineTo(-2, 0); ctx.lineTo(-7, 3); ctx.closePath();
+      ctx.moveTo(7, -3); ctx.lineTo(2, 0); ctx.lineTo(7, 3); ctx.closePath();
       ctx.fill();
+      ctx.fillStyle = g.glow;
+      ctx.fillRect(-1.5, -2, 3, 4);
     } else if(def.id === 'w_brass'){
-      ctx.fillStyle = '#FFD43B';
-      for(let k=-1;k<=1;k++){
-        ctx.beginPath(); ctx.arc(k*4, 0, 3, 0, Math.PI*2); ctx.fill();
-      }
+      // Brass knuckles — three gold knuckles on a strap that wraps the fist
       ctx.fillStyle = g.color;
-      ctx.fillRect(-7, -4, 14, 2);
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-9, -2, 18, 4, 1.5) : ctx.rect(-9, -2, 18, 4);
+      ctx.fill();
+      ctx.fillStyle = '#FFD700';
+      for(let k=-1;k<=1;k++){
+        ctx.beginPath(); ctx.arc(k*5, -3, 3.4, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#A57400'; ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+      // Highlights
+      ctx.fillStyle = '#FFF9DB';
+      for(let k=-1;k<=1;k++){
+        ctx.beginPath(); ctx.arc(k*5 - 1, -4, 1, 0, Math.PI*2); ctx.fill();
+      }
     } else if(def.id === 'w_gauntlet'){
+      // Combat gauntlet — armored sleeve over the fist with rivets
       ctx.fillStyle = '#495057';
       ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#ADB5BD';
-      ctx.fillRect(-8, -2, 16, 4);
+      ctx.fillStyle = '#6C757D';
+      ctx.fillRect(-9, -2, 18, 4);
+      // Rivets
+      ctx.fillStyle = '#212529';
+      ctx.beginPath(); ctx.arc(-6, 0, 1.2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, 1.2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6, 0, 1.2, 0, Math.PI*2); ctx.fill();
+      // Knuckle stud
       ctx.fillStyle = g.color;
-      ctx.beginPath(); ctx.arc(0, -3, 2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, -5, 2.4, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = g.glow;
+      ctx.beginPath(); ctx.arc(0, -5, 1, 0, Math.PI*2); ctx.fill();
     } else if(def.id === 'w_blade'){
+      // Twin daggers — a short sword pointing up and a small handle
       ctx.fillStyle = '#CED4DA';
-      ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(3, 8); ctx.lineTo(-3, 8); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = g.color; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -16); ctx.lineTo(3, 4); ctx.lineTo(-3, 4); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#495057'; ctx.lineWidth = 0.8;
       ctx.stroke();
+      // Cross-guard
       ctx.fillStyle = g.color;
-      ctx.fillRect(-5, 6, 10, 3);
+      ctx.fillRect(-6, 4, 12, 3);
+      // Handle
+      ctx.fillStyle = '#3E2723';
+      ctx.fillRect(-1.5, 7, 3, 6);
+      // Pommel gem
+      ctx.fillStyle = g.glow;
+      ctx.beginPath(); ctx.arc(0, 13, 2, 0, Math.PI*2); ctx.fill();
     } else if(def.id === 'w_thunder'){
-      ctx.fillStyle = '#5C6670';
-      ctx.fillRect(-4, -10, 8, 16);
+      // Thunder mace — short shaft, round head, with a lightning bolt etched on top
+      ctx.fillStyle = '#3E2723';
+      ctx.fillRect(-1.6, 0, 3.2, 12);
+      // Head
       ctx.fillStyle = g.color;
-      ctx.beginPath(); ctx.arc(0, -10, 7, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, -4, 7, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#A57400'; ctx.lineWidth = 1;
+      ctx.stroke();
+      // Lightning
       ctx.fillStyle = '#FFE066';
       ctx.beginPath();
-      ctx.moveTo(-3, -16); ctx.lineTo(0, -10); ctx.lineTo(-2, -10); ctx.lineTo(2, -4);
-      ctx.lineTo(-1, -10); ctx.lineTo(2, -10); ctx.closePath(); ctx.fill();
+      ctx.moveTo(-2, -9); ctx.lineTo(1, -5); ctx.lineTo(-1, -5); ctx.lineTo(2, 1);
+      ctx.lineTo(0, -3); ctx.lineTo(2, -3); ctx.closePath();
+      ctx.fill();
     } else if(def.id === 'w_phoenix'){
+      // Phoenix claw — flame burst with rotating fiery petals around a glowing core
       ctx.fillStyle = '#F76707';
-      ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI*2); ctx.fill();
+      // Petals
       ctx.fillStyle = '#FFE066';
       for(let k=0;k<5;k++){
         const a = k*(Math.PI*2/5) + state.time*2;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(a)*12, Math.sin(a)*12);
-        ctx.lineTo(Math.cos(a+0.4)*8, Math.sin(a+0.4)*8);
+        ctx.lineTo(Math.cos(a)*11, Math.sin(a)*11);
+        ctx.lineTo(Math.cos(a+0.5)*6, Math.sin(a+0.5)*6);
         ctx.closePath(); ctx.fill();
       }
+      // Core
+      ctx.fillStyle = '#FFF9DB';
+      ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
     } else {
-      ctx.font = 'bold 16px sans-serif';
+      ctx.font = 'bold 14px sans-serif';
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(def.icon, 0, 1);
     }
@@ -5539,10 +5749,12 @@ function renderAlbum(){
       const allFour = grades.S && grades.A && grades.B && grades.C;
       const anyOwned = grades.S || grades.A || grades.B || grades.C;
       const card = document.createElement('div');
-      card.className = 'album-card' + (allFour ? ' complete' : '');
+      card.className = 'album-card' + (allFour ? ' complete' : '') + (!anyOwned ? ' silhouette' : '');
+      // Always show the actual icon — unowned entries get a grayscale dim so the player
+      // sees what they're chasing, not a generic "?".
       card.innerHTML = `
-        <div class="a-icon ${anyOwned ? '' : 'locked'}">${anyOwned ? def.icon : '❓'}</div>
-        <div class="a-name">${anyOwned ? def.name : '???'}</div>
+        <div class="a-icon ${anyOwned ? '' : 'silhouette-icon'}">${def.icon}</div>
+        <div class="a-name${anyOwned ? '' : ' silhouette-name'}">${def.name}</div>
         <div class="a-slot">${slotLabels[slot]}</div>
         <div class="a-grades">
           ${['S','A','B','C'].map(k => `<span class="album-grade-pip ${grades[k] ? 'have ' + k : ''}">${k}</span>`).join('')}
@@ -5650,6 +5862,8 @@ function renderShop(){
     const col = document.createElement('div');
     col.className = 'branch';
     col.style.setProperty('--branch-color', branch.color);
+    // Soft tinted column backdrop derived from the branch color so each branch reads as its own aisle.
+    col.style.setProperty('--branch-tint', `${branch.color}26`);
 
     const head = document.createElement('div');
     head.className = 'branch-head';
