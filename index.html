@@ -17,7 +17,7 @@
 
   /* Title screen — scrollable on short/notched viewports; content anchored to top with safe-area padding.
      Top padding leaves headroom so the shop pill anchored top-right never crowds the title text on narrow phones. */
-  #title{background:radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.92) 0%, rgba(255,212,59,.88) 18%, rgba(247,103,7,.88) 45%, rgba(90,26,4,.94) 80%, rgba(18,3,0,.98) 100%);flex-direction:column;gap:14px;padding:calc(env(safe-area-inset-top, 0px) + 110px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 16px);align-items:center;justify-content:flex-start;min-height:100%;}
+  #title{background:radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.92) 0%, rgba(255,212,59,.88) 18%, rgba(247,103,7,.88) 45%, rgba(90,26,4,.94) 80%, rgba(18,3,0,.98) 100%);flex-direction:column;gap:14px;padding:calc(env(safe-area-inset-top, 0px) + 100px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 16px);align-items:center;justify-content:flex-start;min-height:100%;}
   #title > *{flex-shrink:0;}
   #title h1{margin:0;font-size:min(10.5vw,64px);font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A, 0 5px 0 #5A1A04, 0 8px 24px rgba(0,0,0,.6), 0 0 30px rgba(255,224,102,.4);letter-spacing:-1.5px;text-align:center;line-height:1;animation:titleBob 3.5s ease-in-out infinite;}
   @keyframes titleBob{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-4px) rotate(1deg);}}
@@ -40,14 +40,14 @@
   /* Title-screen shop entry — designed as a tiny shopfront card so it screams 'shop' at a glance:
      red/white striped awning roof, golden storefront body with a shopping cart, coin badge, and a
      pulsing 'NEW' tag + corner sparkle. Anchored top-right where the eye lands first on mobile. */
-  #titleShopPill{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 14px);right:calc(env(safe-area-inset-right, 0px) + 12px);width:118px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit;z-index:3;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(255,212,59,.45));animation:shopBob 2.6s ease-in-out infinite;overflow:visible;}
-  #titleCostumePill{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 14px);left:calc(env(safe-area-inset-left, 0px) + 12px);width:118px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit;z-index:3;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(190,75,219,.45));animation:shopBob 2.6s ease-in-out infinite reverse;overflow:visible;}
-  #titleCostumePill .awning{display:block;height:22px;background:repeating-linear-gradient(90deg,#7048E8 0 11px,#FFF9DB 11px 22px);border:3px solid #2C0A52;border-bottom-width:4px;border-radius:14px 14px 4px 4px;}
-  #titleCostumePill .shop-front{display:flex;align-items:center;gap:6px;padding:8px 8px 10px;background:linear-gradient(180deg,#E599F7 0%,#BE4BDB 55%,#5F3DC4 100%);border:3px solid #2C0A52;border-top:0;border-radius:4px 4px 14px 14px;color:#2C0A52;text-align:left;}
-  #titleCostumePill .shop-icon{font-size:22px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3));flex:0 0 auto;}
-  #titleCostumePill .shop-info{display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1;min-width:0;}
-  #titleCostumePill .shop-label{font-size:13px;font-weight:900;letter-spacing:-.4px;text-shadow:0 1px 0 rgba(255,255,255,.4);line-height:1;}
-  #titleCostumePill .shop-coin{font-size:10px;font-weight:900;background:rgba(44,10,82,.85);color:#E599F7;padding:2px 6px;border-radius:999px;display:inline-flex;align-items:center;gap:3px;line-height:1.2;text-shadow:0 1px 0 rgba(0,0,0,.4);}
+  #titleShopPill{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 14px);right:calc(env(safe-area-inset-right, 0px) + 12px);width:138px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit;z-index:3;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(255,212,59,.45));animation:shopBob 2.6s ease-in-out infinite;overflow:visible;}
+
+  /* Shop tabs — switches between skill tree and costume gacha sections inside the shop screen. */
+  #shopScreen .shop-tabs{display:flex;gap:6px;justify-content:center;margin:6px 0 12px;}
+  #shopScreen .shop-tab{background:rgba(0,0,0,.4);border:2px solid #FFD43B;color:#FFE066;font-weight:900;font-family:inherit;font-size:13px;padding:9px 18px;border-radius:999px;cursor:pointer;letter-spacing:-.2px;}
+  #shopScreen .shop-tab.on{background:linear-gradient(180deg,#FFD43B,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 3px 0 rgba(0,0,0,.4);border-color:#FFF9DB;}
+  #shopScreen #shopCostumeSection .costume-section{padding:0 6px;max-width:680px;width:100%;margin:0 auto 8px;}
+  #shopScreen #shopCostumeSection .equip-row{margin:6px auto 14px;}
   @keyframes shopBob{0%,100%{transform:translateY(0) rotate(-1.2deg);}50%{transform:translateY(-3px) rotate(1.2deg);}}
   #titleShopPill:active{animation:none;transform:translateY(3px);}
   #titleShopPill .awning{display:block;height:22px;background:repeating-linear-gradient(90deg,#C92A2A 0 11px,#FFF9DB 11px 22px);border:3px solid #5A1A04;border-bottom-width:4px;border-radius:14px 14px 4px 4px;position:relative;overflow:hidden;}
@@ -252,14 +252,8 @@
   #toastBanner.enter{opacity:0;transform:translateX(-50%) translateY(-30px);}
   #toastBanner .toast-sub{display:block;color:#A5D6A7;font-size:13px;margin-top:4px;font-weight:700;}
 
-  /* Costume screen — gacha + inventory + equip slots */
-  #costumeScreen{background:radial-gradient(ellipse at 50% 30%, #1B0830 0%, #0F0220 60%, #050000 100%);flex-direction:column;gap:10px;padding:calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 10px);overflow-y:auto;align-items:stretch;justify-content:flex-start;}
-  #costumeScreen .cs-header{display:flex;align-items:center;gap:10px;padding:4px 6px 6px;flex:0 0 auto;}
-  #costumeScreen .cs-header h2{margin:0;color:#E599F7;font-size:min(5.4vw,24px);text-shadow:0 2px 0 #5F3DC4,0 0 18px rgba(229,153,247,.35);flex:1;text-align:center;letter-spacing:-.5px;}
-  #costumeScreen .back-btn{width:42px;height:42px;border-radius:12px;background:linear-gradient(180deg,rgba(0,0,0,.7),rgba(0,0,0,.5));border:2px solid #BE4BDB;color:#E599F7;font-weight:900;font-size:18px;cursor:pointer;font-family:inherit;box-shadow:0 3px 0 rgba(0,0,0,.4);}
-  #costumeScreen .coin-bar{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(180deg,#FFD43B 0%,#FAB005 50%,#E67700 100%);border:3px solid #FFF9DB;border-radius:14px;padding:10px 18px;margin:0 auto 4px;font-weight:900;color:#5A1A04;font-size:18px;max-width:300px;width:100%;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 4px 0 rgba(0,0,0,.4),inset 0 -3px 0 rgba(0,0,0,.18);letter-spacing:-.3px;}
-  #costumeScreen .coin-bar .coin-ic{font-size:22px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3));}
-  #costumeScreen .gacha-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0 12px;}
+  /* Gacha row — used inside the shop screen's costume tab */
+  .gacha-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0 12px;}
   .gacha-btn{background:linear-gradient(180deg,#E599F7 0%,#BE4BDB 50%,#7048E8 100%);border:3px solid #FFF9DB;border-radius:14px;padding:12px 18px;color:#fff;font-weight:900;font-family:inherit;font-size:15px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.4),inset 0 -3px 0 rgba(0,0,0,.2);text-shadow:0 1px 2px rgba(0,0,0,.5);min-width:130px;letter-spacing:-.3px;}
   .gacha-btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.4),inset 0 -3px 0 rgba(0,0,0,.2);}
   .gacha-btn.poor{background:linear-gradient(180deg,#7A0F0F 0%,#3B0606 100%);border-color:#FF8787;color:#FFE3E3;}
@@ -328,10 +322,10 @@
     #hud .inv-pill .ic{font-size:11px;}
     #hud .inv-pill .lv{font-size:9px;}
     #title h1{font-size:min(11vw, 48px);}
-    #titleShopPill,#titleCostumePill{width:96px;}
-    #titleShopPill .shop-icon,#titleCostumePill .shop-icon{font-size:18px;}
-    #titleShopPill .shop-label,#titleCostumePill .shop-label{font-size:11px;}
-    #titleShopPill .shop-coin,#titleCostumePill .shop-coin{font-size:9px;}
+    #titleShopPill{width:118px;}
+    #titleShopPill .shop-icon{font-size:20px;}
+    #titleShopPill .shop-label{font-size:12px;}
+    #titleShopPill .shop-coin{font-size:10px;}
     .card{padding:14px;}
     .card h2{font-size:20px;}
     #gameOver .card h2, #victory .card h2, #chapterCleared .card h2{font-size:24px;}
@@ -387,17 +381,7 @@
   <!-- Title screen -->
   <div id="title" class="overlay on">
     <div class="rays"></div>
-    <button id="titleCostumePill" type="button" title="코스튬">
-      <span class="awning"></span>
-      <span class="shop-front">
-        <span class="shop-icon">👗</span>
-        <span class="shop-info">
-          <span class="shop-label">코스튬</span>
-          <span class="shop-coin">🎁 <span id="titleCostumeCount">0</span></span>
-        </span>
-      </span>
-    </button>
-    <button id="titleShopPill" type="button" title="상점 열기">
+    <button id="titleShopPill" type="button" title="상점 열기 (스킬 트리 + 코스튬 가챠)">
       <span class="awning"></span>
       <span class="shop-front">
         <span class="shop-icon">🛒</span>
@@ -418,7 +402,8 @@
     <div class="hint">근육질 비둘기가 되어 새우깡을 뿌려 적을 제압하세요!<br>50개 챕터 · 챕터당 3웨이브 + 보스 · 레벨업 카드와 코스튬으로 빌드 완성.</div>
   </div>
 
-  <!-- Shop screen — permanent meta-progression upgrades bought with coins earned in runs -->
+  <!-- Shop screen — permanent meta-progression upgrades + costume gacha, all under one roof.
+       Top tabs swap between "스킬 트리" (skill upgrades) and "코스튬" (gacha + inventory + album). -->
   <div id="shopScreen" class="overlay hidden">
     <div class="cs-header">
       <button class="back-btn" id="shopBackBtn" title="뒤로">◀</button>
@@ -426,8 +411,34 @@
       <div style="width:40px;"></div>
     </div>
     <div class="coin-bar"><span class="coin-ic">🪙</span><span id="shopCoinTxt">0</span></div>
-    <div class="shop-hint">위 → 아래로 가지를 키워가는 스킬 트리예요.<br>아래 단계는 위 노드를 일정 레벨까지 올려야 열립니다.</div>
-    <div class="tree" id="shopGrid"></div>
+    <div class="shop-tabs">
+      <button class="shop-tab on" id="shopTabSkill" type="button">🌳 스킬 트리</button>
+      <button class="shop-tab" id="shopTabCostume" type="button">👗 코스튬 가챠</button>
+    </div>
+    <!-- Skill tree section -->
+    <div id="shopSkillSection">
+      <div class="shop-hint">위 → 아래로 가지를 키워가는 스킬 트리예요.<br>아래 단계는 위 노드를 일정 레벨까지 올려야 열립니다.</div>
+      <div class="tree" id="shopGrid"></div>
+    </div>
+    <!-- Costume gacha section (was the standalone costume screen) -->
+    <div id="shopCostumeSection" class="hidden">
+      <div class="gacha-row">
+        <button class="gacha-btn" id="gachaSingleBtn">🎲 1회 뽑기<span class="cost">🪙 1,500</span></button>
+        <button class="gacha-btn" id="gachaTenBtn">🎰 10연 뽑기<span class="cost">🪙 12,000 (A 보장)</span></button>
+      </div>
+      <div class="costume-section">
+        <h3 style="text-align:center;color:#E599F7;">현재 착용 중</h3>
+        <div class="equip-row" id="equipRow"></div>
+      </div>
+      <div class="costume-section">
+        <h3>📦 보유 코스튬 (<span id="costumeCount">0</span>)</h3>
+        <div class="cos-grid" id="costumeGrid"></div>
+      </div>
+      <div class="costume-section">
+        <h3 style="display:flex;align-items:center;gap:8px;">📒 도감 <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span></h3>
+        <div id="albumGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:0 6px 6px;"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Chapter select -->
@@ -453,31 +464,6 @@
     <div class="grid hidden" id="chapterGrid"></div>
   </div>
 
-  <!-- Costume screen — gacha + inventory + equip -->
-  <div id="costumeScreen" class="overlay hidden">
-    <div class="cs-header">
-      <button class="back-btn" id="costumeBackBtn" title="뒤로">◀</button>
-      <h2>👗 비둘기 옷장</h2>
-      <div style="width:40px;"></div>
-    </div>
-    <div class="coin-bar"><span class="coin-ic">🪙</span><span id="costumeCoinTxt">0</span></div>
-    <div class="gacha-row">
-      <button class="gacha-btn" id="gachaSingleBtn">🎲 1회 뽑기<span class="cost">🪙 1,500</span></button>
-      <button class="gacha-btn" id="gachaTenBtn">🎰 10연 뽑기<span class="cost">🪙 12,000 (A 보장)</span></button>
-    </div>
-    <div class="costume-section">
-      <h3 style="text-align:center;color:#E599F7;">현재 착용 중</h3>
-      <div class="equip-row" id="equipRow"></div>
-    </div>
-    <div class="costume-section">
-      <h3>📦 보유 코스튬 (<span id="costumeCount">0</span>)</h3>
-      <div class="cos-grid" id="costumeGrid"></div>
-    </div>
-    <div class="costume-section">
-      <h3 style="display:flex;align-items:center;gap:8px;">📒 도감 <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span></h3>
-      <div id="albumGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:0 6px 6px;"></div>
-    </div>
-  </div>
 
   <!-- Gacha reveal modal -->
   <div id="gachaModal" class="modal hidden">
@@ -803,7 +789,7 @@ const TITLE_BGM_PACK = {
   interval:190, wave:'triangle', bassShift:'3', vol:.13
 };
 function currentBgmPack(){
-  if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop' || state.scene === 'costume') return TITLE_BGM_PACK;
+  if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop') return TITLE_BGM_PACK;
   const idx = Math.min(Math.max(0, state.chapter - 1), BGM_CHAPTER_PACKS.length - 1);
   return BGM_CHAPTER_PACKS[idx];
 }
@@ -4975,7 +4961,7 @@ function render(){
   ctx.fillStyle=g;
   ctx.fillRect(0,0,W,H);
 
-  if(state.scene==='title' || state.scene==='shop' || state.scene==='chapterSelect' || state.scene==='costume') return; // overlay handles it
+  if(state.scene==='title' || state.scene==='shop' || state.scene==='chapterSelect') return; // overlay handles it
   // Cinematic victory scene — full-screen canvas celebration that plays behind the modal stats panel.
   // Drawn instead of the gameplay world so the player sees the pigeon, not a paused arena.
   if(state.scene === 'victory'){
@@ -5310,14 +5296,9 @@ requestAnimationFrame(loop);
 
 // ---------- UI wiring ----------
 document.getElementById('startBtn').addEventListener('click', openChapterSelect);
-document.getElementById('titleShopPill').addEventListener('click', openShop);
-document.getElementById('titleCostumePill').addEventListener('click', openCostume);
-document.getElementById('costumeBackBtn').addEventListener('click', ()=>{
-  state.scene = 'title';
-  document.getElementById('costumeScreen').classList.add('hidden');
-  document.getElementById('title').classList.remove('hidden');
-  updateTitleCoinDisplay();
-});
+document.getElementById('titleShopPill').addEventListener('click', ()=> openShop('skill'));
+document.getElementById('shopTabSkill').addEventListener('click', ()=> setShopTab('skill'));
+document.getElementById('shopTabCostume').addEventListener('click', ()=> setShopTab('costume'));
 document.getElementById('gachaSingleBtn').addEventListener('click', ()=> doGachaPull(1));
 document.getElementById('gachaTenBtn').addEventListener('click', ()=> doGachaPull(10));
 document.getElementById('gachaCloseBtn').addEventListener('click', ()=>{
@@ -5411,19 +5392,10 @@ function openChapterSelect(){
 function updateTitleCoinDisplay(){
   const el = document.getElementById('titleCoinTxt');
   if(el) el.textContent = (progress.coins||0).toLocaleString();
-  const c2 = document.getElementById('titleCostumeCount');
-  if(c2) c2.textContent = (progress.costumes||[]).length;
 }
 
-function openCostume(){
-  initAudio();
-  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
-  state.scene = 'costume';
-  document.getElementById('title').classList.add('hidden');
-  renderCostumeScreen();
-  document.getElementById('costumeScreen').classList.remove('hidden');
-  if(!bgmTimer) bgmStart();
-}
+// Legacy entry point — costume now lives inside the shop. Routes to the shop's costume tab.
+function openCostume(){ openShop('costume'); }
 
 function costumeStatLines(eq){
   const def = COSTUME_DEFS_BY_ID[eq.defId];
@@ -5441,10 +5413,13 @@ function costumeStatLines(eq){
 }
 
 function renderCostumeScreen(){
-  document.getElementById('costumeCoinTxt').textContent = (progress.coins||0).toLocaleString();
+  // Shop screen owns the coin bar (#shopCoinTxt) — both tabs share it.
+  const sc = document.getElementById('shopCoinTxt');
+  if(sc) sc.textContent = (progress.coins||0).toLocaleString();
   // Gacha button affordability tinting.
   const c1 = document.getElementById('gachaSingleBtn');
   const c2 = document.getElementById('gachaTenBtn');
+  if(!c1 || !c2) return; // costume tab not in DOM yet
   c1.classList.toggle('poor', (progress.coins||0) < GACHA_COST_SINGLE);
   c2.classList.toggle('poor', (progress.coins||0) < GACHA_COST_TEN);
 
@@ -5635,14 +5610,36 @@ function doGachaPull(n){
   document.getElementById('gachaModal').classList.remove('hidden');
   updateTitleCoinDisplay();
 }
-function openShop(){
+function openShop(initialTab){
   initAudio();
   if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
   state.scene = 'shop';
   document.getElementById('title').classList.add('hidden');
   renderShop();
+  renderCostumeScreen();
+  setShopTab(initialTab || 'skill');
   document.getElementById('shopScreen').classList.remove('hidden');
   if(!bgmTimer) bgmStart();
+}
+
+function setShopTab(which){
+  const skillSec = document.getElementById('shopSkillSection');
+  const costumeSec = document.getElementById('shopCostumeSection');
+  const tabSkill = document.getElementById('shopTabSkill');
+  const tabCostume = document.getElementById('shopTabCostume');
+  if(which === 'costume'){
+    skillSec.classList.add('hidden');
+    costumeSec.classList.remove('hidden');
+    tabSkill.classList.remove('on');
+    tabCostume.classList.add('on');
+    renderCostumeScreen();
+  } else {
+    skillSec.classList.remove('hidden');
+    costumeSec.classList.add('hidden');
+    tabSkill.classList.add('on');
+    tabCostume.classList.remove('on');
+    renderShop();
+  }
 }
 function renderShop(){
   document.getElementById('shopCoinTxt').textContent = (progress.coins||0).toLocaleString();
@@ -5910,7 +5907,6 @@ function backToTitle(){
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('chapterSelect').classList.add('hidden');
   document.getElementById('shopScreen').classList.add('hidden');
-  document.getElementById('costumeScreen').classList.add('hidden');
   document.getElementById('title').classList.remove('hidden');
   updateTitleCoinDisplay();
   if(audioCtx) bgmStart();
