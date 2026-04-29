@@ -369,6 +369,36 @@
   .cos-detail-card.equipped .equip-hint{color:#51CF66;font-weight:900;}
 
 
+  /* Click feedback — a brief flash on every button click so the player can clearly see what they
+     pressed. Triggered via a global click handler that toggles data-clicked='1' for ~280ms.
+     filter+brightness avoids transform conflicts with buttons that already animate translate/scale. */
+  button[data-clicked='1']{ animation: btnClickFlash .26s ease-out; }
+  @keyframes btnClickFlash{
+    0%   { filter: brightness(1.55) saturate(1.3) drop-shadow(0 0 6px rgba(255,255,255,.6)); }
+    60%  { filter: brightness(1.18) saturate(1.1) drop-shadow(0 0 3px rgba(255,255,255,.3)); }
+    100% { filter: brightness(1)    saturate(1)   drop-shadow(0 0 0   rgba(255,255,255,0)); }
+  }
+  /* Stronger :active states across the board — instant press feedback before the post-click flash. */
+  .btn:active, .gacha-btn:active, .shop-tab:active, .cos-slot-tab:active,
+  .cs-tab:active, .grade-chip:active, .ep-option:active, .skin-action:active,
+  .ch-hero .h-play:active, .cs-mini:active{
+    filter: brightness(1.15) saturate(1.1);
+  }
+
+  /* Back button — pinned to the viewport's top-left so it stays in place regardless of how the
+     overlay content is centered. Without this, PC centering pushed the cs-header (and the back
+     button inside it) to the middle of the screen. */
+  #shopScreen .back-btn,
+  #chapterSelect .back-btn{
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    left: calc(env(safe-area-inset-left, 0px) + 14px);
+    z-index: 100;
+  }
+  /* The header still centers its h2 since the back button is no longer in the flex flow. */
+  #shopScreen .cs-header,
+  #chapterSelect .cs-header{ justify-content: center; }
+
   /* PC center-alignment — on wider/taller viewports the title/shop/chapter-select content should
      sit in the vertical middle of the screen instead of glued to the top. We use ::before/::after
      flex spacers (flex:1) so when content fits the viewport it centers, and when it overflows the
@@ -6907,6 +6937,16 @@ document.body.addEventListener('touchmove', e=>{ if(state.scene==='playing') e.p
 document.addEventListener('click', e=>{
   if(!audioCtx) return; // wait until first interaction has unlocked audio
   if(e.target.closest('.btn, .hud-btn, .back-btn, .ch-card:not(.locked), .choice, #titleShopPill, .shop-item .buy:not(.locked):not(.maxed)')) sfxClick();
+}, true);
+
+// Visual click flash — every <button> click gets a brief brightness pulse so the player can
+// see exactly what they pressed. CSS keyframe handles the animation; we just toggle the attribute.
+document.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if(!b) return;
+  b.dataset.clicked = '1';
+  // Strip the marker shortly after the animation finishes so the next click can re-trigger it.
+  setTimeout(() => { delete b.dataset.clicked; }, 290);
 }, true);
 
 // Title BGM bootstrap — browsers block autoplay until a user gesture, so kick BGM off
