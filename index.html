@@ -1063,9 +1063,12 @@ function cooNote(freq, dur, vol, delay){
 }
 
 // Two-syllable "구구" coo. Title screen plays it dry; in-game adds a softer echo trail.
-function sfxCoo(withEcho){
+//   `intensity` (default 1) scales overall volume — used by doUltimate to make the ult roar
+//   noticeably louder than the idle title coo.
+function sfxCoo(withEcho, intensity){
   if(!audioCtx || muted) return;
-  const baseVol = withEcho ? 0.34 : 0.30;
+  const i = intensity || 1;
+  const baseVol = (withEcho ? 0.34 : 0.30) * i;
   // Syllable 1 — "coo" (lower, fuller)
   cooNote(258, 0.50, baseVol, 0.00);
   // Syllable 2 — "coo" (slightly higher, brisk)
@@ -3690,7 +3693,11 @@ function drawEnemy(ctx, e, walkPhase){
 //   • ULT_DAMAGE_PCT of boss max HP one-shot to a chapter boss (same flat damage applied to mobs
 //     so the screen wipes clean while the boss takes a hefty chunk).
 const ULT_MAX = 100;
-const ULT_KILL_GAIN = 1.6;     // ~62 kills to fully charge
+// Charge tuned to land near the middle of wave 2 (~120s into a chapter):
+//   Wave 1 (3.6/s × 80s) ≈ 240 effective kills → 240×0.20 = 48 charge
+//   Wave 2 first half (5.6/s × 40s) ≈ 200 effective kills → +40 charge → ~88 total
+//   Mid-wave-2 boundary lands around 100% as elites/groups push it over.
+const ULT_KILL_GAIN = 0.20;    // was 1.6 — full charge in ~17s; now ~120s
 const ULT_DAMAGE_PCT = 0.30;   // 30% of boss max HP per ult cast
 
 // WAVES_PER_CHAPTER: each chapter is 3 swelling enemy waves followed by the chapter boss.
@@ -6120,32 +6127,51 @@ function doUltimate(){
   if(state.ultCharge < ULT_MAX) return;
   state.ultUsed = true;
   state.ultCharge = 0;
-  // Bigger / longer impact than v1 — user feedback "이팩트가 너무 약해서 더 강하게".
-  state.ultFlashT = 1.6;        // fire-from-eyes overlay duration (was 1.0s)
-  state.cooFlash = 1.6;         // beak stays wide-open longer for the roar (was 1.2)
-  state.ultScreenFlash = 0.55;  // bright white flash overlay (rendered in render())
-  state.camera.shake = Math.max(state.camera.shake, 64); // was 36 — earthshaking
-  // Layered SFX — echoed coo + deep rumble + impact crack + high sparkle.
-  if(typeof sfxCoo === 'function') sfxCoo(true);
+  // v2 — earthshaking impact. User feedback: "이펙트가 너무 약하니까 더 강하게".
+  state.ultFlashT = 2.2;        // fire-from-eyes overlay duration (was 1.6s)
+  state.cooFlash = 2.0;         // beak wide-open for the roar (was 1.6)
+  state.ultScreenFlash = 0.95;  // bright white flash overlay (was 0.55)
+  state.camera.shake = Math.max(state.camera.shake, 110); // was 64 — full screen wobble
+  // Schedule additional shake bursts so the ground keeps trembling for ~1.5s
+  setTimeout(() => { if(state.scene === 'playing') state.camera.shake = Math.max(state.camera.shake, 80); }, 200);
+  setTimeout(() => { if(state.scene === 'playing') state.camera.shake = Math.max(state.camera.shake, 60); }, 480);
+  setTimeout(() => { if(state.scene === 'playing') state.camera.shake = Math.max(state.camera.shake, 40); }, 800);
+  // Trigger a second screen flash echo so the impact reads as a 1-2 punch
+  setTimeout(() => { if(state.scene === 'playing') state.ultScreenFlash = Math.max(state.ultScreenFlash, 0.55); }, 220);
+  // Layered SFX — echoed coo (LOUDER 2.0×) + deep rumble + impact crack + high sparkle + roar.
+  if(typeof sfxCoo === 'function') sfxCoo(true, 2.0); // ult coo is much louder than idle
+  // Add a deep low-pitch roar layer on top of the coo
+  if(typeof cooNote === 'function'){
+    cooNote(160, 0.8, 0.55, 0.05);  // low rumble coo
+    cooNote(140, 1.0, 0.40, 0.40);  // deeper extended roar
+    cooNote(190, 0.7, 0.45, 0.85);  // final low growl
+  }
   if(typeof beep === 'function'){
-    // Sub bass thump
-    beep(60,  0.95, 'sawtooth', 0.42, -200);
-    beep(90,  0.70, 'sawtooth', 0.34, -150);
-    // Crack/boom
-    if(typeof noise === 'function') noise(0.30, 0.55);
-    beep(180, 0.55, 'square',   0.26, -120);
-    beep(340, 0.40, 'square',   0.20,  -80);
-    // High sparkle / impact whistle
-    beep(1200, 0.30, 'triangle', 0.20,  320);
-    beep(1700, 0.22, 'triangle', 0.16,  260);
-    // Delayed echo — amplifies the meatiness
+    // BIGGER sub bass thump (was 0.42 → 0.55)
+    beep(50,  1.10, 'sawtooth', 0.55, -240);
+    beep(80,  0.90, 'sawtooth', 0.45, -180);
+    beep(120, 0.65, 'sawtooth', 0.36, -120);
+    // Crack/boom — heavier
+    if(typeof noise === 'function'){ noise(0.45, 0.70); setTimeout(() => noise(0.30, 0.45), 180); }
+    beep(180, 0.70, 'square',   0.34, -140);
+    beep(340, 0.50, 'square',   0.26,  -100);
+    // High sparkle / impact whistle (louder)
+    beep(1200, 0.35, 'triangle', 0.28,  360);
+    beep(1700, 0.28, 'triangle', 0.22,  280);
+    beep(2100, 0.20, 'triangle', 0.16,  240);
+    // Delayed echo cascade — meatier sustain
     setTimeout(()=>{
-      beep(80,  0.55, 'sawtooth', 0.20, -120);
-      beep(280, 0.30, 'square',   0.14, -90);
+      beep(70,  0.70, 'sawtooth', 0.30, -160);
+      beep(280, 0.40, 'square',   0.22, -110);
+      beep(900, 0.30, 'triangle', 0.16,  140);
     }, 220);
     setTimeout(()=>{
-      beep(120, 0.45, 'sawtooth', 0.14, -90);
-    }, 480);
+      beep(110, 0.55, 'sawtooth', 0.22, -100);
+      beep(440, 0.30, 'square',   0.14,  -60);
+    }, 520);
+    setTimeout(()=>{
+      beep(95,  0.45, 'sawtooth', 0.16,  -80);
+    }, 880);
   }
   // AOE damage — sweeps every enemy on screen. Bosses take ULT_DAMAGE_PCT of their max HP;
   // mobs take a flat amount equal to that boss damage so the wave clears reliably.
@@ -6163,59 +6189,83 @@ function doUltimate(){
     if(e.dead || e.kind === 'boss') continue;
     damageEnemy(e, mobDamage);
   }
-  // Visual layers:
-  //  1) Three concentric expanding shockwave rings (fire colors, staggered timings)
-  //  2) Dense outward particle burst (200 sparks across yellow/red/orange palette)
-  //  3) Forward eye-cone flame particles (player-aligned)
-  //  4) Inner pulse ring at the pigeon
+  // Visual layers (v2 — significantly bigger):
+  //  1) FIVE concentric expanding shockwave rings — wider, more colors
+  //  2) Dense outward particle burst (450 sparks)
+  //  3) Forward eye-cone flame particles (120 sparks, longer cone)
+  //  4) Vertical rising embers (80 sparks)
+  //  5) Lightning-style streaks radiating outward (8 zaps)
+  //  6) Damage-number-style "HUGE" bursts on every hit enemy
   if(p){
-    // Shockwave rings — white-hot center, then orange, then red trail
-    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.45, maxLife:.45, color:'#FFF9DB', size:520, grav:0, ring:true });
-    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.65, maxLife:.65, color:'#FFE066', size:380, grav:0, ring:true });
-    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.85, maxLife:.85, color:'#FF6B00', size:240, grav:0, ring:true });
-    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:1.05, maxLife:1.05, color:'#C92A2A', size:140, grav:0, ring:true });
-    // Outward fire particle burst — much denser than before
-    for(let i=0;i<200;i++){
+    // Shockwave rings — white-hot center → yellow → orange → red → deep red, all bigger
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.55, maxLife:.55, color:'#FFFFFF', size:720, grav:0, ring:true });
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.70, maxLife:.70, color:'#FFF9DB', size:560, grav:0, ring:true });
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.85, maxLife:.85, color:'#FFE066', size:420, grav:0, ring:true });
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:1.05, maxLife:1.05, color:'#FF6B00', size:280, grav:0, ring:true });
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:1.30, maxLife:1.30, color:'#C92A2A', size:160, grav:0, ring:true });
+    // Outward fire particle burst — 450 sparks (was 200), wider speed range
+    for(let i=0;i<450;i++){
       const a = Math.random()*Math.PI*2;
-      const sp = 240 + Math.random()*420;
-      const palette = ['#FFF9DB','#FFE066','#FFA94D','#FF6B6B','#FF8C00','#FF1744'];
+      const sp = 220 + Math.random()*620;
+      const palette = ['#FFFFFF','#FFF9DB','#FFE066','#FFA94D','#FF6B6B','#FF8C00','#FF1744','#C92A2A'];
       state.particles.push({
         x: p.x, y: p.y - 18,
         vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
-        life: 0.6 + Math.random()*0.7, maxLife: 1.3,
+        life: 0.6 + Math.random()*1.0, maxLife: 1.6,
         color: palette[i % palette.length],
-        size: 4 + Math.random()*7,
+        size: 4 + Math.random()*9,
       });
     }
-    // Forward fire jet — particles streaming out the front of both eyes (direction = facing)
+    // Forward fire jet — 120 particles in a narrower, longer cone
     const facing = p.facing || 1;
-    for(let i=0;i<60;i++){
+    for(let i=0;i<120;i++){
       const baseAng = facing > 0 ? 0 : Math.PI;
-      const a = baseAng + (Math.random()-0.5) * 0.9; // ±0.45 rad cone
-      const sp = 360 + Math.random()*340;
-      const palette = ['#FFE066','#FFA94D','#FF6B00','#FFF9DB'];
+      const a = baseAng + (Math.random()-0.5) * 0.7;
+      const sp = 420 + Math.random()*460;
+      const palette = ['#FFFFFF','#FFE066','#FFA94D','#FF6B00','#FFF9DB','#FF8C00'];
       state.particles.push({
-        x: p.x + Math.cos(a)*8, y: p.y - 26,
-        vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - 40,
-        life: 0.5 + Math.random()*0.45, maxLife: 0.95,
+        x: p.x + Math.cos(a)*10, y: p.y - 26,
+        vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - 50,
+        life: 0.6 + Math.random()*0.55, maxLife: 1.15,
         color: palette[i % palette.length],
-        size: 5 + Math.random()*6,
+        size: 6 + Math.random()*7,
       });
     }
-    // Vertical column of rising embers from the pigeon (volcanic feel)
-    for(let i=0;i<40;i++){
+    // Vertical column of rising embers — 80 sparks (was 40)
+    for(let i=0;i<80;i++){
       state.particles.push({
-        x: p.x + (Math.random()-0.5)*60,
+        x: p.x + (Math.random()-0.5)*80,
         y: p.y - 10 + Math.random()*30,
-        vx: (Math.random()-0.5)*120,
-        vy: -260 - Math.random()*240,
-        life: 0.7 + Math.random()*0.6, maxLife: 1.3,
-        color: i%2===0 ? '#FFE066' : '#FF8C00',
-        size: 3 + Math.random()*4,
+        vx: (Math.random()-0.5)*180,
+        vy: -300 - Math.random()*300,
+        life: 0.8 + Math.random()*0.7, maxLife: 1.5,
+        color: ['#FFE066','#FF8C00','#FFA94D','#FF6B00'][i%4],
+        size: 3 + Math.random()*5,
+      });
+    }
+    // Lightning-style streaks — 8 radiating zaps from the pigeon outward
+    for(let i=0;i<8;i++){
+      const a = (i / 8) * Math.PI * 2 + Math.random()*0.2;
+      const reach = 380 + Math.random()*120;
+      state.particles.push({
+        lightning: true,
+        fromX: p.x, fromY: p.y - 18,
+        toX: p.x + Math.cos(a)*reach, toY: p.y - 18 + Math.sin(a)*reach,
+        life: .35, maxLife: .35,
+      });
+    }
+    // Big damage labels above each hit enemy — extra feedback
+    for(const e of state.enemies){
+      if(e.dead) continue;
+      state.damageNums.push({
+        x: e.x + (Math.random()*16-8), y: e.y - 30,
+        t: 1.2, vy: -55,
+        txt: e.kind === 'boss' ? '구구!!! ' + bossDamage : '구구! ' + mobDamage,
+        crit: true,
       });
     }
   }
-  state.toastBanner = { text:'🐦‍🔥 비둘기의 외침 — 구구~~!!!', sub:'적 전체에게 화염 피해', t:1.8, maxT:1.8 };
+  state.toastBanner = { text:'🐦‍🔥 비둘기의 외침 — 구구~~~!!!', sub:'적 전체에게 화염 피해', t:2.0, maxT:2.0 };
   updateUltButton();
 }
 
