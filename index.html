@@ -122,20 +122,30 @@
   .hud-btn{position:absolute;width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;color:#FFE066;font-size:18px;font-weight:900;pointer-events:auto;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;z-index:7;}
   /* 비둘기의 외침 ultimate button — bigger, sits center-bottom on PC and just above the joystick on mobile.
      Charge fill grows from bottom; when ready a pulsing yellow glow + 외침! label invites the click. */
-  #ultBtn{position:absolute;width:96px;height:96px;border-radius:50%;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);background:linear-gradient(180deg,rgba(40,8,50,.85),rgba(8,2,18,.92));border:3px solid #5C3A6E;color:#fff;font-weight:900;font-family:inherit;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;pointer-events:auto;z-index:7;box-shadow:0 4px 0 rgba(0,0,0,.45);overflow:hidden;}
+  /* PC default — bottom-right corner. Mobile/touch (body.touch) overrides below. */
+  #ultBtn{position:absolute;width:108px;height:108px;border-radius:50%;left:auto;right:24px;bottom:24px;background:linear-gradient(180deg,rgba(40,8,50,.85),rgba(8,2,18,.92));border:3px solid #5C3A6E;color:#fff;font-weight:900;font-family:inherit;font-size:15px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;pointer-events:auto;z-index:7;box-shadow:0 4px 0 rgba(0,0,0,.45);overflow:hidden;}
   #ultBtn .ult-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(255,107,107,.45),rgba(255,224,102,.7));pointer-events:none;transition:height .12s ease-out;}
-  #ultBtn .ult-icon{font-size:32px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6));position:relative;line-height:1;}
-  #ultBtn .ult-label{position:relative;font-size:14px;color:#FFE066;text-shadow:0 1px 0 rgba(0,0,0,.6),0 0 6px rgba(0,0,0,.4);letter-spacing:-.3px;}
+  #ultBtn .ult-icon{font-size:36px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6));position:relative;line-height:1;}
+  #ultBtn .ult-label{position:relative;font-size:15px;color:#FFE066;text-shadow:0 1px 0 rgba(0,0,0,.6),0 0 6px rgba(0,0,0,.4);letter-spacing:-.3px;}
   #ultBtn.ready{border-color:#FFE066;animation:ultPulse 1.1s infinite;box-shadow:0 0 20px rgba(255,224,102,.7),0 4px 0 rgba(0,0,0,.45);}
-  #ultBtn.ready .ult-label{color:#FFF9DB;font-size:15px;}
+  #ultBtn.ready .ult-label{color:#FFF9DB;font-size:17px;}
   #ultBtn.used{opacity:.45;cursor:default;border-color:#444;}
   @keyframes ultPulse{ 0%,100%{ box-shadow:0 0 12px rgba(255,224,102,.55),0 4px 0 rgba(0,0,0,.45); } 50%{ box-shadow:0 0 28px rgba(255,224,102,.9),0 4px 0 rgba(0,0,0,.45); } }
-  @media (min-width:768px){
-    #ultBtn{ left:auto; right:24px; bottom:24px; transform:none; width:108px; height:108px; font-size:15px; }
-    #ultBtn .ult-icon{ font-size:36px; }
-    #ultBtn .ult-label{ font-size:15px; }
-    #ultBtn.ready .ult-label{ font-size:17px; }
+  /* Touch / mobile — joystick lives bottom-right, so park the ult button DIRECTLY ABOVE it.
+     Joystick: right clamp(20,7vw,48), width clamp(140,32vw,180). Center-x from right = clamp(90,23vw,138).
+     Ult is 96px wide → right = joystick_center - 48 ≈ clamp(42,23vw-48,90).
+     Joystick top from bottom = clamp(164,40vw,232). Add ~12px gap → clamp(176,40vw+12,244). */
+  body.touch #ultBtn{
+    width:96px;
+    height:96px;
+    font-size:14px;
+    left:auto;
+    right:clamp(42px, calc(23vw - 48px), 90px);
+    bottom:calc(env(safe-area-inset-bottom, 0px) + clamp(176px, calc(40vw + 12px), 244px));
   }
+  body.touch #ultBtn .ult-icon{ font-size:32px; }
+  body.touch #ultBtn .ult-label{ font-size:14px; }
+  body.touch #ultBtn.ready .ult-label{ font-size:15px; }
   /* Vertical stack on left side — joystick lives on the right, action buttons go opposite.
      Pause sits on top (most-used) and mute below; quitting goes through the pause menu so
      there is no rogue ✕ next to the joystick that fires a confirm() on accidental taps. */
@@ -4096,7 +4106,12 @@ function isTouch(){ return FORCE_MOBILE || 'ontouchstart' in window || navigator
 // PC users get a noticeably larger pigeon — desktop screens are far bigger than phones,
 // and the previous 0.95 scale made the player look tiny.
 const PLAYER_DRAW_SCALE = isTouch() ? 0.95 : 1.45;
-if(isTouch()){ joyEl.style.display='block'; joyArea.style.display='block'; }
+if(isTouch()){
+  joyEl.style.display='block';
+  joyArea.style.display='block';
+  // Tag the body so touch-only CSS (e.g. ult button parked above the joystick) can take effect.
+  document.body.classList.add('touch');
+}
 
 function joyMaxR(){ return joyEl.offsetWidth/2 - 6; }
 function moveJoyBaseTo(pageX, pageY){
