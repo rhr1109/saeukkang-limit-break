@@ -5429,12 +5429,16 @@ function update(dt){
     state.time += dt;
     // Title-screen coo — every ~7s the title pigeon vocalizes (beak opens + sfx fires).
     // Dry coo on title (no echo) so the start screen feels intimate.
+    // Suppressed while ANY modal is open so popup interactions (먹이주기, 가챠, 등) aren't
+    // interrupted by the periodic coo. Timer keeps ticking but the SFX/animation is gated.
     if(state.scene === 'title'){
       state._titleCooTimer = (state._titleCooTimer == null ? 3 : state._titleCooTimer) - dt;
       if(state._titleCooTimer <= 0){
         state._titleCooTimer = 7;
-        state.cooFlash = 0.6;
-        sfxCoo(false);
+        if(!document.body.classList.contains('modal-open')){
+          state.cooFlash = 0.6;
+          sfxCoo(false);
+        }
       }
     }
     return;
