@@ -112,7 +112,7 @@
 
   /* Joystick & buttons — 우측 부동 조이스틱(오른손 엄지). 우하단 절반에 부동 캡처 영역을 두어
      손가락을 가져다 댄 위치로 베이스가 따라옵니다. HUD 액션 버튼은 좌측에 스택. */
-  #joystick{position:absolute;right:clamp(20px,7vw,48px);bottom:clamp(24px,8vw,52px);width:clamp(140px,32vw,180px);height:clamp(140px,32vw,180px);border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,.55) 0%, rgba(0,0,0,.42) 60%, rgba(0,0,0,.30) 100%);border:4px solid rgba(255,212,59,.75);pointer-events:auto;touch-action:none;display:none;z-index:6;box-shadow:0 6px 16px rgba(0,0,0,.5),inset 0 0 18px rgba(255,212,59,.18);}
+  #joystick{position:absolute;right:clamp(10px,4vw,32px);bottom:clamp(24px,8vw,52px);width:clamp(140px,32vw,180px);height:clamp(140px,32vw,180px);border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,.55) 0%, rgba(0,0,0,.42) 60%, rgba(0,0,0,.30) 100%);border:4px solid rgba(255,212,59,.75);pointer-events:auto;touch-action:none;display:none;z-index:6;box-shadow:0 6px 16px rgba(0,0,0,.5),inset 0 0 18px rgba(255,212,59,.18);}
   #joystick::before{content:'';position:absolute;inset:14%;border-radius:50%;border:1.5px dashed rgba(255,212,59,.42);pointer-events:none;}
   #joystick::after{content:'';position:absolute;left:50%;top:50%;width:16%;height:16%;border-radius:50%;background:rgba(255,224,102,.45);transform:translate(-50%,-50%);pointer-events:none;}
   #joystick.active{border-color:#FFE066;box-shadow:0 0 22px rgba(255,224,102,.55),inset 0 0 18px rgba(255,224,102,.35);}
@@ -132,16 +132,16 @@
   #ultBtn.used{opacity:.45;cursor:default;border-color:#444;}
   @keyframes ultPulse{ 0%,100%{ box-shadow:0 0 12px rgba(255,224,102,.55),0 4px 0 rgba(0,0,0,.45); } 50%{ box-shadow:0 0 28px rgba(255,224,102,.9),0 4px 0 rgba(0,0,0,.45); } }
   /* Touch / mobile — joystick lives bottom-right, so park the ult button DIRECTLY ABOVE it.
-     Joystick: right clamp(20,7vw,48), width clamp(140,32vw,180). Center-x from right = clamp(90,23vw,138).
-     Ult is 78px wide on mobile (was 96px — user feedback "좀만 크기 줄여줘")
-       → right = joystick_center - 39 ≈ clamp(51,23vw-39,99).
-     Joystick top from bottom = clamp(164,40vw,232). Add ~12px gap → clamp(176,40vw+12,244). */
+     Joystick: right clamp(10,4vw,32), width clamp(140,32vw,180). Center-x from right = clamp(80,20vw,122).
+     Ult is 78px wide → right = joystick_center - 39 ≈ clamp(41,20vw-39,83).
+     Joystick top from bottom = clamp(164,40vw,232). Add ~12px gap → clamp(176,40vw+12,244).
+     (Both joystick and ult shifted ~10-15px further right on user request.) */
   body.touch #ultBtn{
     width:78px;
     height:78px;
     font-size:12px;
     left:auto;
-    right:clamp(51px, calc(23vw - 39px), 99px);
+    right:clamp(41px, calc(20vw - 39px), 83px);
     bottom:calc(env(safe-area-inset-bottom, 0px) + clamp(176px, calc(40vw + 12px), 244px));
   }
   body.touch #ultBtn .ult-icon{ font-size:26px; }
