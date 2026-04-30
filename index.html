@@ -1512,17 +1512,22 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
     }
     ctx.restore();
   } else if(hungerState === 'starving'){
-    // Starving — pronounced dark socket, drooping closed-curve x_x eye, tear streak.
-    // Visual is amplified vs v1 so it reads at game-camera scale, not just zoomed previews.
-    // Dark hollow ring (bigger + darker)
-    ctx.fillStyle = 'rgba(20,8,8,0.85)';
-    ctx.beginPath(); ctx.arc(-4, -26, 7, 0, Math.PI*2); ctx.fill();
-    // Heavy upper eyelid — thick black arc covering most of the eye
-    ctx.strokeStyle='#000'; ctx.lineWidth=3; ctx.lineCap='round';
-    ctx.beginPath(); ctx.arc(-4, -25, 4.6, Math.PI*0.95, Math.PI*0.05, true); ctx.stroke();
-    // Tiny dim dot of an iris
-    ctx.fillStyle = '#1A0808';
-    ctx.beginPath(); ctx.arc(-4, -25, 1.4, 0, Math.PI*2); ctx.fill();
+    // Starving — heavy hooded eye (cartoon "completely exhausted" look). Earlier version
+    // stacked a dark socket + black eyelid + black iris into a solid black blob; this version
+    // uses a clear closed-eye line so the face still reads as a face, just totally drained.
+    // Soft purple eye-bag below the eye
+    ctx.fillStyle = 'rgba(95,55,90,0.55)';
+    ctx.beginPath(); ctx.ellipse(-4, -22, 5.2, 1.8, 0, 0, Math.PI*2); ctx.fill();
+    // Closed-eye curve — single thick black arc dipping downward (anime "기절/지친" closed eye)
+    ctx.strokeStyle='#000'; ctx.lineWidth=2.6; ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(-9, -25);
+    ctx.quadraticCurveTo(-4, -21.5, 1, -25);
+    ctx.stroke();
+    // Tiny eyelash strokes at the corners (sells the closed-eye read)
+    ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(-9, -25); ctx.lineTo(-10.5, -27); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(1, -25); ctx.lineTo(2.5, -27); ctx.stroke();
     // Tear streak running down the cheek
     ctx.fillStyle = 'rgba(116,192,252,0.85)';
     ctx.beginPath(); ctx.ellipse(-2.5, -18, 1.2, 2.2, 0, 0, Math.PI*2); ctx.fill();
