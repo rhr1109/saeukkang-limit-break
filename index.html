@@ -932,36 +932,56 @@ function sfxShuriken(){ beep(1500,.025,'square',.10,-600); setTimeout(()=>beep(2
 function sfxBoomerang(){ noise(.07,.10); beep(280,.18,'sawtooth',.16,-90); }
 function sfxMissile(){ noise(.12,.14); beep(160,.22,'sawtooth',.20,260); setTimeout(()=>beep(80,.18,'sawtooth',.18,80),60); }
 // "구구" cooing — two soft round notes with a quick warble. Quiet so it sits behind action SFX.
-// Pigeon "구구" coo — two-syllable warm vocalization.
-//   • Sine fundamental + faint 2× overtone gives a throaty body (real pigeons coo around 380-440Hz).
-//   • Each syllable starts with a small downward pitch sweep then settles, mimicking the
-//     throat warble. Triangle tail at the end of each syllable adds the breathy "ooo" finish.
-//   • `withEcho=true` layers 3 delayed, lowered-pitch quieter copies — simulates a covered/echoed
-//     space. Used during gameplay to differentiate from the dry title-screen call.
+// Pigeon-coo synthesis.
+//   Real pigeons coo around 240-310 Hz (males a bit lower than females), with a slow throat
+//   wobble (~5 Hz freq vibrato), plus a 2nd harmonic at half volume. The contour is
+//   attack → swell → fade, NOT a flat tone with linear decay (which sounds like a beep).
+//   `cooNote` synthesizes one syllable; `sfxCoo(withEcho)` chains 2-3 syllables.
+function cooNote(freq, dur, vol, delay){
+  if(!audioCtx || muted) return;
+  const t0 = audioCtx.currentTime + (delay||0);
+  // Fundamental
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'sine';
+  // Throat wobble — small pitch swell up then drop. Mimics the rolling "coo-OOH-oo".
+  o.frequency.setValueAtTime(freq * 0.94, t0);
+  o.frequency.linearRampToValueAtTime(freq * 1.04, t0 + dur*0.30);
+  o.frequency.linearRampToValueAtTime(freq * 0.98, t0 + dur*0.65);
+  o.frequency.linearRampToValueAtTime(freq * 0.88, t0 + dur);
+  // Attack(15%) → sustain(45%) → decay(40%) — classic coo envelope
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + dur*0.15);
+  g.gain.setValueAtTime(vol*0.95, t0 + dur*0.55);
+  g.gain.exponentialRampToValueAtTime(0.0005, t0 + dur);
+  o.connect(g); g.connect(masterGain);
+  o.start(t0); o.stop(t0 + dur + 0.02);
+  // 2nd harmonic — gives the throaty body (sounds like a chest cavity resonating)
+  const o2 = audioCtx.createOscillator(), g2 = audioCtx.createGain();
+  o2.type = 'triangle';
+  o2.frequency.setValueAtTime(freq * 1.88, t0);
+  o2.frequency.linearRampToValueAtTime(freq * 2.08, t0 + dur*0.30);
+  o2.frequency.linearRampToValueAtTime(freq * 1.96, t0 + dur*0.65);
+  o2.frequency.linearRampToValueAtTime(freq * 1.76, t0 + dur);
+  g2.gain.setValueAtTime(0.0001, t0);
+  g2.gain.linearRampToValueAtTime(vol*0.28, t0 + dur*0.18);
+  g2.gain.setValueAtTime(vol*0.24, t0 + dur*0.55);
+  g2.gain.exponentialRampToValueAtTime(0.0005, t0 + dur);
+  o2.connect(g2); g2.connect(masterGain);
+  o2.start(t0); o2.stop(t0 + dur + 0.02);
+}
+
+// Two-syllable "구구" coo. Title screen plays it dry; in-game adds a softer echo trail.
 function sfxCoo(withEcho){
   if(!audioCtx || muted) return;
-  const v = withEcho ? 0.18 : 0.16;
-  // Syllable 1 — "coo" (lower pitch, longer)
-  beep(380, .26, 'sine', v, -110);                                 // body
-  beep(760, .18, 'sine', v*0.18, -110);                            // overtone 2×
-  setTimeout(()=>beep(340, .14, 'triangle', v*0.55, 80), 90);      // breathy tail
-  // Syllable 2 — "coo" (slightly higher, snappier)
-  setTimeout(()=>{
-    beep(440, .22, 'sine', v*0.92, -80);
-    beep(880, .15, 'sine', v*0.16, -80);
-    setTimeout(()=>beep(400, .12, 'triangle', v*0.50, 80), 80);
-  }, 280);
+  const baseVol = withEcho ? 0.34 : 0.30;
+  // Syllable 1 — "coo" (lower, fuller)
+  cooNote(258, 0.50, baseVol, 0.00);
+  // Syllable 2 — "coo" (slightly higher, brisk)
+  cooNote(298, 0.42, baseVol*0.92, 0.55);
   if(withEcho){
-    // Echo trail — lower pitch, quieter, spaced out (room reverb feel)
-    setTimeout(()=>{
-      beep(340, .28, 'sine', v*0.50, -80);
-      beep(680, .18, 'sine', v*0.10, -80);
-    }, 460);
-    setTimeout(()=>{
-      beep(380, .24, 'sine', v*0.42, -70);
-      beep(760, .14, 'sine', v*0.07, -70);
-    }, 700);
-    setTimeout(()=>beep(310, .34, 'sine', v*0.22, -50), 960);     // distant fade
+    // Echo trail — lower pitch, quieter, spaced (covered-space reverb feel)
+    cooNote(238, 0.55, baseVol*0.45, 1.05);
+    cooNote(218, 0.60, baseVol*0.28, 1.55);
   }
 }
 
