@@ -365,6 +365,59 @@
   .skin-card .skin-action.equip{background:linear-gradient(180deg,#74C0FC,#1864AB);}
   .skin-card .skin-tag{position:absolute;top:8px;right:8px;font-size:10px;font-weight:900;padding:2px 8px;border-radius:999px;background:rgba(0,0,0,.6);color:#FFE066;border:1.5px solid #FFE066;}
   .skin-card .skin-tag.eq{background:#51CF66;color:#052;border-color:#fff;}
+  /* Feed cards — pigeon feeding modal. Tier color rises with price (gray → blue → gold → rainbow). */
+  .feed-card{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:center;background:linear-gradient(180deg,rgba(40,30,18,.55),rgba(20,12,4,.85));border:2px solid rgba(255,224,102,.35);border-radius:12px;padding:10px;color:#FFF9DB;font-family:inherit;text-align:left;cursor:pointer;}
+  .feed-card.tier1{border-color:#74C0FC;}
+  .feed-card.tier2{border-color:#FFD43B;background:linear-gradient(180deg,rgba(70,55,18,.65),rgba(30,20,4,.9));}
+  .feed-card.tier3{border-color:#FF6B6B;background:linear-gradient(135deg,rgba(80,40,140,.5),rgba(255,107,107,.35),rgba(255,224,102,.4));box-shadow:0 0 18px rgba(255,224,102,.35);}
+  .feed-card.poor{opacity:.55;cursor:not-allowed;}
+  .feed-card .fc-icon{font-size:34px;text-align:center;filter:drop-shadow(0 2px 0 rgba(0,0,0,.5));}
+  .feed-card .fc-body{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .feed-card .fc-name{font-size:14px;font-weight:900;color:#FFE066;}
+  .feed-card .fc-desc{font-size:11px;color:#DEE2E6;line-height:1.45;}
+  .feed-card .fc-price{display:inline-flex;align-items:center;gap:3px;padding:6px 12px;border-radius:999px;background:linear-gradient(180deg,#FFD43B,#E67700);color:#3B1F00;font-weight:900;border:2px solid #FFF9DB;font-size:13px;box-shadow:0 2px 0 rgba(0,0,0,.45);min-width:78px;justify-content:center;}
+  .feed-card.poor .fc-price{background:linear-gradient(180deg,#7A0F0F,#3B0606);color:#FFE3E3;border-color:#FF8787;}
+  .feed-card:hover:not(.poor){transform:translateY(-1px);}
+  .feed-card:active:not(.poor){transform:translateY(1px);}
+  /* Title pigeon stage — pigeon itself is NOT clickable; the speech-bubble feed button is. */
+  /* Speech-bubble feed button — sits to the right of the pigeon with a tail pointing toward it. */
+  #feedBubbleBtn{
+    position:absolute;
+    right:-12%; top:34%;
+    background:#FFF9DB;color:#5A1A04;
+    border:3px solid #FFD43B;border-radius:18px;
+    padding:8px 12px;font-weight:900;font-family:inherit;font-size:12px;
+    cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.35);text-shadow:none;
+    line-height:1.25;display:flex;flex-direction:column;align-items:center;gap:2px;
+    pointer-events:auto;z-index:4;white-space:nowrap;
+    transition:transform .12s, box-shadow .12s;
+  }
+  #feedBubbleBtn .fb-icon{font-size:22px;line-height:1;}
+  #feedBubbleBtn .fb-text{font-size:11px;color:#9A4A07;}
+  #feedBubbleBtn:hover{transform:translateY(-2px);}
+  #feedBubbleBtn:active{transform:translateY(2px);box-shadow:0 0 0 rgba(0,0,0,.35);}
+  /* Speech tail pointing left at the pigeon. Outer (border) layer first, then inner fill. */
+  #feedBubbleBtn::before{content:'';position:absolute;left:-12px;top:18px;width:0;height:0;border:9px solid transparent;border-right-color:#FFD43B;}
+  #feedBubbleBtn::after{content:'';position:absolute;left:-8px;top:20px;width:0;height:0;border:7px solid transparent;border-right-color:#FFF9DB;}
+  /* Subtle attention pulse so the button doesn't get missed on first sight. */
+  @keyframes feedBubblePulse{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.35), 0 0 0 rgba(255,224,102,.7);}50%{box-shadow:0 4px 0 rgba(0,0,0,.35), 0 0 18px rgba(255,224,102,.7);}}
+  #feedBubbleBtn{animation:feedBubblePulse 2.4s infinite;}
+  /* When the pigeon is hungry/starving the bubble flashes a more urgent red ring. */
+  #feedBubbleBtn.urgent{border-color:#FF6B6B;}
+  #feedBubbleBtn.urgent::before{border-right-color:#FF6B6B;}
+  #feedBubbleBtn.urgent .fb-text{color:#C92A2A;}
+  @media (max-width:480px){
+    #feedBubbleBtn{right:-6%;top:30%;padding:6px 10px;font-size:11px;}
+    #feedBubbleBtn .fb-icon{font-size:18px;}
+    #feedBubbleBtn .fb-text{font-size:10px;}
+  }
+  /* Hunger badge floating above the title pigeon — color codes the current state. */
+  .hunger-badge{position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900;padding:4px 12px;border-radius:999px;background:rgba(0,0,0,.72);border:2px solid #FFE066;color:#FFE066;text-shadow:0 1px 0 rgba(0,0,0,.6);pointer-events:none;white-space:nowrap;z-index:3;}
+  .hunger-badge.starving{border-color:#FF6B6B;color:#FFB3B3;animation:hungerPulse 1.4s infinite;}
+  .hunger-badge.hungry{border-color:#FFA94D;color:#FFD8A8;}
+  .hunger-badge.boosted{border-color:#74C0FC;color:#A5D8FF;}
+  .hunger-badge.glow{border-color:#FFE066;color:#FFF9DB;animation:hungerPulse 1.1s infinite;box-shadow:0 0 16px rgba(255,224,102,.6);}
+  @keyframes hungerPulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.4);}}
 
   /* Equip picker — modal grid that lets the player pick which owned costume to equip. */
   .ep-option{position:relative;background:linear-gradient(180deg,rgba(40,15,70,.7),rgba(15,2,30,.92));border:2px solid #BE4BDB;border-radius:12px;padding:8px 6px;color:#fff;cursor:pointer;font-family:inherit;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
@@ -541,7 +594,14 @@
     </button>
     <div class="sub">새우깡으로</div>
     <h1>한계돌파!</h1>
-    <div class="pigeon-stage"><canvas id="titlePigeon"></canvas></div>
+    <div class="pigeon-stage" id="titlePigeonStage">
+      <span class="hunger-badge" id="titleHungerBadge"></span>
+      <canvas id="titlePigeon"></canvas>
+      <button id="feedBubbleBtn" type="button" title="비둘기 먹이주기">
+        <span class="fb-icon">🍴</span>
+        <span class="fb-text">먹이주기</span>
+      </button>
+    </div>
     <div class="btns">
       <button class="btn" id="startBtn">▶ 챕터 선택</button>
       <button class="btn alt small" id="howBtn">조작법 · 규칙</button>
@@ -639,6 +699,20 @@
       <h2 style="color:#E599F7;">✨ 코스튬 획득!</h2>
       <div id="gachaReveal" class="gacha-reveal"></div>
       <button class="btn" id="gachaCloseBtn" style="width:100%;margin-top:8px;">확인</button>
+    </div>
+  </div>
+
+  <!-- Feed-the-pigeon modal — opened by clicking the title-screen pigeon. Shows current
+       hunger state + 4 feed tier cards. Buying a feed restores hunger and (deluxe/ultra)
+       grants a temporary combat boost that affects the next chapter run. -->
+  <div id="feedModal" class="modal hidden">
+    <div class="card" style="max-width:480px;">
+      <h2 style="color:#FFE066;">🐦 비둘기 먹이주기</h2>
+      <div class="sub" id="feedSub">우리 비둘기, 배가 고프지 않은지 살펴봐주세요!</div>
+      <div id="feedStatus" style="background:rgba(255,224,102,.10);border:2px solid rgba(255,224,102,.4);border-radius:12px;padding:12px;margin:6px 0 12px;text-align:center;font-size:13px;color:#FFF9DB;line-height:1.6;"></div>
+      <div class="sub" style="margin-top:8px;">사료를 골라주세요</div>
+      <div id="feedGrid" style="display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0;max-height:50vh;overflow-y:auto;"></div>
+      <button class="btn alt small" id="feedCloseBtn" style="width:100%;">닫기</button>
     </div>
   </div>
 
@@ -1348,8 +1422,10 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
     ctx.fillStyle='#FFC87A';
     ctx.beginPath(); ctx.moveTo(-2, -18); ctx.lineTo(10, -15.5); ctx.lineTo(-2, -14); ctx.closePath(); ctx.fill();
   }
-  // Eye — blink if needed
+  // Eye — blink if needed. Hunger state changes the EYE rendering only (per user spec:
+  // "얼굴 영역만 배고픈거처럼"); body silhouette stays the same.
   const ultFlash = state.ultFlashT || 0;
+  const hungerState = (player && player.hungerState) || null;
   if(blink && ultFlash <= 0){
     ctx.strokeStyle='#000'; ctx.lineWidth=1.8; ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
@@ -1417,6 +1493,77 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
       ctx.beginPath(); ctx.arc(sx, sy, 1.6 + Math.random()*1.4, 0, Math.PI*2); ctx.fill();
     }
     ctx.restore();
+  } else if(hungerState === 'starving'){
+    // Starving — sunken dark socket, tiny pupil, drooping closed-curve "x_x" feel.
+    // Dark hollow ring around the eye area
+    ctx.fillStyle = 'rgba(40,15,15,0.55)';
+    ctx.beginPath(); ctx.arc(-4, -26, 5.5, 0, Math.PI*2); ctx.fill();
+    // Half-closed lid (drawn as a thick top arc covering most of the eye)
+    ctx.strokeStyle='#000'; ctx.lineWidth=2; ctx.lineCap='round';
+    ctx.beginPath(); ctx.arc(-4, -25, 4.2, Math.PI*0.85, Math.PI*0.15, true); ctx.stroke();
+    // Tiny dim pupil — barely there
+    ctx.fillStyle = '#3A2222';
+    ctx.beginPath(); ctx.arc(-4, -25, 1.2, 0, Math.PI*2); ctx.fill();
+    // Tear streak below eye
+    ctx.fillStyle = 'rgba(116,192,252,0.6)';
+    ctx.beginPath(); ctx.ellipse(-3, -19, 0.8, 1.6, 0, 0, Math.PI*2); ctx.fill();
+  } else if(hungerState === 'hungry'){
+    // Hungry — droopy half-closed eye with a sad gleam. Eyebrow handled below.
+    ctx.fillStyle='#000';
+    ctx.beginPath(); ctx.arc(-4, -25, 2.4, 0, Math.PI*2); ctx.fill();
+    // Lower eyelid — partial cover from below
+    ctx.strokeStyle='#000'; ctx.lineWidth=1.8; ctx.lineCap='round';
+    ctx.beginPath(); ctx.arc(-4, -24.5, 3.2, 0.05, Math.PI - 0.05, false); ctx.stroke();
+    // Small white catchlight (smaller than normal — less alert)
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(-3, -26, 0.7, 0, Math.PI*2); ctx.fill();
+    // Faint shadow under eye
+    ctx.fillStyle = 'rgba(40,15,15,0.30)';
+    ctx.beginPath(); ctx.ellipse(-4, -22, 4, 1.2, 0, 0, Math.PI*2); ctx.fill();
+  } else if(hungerState === 'glow'){
+    // Glow — bright sparkly eye with golden rays + extra highlights. Eyebrow stays fierce below.
+    ctx.save();
+    // Outer halo
+    const haloPulse = 0.7 + 0.3 * Math.sin(t * 4);
+    ctx.globalAlpha = 0.7 * haloPulse;
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath(); ctx.arc(-4, -26, 8.5, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    // Eye core — bright white with golden rim
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath(); ctx.arc(-4, -26, 4.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFF9DB';
+    ctx.beginPath(); ctx.arc(-4, -26, 3, 0, Math.PI*2); ctx.fill();
+    // Star-shaped pupil — 4-point sparkle
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(-4, -26, 1.4, 0, Math.PI*2); ctx.fill();
+    // Cross-shaped sparkle highlight (catchlight) — animated
+    ctx.fillStyle = '#fff';
+    const sparkR = 2.4 + Math.sin(t*5)*0.4;
+    ctx.fillRect(-4 - sparkR, -26.4, sparkR*2, 0.8);
+    ctx.fillRect(-4.4, -26 - sparkR, 0.8, sparkR*2);
+    // Outer animated golden rays (4 of them, rotating slowly)
+    ctx.strokeStyle = '#FFD43B';
+    ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+    for(let i=0;i<4;i++){
+      const a = (i/4) * Math.PI * 2 + t * 0.6;
+      const r1 = 6, r2 = 9.5;
+      const x1 = -4 + Math.cos(a)*r1, y1 = -26 + Math.sin(a)*r1;
+      const x2 = -4 + Math.cos(a)*r2, y2 = -26 + Math.sin(a)*r2;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    }
+  } else if(hungerState === 'boosted'){
+    // Boosted — same shape as normal, but eye glints blue and pupil shimmers.
+    ctx.fillStyle='#000';
+    ctx.beginPath(); ctx.arc(-4, -26, 3, 0, Math.PI*2); ctx.fill();
+    // Pupil — pulsing blue
+    ctx.fillStyle = '#74C0FC';
+    ctx.beginPath(); ctx.arc(-4, -26, 1.5 + Math.sin(t*4)*0.3, 0, Math.PI*2); ctx.fill();
+    // Bright catchlight (bigger than normal)
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(-3, -27, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-5, -25, 0.6, 0, Math.PI*2); ctx.fill();
   } else {
     ctx.fillStyle='#000';
     ctx.beginPath(); ctx.arc(-4, -26, 3, 0, Math.PI*2); ctx.fill();
@@ -1428,9 +1575,26 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
       ctx.beginPath(); ctx.arc(-4, -26, 1.4, 0, Math.PI*2); ctx.fill();
     }
   }
-  // Angry eyebrow — flex with attack
+  // Eyebrow — angle changes with hunger state (sad-down for hungry/starving, fierce-up for boosted/glow)
   ctx.strokeStyle='#000'; ctx.lineWidth=3.2; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(-11, -33 - angry*0.5 - attackPulse*0.6); ctx.lineTo(-1, -30); ctx.stroke();
+  if(hungerState === 'starving'){
+    // Drooping wavy brow — wobbly sad
+    ctx.beginPath(); ctx.moveTo(-11, -28); ctx.lineTo(-1, -32); ctx.stroke();
+  } else if(hungerState === 'hungry'){
+    // Sad slope — opposite of angry
+    ctx.beginPath(); ctx.moveTo(-11, -29); ctx.lineTo(-1, -32); ctx.stroke();
+  } else if(hungerState === 'glow'){
+    // Extremely fierce — golden brow, more pronounced
+    ctx.strokeStyle = '#FFD43B'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(-12, -34 - attackPulse*0.6); ctx.lineTo(-1, -30); ctx.stroke();
+  } else if(hungerState === 'boosted'){
+    // Slightly more fierce than normal
+    ctx.lineWidth = 3.6;
+    ctx.beginPath(); ctx.moveTo(-12, -34 - angry*0.5 - attackPulse*0.6); ctx.lineTo(-1, -30); ctx.stroke();
+  } else {
+    // Default angry brow — flex with attack
+    ctx.beginPath(); ctx.moveTo(-11, -33 - angry*0.5 - attackPulse*0.6); ctx.lineTo(-1, -30); ctx.stroke();
+  }
   // Feathers on head
   ctx.strokeStyle='#5C6670'; ctx.lineWidth=3.5;
   const fp = Math.sin(t*3)*0.6;
@@ -2613,9 +2777,11 @@ function drawTitlePigeonFrame(){
   ctx2.clearRect(0, 0, cssW, cssH);
   // Fake player carrying the current costume refs — drawPigeon reads .costumes for overlays.
   // Using a stable fireRate/reloadT keeps the attack pulse from ever ticking on the title pigeon.
+  // hungerState surfaces the current 비둘기 먹이주기 state so the face/eyes render the right variant.
   const fakePlayer = {
     fireRate: 1, reloadT: 1, vx: 0, vy: 0,
-    costumes: buildPlayerCostumeRefs()
+    costumes: buildPlayerCostumeRefs(),
+    hungerState: getPigeonHungerState(),
   };
   const cx = cssW / 2;
   // Pigeon footprint is roughly 110px tall at scale 1, with origin at body center; we anchor a
@@ -3613,6 +3779,11 @@ const progress = (()=>{
     chaptersSinceCostume: 0,                            // pity counter — guarantees a costume every 10 clears
     skin: 'default',                                    // currently selected title-screen background skin
     ownedSkins: ['default'],                            // skin ids the player has unlocked
+    // 비둘기 먹이주기 — title-screen pigeon gets hungry over real time. Hungry pigeons hit
+    // softer in combat; premium feed grants a temporary boost. See FEEDS + getPigeonHungerState.
+    lastFedAt: Date.now(),
+    feedBoostUntil: 0,                                  // ms timestamp when current boost expires
+    feedBoostStrength: 0,                               // 0=none, 1=deluxe (+10%), 2=ultra (+20% glow)
   };
   const merged = Object.assign(base, saved || {}, {
     shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}),
@@ -3916,6 +4087,74 @@ function pullGachaTen(rates){
   saveProgress();
   return out;
 }
+// ---------- 비둘기 먹이주기 (feed-the-pigeon) ----------
+//   • Pigeon gets hungry over REAL time since last feed — hours, not session time.
+//   • 4 feed tiers:
+//       basic  (50¢)    — restore to NORMAL, full belly 8h
+//       premium(300¢)   — restore + full belly 16h
+//       deluxe (1500¢)  — restore + +10% combat boost for 4h (눈 살짝 반짝)
+//       ultra  (8000¢)  — restore + +20% combat boost for 2h (눈 엄청 반짝, 황금 후광)
+//   • Combat mods apply via getPigeonStatMods() → spawnEnemy/applyHungerMods at run start.
+//   • State machine:
+//       getPigeonHungerState() — 'glow' / 'boosted' / 'normal' / 'hungry' / 'starving'
+//       0–12h since fed: normal     (mod ×1.0)
+//       12–24h since fed: hungry    (dmg ×0.85, hp -10, fireRate ×1.0)
+//       24h+ since fed:  starving  (dmg ×0.65, hp -20, fireRate ×0.90)
+//       feedBoost active w/ strength<2: boosted (dmg ×1.10, hp +10, fireRate ×1.05)
+//       feedBoost active w/ strength≥2: glow    (dmg ×1.20, hp +20, fireRate ×1.10)
+const FEEDS = [
+  { id:'basic',   icon:'🌾', name:'일반 새 모이',  price:50,    bellyH:8,  boostH:0, boostStr:0,
+    desc:'기본 사료 — 배고픔만 채워주는 검소한 한 끼.' },
+  { id:'premium', icon:'🥣', name:'고급 곡물 믹스', price:300,   bellyH:16, boostH:0, boostStr:0,
+    desc:'영양가 높은 곡물 믹스 — 배고픔이 더 오래 지속되지 않아요.' },
+  { id:'deluxe',  icon:'🌰', name:'황금 견과',     price:1500,  bellyH:24, boostH:4, boostStr:1,
+    desc:'특별한 견과 — 4시간 동안 +10% 전투력 부스트, 눈이 살짝 빛나요.' },
+  { id:'ultra',   icon:'✨', name:'전설의 사료',   price:8000,  bellyH:24, boostH:2, boostStr:2,
+    desc:'전설급 영양제 — 2시간 동안 +20% 전투력. 눈이 엄청 반짝이고 황금 후광까지!' },
+];
+const FEEDS_BY_ID = Object.fromEntries(FEEDS.map(f => [f.id, f]));
+
+// 5-state hunger / boost machine. Boost has priority over hunger (eating premium also resets timer).
+function getPigeonHungerState(){
+  const now = Date.now();
+  if(progress.feedBoostUntil > now){
+    return progress.feedBoostStrength >= 2 ? 'glow' : 'boosted';
+  }
+  const since = now - (progress.lastFedAt || now);
+  const hours = since / (1000*60*60);
+  if(hours >= 24) return 'starving';
+  if(hours >= 12) return 'hungry';
+  return 'normal';
+}
+
+// Combat stat multipliers/additions for the current hunger state.
+function getPigeonStatMods(){
+  switch(getPigeonHungerState()){
+    case 'glow':     return { dmg:1.20, hp:+20, rate:1.10, label:'전설적 ✨', color:'#FFE066' };
+    case 'boosted':  return { dmg:1.10, hp:+10, rate:1.05, label:'기운 넘침 ⚡',  color:'#74C0FC' };
+    case 'starving': return { dmg:0.65, hp:-20, rate:0.90, label:'굶주림 💀',    color:'#868E96' };
+    case 'hungry':   return { dmg:0.85, hp:-10, rate:1.00, label:'배고픔 😣',    color:'#FFA94D' };
+    default:         return { dmg:1.00, hp:  0, rate:1.00, label:'정상 🙂',      color:'#51CF66' };
+  }
+}
+
+// Buy one feed item. Deducts coin, sets lastFedAt + boost timers, persists.
+function buyFeed(id){
+  const feed = FEEDS_BY_ID[id]; if(!feed) return false;
+  if((progress.coins || 0) < feed.price) return false;
+  progress.coins -= feed.price;
+  const now = Date.now();
+  // bellyH hours of "fed" (resets hungry/starving). Belly starts at NOW so the player gets the full window.
+  progress.lastFedAt = now;
+  // Boost — only applies if this feed grants one. Boost timer measured from now.
+  if(feed.boostH > 0){
+    progress.feedBoostUntil = now + feed.boostH * 3600 * 1000;
+    progress.feedBoostStrength = feed.boostStr;
+  }
+  saveProgress();
+  return true;
+}
+
 // Chapter-clear costume drop: 10% base rate, but every 10 clears guarantees one regardless.
 function rollChapterClearCostume(){
   let dropped = null;
@@ -4120,10 +4359,23 @@ function applyChapterStartBuff(){
   state.player.damage *= buff;
 }
 
+// Apply hunger / boost mods to current player stats. Called AFTER chapter buff so mods compound.
+function applyHungerMods(){
+  if(!state.player) return;
+  const m = getPigeonStatMods();
+  state.player.damage = state.player.damage * m.dmg;
+  state.player.fireRate = state.player.fireRate * m.rate;
+  state.player.maxHp = Math.max(20, Math.round(state.player.maxHp + m.hp));
+  state.player.hp = state.player.maxHp;
+  // Surface the current state so drawPigeon can render the right face/eyes during gameplay.
+  state.player.hungerState = getPigeonHungerState();
+}
+
 function resetRun(startChapter){
   state.chapter = startChapter || 1;
   resetPlayer();
   applyChapterStartBuff();
+  applyHungerMods();
   state.stage=1; state.wave=1; state.chapterTime=0; state.score=0; state.kills=0; state.time=0;
   state.coinsThisRun = 0;
   state.earnedCostumeThisChapter = null;
@@ -7536,6 +7788,18 @@ requestAnimationFrame(loop);
 // ---------- UI wiring ----------
 document.getElementById('startBtn').addEventListener('click', openChapterSelect);
 document.getElementById('titleShopPill').addEventListener('click', ()=> openShop('skill'));
+// Speech-bubble feed button next to the title pigeon — opens 비둘기 먹이주기.
+// (Pigeon itself is NOT clickable; only this bubble button.)
+document.getElementById('feedBubbleBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  // Audio bootstrap (browsers gate WebAudio behind a user gesture).
+  initAudio();
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  openFeedModal();
+});
+document.getElementById('feedCloseBtn').addEventListener('click', () => {
+  document.getElementById('feedModal').classList.add('hidden');
+});
 document.getElementById('shopTabSkill').addEventListener('click', ()=> setShopTab('skill'));
 document.getElementById('shopTabCostume').addEventListener('click', ()=> setShopTab('costume'));
 document.getElementById('shopTabSkin').addEventListener('click', ()=> setShopTab('skin'));
@@ -7661,6 +7925,90 @@ function openChapterSelect(){
 function updateTitleCoinDisplay(){
   const el = document.getElementById('titleCoinTxt');
   if(el) el.textContent = (progress.coins||0).toLocaleString();
+}
+
+// ---------- 비둘기 먹이주기 ----------
+// Format hours since fed as "Nh Mm 전" or "방금" — used in the feed modal status block.
+function formatTimeSince(ms){
+  const sec = Math.max(0, Math.floor(ms/1000));
+  if(sec < 60) return '방금 (' + sec + '초 전)';
+  const min = Math.floor(sec/60);
+  if(min < 60) return min + '분 전';
+  const hr = Math.floor(min/60);
+  const remMin = min - hr*60;
+  return hr + '시간' + (remMin ? ' ' + remMin + '분' : '') + ' 전';
+}
+
+// Update the small badge floating above the title pigeon to reflect hunger state. Also toggles
+// the speech-bubble button into a more urgent red color when the pigeon is hungry/starving.
+function updateTitleHungerBadge(){
+  const el = document.getElementById('titleHungerBadge');
+  const state = getPigeonHungerState();
+  if(el){
+    el.className = 'hunger-badge ' + state;
+    el.textContent =
+      state === 'glow'     ? '✨ 전설의 컨디션' :
+      state === 'boosted'  ? '⚡ 기운 넘쳐요' :
+      state === 'starving' ? '💀 굶주려요!' :
+      state === 'hungry'   ? '😣 배고파요…' :
+                             '🙂 정상';
+  }
+  const bubble = document.getElementById('feedBubbleBtn');
+  if(bubble){
+    bubble.classList.toggle('urgent', state === 'starving' || state === 'hungry');
+  }
+}
+
+function openFeedModal(){
+  const modal = document.getElementById('feedModal');
+  const status = document.getElementById('feedStatus');
+  const grid = document.getElementById('feedGrid');
+  if(!modal || !status || !grid) return;
+  // Header status — current hunger state, coins, time since last fed, time on boost (if any)
+  const mods = getPigeonStatMods();
+  const stateK = getPigeonHungerState();
+  const since = Date.now() - (progress.lastFedAt || Date.now());
+  const boostLeft = Math.max(0, (progress.feedBoostUntil || 0) - Date.now());
+  const stat = `<div style="font-weight:900;color:${mods.color};font-size:16px;">${mods.label}</div>` +
+    `<div style="font-size:12px;color:#DEE2E6;margin-top:4px;">` +
+    `전투력: 공격 ×${mods.dmg.toFixed(2)} · HP ${mods.hp >= 0 ? '+' : ''}${mods.hp} · 연사 ×${mods.rate.toFixed(2)}` +
+    `</div>` +
+    `<div style="font-size:11px;color:#868E96;margin-top:6px;">마지막 식사 — ${formatTimeSince(since)}` +
+    (boostLeft > 0 ? `<br>부스트 남은 시간 — ${formatTimeSince(boostLeft).replace(' 전','')}` : '') +
+    `</div>`;
+  status.innerHTML = stat;
+  // Feed cards
+  grid.innerHTML = '';
+  const coins = progress.coins || 0;
+  for(const f of FEEDS){
+    const tier = f.boostStr === 2 ? 3 : f.boostStr === 1 ? 2 : f.id === 'premium' ? 1 : 0;
+    const poor = coins < f.price;
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'feed-card tier' + tier + (poor ? ' poor' : '');
+    card.innerHTML = `
+      <div class="fc-icon">${f.icon}</div>
+      <div class="fc-body">
+        <div class="fc-name">${f.name}</div>
+        <div class="fc-desc">${f.desc}</div>
+      </div>
+      <div class="fc-price">🪙 ${f.price.toLocaleString()}</div>
+    `;
+    if(!poor){
+      card.addEventListener('click', () => {
+        if(buyFeed(f.id)){
+          if(typeof sfxLevelUp === 'function') sfxLevelUp();
+          if(typeof sfxCoo === 'function') sfxCoo(false); // happy coo on feed
+          updateTitleCoinDisplay();
+          updateTitleHungerBadge();
+          // Re-render the modal so the new state is reflected
+          openFeedModal();
+        }
+      });
+    }
+    grid.appendChild(card);
+  }
+  modal.classList.remove('hidden');
 }
 
 // Legacy entry point — costume now lives inside the shop. Routes to the shop's costume tab.
@@ -8596,6 +8944,9 @@ function startTitleBgmOnce(){
 updateTitleCoinDisplay();
 // Apply currently-selected title skin so the start screen reflects the player's choice on load.
 applyTitleSkin();
+// Hunger badge — refresh on load and every 30s so the state visibly updates while the player idles.
+updateTitleHungerBadge();
+setInterval(updateTitleHungerBadge, 30000);
 
 // Toggle body.modal-open whenever any .modal becomes visible/hidden. We use this class to
 // hide the fixed back button while a popup is up — without it Chrome paints the back button
