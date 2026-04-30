@@ -120,6 +120,19 @@
   /* Floating capture: 우하단 절반을 가상 패드로 사용 — 손가락 닿는 곳으로 베이스가 텔레포트 */
   #joyArea{position:absolute;right:0;bottom:0;width:62%;height:64%;pointer-events:auto;touch-action:none;display:none;z-index:5;background:transparent;}
   .hud-btn{position:absolute;width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;color:#FFE066;font-size:18px;font-weight:900;pointer-events:auto;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;z-index:7;}
+  /* 비둘기의 외침 ultimate button — bigger, sits center-bottom on PC and just above the joystick on mobile.
+     Charge fill grows from bottom; when ready a pulsing yellow glow + 외침! label invites the click. */
+  #ultBtn{position:absolute;width:84px;height:84px;border-radius:50%;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);background:linear-gradient(180deg,rgba(40,8,50,.85),rgba(8,2,18,.92));border:3px solid #5C3A6E;color:#fff;font-weight:900;font-family:inherit;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:auto;z-index:7;box-shadow:0 4px 0 rgba(0,0,0,.45);overflow:hidden;}
+  #ultBtn .ult-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(255,107,107,.45),rgba(255,224,102,.7));pointer-events:none;transition:height .12s ease-out;}
+  #ultBtn .ult-icon{font-size:28px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6));position:relative;}
+  #ultBtn .ult-label{position:relative;font-size:10px;color:#FFE066;text-shadow:0 1px 0 rgba(0,0,0,.6);}
+  #ultBtn.ready{border-color:#FFE066;animation:ultPulse 1.1s infinite;box-shadow:0 0 20px rgba(255,224,102,.7),0 4px 0 rgba(0,0,0,.45);}
+  #ultBtn.ready .ult-label{color:#FFF9DB;}
+  #ultBtn.used{opacity:.45;cursor:default;border-color:#444;}
+  @keyframes ultPulse{ 0%,100%{ box-shadow:0 0 12px rgba(255,224,102,.55),0 4px 0 rgba(0,0,0,.45); } 50%{ box-shadow:0 0 28px rgba(255,224,102,.9),0 4px 0 rgba(0,0,0,.45); } }
+  @media (min-width:768px){
+    #ultBtn{ left:auto; right:24px; bottom:24px; transform:none; width:96px; height:96px; }
+  }
   /* Vertical stack on left side — joystick lives on the right, action buttons go opposite.
      Pause sits on top (most-used) and mute below; quitting goes through the pause menu so
      there is no rogue ✕ next to the joystick that fires a confirm() on accidental taps. */
@@ -492,6 +505,11 @@
     <div id="joyArea"></div>
     <div id="joystick"><div class="stick"></div></div>
     <button class="hud-btn" id="muteBtn" title="음소거">🔊</button>
+    <button id="ultBtn" type="button" title="비둘기의 외침 — 챕터당 1회">
+      <div class="ult-fill" id="ultFill"></div>
+      <div class="ult-icon">🐦‍🔥</div>
+      <div class="ult-label" id="ultLabel">외침</div>
+    </button>
   </div>
 
   <!-- Title screen -->
@@ -610,6 +628,21 @@
     </div>
   </div>
 
+  <!-- Chapter-clear costume reveal — fires before the chapter-cleared summary so the player gets
+       a 짜자잔! moment with the dropped costume and an immediate equip prompt. -->
+  <div id="chapterRewardModal" class="modal hidden">
+    <div class="card" style="max-width:360px;text-align:center;">
+      <h2 style="color:#FFE066;text-shadow:0 0 16px rgba(255,224,102,.7);">🎉 짜자잔! 코스튬 획득!</h2>
+      <div class="sub">챕터 클리어 보상</div>
+      <div id="crmReveal" class="gacha-reveal"></div>
+      <div id="crmPrompt" style="font-size:14px;color:#FFF9DB;margin:6px 0 12px;font-weight:700;">바로 착용하시겠어요?</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn alt small" id="crmSkipBtn" style="flex:1;">그냥 챙기기</button>
+        <button class="btn small" id="crmEquipBtn" style="flex:2;">✨ 착용하기</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Equip picker — shown when the player taps an empty + slot in the costume tab -->
   <div id="equipPickerModal" class="modal hidden">
     <div class="card" style="max-width:480px;">
@@ -640,15 +673,20 @@
     </div>
   </div>
 
-  <!-- Skin preview — shown when the player taps a skin card. Lets the player see how the title
-       screen will look BEFORE committing to buy/equip. -->
+  <!-- Skin preview — shown when the player taps a skin card. Shows the title screen as it would
+       appear after applying: skin gradient + currently equipped costumes worn by the pigeon. -->
   <div id="skinPreviewModal" class="modal hidden">
     <div class="card" style="max-width:440px;text-align:center;">
       <h2 id="spmTitle" style="margin:0 0 4px;">배경 스킨</h2>
       <div class="sub">적용 시 타이틀 화면 미리보기</div>
-      <div id="spmPreview" style="position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;border:2px solid rgba(255,255,255,.2);overflow:hidden;margin:8px 0 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);">
-        <div style="font-size:14px;font-weight:900;letter-spacing:1px;opacity:.95;">새우깡으로</div>
-        <div style="font-size:28px;font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A,0 0 22px rgba(255,224,102,.5);margin-top:2px;">한계돌파!</div>
+      <div id="spmPreview" style="position:relative;width:100%;aspect-ratio:16/10;border-radius:14px;border:2px solid rgba(255,255,255,.2);overflow:hidden;margin:8px 0 12px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);">
+        <!-- Title text overlay -->
+        <div style="position:absolute;top:8%;left:0;right:0;text-align:center;pointer-events:none;">
+          <div style="font-size:13px;font-weight:900;letter-spacing:1px;opacity:.95;">새우깡으로</div>
+          <div style="font-size:24px;font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A,0 0 18px rgba(255,224,102,.5);margin-top:2px;">한계돌파!</div>
+        </div>
+        <!-- Pigeon canvas, layered above the gradient -->
+        <canvas id="spmPigeon" style="position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:48%;height:70%;"></canvas>
       </div>
       <div id="spmOwnership" style="font-size:13px;color:#FFF9DB;margin-bottom:12px;font-weight:700;"></div>
       <div style="display:flex;gap:8px;">
@@ -1220,16 +1258,76 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
   // Head highlight
   ctx.fillStyle = hurt ? '#FFE0E0' : '#C9D1DB';
   ctx.globalAlpha=.7; ctx.beginPath(); ctx.arc(-5, -26, 6, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha=1;
-  // Beak (points forward)
+  // Beak (points forward) — when cooFlash is active the beak splits open ("구구!" yell).
+  // Open amount is a soft pulse so the mouth wiggles instead of just snapping wide.
+  const cooFlash = state.cooFlash || 0;
+  const cooOpen = cooFlash > 0 ? Math.sin((1 - cooFlash/0.6) * Math.PI) * 5 : 0;
   ctx.fillStyle='#FFA500';
-  ctx.beginPath(); ctx.moveTo(-2, -20); ctx.lineTo(16, -16); ctx.lineTo(-2, -12); ctx.closePath(); ctx.fill();
-  // Beak highlight
-  ctx.fillStyle='#FFC87A';
-  ctx.beginPath(); ctx.moveTo(-2, -18); ctx.lineTo(10, -15.5); ctx.lineTo(-2, -14); ctx.closePath(); ctx.fill();
+  if(cooOpen > 0){
+    // Top half of beak tilts up
+    ctx.beginPath();
+    ctx.moveTo(-2, -20);
+    ctx.lineTo(16, -16 - cooOpen);
+    ctx.lineTo(-2, -16);
+    ctx.closePath(); ctx.fill();
+    // Bottom half tilts down
+    ctx.beginPath();
+    ctx.moveTo(-2, -16);
+    ctx.lineTo(16, -16 + cooOpen);
+    ctx.lineTo(-2, -12);
+    ctx.closePath(); ctx.fill();
+    // Tongue/throat tint inside the open beak
+    ctx.fillStyle = '#A8324B';
+    ctx.beginPath();
+    ctx.moveTo(-2, -16);
+    ctx.lineTo(13, -16);
+    ctx.lineTo(-2, -16 + cooOpen*0.4);
+    ctx.closePath(); ctx.fill();
+  } else {
+    ctx.beginPath(); ctx.moveTo(-2, -20); ctx.lineTo(16, -16); ctx.lineTo(-2, -12); ctx.closePath(); ctx.fill();
+    // Beak highlight
+    ctx.fillStyle='#FFC87A';
+    ctx.beginPath(); ctx.moveTo(-2, -18); ctx.lineTo(10, -15.5); ctx.lineTo(-2, -14); ctx.closePath(); ctx.fill();
+  }
   // Eye — blink if needed
-  if(blink){
+  const ultFlash = state.ultFlashT || 0;
+  if(blink && ultFlash <= 0){
     ctx.strokeStyle='#000'; ctx.lineWidth=1.8; ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
+  } else if(ultFlash > 0){
+    // Ultimate active — eyes blaze with fire that streams forward in a thick cone.
+    const intensity = ultFlash; // 0..1
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath(); ctx.arc(-4, -26, 3.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FF6B6B';
+    ctx.beginPath(); ctx.arc(-4, -26, 2, 0, Math.PI*2); ctx.fill();
+    // Forward fire jet
+    ctx.save();
+    ctx.globalAlpha = 0.85 * intensity;
+    ctx.fillStyle = '#FF6B00';
+    ctx.beginPath();
+    ctx.moveTo(-2, -28);
+    ctx.lineTo(28 + intensity*16, -30);
+    ctx.lineTo(40 + intensity*22, -26);
+    ctx.lineTo(28 + intensity*16, -22);
+    ctx.lineTo(-2, -24);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath();
+    ctx.moveTo(-2, -27);
+    ctx.lineTo(20 + intensity*10, -28);
+    ctx.lineTo(30 + intensity*14, -26);
+    ctx.lineTo(20 + intensity*10, -24);
+    ctx.lineTo(-2, -25);
+    ctx.closePath(); ctx.fill();
+    // Spark sparkles in front of the muzzle
+    for(let i=0;i<3;i++){
+      const sx = 18 + Math.random()*22;
+      const sy = -28 + Math.random()*4;
+      ctx.fillStyle = '#FFF9DB';
+      ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
   } else {
     ctx.fillStyle='#000';
     ctx.beginPath(); ctx.arc(-4, -26, 3, 0, Math.PI*2); ctx.fill();
@@ -2385,6 +2483,30 @@ function drawCostumeWeaponOverlay(ctx, px, py, scale, facing, eq, attackPulse){
 // Title-screen pigeon — drawn into a canvas via the same drawPigeon used in-game so the pigeon
 // shows the player's currently-equipped costumes on the start screen. Runs each frame from the
 // main loop while the title scene is visible.
+// Draws the costumed pigeon onto the skin-preview modal's canvas — keeps breath/blink/coo
+// animations live while the modal is open so the player sees the title screen as it would feel.
+function drawSkinPreviewPigeonFrame(){
+  const c = document.getElementById('spmPigeon');
+  if(!c) return;
+  if(c.offsetParent === null) return;
+  const cssW = c.clientWidth, cssH = c.clientHeight;
+  if(cssW <= 0 || cssH <= 0) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if(c.width !== cssW * dpr || c.height !== cssH * dpr){
+    c.width = cssW * dpr;
+    c.height = cssH * dpr;
+  }
+  const ctx2 = c.getContext('2d');
+  ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx2.clearRect(0, 0, cssW, cssH);
+  const fakePlayer = {
+    fireRate: 1, reloadT: 1, vx: 0, vy: 0,
+    costumes: buildPlayerCostumeRefs()
+  };
+  const scale = Math.min(cssW, cssH) / 130;
+  drawPigeon(ctx2, cssW/2, cssH * 0.78, scale, 1, state.time * 1.4, false, 1, fakePlayer);
+}
+
 function drawTitlePigeonFrame(){
   const c = document.getElementById('titlePigeon');
   if(!c) return;
@@ -3258,6 +3380,14 @@ function drawEnemy(ctx, e, walkPhase){
 }
 
 // ---------- Game state ----------
+// 비둘기의 외침 ultimate constants — charge fills as kills accumulate, fully ready at ULT_MAX.
+//   • ULT_KILL_GAIN per regular kill (boss/elite kills earn more — see killEnemy).
+//   • ULT_DAMAGE_PCT of boss max HP one-shot to a chapter boss (same flat damage applied to mobs
+//     so the screen wipes clean while the boss takes a hefty chunk).
+const ULT_MAX = 100;
+const ULT_KILL_GAIN = 1.6;     // ~62 kills to fully charge
+const ULT_DAMAGE_PCT = 0.30;   // 30% of boss max HP per ult cast
+
 // WAVES_PER_CHAPTER: each chapter is 3 swelling enemy waves followed by the chapter boss.
 // CHAPTER_TIME_CAP: hard ceiling on a single chapter's playtime — early chapters cap at 10 min,
 // later chapters cap at 15 min so the gauntlet of ch11-50 has more breathing room.
@@ -3700,7 +3830,12 @@ function pullGachaTen(rates){
 // Chapter-clear costume drop: 10% base rate, but every 10 clears guarantees one regardless.
 function rollChapterClearCostume(){
   let dropped = null;
-  if(Math.random() < 0.10){
+  // Onboarding rule: clearing any of the first 10 chapters always awards a random costume so
+  // new players actually feel the gacha system before chapter 11.
+  if(state.chapter <= 10){
+    dropped = awardCostume(rollGachaGrade(GACHA_RATES_CHAPTER));
+    progress.chaptersSinceCostume = 0;
+  } else if(Math.random() < 0.10){
     dropped = awardCostume(rollGachaGrade(GACHA_RATES_CHAPTER));
     progress.chaptersSinceCostume = 0;
   } else if((progress.chaptersSinceCostume || 0) >= 9){
@@ -3817,6 +3952,9 @@ const state = {
   time: 0,
   coinsThisRun: 0,                 // coins earned during the current chapter run — shown on chapter-clear modal
   earnedCostumeThisChapter: null,  // populated when the chapter-clear drop fires
+  ultCharge: 0,                    // 0..ULT_MAX — fills via kills, enables 비둘기의 외침
+  ultUsed: false,                  // true after the ult fires; reset per chapter
+  ultFlashT: 0,                    // 0..1 — fire-from-eyes overlay decay timer
   camera: {x:0,y:0, shake:0},
   player: null,
   enemies: [],
@@ -3921,6 +4059,11 @@ function initChapter(){
   state.stageDuration = state.waveTimes[2]; // legacy alias — boss spawns at end of wave 3
   state.camera.x = state.player.x;
   state.camera.y = state.player.y;
+  // Fresh ult charge per chapter — once-per-chapter is the design contract.
+  state.ultCharge = 0;
+  state.ultUsed = false;
+  state.ultFlashT = 0;
+  updateUltButton();
 }
 // Legacy shim — older code paths still call initStage(). Routes to initChapter for the wave system.
 function initStage(){ initChapter(); }
@@ -4069,15 +4212,21 @@ function spawnEnemy(kind){
   const y = p.y + Math.sin(angle)*dist;
   const scale = 1 + (state.stage-1)*0.07;
   const chm = chapterMult();
-  const hp = Math.ceil(def.hp * scale * chm.hp);
+  // Density rebalance — spawn rate is ~2× higher than before, so per-mob HP/dmg/XP are scaled
+  // DOWN to keep total wave damage and XP close to the previous curve while making each kill
+  // feel snappy (탕탕특공대 hit-feedback). Boss balance is handled separately in spawnBoss.
+  const ENEMY_HP_MULT = 0.65;
+  const ENEMY_DMG_MULT = 0.75;
+  const ENEMY_XP_MULT = 0.50;
+  const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT));
   const e = {
     x, y, vx:0, vy:0, kind,
     hp, maxHp: hp,
     speed: def.speed * (0.95 + Math.random()*0.2) * chm.speed,
-    damage: Math.ceil(def.dmg * chm.dmg),
+    damage: Math.max(1, Math.ceil(def.dmg * chm.dmg * ENEMY_DMG_MULT)),
     size: def.size,
     score: Math.ceil(def.score * chm.score),
-    xp: Math.max(1, Math.ceil(def.xp * chm.xp)),
+    xp: Math.max(1, Math.ceil(def.xp * chm.xp * ENEMY_XP_MULT)),
     hitT: 0,
     walkPhase: Math.random()*Math.PI*2,
     collideRadius: 18*def.size,
@@ -4125,8 +4274,11 @@ function spawnBoss(){
   const v = BOSS_VARIANTS[variant];
   b.bossVariant = variant;
   b.bossLabel = v.label;
-  // Base HP grows with chapter (220 + c^1.45 × 46) × chapterMult, then scaled by variant.
-  b.hp = b.maxHp = Math.ceil((220 + Math.pow(c, 1.45)*46) * chm.hp * v.hpMult);
+  // Base HP grows with chapter (700 + c^1.45 × 110) × chapterMult, then scaled by variant.
+  // Tuned so a clean run with shop maxed + chapter starting buff + 비둘기의 외침 ult takes
+  // ~30s of active fighting (the ult wipes a chunk; the rest is sustained DPS). Earlier
+  // formula was (220 + c^1.45×46) — bosses popped in <10s.
+  b.hp = b.maxHp = Math.ceil((700 + Math.pow(c, 1.45)*110) * chm.hp * v.hpMult);
   b.speed = (52 + c*2.2) * chm.speed;
   b.damage = Math.ceil((14 + c*1.8) * chm.dmg * v.dmgMult);
   b.size = 2.9 * v.sizeMult;
@@ -4194,10 +4346,12 @@ function waveEnemyPool(wave){
 function stageEnemyPool(){ return waveEnemyPool(state.wave || 1); }
 
 function spawnRateForWave(wave){
-  // Wave 1 baseline ~1.6/s, wave 2 ~2.6/s, wave 3 ~3.8/s (scaled by chapter).
-  // Late chapters multiply this further so ch50 wave 3 truly tests the player.
-  const baseByWave = wave === 1 ? 1.6 : wave === 2 ? 2.6 : 3.8;
-  return baseByWave * (1 + (state.chapter-1)*0.020);
+  // Wave 1 baseline ~3.6/s, wave 2 ~5.6/s, wave 3 ~8.0/s (scaled by chapter).
+  // Roughly 2× the previous density to give a 탕탕특공대-style swarm feel. Per-enemy HP/dmg/XP
+  // are correspondingly lowered in spawnEnemy so total wave XP and difficulty stay close to the
+  // pre-buff curve while the screen feels packed.
+  const baseByWave = wave === 1 ? 3.6 : wave === 2 ? 5.6 : 8.0;
+  return baseByWave * (1 + (state.chapter-1)*0.024);
 }
 // Legacy shim — older call sites that pass `state.stage` now get the equivalent wave-3 rate.
 function spawnRateForStage(){ return spawnRateForWave(state.wave || 1); }
@@ -4496,6 +4650,19 @@ function killEnemy(e){
   e.dead = true;
   state.kills++;
   state.score += e.score;
+  // 비둘기의 외침 charge — every kill nudges the meter; boss kills don't matter (chapter ends).
+  if(!state.ultUsed && e.kind !== 'boss'){
+    const gain = (e.kind === 'tyrant' || e.kind === 'leviathan') ? ULT_KILL_GAIN * 4
+               : (e.kind === 'summoner' || e.kind === 'reaper') ? ULT_KILL_GAIN * 2
+               : ULT_KILL_GAIN;
+    const before = state.ultCharge;
+    state.ultCharge = Math.min(ULT_MAX, state.ultCharge + gain);
+    if(before < ULT_MAX && state.ultCharge >= ULT_MAX){
+      // Just hit full charge — toast banner so the player knows the button is live.
+      state.toastBanner = { text:'🐦‍🔥 비둘기의 외침 충전!', sub:'우측 버튼 클릭', t:2.0, maxT:2.0 };
+    }
+    updateUltButton();
+  }
   // Trickle meta-coins for every kill so the shop fills up even from regular play.
   // Boss/tyrant pay a richer bounty; trash mobs nudge the meter forward.
   if(e.kind === 'boss')        awardCoins(20 + state.chapter*5);
@@ -4727,14 +4894,63 @@ function onBossDefeated(){
   }
   state.scene='chapterCleared';
   sfxVictory();
-  renderChapterCleared();
-  document.getElementById('chapterCleared').classList.remove('hidden');
+  // If a costume dropped, do the 짜자잔 reveal first; the chapter-cleared summary shows after the
+  // player decides whether to equip. If no drop, skip straight to the summary.
+  if(state.earnedCostumeThisChapter){
+    showChapterRewardModal(state.earnedCostumeThisChapter);
+  } else {
+    renderChapterCleared();
+    document.getElementById('chapterCleared').classList.remove('hidden');
+  }
+}
+
+// Show the 짜자잔 reveal popup for a chapter-clear costume drop. After the player taps either
+// 착용하기 or 그냥 챙기기, the reward modal closes and the chapter-cleared summary takes over.
+function showChapterRewardModal(eq){
+  const def = COSTUME_DEFS_BY_ID[eq.defId]; if(!def) return;
+  const g = COSTUME_GRADES[eq.grade];
+  const slotLabel = { head:'머리', body:'몸통', weapon:'무기' }[def.slot];
+  const reveal = document.getElementById('crmReveal');
+  reveal.innerHTML = `
+    <div class="pull-title">${eq.grade === 'S' ? '✨ S 등급! ✨' : eq.grade === 'A' ? '⭐ A 등급!' : eq.grade === 'B' ? '🔵 B 등급' : '⚪ C 등급'}</div>
+    <div class="pull-card" style="border-color:${g.color};box-shadow:0 0 30px ${g.color}aa;">
+      <div class="pc-grade ${g.borderClass}" style="background:${g.color};border-color:#fff;">${g.label}</div>
+      <div class="pc-icon"><canvas></canvas></div>
+      <div class="pc-name">${def.name}</div>
+      <div class="pc-slot">${slotLabel}</div>
+    </div>
+    <div class="pull-stats">${costumeStatLines(eq)}</div>`;
+  const cv = reveal.querySelector('.pc-icon canvas');
+  if(cv) renderCostumePreview(cv, eq, 80);
+  // Wire equip / skip — both close this modal and reveal the chapter-cleared summary.
+  const equipBtn = document.getElementById('crmEquipBtn');
+  const skipBtn = document.getElementById('crmSkipBtn');
+  function dismiss(equipped){
+    document.getElementById('chapterRewardModal').classList.add('hidden');
+    if(equipped){
+      progress.equipped[def.slot] = eq.uid;
+      saveProgress();
+      sfxLevelUp();
+    }
+    renderChapterCleared();
+    document.getElementById('chapterCleared').classList.remove('hidden');
+  }
+  equipBtn.onclick = () => dismiss(true);
+  skipBtn.onclick = () => dismiss(false);
+  document.getElementById('chapterRewardModal').classList.remove('hidden');
 }
 
 function gainXP(amount){
   const p = state.player;
   p.xp += amount * p.xpMult;
   while(p.xp >= p.xpToNext){
+    // Level cap — once every chapter-applicable upgrade is maxed, stop leveling. The bar parks
+    // just below full so the player isn't visually stuck "almost ready to level".
+    const allMaxed = UPGRADES.filter(isUpgradeUnlocked).every(u => isUpgradeMaxed(u, p));
+    if(allMaxed){
+      p.xp = Math.min(p.xp, p.xpToNext - 1);
+      break;
+    }
     p.xp -= p.xpToNext;
     p.level++;
     // Tamer growth curve so the chapter's full upgrade set isn't maxed before the final stage.
@@ -4790,11 +5006,25 @@ function gameOver(){
 
 // ---------- Update ----------
 function update(dt){
+  // Universal coo-flash decay — when the pigeon yells "구구", drawPigeon opens the beak for ~0.5s.
+  // Decays here so it works on the title screen and in-game alike.
+  if(state.cooFlash > 0) state.cooFlash = Math.max(0, state.cooFlash - dt);
+  // Ultimate fire-from-eyes overlay decay — drives the eye-beam VFX in drawPigeon.
+  if(state.ultFlashT > 0) state.ultFlashT = Math.max(0, state.ultFlashT - dt);
   // Tick the global time clock for menu scenes too — the title pigeon, costume previews, and
   // shop screens use state.time for breathing/halo animation, so freezing it would lock them solid.
   // The gameplay simulation still bails below the early return for non-playing scenes.
   if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop'){
     state.time += dt;
+    // Title-screen coo — every ~7s the title pigeon vocalizes (beak opens + sfx fires).
+    if(state.scene === 'title'){
+      state._titleCooTimer = (state._titleCooTimer == null ? 3 : state._titleCooTimer) - dt;
+      if(state._titleCooTimer <= 0){
+        state._titleCooTimer = 7;
+        state.cooFlash = 0.6;
+        sfxCoo();
+      }
+    }
     return;
   }
   if(state.scene!=='playing') return;
@@ -4957,6 +5187,7 @@ function update(dt){
     const movingFast = Math.abs(p.vx) + Math.abs(p.vy) > 280;
     if(!state.bossSpawned && !movingFast && state.scene === 'playing'){
       sfxCoo();
+      state.cooFlash = 0.5;
     }
   }
 
@@ -5451,6 +5682,73 @@ function doLightning(targets){
 }
 
 // ---------- HUD ----------
+function updateUltButton(){
+  const btn = document.getElementById('ultBtn');
+  if(!btn) return;
+  const fill = document.getElementById('ultFill');
+  const label = document.getElementById('ultLabel');
+  const used = !!state.ultUsed;
+  const ready = !used && state.ultCharge >= ULT_MAX;
+  const pct = used ? 0 : Math.min(100, Math.max(0, (state.ultCharge / ULT_MAX) * 100));
+  if(fill) fill.style.height = pct + '%';
+  btn.classList.toggle('ready', ready);
+  btn.classList.toggle('used', used);
+  if(label){
+    label.textContent = used ? '사용 완료' : ready ? '외침!' : Math.round(pct) + '%';
+  }
+}
+
+function doUltimate(){
+  if(state.scene !== 'playing') return;
+  if(state.ultUsed) return;
+  if(state.ultCharge < ULT_MAX) return;
+  state.ultUsed = true;
+  state.ultCharge = 0;
+  state.ultFlashT = 1.0; // drives the fire-from-eyes overlay (decays in update())
+  state.cooFlash = 1.2;  // long beak-open for the yell
+  state.camera.shake = Math.max(state.camera.shake, 36);
+  // Loud, lower-pitched coo so the ult reads as a roar instead of a passing chirp.
+  if(typeof sfxCoo === 'function') sfxCoo();
+  if(typeof beep === 'function'){
+    // Layer a deeper rumble + bright sparkle so it doesn't sound like a normal kill SFX.
+    beep(110, 0.6, 'sawtooth', 0.35, -160);
+    beep(220, 0.4, 'square', 0.18, -90);
+    beep(880, 0.25, 'triangle', 0.12, 240);
+  }
+  // AOE damage — sweeps every enemy on screen. Bosses take ULT_DAMAGE_PCT of their max HP;
+  // mobs take a flat amount equal to that boss damage so the wave clears reliably.
+  const p = state.player;
+  let bossDamage = 0;
+  for(const e of state.enemies){
+    if(e.dead) continue;
+    if(e.kind === 'boss'){
+      bossDamage = Math.ceil(e.maxHp * ULT_DAMAGE_PCT);
+      damageEnemy(e, bossDamage);
+    }
+  }
+  const mobDamage = Math.max(80, bossDamage > 0 ? bossDamage : (p ? Math.ceil(p.damage * 30) : 200));
+  for(const e of state.enemies){
+    if(e.dead || e.kind === 'boss') continue;
+    damageEnemy(e, mobDamage);
+  }
+  // Fire-from-eyes particle burst that radiates outward from the pigeon.
+  if(p){
+    for(let i=0;i<48;i++){
+      const a = Math.random()*Math.PI*2;
+      const sp = 220 + Math.random()*260;
+      state.particles.push({
+        x: p.x, y: p.y - 18,
+        vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
+        life: 0.9, maxLife: 0.9,
+        color: i%3===0 ? '#FFE066' : i%3===1 ? '#FF6B6B' : '#FF8C00',
+        size: 4 + Math.random()*4,
+      });
+    }
+  }
+  state.toastBanner = { text:'🐦‍🔥 비둘기의 외침 — 구구!!!', sub:'적 전체에게 화염 피해', t:1.6, maxT:1.6 };
+  updateUltButton();
+}
+
 function updateHUD(){
   const p = state.player;
   document.getElementById('lvBadge').textContent = 'Lv '+p.level;
@@ -5480,6 +5778,8 @@ function updateHUD(){
     t = m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}초`;
   }
   document.getElementById('timerTxt').textContent = t;
+  // Refresh ult button each HUD tick — keeps the fill height in sync as kills accumulate.
+  updateUltButton();
 }
 
 // ---------- DOM toast banner ----------
@@ -7045,6 +7345,10 @@ function loop(ts){
   // Title pigeon — drawn separately into its own canvas so the player sees their equipped costumes
   // on the start screen. Drawing every frame keeps breath/blink/animations live.
   if(state.scene === 'title') drawTitlePigeonFrame();
+  // Skin preview pigeon — drawn live while the skin preview modal is visible, so the player
+  // sees a moving costumed pigeon overlaid on the candidate skin (matches the title-screen feel).
+  const spm = document.getElementById('skinPreviewModal');
+  if(spm && !spm.classList.contains('hidden')) drawSkinPreviewPigeonFrame();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -7145,6 +7449,7 @@ document.getElementById('scNext').addEventListener('click', ()=>{
   showLevelUp();
 });
 document.getElementById('pauseBtn').addEventListener('click', togglePause);
+document.getElementById('ultBtn').addEventListener('click', () => doUltimate());
 document.getElementById('resumeBtn').addEventListener('click', togglePause);
 document.getElementById('quitBtn').addEventListener('click', ()=>{ document.getElementById('pauseModal').classList.add('hidden'); backToTitle(); });
 document.getElementById('quitToChapterBtn').addEventListener('click', ()=>{
@@ -7191,12 +7496,16 @@ function renderCostumePreview(canvas, eq, size){
   if(!def) return;
   const cx = size/2, cy = size/2;
   if(def.slot === 'head'){
-    // Head overlay translates internally to (px, py + (-22)*scale). To center the cosume in the
-    // canvas we offset py so the costume's anchor lands at canvas mid.
-    const scale = size / 50;
-    drawCostumeHeadOverlay(c, cx, cy + 16*scale, scale, eq);
+    // Head costumes draw between local y=-30 (top of sparkles) and y=2 (cap bottom). Visual
+    // center sits near local y=-14. drawCostumeHeadOverlay applies hy = py + (-22)*scale, so
+    // we pass py such that the costume's visual center lands at canvas mid:
+    //   hy = cy + 14*scale  →  py = cy + 36*scale
+    // Slightly tighter scale (size/56) keeps S-grade (×1.30 tier scale) within frame.
+    const scale = size / 56;
+    drawCostumeHeadOverlay(c, cx, cy + 36*scale, scale, eq);
   } else if(def.slot === 'body'){
-    // Body translates to (px, py + 10*scale). Offset py so body center sits at canvas mid.
+    // Body costume draws between local y=-28 and y=28; drawCostumeBodyOverlay applies
+    // cy_local = py + 10*scale. To center, pass py = cy - 10*scale (origin sits 10 above mid).
     const scale = size / 80;
     drawCostumeBodyOverlay(c, cx, cy - 10*scale, scale, eq);
   } else {
@@ -7474,7 +7783,8 @@ function openCostumePreviewModal(defId, grade, slot){
 }
 
 // Open the skin preview modal — shows the title screen background as it would appear, with
-// a buy/equip action at the bottom. Players see what they're paying for before committing.
+// a buy/equip action at the bottom. Players see what they're paying for, INCLUDING how their
+// currently equipped costumes look against the skin, before committing.
 function openSkinPreviewModal(skinId){
   const skin = TITLE_SKINS_BY_ID[skinId]; if(!skin) return;
   const owned = (progress.ownedSkins||[]).includes(skin.id);
@@ -7656,7 +7966,9 @@ function renderSkinShop(){
   const sc = document.getElementById('shopCoinTxt');
   if(sc) sc.textContent = (progress.coins||0).toLocaleString();
   grid.innerHTML = '';
-  for(const skin of TITLE_SKINS){
+  // Sort by price ascending so cheaper skins appear first; equal-price ties keep declaration order.
+  const sortedSkins = TITLE_SKINS.slice().sort((a, b) => (a.price || 0) - (b.price || 0));
+  for(const skin of sortedSkins){
     const owned = (progress.ownedSkins||[]).includes(skin.id);
     const equipped = progress.skin === skin.id;
     const canAfford = (progress.coins||0) >= skin.price;
