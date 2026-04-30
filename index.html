@@ -396,9 +396,26 @@
   #feedBubbleBtn .fb-text{font-size:11px;color:#9A4A07;}
   #feedBubbleBtn:hover{transform:translateY(-2px);}
   #feedBubbleBtn:active{transform:translateY(2px);box-shadow:0 0 0 rgba(0,0,0,.35);}
-  /* Speech tail pointing left at the pigeon. Outer (border) layer first, then inner fill. */
-  #feedBubbleBtn::before{content:'';position:absolute;left:-12px;top:18px;width:0;height:0;border:9px solid transparent;border-right-color:#FFD43B;}
-  #feedBubbleBtn::after{content:'';position:absolute;left:-8px;top:20px;width:0;height:0;border:7px solid transparent;border-right-color:#FFF9DB;}
+  /* Speech tail pointing LEFT at the pigeon. Border-only triangles (no border-left) so the
+     entire triangle sits OUTSIDE the bubble's left edge — apex on the far left, base flush with
+     bubble's left edge. Earlier `border:9px transparent` also set border-left:9px which pushed
+     half the triangle inside the bubble (looked like a tail "stuck inside" the rectangle). */
+  #feedBubbleBtn::before{
+    content:''; position:absolute;
+    left:-13px; top:18px;
+    width:0; height:0;
+    border-top:9px solid transparent;
+    border-bottom:9px solid transparent;
+    border-right:13px solid #FFD43B;   /* outer rim */
+  }
+  #feedBubbleBtn::after{
+    content:''; position:absolute;
+    left:-9px; top:21px;                /* slight inset so yellow rim shows on the apex */
+    width:0; height:0;
+    border-top:6px solid transparent;
+    border-bottom:6px solid transparent;
+    border-right:9px solid #FFF9DB;    /* inner fill matches bubble background */
+  }
   /* Subtle attention pulse so the button doesn't get missed on first sight. */
   @keyframes feedBubblePulse{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.35), 0 0 0 rgba(255,224,102,.7);}50%{box-shadow:0 4px 0 rgba(0,0,0,.35), 0 0 18px rgba(255,224,102,.7);}}
   #feedBubbleBtn{animation:feedBubblePulse 2.4s infinite;}
@@ -561,6 +578,7 @@
         <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">비둘기 광장</span></div>
         <div class="panel">웨이브 <span id="waveNum">1</span> / 3</div>
         <div class="panel" id="timerPanel">⏱ <span id="timerTxt">60</span></div>
+        <div class="panel hidden" id="hudHungerPanel"><span id="hudHungerTxt"></span></div>
         <div class="panel">⭐ <span id="scoreTxt">0</span></div>
         <div class="panel">💀 <span id="killsTxt">0</span></div>
         <div class="panel" style="color:#FFD43B;">🪙 <span id="hudCoinTxt">0</span></div>
@@ -1494,32 +1512,41 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
     }
     ctx.restore();
   } else if(hungerState === 'starving'){
-    // Starving — sunken dark socket, tiny pupil, drooping closed-curve "x_x" feel.
-    // Dark hollow ring around the eye area
+    // Starving — pronounced dark socket, drooping closed-curve x_x eye, tear streak.
+    // Visual is amplified vs v1 so it reads at game-camera scale, not just zoomed previews.
+    // Dark hollow ring (bigger + darker)
+    ctx.fillStyle = 'rgba(20,8,8,0.85)';
+    ctx.beginPath(); ctx.arc(-4, -26, 7, 0, Math.PI*2); ctx.fill();
+    // Heavy upper eyelid — thick black arc covering most of the eye
+    ctx.strokeStyle='#000'; ctx.lineWidth=3; ctx.lineCap='round';
+    ctx.beginPath(); ctx.arc(-4, -25, 4.6, Math.PI*0.95, Math.PI*0.05, true); ctx.stroke();
+    // Tiny dim dot of an iris
+    ctx.fillStyle = '#1A0808';
+    ctx.beginPath(); ctx.arc(-4, -25, 1.4, 0, Math.PI*2); ctx.fill();
+    // Tear streak running down the cheek
+    ctx.fillStyle = 'rgba(116,192,252,0.85)';
+    ctx.beginPath(); ctx.ellipse(-2.5, -18, 1.2, 2.2, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-2, -14, 0.9, 1.6, 0, 0, Math.PI*2); ctx.fill();
+    // Sweat drop on forehead (anime-style "exhausted" cue)
+    ctx.fillStyle = 'rgba(160,210,255,0.85)';
+    ctx.beginPath(); ctx.ellipse(6, -32, 1.6, 2.6, 0, 0, Math.PI*2); ctx.fill();
+  } else if(hungerState === 'hungry'){
+    // Hungry — droopy half-closed eye, dark eye bag.
+    // Dark socket (smaller than starving)
     ctx.fillStyle = 'rgba(40,15,15,0.55)';
     ctx.beginPath(); ctx.arc(-4, -26, 5.5, 0, Math.PI*2); ctx.fill();
-    // Half-closed lid (drawn as a thick top arc covering most of the eye)
-    ctx.strokeStyle='#000'; ctx.lineWidth=2; ctx.lineCap='round';
-    ctx.beginPath(); ctx.arc(-4, -25, 4.2, Math.PI*0.85, Math.PI*0.15, true); ctx.stroke();
-    // Tiny dim pupil — barely there
-    ctx.fillStyle = '#3A2222';
-    ctx.beginPath(); ctx.arc(-4, -25, 1.2, 0, Math.PI*2); ctx.fill();
-    // Tear streak below eye
-    ctx.fillStyle = 'rgba(116,192,252,0.6)';
-    ctx.beginPath(); ctx.ellipse(-3, -19, 0.8, 1.6, 0, 0, Math.PI*2); ctx.fill();
-  } else if(hungerState === 'hungry'){
-    // Hungry — droopy half-closed eye with a sad gleam. Eyebrow handled below.
+    // Pupil moved DOWN (looks tired, drooping)
     ctx.fillStyle='#000';
-    ctx.beginPath(); ctx.arc(-4, -25, 2.4, 0, Math.PI*2); ctx.fill();
-    // Lower eyelid — partial cover from below
-    ctx.strokeStyle='#000'; ctx.lineWidth=1.8; ctx.lineCap='round';
-    ctx.beginPath(); ctx.arc(-4, -24.5, 3.2, 0.05, Math.PI - 0.05, false); ctx.stroke();
-    // Small white catchlight (smaller than normal — less alert)
-    ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.arc(-3, -26, 0.7, 0, Math.PI*2); ctx.fill();
-    // Faint shadow under eye
-    ctx.fillStyle = 'rgba(40,15,15,0.30)';
-    ctx.beginPath(); ctx.ellipse(-4, -22, 4, 1.2, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-4, -24.5, 2.6, 0, Math.PI*2); ctx.fill();
+    // Heavy lower eyelid covering bottom of eye
+    ctx.strokeStyle='#000'; ctx.lineWidth=2.4; ctx.lineCap='round';
+    ctx.beginPath(); ctx.arc(-4, -24, 3.6, 0.05, Math.PI - 0.05, false); ctx.stroke();
+    // Tiny dim catchlight
+    ctx.fillStyle='rgba(255,255,255,0.6)';
+    ctx.beginPath(); ctx.arc(-3, -25.5, 0.5, 0, Math.PI*2); ctx.fill();
+    // Eye bag — visible dark crescent under the eye
+    ctx.fillStyle = 'rgba(70,40,30,0.55)';
+    ctx.beginPath(); ctx.ellipse(-4, -21, 4.5, 1.4, 0, 0, Math.PI*2); ctx.fill();
   } else if(hungerState === 'glow'){
     // Glow — bright sparkly eye with golden rays + extra highlights. Eyebrow stays fierce below.
     ctx.save();
@@ -6193,6 +6220,21 @@ function updateHUD(){
   document.getElementById('timerTxt').textContent = t;
   // Refresh ult button each HUD tick — keeps the fill height in sync as kills accumulate.
   updateUltButton();
+  // Hunger pill — show in HUD only if pigeon is NOT in the default normal state, so the player
+  // sees the active modifier at a glance during play.
+  const hungerPanel = document.getElementById('hudHungerPanel');
+  const hungerTxt = document.getElementById('hudHungerTxt');
+  if(hungerPanel && hungerTxt){
+    const hs = (p && p.hungerState) || 'normal';
+    if(hs === 'normal'){
+      hungerPanel.classList.add('hidden');
+    } else {
+      hungerPanel.classList.remove('hidden');
+      const m = getPigeonStatMods();
+      hungerPanel.style.color = m.color;
+      hungerTxt.textContent = m.label + '  공×' + m.dmg.toFixed(2);
+    }
+  }
 }
 
 // ---------- DOM toast banner ----------
