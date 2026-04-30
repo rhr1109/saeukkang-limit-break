@@ -122,16 +122,19 @@
   .hud-btn{position:absolute;width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;color:#FFE066;font-size:18px;font-weight:900;pointer-events:auto;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;z-index:7;}
   /* 비둘기의 외침 ultimate button — bigger, sits center-bottom on PC and just above the joystick on mobile.
      Charge fill grows from bottom; when ready a pulsing yellow glow + 외침! label invites the click. */
-  #ultBtn{position:absolute;width:84px;height:84px;border-radius:50%;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);background:linear-gradient(180deg,rgba(40,8,50,.85),rgba(8,2,18,.92));border:3px solid #5C3A6E;color:#fff;font-weight:900;font-family:inherit;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:auto;z-index:7;box-shadow:0 4px 0 rgba(0,0,0,.45);overflow:hidden;}
+  #ultBtn{position:absolute;width:96px;height:96px;border-radius:50%;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);background:linear-gradient(180deg,rgba(40,8,50,.85),rgba(8,2,18,.92));border:3px solid #5C3A6E;color:#fff;font-weight:900;font-family:inherit;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;pointer-events:auto;z-index:7;box-shadow:0 4px 0 rgba(0,0,0,.45);overflow:hidden;}
   #ultBtn .ult-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(255,107,107,.45),rgba(255,224,102,.7));pointer-events:none;transition:height .12s ease-out;}
-  #ultBtn .ult-icon{font-size:28px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6));position:relative;}
-  #ultBtn .ult-label{position:relative;font-size:10px;color:#FFE066;text-shadow:0 1px 0 rgba(0,0,0,.6);}
+  #ultBtn .ult-icon{font-size:32px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6));position:relative;line-height:1;}
+  #ultBtn .ult-label{position:relative;font-size:14px;color:#FFE066;text-shadow:0 1px 0 rgba(0,0,0,.6),0 0 6px rgba(0,0,0,.4);letter-spacing:-.3px;}
   #ultBtn.ready{border-color:#FFE066;animation:ultPulse 1.1s infinite;box-shadow:0 0 20px rgba(255,224,102,.7),0 4px 0 rgba(0,0,0,.45);}
-  #ultBtn.ready .ult-label{color:#FFF9DB;}
+  #ultBtn.ready .ult-label{color:#FFF9DB;font-size:15px;}
   #ultBtn.used{opacity:.45;cursor:default;border-color:#444;}
   @keyframes ultPulse{ 0%,100%{ box-shadow:0 0 12px rgba(255,224,102,.55),0 4px 0 rgba(0,0,0,.45); } 50%{ box-shadow:0 0 28px rgba(255,224,102,.9),0 4px 0 rgba(0,0,0,.45); } }
   @media (min-width:768px){
-    #ultBtn{ left:auto; right:24px; bottom:24px; transform:none; width:96px; height:96px; }
+    #ultBtn{ left:auto; right:24px; bottom:24px; transform:none; width:108px; height:108px; font-size:15px; }
+    #ultBtn .ult-icon{ font-size:36px; }
+    #ultBtn .ult-label{ font-size:15px; }
+    #ultBtn.ready .ult-label{ font-size:17px; }
   }
   /* Vertical stack on left side — joystick lives on the right, action buttons go opposite.
      Pause sits on top (most-used) and mute below; quitting goes through the pause menu so
@@ -764,9 +767,9 @@
         <span style="opacity:.85;">적이 강해지고 새로운 종류가 등장합니다. 레벨과 업그레이드는 초기화되어 새 빌드를 짜게 됩니다.</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button class="btn" id="ccNextBtn">⚔ 다음 챕터 도전 ▶</button>
+        <button class="btn" id="ccNextDirectBtn">⚔ 다음 챕터 바로 도전 ▶</button>
+        <button class="btn alt" id="ccNextBtn">🗺 챕터 선택으로</button>
         <button class="btn alt" id="ccHomeBtn">🏠 홈으로</button>
-        <button class="btn alt small" id="ccEndBtn">여기서 마무리하고 기록 보기</button>
       </div>
     </div>
   </div>
@@ -4274,11 +4277,12 @@ function spawnBoss(){
   const v = BOSS_VARIANTS[variant];
   b.bossVariant = variant;
   b.bossLabel = v.label;
-  // Base HP grows with chapter (700 + c^1.45 × 110) × chapterMult, then scaled by variant.
-  // Tuned so a clean run with shop maxed + chapter starting buff + 비둘기의 외침 ult takes
-  // ~30s of active fighting (the ult wipes a chunk; the rest is sustained DPS). Earlier
-  // formula was (220 + c^1.45×46) — bosses popped in <10s.
-  b.hp = b.maxHp = Math.ceil((700 + Math.pow(c, 1.45)*110) * chm.hp * v.hpMult);
+  // Base HP grows with chapter (1100 + c^1.45 × 130) × chapterMult, then scaled by variant.
+  // Tuned so a 5-card mid-build at the chapter's expected level + 비둘기의 외침 ult lands
+  // around the 30-second mark on the boss. Earlier formula (700, 110) finished in ~20s,
+  // and the original (220, 46) popped in <10s. The ult deletes ~30% so the floor without
+  // ult is roughly 45-50s of dodging — well above the user's "최소 30초" target.
+  b.hp = b.maxHp = Math.ceil((1100 + Math.pow(c, 1.45)*130) * chm.hp * v.hpMult);
   b.speed = (52 + c*2.2) * chm.speed;
   b.damage = Math.ceil((14 + c*1.8) * chm.dmg * v.dmgMult);
   b.size = 2.9 * v.sizeMult;
@@ -7433,11 +7437,17 @@ document.getElementById('ccHomeBtn').addEventListener('click', ()=>{
   document.getElementById('chapterCleared').classList.add('hidden');
   backToTitle();
 });
-document.getElementById('ccEndBtn').addEventListener('click', ()=>{
+// Direct next-chapter — skip chapter select, drop straight into the next chapter.
+document.getElementById('ccNextDirectBtn').addEventListener('click', ()=>{
   document.getElementById('chapterCleared').classList.add('hidden');
-  state.scene = 'victory';
-  renderVictory();
-  document.getElementById('victory').classList.remove('hidden');
+  if(state.chapter >= MAX_CHAPTERS){
+    // Final chapter cleared — ultimate victory
+    state.scene = 'victory';
+    renderVictory();
+    document.getElementById('victory').classList.remove('hidden');
+    return;
+  }
+  startGame(state.chapter + 1);
 });
 document.getElementById('scNext').addEventListener('click', ()=>{
   document.getElementById('stageCleared').classList.add('hidden');
@@ -7496,21 +7506,23 @@ function renderCostumePreview(canvas, eq, size){
   if(!def) return;
   const cx = size/2, cy = size/2;
   if(def.slot === 'head'){
-    // Head costumes draw between local y=-30 (top of sparkles) and y=2 (cap bottom). Visual
-    // center sits near local y=-14. drawCostumeHeadOverlay applies hy = py + (-22)*scale, so
-    // we pass py such that the costume's visual center lands at canvas mid:
-    //   hy = cy + 14*scale  →  py = cy + 36*scale
-    // Slightly tighter scale (size/56) keeps S-grade (×1.30 tier scale) within frame.
-    const scale = size / 56;
-    drawCostumeHeadOverlay(c, cx, cy + 36*scale, scale, eq);
+    // Head costumes draw between local y≈-37 (top of S-tier wings/orbs/crown points) and y=2
+    // (cap bottom). Visual center sits near local y=-18. drawCostumeHeadOverlay applies
+    // hy = py + (-22)*scale, so we pass py = cy + 22*scale + 16*scale = cy + 38*scale
+    // (origin lands at cy + 16*scale → costume fills the canvas centered).
+    // size/74 keeps even S-grade (×1.30 scale) flourishes inside the canvas frame.
+    const scale = size / 74;
+    drawCostumeHeadOverlay(c, cx, cy + 38*scale, scale, eq);
   } else if(def.slot === 'body'){
     // Body costume draws between local y=-28 and y=28; drawCostumeBodyOverlay applies
     // cy_local = py + 10*scale. To center, pass py = cy - 10*scale (origin sits 10 above mid).
-    const scale = size / 80;
+    // size/90 leaves a small margin so the dragon S wing tips (out to ±40) fit.
+    const scale = size / 90;
     drawCostumeBodyOverlay(c, cx, cy - 10*scale, scale, eq);
   } else {
-    // Single weapon — draw one fist's worth, centered.
-    const scale = size / 38;
+    // Single weapon — draw one fist's worth, centered. size/46 keeps S-tier outer rings/petals
+    // (extend to ~22 from center) inside the canvas after ×1.30 tier scaling.
+    const scale = size / 46;
     drawWeaponCostumeAt(c, cx, cy, scale, eq);
   }
 }
@@ -8299,15 +8311,20 @@ function renderChapterCleared(){
   const nextCh = state.chapter + 1;
   const atCap = state.chapter >= MAX_CHAPTERS;
   const nextName = atCap ? null : chapterName(nextCh);
+  const directBtn = document.getElementById('ccNextDirectBtn');
   const nextBtn = document.getElementById('ccNextBtn');
   const nextLabelEl = document.getElementById('ccNextLabel');
   document.getElementById('ccSub').textContent = `Ch.${state.chapter} 《${chapterName(state.chapter)}》 정복!`;
   if(atCap){
+    // Final chapter cleared — direct button becomes the ending route, hide the chapter-select option.
     nextLabelEl.parentElement.style.display = 'none';
-    nextBtn.textContent = '🏆 최종 엔딩 보기 ▶';
+    directBtn.textContent = '🏆 최종 엔딩 보기 ▶';
+    nextBtn.style.display = 'none';
   } else {
     nextLabelEl.parentElement.style.display = '';
-    nextBtn.textContent = '🗺 챕터 선택으로 ▶';
+    directBtn.textContent = `⚔ 다음 챕터 바로 도전 — Ch.${nextCh} ▶`;
+    nextBtn.style.display = '';
+    nextBtn.textContent = '🗺 챕터 선택으로';
     // Show next-chapter scaling pulled from the actual chapterMult formula instead of a stale formula.
     const oldCh = state.chapter; state.chapter = nextCh;
     const chm = chapterMult();
