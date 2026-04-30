@@ -4147,11 +4147,14 @@ const FEEDS = [
 const FEEDS_BY_ID = Object.fromEntries(FEEDS.map(f => [f.id, f]));
 
 // 5-state hunger / boost machine. Boost has priority over hunger (eating premium also resets timer).
+// Endgame perk: once the player has cleared the final chapter (full ending seen), the pigeon
+// never gets hungry/starving again — only boost states can apply on top of permanent normal.
 function getPigeonHungerState(){
   const now = Date.now();
   if(progress.feedBoostUntil > now){
     return progress.feedBoostStrength >= 2 ? 'glow' : 'boosted';
   }
+  if((progress.clearedChapter || 0) >= MAX_CHAPTERS) return 'normal';
   const since = now - (progress.lastFedAt || now);
   const hours = since / (1000*60*60);
   if(hours >= 24) return 'starving';
@@ -7991,6 +7994,7 @@ function formatTimeSince(ms){
 function updateTitleHungerBadge(){
   const el = document.getElementById('titleHungerBadge');
   const state = getPigeonHungerState();
+  const endingCleared = (progress.clearedChapter || 0) >= MAX_CHAPTERS;
   if(el){
     el.className = 'hunger-badge ' + state;
     el.textContent =
@@ -7998,6 +8002,7 @@ function updateTitleHungerBadge(){
       state === 'boosted'  ? '⚡ 기운 넘쳐요' :
       state === 'starving' ? '💀 굶주려요!' :
       state === 'hungry'   ? '😣 배고파요…' :
+      endingCleared        ? '🏆 영원한 정상' :
                              '🙂 정상';
   }
   const bubble = document.getElementById('feedBubbleBtn');
@@ -8016,13 +8021,16 @@ function openFeedModal(){
   const stateK = getPigeonHungerState();
   const since = Date.now() - (progress.lastFedAt || Date.now());
   const boostLeft = Math.max(0, (progress.feedBoostUntil || 0) - Date.now());
+  const endingCleared = (progress.clearedChapter || 0) >= MAX_CHAPTERS;
   const stat = `<div style="font-weight:900;color:${mods.color};font-size:16px;">${mods.label}</div>` +
     `<div style="font-size:12px;color:#DEE2E6;margin-top:4px;">` +
     `전투력: 공격 ×${mods.dmg.toFixed(2)} · HP ${mods.hp >= 0 ? '+' : ''}${mods.hp} · 연사 ×${mods.rate.toFixed(2)}` +
     `</div>` +
-    `<div style="font-size:11px;color:#868E96;margin-top:6px;">마지막 식사 — ${formatTimeSince(since)}` +
-    (boostLeft > 0 ? `<br>부스트 남은 시간 — ${formatTimeSince(boostLeft).replace(' 전','')}` : '') +
-    `</div>`;
+    (endingCleared && stateK === 'normal'
+      ? `<div style="font-size:11px;color:#FFD43B;margin-top:6px;font-weight:700;">🏆 전 챕터 정복 보너스 — 배고픔 면역!</div>`
+      : `<div style="font-size:11px;color:#868E96;margin-top:6px;">마지막 식사 — ${formatTimeSince(since)}` +
+        (boostLeft > 0 ? `<br>부스트 남은 시간 — ${formatTimeSince(boostLeft).replace(' 전','')}` : '') +
+        `</div>`);
   status.innerHTML = stat;
   // Feed cards
   grid.innerHTML = '';
