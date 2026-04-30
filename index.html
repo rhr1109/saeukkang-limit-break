@@ -4230,12 +4230,13 @@ function spawnEnemy(kind){
   const y = p.y + Math.sin(angle)*dist;
   const scale = 1 + (state.stage-1)*0.07;
   const chm = chapterMult();
-  // Density rebalance — spawn rate is ~2× higher than before, so per-mob HP/dmg/XP are scaled
-  // DOWN to keep total wave damage and XP close to the previous curve while making each kill
-  // feel snappy (탕탕특공대 hit-feedback). Boss balance is handled separately in spawnBoss.
+  // Density rebalance — spawn rate is ~2× higher than before. Per-mob HP/dmg are scaled DOWN
+  // for snappy 탕탕특공대 hit-feedback. Per-mob XP keeps the old base value here; the gem
+  // creation step multiplies gem.value by GEM_XP_SCALE (0.47) so total wave XP stays close
+  // to the pre-density curve. (Scaling e.xp directly would have been clamped by Math.max(1,...)
+  // and overshot the old totals by ~13%.)
   const ENEMY_HP_MULT = 0.65;
   const ENEMY_DMG_MULT = 0.75;
-  const ENEMY_XP_MULT = 0.50;
   const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT));
   const e = {
     x, y, vx:0, vy:0, kind,
@@ -4244,7 +4245,7 @@ function spawnEnemy(kind){
     damage: Math.max(1, Math.ceil(def.dmg * chm.dmg * ENEMY_DMG_MULT)),
     size: def.size,
     score: Math.ceil(def.score * chm.score),
-    xp: Math.max(1, Math.ceil(def.xp * chm.xp * ENEMY_XP_MULT)),
+    xp: Math.max(1, Math.ceil(def.xp * chm.xp)),
     hitT: 0,
     walkPhase: Math.random()*Math.PI*2,
     collideRadius: 18*def.size,
@@ -4292,12 +4293,15 @@ function spawnBoss(){
   const v = BOSS_VARIANTS[variant];
   b.bossVariant = variant;
   b.bossLabel = v.label;
-  // Base HP grows with chapter (1100 + c^1.45 × 130) × chapterMult, then scaled by variant.
-  // Tuned so a 5-card mid-build at the chapter's expected level + 비둘기의 외침 ult lands
-  // around the 30-second mark on the boss. Earlier formula (700, 110) finished in ~20s,
-  // and the original (220, 46) popped in <10s. The ult deletes ~30% so the floor without
-  // ult is roughly 45-50s of dodging — well above the user's "최소 30초" target.
-  b.hp = b.maxHp = Math.ceil((1100 + Math.pow(c, 1.45)*130) * chm.hp * v.hpMult);
+  // Base HP grows with chapter (3500 + c^1.45 × 110) × chapterMult, then scaled by variant.
+  // Re-tuned after restoring full per-mob XP — the player now reaches Lvl 15-17 with 14 cards
+  // picked by boss time (cumulative XP-to-L15 = 1180, ch1 wave total ≈ 1934), so realistic
+  // DPS at the boss is ~100 effective (3-4 dmg cards × 2-3 proj × 1.4 fireRate). 3500+ HP at
+  // ch1 lands a typical 14-card build + 외침 ult around 30s. Less-built runs go longer; the
+  // max-build sub-20s is the reward for an ideal pick string.
+  // Formula evolution: v0 (220, 46) <10s, v1 (700, 110) 20s, v2 (1100, 130) 30s for thin
+  // 5-card builds, v3 (3500, 110) 30s for the typical full-XP build.
+  b.hp = b.maxHp = Math.ceil((3500 + Math.pow(c, 1.45)*110) * chm.hp * v.hpMult);
   b.speed = (52 + c*2.2) * chm.speed;
   b.damage = Math.ceil((14 + c*1.8) * chm.dmg * v.dmgMult);
   b.size = 2.9 * v.sizeMult;
@@ -4700,7 +4704,10 @@ function killEnemy(e){
       grav: 180
     });
   }
-  // drop gems
+  // drop gems — gem.value is scaled by GEM_XP_SCALE so density × per-mob XP ≈ old wave totals.
+  // Old: rate 1.6/2.6/3.8 × full XP per mob. New: rate 3.6/5.6/8.0 × 0.47 ≈ same total per wave.
+  // We scale gem.value (fractional) instead of e.xp (would clamp at Math.max(1,...) and overshoot).
+  const GEM_XP_SCALE = 0.47;
   const xpDrop = e.xp||1;
   for(let i=0;i<Math.min(xpDrop,5);i++){
     const a = Math.random()*Math.PI*2;
@@ -4708,7 +4715,7 @@ function killEnemy(e){
     state.gems.push({
       x:e.x+Math.cos(a)*8, y:e.y+Math.sin(a)*8,
       vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
-      value: xpDrop/Math.min(xpDrop,5), life: 30
+      value: (xpDrop/Math.min(xpDrop,5)) * GEM_XP_SCALE, life: 30
     });
   }
   // Drop items (chance varies by enemy strength)
