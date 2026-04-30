@@ -133,19 +133,20 @@
   @keyframes ultPulse{ 0%,100%{ box-shadow:0 0 12px rgba(255,224,102,.55),0 4px 0 rgba(0,0,0,.45); } 50%{ box-shadow:0 0 28px rgba(255,224,102,.9),0 4px 0 rgba(0,0,0,.45); } }
   /* Touch / mobile — joystick lives bottom-right, so park the ult button DIRECTLY ABOVE it.
      Joystick: right clamp(20,7vw,48), width clamp(140,32vw,180). Center-x from right = clamp(90,23vw,138).
-     Ult is 96px wide → right = joystick_center - 48 ≈ clamp(42,23vw-48,90).
+     Ult is 78px wide on mobile (was 96px — user feedback "좀만 크기 줄여줘")
+       → right = joystick_center - 39 ≈ clamp(51,23vw-39,99).
      Joystick top from bottom = clamp(164,40vw,232). Add ~12px gap → clamp(176,40vw+12,244). */
   body.touch #ultBtn{
-    width:96px;
-    height:96px;
-    font-size:14px;
+    width:78px;
+    height:78px;
+    font-size:12px;
     left:auto;
-    right:clamp(42px, calc(23vw - 48px), 90px);
+    right:clamp(51px, calc(23vw - 39px), 99px);
     bottom:calc(env(safe-area-inset-bottom, 0px) + clamp(176px, calc(40vw + 12px), 244px));
   }
-  body.touch #ultBtn .ult-icon{ font-size:32px; }
-  body.touch #ultBtn .ult-label{ font-size:14px; }
-  body.touch #ultBtn.ready .ult-label{ font-size:15px; }
+  body.touch #ultBtn .ult-icon{ font-size:26px; }
+  body.touch #ultBtn .ult-label{ font-size:12px; }
+  body.touch #ultBtn.ready .ult-label{ font-size:13px; }
   /* Vertical stack on left side — joystick lives on the right, action buttons go opposite.
      Pause sits on top (most-used) and mute below; quitting goes through the pause menu so
      there is no rogue ✕ next to the joystick that fires a confirm() on accidental taps. */
@@ -931,12 +932,37 @@ function sfxShuriken(){ beep(1500,.025,'square',.10,-600); setTimeout(()=>beep(2
 function sfxBoomerang(){ noise(.07,.10); beep(280,.18,'sawtooth',.16,-90); }
 function sfxMissile(){ noise(.12,.14); beep(160,.22,'sawtooth',.20,260); setTimeout(()=>beep(80,.18,'sawtooth',.18,80),60); }
 // "구구" cooing — two soft round notes with a quick warble. Quiet so it sits behind action SFX.
-function sfxCoo(){
+// Pigeon "구구" coo — two-syllable warm vocalization.
+//   • Sine fundamental + faint 2× overtone gives a throaty body (real pigeons coo around 380-440Hz).
+//   • Each syllable starts with a small downward pitch sweep then settles, mimicking the
+//     throat warble. Triangle tail at the end of each syllable adds the breathy "ooo" finish.
+//   • `withEcho=true` layers 3 delayed, lowered-pitch quieter copies — simulates a covered/echoed
+//     space. Used during gameplay to differentiate from the dry title-screen call.
+function sfxCoo(withEcho){
   if(!audioCtx || muted) return;
-  // Two-syllable coo: low warm tone then slightly higher echo.
-  beep(420, .18, 'sine', .14, -60);
-  beep(380, .12, 'triangle', .08, -40);
-  setTimeout(()=>{ beep(460, .16, 'sine', .12, -80); beep(420, .10, 'triangle', .07, -50); }, 220);
+  const v = withEcho ? 0.18 : 0.16;
+  // Syllable 1 — "coo" (lower pitch, longer)
+  beep(380, .26, 'sine', v, -110);                                 // body
+  beep(760, .18, 'sine', v*0.18, -110);                            // overtone 2×
+  setTimeout(()=>beep(340, .14, 'triangle', v*0.55, 80), 90);      // breathy tail
+  // Syllable 2 — "coo" (slightly higher, snappier)
+  setTimeout(()=>{
+    beep(440, .22, 'sine', v*0.92, -80);
+    beep(880, .15, 'sine', v*0.16, -80);
+    setTimeout(()=>beep(400, .12, 'triangle', v*0.50, 80), 80);
+  }, 280);
+  if(withEcho){
+    // Echo trail — lower pitch, quieter, spaced out (room reverb feel)
+    setTimeout(()=>{
+      beep(340, .28, 'sine', v*0.50, -80);
+      beep(680, .18, 'sine', v*0.10, -80);
+    }, 460);
+    setTimeout(()=>{
+      beep(380, .24, 'sine', v*0.42, -70);
+      beep(760, .14, 'sine', v*0.07, -70);
+    }, 700);
+    setTimeout(()=>beep(310, .34, 'sine', v*0.22, -50), 960);     // distant fade
+  }
 }
 
 // BGM — per-chapter chord progressions. Tier character (wave/vol) is preserved,
@@ -1308,37 +1334,67 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
     ctx.strokeStyle='#000'; ctx.lineWidth=1.8; ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
   } else if(ultFlash > 0){
-    // Ultimate active — eyes blaze with fire that streams forward in a thick cone.
-    const intensity = ultFlash; // 0..1
+    // Ultimate active — eyes BLAZE with fire that streams forward in a long, thick cone.
+    // Fire jets are way bigger / brighter than the v1 effect so the user feels the impact.
+    const intensity = Math.min(1.0, ultFlash); // 0..1 (clamped even when ultFlashT>1.0)
+    // Glowing eye core — multi-layer for hot center
+    ctx.fillStyle = '#FFF9DB';
+    ctx.beginPath(); ctx.arc(-4, -26, 5.0, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#FFE066';
     ctx.beginPath(); ctx.arc(-4, -26, 3.5, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#FF6B6B';
     ctx.beginPath(); ctx.arc(-4, -26, 2, 0, Math.PI*2); ctx.fill();
-    // Forward fire jet
+    // Outer glow halo around the eye (3× radius, faint)
     ctx.save();
-    ctx.globalAlpha = 0.85 * intensity;
+    ctx.globalAlpha = 0.6 * intensity;
+    ctx.fillStyle = '#FFA94D';
+    ctx.beginPath(); ctx.arc(-4, -26, 14 * intensity, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+    // Forward fire jet — much longer and wider than v1
+    ctx.save();
+    ctx.globalAlpha = 0.92 * intensity;
+    // Outer red flame (widest, biggest)
+    ctx.fillStyle = '#C92A2A';
+    ctx.beginPath();
+    ctx.moveTo(-2, -32);
+    ctx.lineTo(50 + intensity*42, -38);
+    ctx.lineTo(72 + intensity*54, -26);
+    ctx.lineTo(50 + intensity*42, -14);
+    ctx.lineTo(-2, -20);
+    ctx.closePath(); ctx.fill();
+    // Mid orange flame
     ctx.fillStyle = '#FF6B00';
     ctx.beginPath();
-    ctx.moveTo(-2, -28);
-    ctx.lineTo(28 + intensity*16, -30);
-    ctx.lineTo(40 + intensity*22, -26);
-    ctx.lineTo(28 + intensity*16, -22);
-    ctx.lineTo(-2, -24);
+    ctx.moveTo(-2, -30);
+    ctx.lineTo(42 + intensity*32, -34);
+    ctx.lineTo(60 + intensity*44, -26);
+    ctx.lineTo(42 + intensity*32, -18);
+    ctx.lineTo(-2, -22);
     ctx.closePath(); ctx.fill();
+    // Inner yellow core
     ctx.fillStyle = '#FFE066';
     ctx.beginPath();
+    ctx.moveTo(-2, -29);
+    ctx.lineTo(30 + intensity*22, -30);
+    ctx.lineTo(46 + intensity*30, -26);
+    ctx.lineTo(30 + intensity*22, -22);
+    ctx.lineTo(-2, -23);
+    ctx.closePath(); ctx.fill();
+    // White-hot inner streak
+    ctx.fillStyle = '#FFF9DB';
+    ctx.beginPath();
     ctx.moveTo(-2, -27);
-    ctx.lineTo(20 + intensity*10, -28);
-    ctx.lineTo(30 + intensity*14, -26);
-    ctx.lineTo(20 + intensity*10, -24);
+    ctx.lineTo(20 + intensity*14, -28);
+    ctx.lineTo(32 + intensity*20, -26);
+    ctx.lineTo(20 + intensity*14, -24);
     ctx.lineTo(-2, -25);
     ctx.closePath(); ctx.fill();
-    // Spark sparkles in front of the muzzle
-    for(let i=0;i<3;i++){
-      const sx = 18 + Math.random()*22;
-      const sy = -28 + Math.random()*4;
-      ctx.fillStyle = '#FFF9DB';
-      ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI*2); ctx.fill();
+    // Spark sparkles fly out in front of the muzzle (lots more than v1)
+    for(let i=0;i<8;i++){
+      const sx = 24 + Math.random()*48;
+      const sy = -34 + Math.random()*16;
+      ctx.fillStyle = i%2===0 ? '#FFF9DB' : '#FFE066';
+      ctx.beginPath(); ctx.arc(sx, sy, 1.6 + Math.random()*1.4, 0, Math.PI*2); ctx.fill();
     }
     ctx.restore();
   } else {
@@ -3967,7 +4023,8 @@ const state = {
   earnedCostumeThisChapter: null,  // populated when the chapter-clear drop fires
   ultCharge: 0,                    // 0..ULT_MAX — fills via kills, enables 비둘기의 외침
   ultUsed: false,                  // true after the ult fires; reset per chapter
-  ultFlashT: 0,                    // 0..1 — fire-from-eyes overlay decay timer
+  ultFlashT: 0,                    // 0..1.6 — fire-from-eyes overlay decay timer
+  ultScreenFlash: 0,               // 0..0.55 — full-screen white-hot flash decay timer
   camera: {x:0,y:0, shake:0},
   player: null,
   enemies: [],
@@ -4076,6 +4133,7 @@ function initChapter(){
   state.ultCharge = 0;
   state.ultUsed = false;
   state.ultFlashT = 0;
+  state.ultScreenFlash = 0;
   updateUltButton();
 }
 // Legacy shim — older code paths still call initStage(). Routes to initChapter for the wave system.
@@ -5037,18 +5095,21 @@ function update(dt){
   if(state.cooFlash > 0) state.cooFlash = Math.max(0, state.cooFlash - dt);
   // Ultimate fire-from-eyes overlay decay — drives the eye-beam VFX in drawPigeon.
   if(state.ultFlashT > 0) state.ultFlashT = Math.max(0, state.ultFlashT - dt);
+  // Ultimate full-screen flash decay — fades quickly (≈0.55s).
+  if(state.ultScreenFlash > 0) state.ultScreenFlash = Math.max(0, state.ultScreenFlash - dt * 1.8);
   // Tick the global time clock for menu scenes too — the title pigeon, costume previews, and
   // shop screens use state.time for breathing/halo animation, so freezing it would lock them solid.
   // The gameplay simulation still bails below the early return for non-playing scenes.
   if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop'){
     state.time += dt;
     // Title-screen coo — every ~7s the title pigeon vocalizes (beak opens + sfx fires).
+    // Dry coo on title (no echo) so the start screen feels intimate.
     if(state.scene === 'title'){
       state._titleCooTimer = (state._titleCooTimer == null ? 3 : state._titleCooTimer) - dt;
       if(state._titleCooTimer <= 0){
         state._titleCooTimer = 7;
         state.cooFlash = 0.6;
-        sfxCoo();
+        sfxCoo(false);
       }
     }
     return;
@@ -5212,7 +5273,7 @@ function update(dt){
     state._cooTimer = 7 + Math.random()*7;
     const movingFast = Math.abs(p.vx) + Math.abs(p.vy) > 280;
     if(!state.bossSpawned && !movingFast && state.scene === 'playing'){
-      sfxCoo();
+      sfxCoo(true); // in-game coo with echo trail (room reverb feel)
       state.cooFlash = 0.5;
     }
   }
@@ -5730,16 +5791,32 @@ function doUltimate(){
   if(state.ultCharge < ULT_MAX) return;
   state.ultUsed = true;
   state.ultCharge = 0;
-  state.ultFlashT = 1.0; // drives the fire-from-eyes overlay (decays in update())
-  state.cooFlash = 1.2;  // long beak-open for the yell
-  state.camera.shake = Math.max(state.camera.shake, 36);
-  // Loud, lower-pitched coo so the ult reads as a roar instead of a passing chirp.
-  if(typeof sfxCoo === 'function') sfxCoo();
+  // Bigger / longer impact than v1 — user feedback "이팩트가 너무 약해서 더 강하게".
+  state.ultFlashT = 1.6;        // fire-from-eyes overlay duration (was 1.0s)
+  state.cooFlash = 1.6;         // beak stays wide-open longer for the roar (was 1.2)
+  state.ultScreenFlash = 0.55;  // bright white flash overlay (rendered in render())
+  state.camera.shake = Math.max(state.camera.shake, 64); // was 36 — earthshaking
+  // Layered SFX — echoed coo + deep rumble + impact crack + high sparkle.
+  if(typeof sfxCoo === 'function') sfxCoo(true);
   if(typeof beep === 'function'){
-    // Layer a deeper rumble + bright sparkle so it doesn't sound like a normal kill SFX.
-    beep(110, 0.6, 'sawtooth', 0.35, -160);
-    beep(220, 0.4, 'square', 0.18, -90);
-    beep(880, 0.25, 'triangle', 0.12, 240);
+    // Sub bass thump
+    beep(60,  0.95, 'sawtooth', 0.42, -200);
+    beep(90,  0.70, 'sawtooth', 0.34, -150);
+    // Crack/boom
+    if(typeof noise === 'function') noise(0.30, 0.55);
+    beep(180, 0.55, 'square',   0.26, -120);
+    beep(340, 0.40, 'square',   0.20,  -80);
+    // High sparkle / impact whistle
+    beep(1200, 0.30, 'triangle', 0.20,  320);
+    beep(1700, 0.22, 'triangle', 0.16,  260);
+    // Delayed echo — amplifies the meatiness
+    setTimeout(()=>{
+      beep(80,  0.55, 'sawtooth', 0.20, -120);
+      beep(280, 0.30, 'square',   0.14, -90);
+    }, 220);
+    setTimeout(()=>{
+      beep(120, 0.45, 'sawtooth', 0.14, -90);
+    }, 480);
   }
   // AOE damage — sweeps every enemy on screen. Bosses take ULT_DAMAGE_PCT of their max HP;
   // mobs take a flat amount equal to that boss damage so the wave clears reliably.
@@ -5757,21 +5834,59 @@ function doUltimate(){
     if(e.dead || e.kind === 'boss') continue;
     damageEnemy(e, mobDamage);
   }
-  // Fire-from-eyes particle burst that radiates outward from the pigeon.
+  // Visual layers:
+  //  1) Three concentric expanding shockwave rings (fire colors, staggered timings)
+  //  2) Dense outward particle burst (200 sparks across yellow/red/orange palette)
+  //  3) Forward eye-cone flame particles (player-aligned)
+  //  4) Inner pulse ring at the pigeon
   if(p){
-    for(let i=0;i<48;i++){
+    // Shockwave rings — white-hot center, then orange, then red trail
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.45, maxLife:.45, color:'#FFF9DB', size:520, grav:0, ring:true });
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.65, maxLife:.65, color:'#FFE066', size:380, grav:0, ring:true });
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:.85, maxLife:.85, color:'#FF6B00', size:240, grav:0, ring:true });
+    state.particles.push({ x:p.x, y:p.y, vx:0, vy:0, life:1.05, maxLife:1.05, color:'#C92A2A', size:140, grav:0, ring:true });
+    // Outward fire particle burst — much denser than before
+    for(let i=0;i<200;i++){
       const a = Math.random()*Math.PI*2;
-      const sp = 220 + Math.random()*260;
+      const sp = 240 + Math.random()*420;
+      const palette = ['#FFF9DB','#FFE066','#FFA94D','#FF6B6B','#FF8C00','#FF1744'];
       state.particles.push({
         x: p.x, y: p.y - 18,
         vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
-        life: 0.9, maxLife: 0.9,
-        color: i%3===0 ? '#FFE066' : i%3===1 ? '#FF6B6B' : '#FF8C00',
-        size: 4 + Math.random()*4,
+        life: 0.6 + Math.random()*0.7, maxLife: 1.3,
+        color: palette[i % palette.length],
+        size: 4 + Math.random()*7,
+      });
+    }
+    // Forward fire jet — particles streaming out the front of both eyes (direction = facing)
+    const facing = p.facing || 1;
+    for(let i=0;i<60;i++){
+      const baseAng = facing > 0 ? 0 : Math.PI;
+      const a = baseAng + (Math.random()-0.5) * 0.9; // ±0.45 rad cone
+      const sp = 360 + Math.random()*340;
+      const palette = ['#FFE066','#FFA94D','#FF6B00','#FFF9DB'];
+      state.particles.push({
+        x: p.x + Math.cos(a)*8, y: p.y - 26,
+        vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - 40,
+        life: 0.5 + Math.random()*0.45, maxLife: 0.95,
+        color: palette[i % palette.length],
+        size: 5 + Math.random()*6,
+      });
+    }
+    // Vertical column of rising embers from the pigeon (volcanic feel)
+    for(let i=0;i<40;i++){
+      state.particles.push({
+        x: p.x + (Math.random()-0.5)*60,
+        y: p.y - 10 + Math.random()*30,
+        vx: (Math.random()-0.5)*120,
+        vy: -260 - Math.random()*240,
+        life: 0.7 + Math.random()*0.6, maxLife: 1.3,
+        color: i%2===0 ? '#FFE066' : '#FF8C00',
+        size: 3 + Math.random()*4,
       });
     }
   }
-  state.toastBanner = { text:'🐦‍🔥 비둘기의 외침 — 구구!!!', sub:'적 전체에게 화염 피해', t:1.6, maxT:1.6 };
+  state.toastBanner = { text:'🐦‍🔥 비둘기의 외침 — 구구~~!!!', sub:'적 전체에게 화염 피해', t:1.8, maxT:1.8 };
   updateUltButton();
 }
 
@@ -7340,6 +7455,25 @@ function render(){
       ctx.restore();
       break;
     }
+  }
+  // 비둘기의 외침 ult — full-screen flash overlay. Drawn LAST so it covers everything for one
+  // brief, hot moment when the ult fires. Decays in update(); intensity fades quickly.
+  if(state.ultScreenFlash > 0){
+    const f = state.ultScreenFlash; // 0..0.55 at peak
+    ctx.save();
+    // White-hot core flash
+    ctx.globalAlpha = Math.min(1, f * 1.4);
+    ctx.fillStyle = '#FFF9DB';
+    ctx.fillRect(0, 0, W, H);
+    // Fire-tinted radial shading on top — stronger toward center
+    const fg = ctx.createRadialGradient(W/2, H/2, 60, W/2, H/2, Math.max(W,H)*0.7);
+    fg.addColorStop(0,   `rgba(255,224,102,${0.55*f})`);
+    fg.addColorStop(0.5, `rgba(255,107,0,${0.30*f})`);
+    fg.addColorStop(1,   `rgba(201,42,42,${0.05*f})`);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = fg;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
   }
 }
 
