@@ -3795,13 +3795,17 @@ function drawEnemy(ctx, e, walkPhase){
 //   • ULT_DAMAGE_PCT of boss max HP one-shot to a chapter boss (same flat damage applied to mobs
 //     so the screen wipes clean while the boss takes a hefty chunk).
 const ULT_MAX = 100;
-// Charge tuned to land near the middle of wave 2 (~120s into a chapter):
-//   Wave 1 (3.6/s × 80s) ≈ 240 effective kills → 240×0.14 = ~34 charge
-//   Wave 2 first half (5.6/s × 40s) ≈ 200 effective kills → +28 charge → ~62 total
-//   Wave 2 end / wave 3 start lands the first 100% so the player has a charged ult for the boss.
-//   Subsequent recharges during the boss fight come from the trash spawned alongside it.
-const ULT_KILL_GAIN = 0.14;    // slowed from 0.20 — boss fight is rechargeable so each cast must mean more
-const ULT_DAMAGE_PCT = 0.18;   // 18% of boss max HP per ult cast (was 0.30 when single-shot)
+// Charge tuned for ~2 casts per chapter so the ult feels precious but isn't a single-shot:
+//   Wave 1 (5.0/s × 80s) ≈ 400 kills → 400×0.10 = 40 charge (NOT castable in wave 1 alone — fixes
+//                                                              "벌써 1웨이브에 사용 가능" complaint)
+//   Wave 2 (7.6/s × 80s) ≈ 608 kills → +60.8 charge → first 100% lands ~mid-wave-2 (cast #1)
+//   Wave 3 (10.6/s × 80s) ≈ 848 kills → +85 charge → ~85% by boss spawn (cast #2 ready at boss)
+//   Boss fight (30s @ 0.7×0.7 rate) ≈ 156 kills → +15 charge → not enough for cast #3
+//   Net: typically 2 casts per chapter (1 mid-game / saved for boss + 1 at or near boss spawn).
+const ULT_KILL_GAIN = 0.10;    // was 0.06 → 0.10 — enables 2 casts per chapter (matches design intent)
+const ULT_DAMAGE_PCT = 0.12;   // 12% of boss max HP per cast — 2 casts ≈ 24% of HP off the top.
+                               // Lower than v6 (0.18) so the "30s at full build" target isn't
+                               // dominated by ult dmg alone — sustained DPS has to do real work.
 
 // WAVES_PER_CHAPTER: each chapter is 3 swelling enemy waves followed by the chapter boss.
 // CHAPTER_TIME_CAP: hard ceiling on a single chapter's playtime — early chapters cap at 10 min,
@@ -3818,13 +3822,13 @@ const PICKUP_RADIUS = 60;
 function chapterWaveTimes(c){
   let each, cap;
   if(c <= 10){
-    each = 80;   cap = 360;   // 1:20 waves → 4 min waves + 2 min boss = 6 min cap
+    each = 80;   cap = 480;   // 1:20 waves → 4 min waves + 4 min boss window = 8 min cap
   } else if(c <= 25){
-    each = 130;  cap = 540;   // 2:10 waves → 6:30 + 2:30 = 9 min cap
+    each = 130;  cap = 660;   // 2:10 waves → 6:30 + 4:30 = 11 min cap
   } else if(c <= 40){
-    each = 170;  cap = 750;   // 2:50 waves → 8:30 + 4:00 = 12:30 cap
+    each = 170;  cap = 870;   // 2:50 waves → 8:30 + 6:00 = 14:30 cap
   } else {
-    each = 200;  cap = 900;   // 3:20 waves → 10 min waves + 5 min boss = 15 min cap
+    each = 200;  cap = 1020;  // 3:20 waves → 10 min waves + 7 min boss = 17 min cap
   }
   return [each, each*2, each*3, cap];
 }
@@ -4761,20 +4765,22 @@ function spawnEnemy(kind){
 // Chapter boss variants — different boss types every 5 chapters from Ch30 onward.
 // Each variant has its own HP/dmg multipliers, visual style, and special behavior.
 // Ch48, 49 keep the Ch45 phoenix boss so the Ch50 void emperor reads as the unique finale.
-// Boss tuning v5 — design target: a NEAR-FULL-BUILD player (≈16 cards picked) should still take
-// ~30s to take down a chapter boss. Earlier v4 (1.75× cat_king) sized the fight for a partial
-// build; full-build players cleared in ~20s. v5 bumps HP ~25-40% so the fight stays meaty even
-// when the deck is stacked. Damage stays moderate so the fight is a survival check, not a
-// one-shot lottery.
-//   ch1 cat_king HP target: ~8500. With ~190 effective DPS at L17 + 2 ult casts (2×0.18×8500=3060),
-//   30s × 190 = 5700 + 3060 = 8760 dmg → ~29s fight. ✓
+// Boss tuning v9 — strict "30s at full build" target. Full build = max shop + S-grade weapon
+// costume + glow-state hunger boost + ~15 stacked in-run cards + multi-weapon kit + bomb/golden
+// item drops + crit. Effective DPS at full build ≈ 1500. With 2 ult casts at 12% of HP each
+// (24% off the top), boss HP needs to be 30s × 1500 / (1 - 0.24) = ~59k for a 30s fight.
+//   ch1 cat_king HP at 17.0× = (3500 + 110) × 17 = 61370. ✓
+//   Mid-strong build (~700 DPS): (61370 - 14729) / 700 = 67s — substantial fight.
+//   Peak max-extreme (~3500 DPS): 13s — still fast but no longer 3s.
+//   Weak build (~250 DPS): 187s — uses chapter cap as safety net (cap bumped to 480s for ch1-10
+//   to accommodate this in chapterWaveTimes).
 const BOSS_VARIANTS = {
-  cat_king:  { hpMult:2.45, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕' },
-  tyrant:    { hpMult:2.80, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주' },
-  leviathan: { hpMult:3.10, dmgMult:1.30, sizeMult:1.10, label:'심해 군주' },
-  phantom:   { hpMult:3.55, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주' },
-  phoenix:   { hpMult:4.10, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조' },
-  void:      { hpMult:5.80, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },
+  cat_king:  { hpMult:17.0, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕' },
+  tyrant:    { hpMult:19.5, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주' },
+  leviathan: { hpMult:22.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주' },
+  phantom:   { hpMult:25.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주' },
+  phoenix:   { hpMult:28.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조' },
+  void:      { hpMult:40.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },
 };
 function bossVariantForChapter(c){
   if(c >= 50) return 'void';
