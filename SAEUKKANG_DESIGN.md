@@ -2,7 +2,7 @@
 
 > 이 문서는 게임의 현재 사양을 기록한다. 기능이 바뀌면 변경이력에 한 줄을 추가하지 말고 이 문서의 해당 섹션을 직접 수정한다.
 >
-> **현재 빌드 버전: v12.14** (Phase 6: 아내 쌍꺼풀 얇게(단일 곡선) + 날개 박쥐→둥근 조류 oval / 원정 보상 스킨 4종 신설(sky_emperor·pigeon_palace·cosmic_throne·hellgate_redeemer, 8-10 layer multi-gradient) / 원정 끝 클리어 시 자동 ownedSkins 추가 + 보상 토스트 / 마이그레이션으로 기존 사용자 자동 해금 / 상점에 잠긴 스킨 표시 + 잠금 토스트)
+> **현재 빌드 버전: v12.15** (Phase 7: 아내 쌍꺼풀 완전 제거 husband 스타일 / 날개 외측 배치(±22) / 아기 발 아래 파란 점(pacifier) 제거 — 머리털만 남김 / 우주 챕터(71-100) 베이스 풀 void_drone·star_eye 위주로 교체 / 지옥 챕터(101-130) 베이스 풀 imp·hellhound·soul_husk로 교체)
 
 ## 1. 개요
 

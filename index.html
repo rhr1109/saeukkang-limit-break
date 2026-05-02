@@ -5979,13 +5979,10 @@ const COMPANION_COSTUMES = {
       } },
   ],
   child: [
-    { id:'pacifier', name:'공갈 젖꼭지', cost:0,     icon:'🍼', slot:'head',
+    { id:'pacifier', name:'기본 (머리털)', cost:0,     icon:'👶', slot:'head',
+      // v12.15 — 사용자 피드백 "아기 비둘기 아래 파란 점은 뭔지 모르겠으니 없애줘".
+      // 발 아래 떠 있던 공갈 젖꼭지 점 제거. 머리 위 작은 머리털 한 가닥만 남김.
       draw:(ctx)=>{
-        ctx.fillStyle = '#74C0FC';
-        ctx.beginPath(); ctx.arc(0, 17, 2.6, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#FFF'; ctx.lineWidth = 0.9;
-        ctx.beginPath(); ctx.arc(0, 17, 2.6, 0, Math.PI*2); ctx.stroke();
-        // Hair tuft (default look)
         ctx.strokeStyle = '#74C0FC'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(2, -22, 0, -25); ctx.stroke();
       } },
@@ -6159,25 +6156,24 @@ function drawWifePigeon(ctx, c){
   ctx.moveTo(-10, 6); ctx.quadraticCurveTo(0, 10+breath, 10, 6);
   ctx.moveTo(-9,  14); ctx.quadraticCurveTo(0, 18+breath, 9, 14);
   ctx.stroke();
-  // v12.14 — 둥근 비둘기 날개 (사용자 피드백 "박쥐 날개라 이상함" 반영). 깃털 3겹 layering.
+  // v12.15 — 날개를 몸통 외측으로 이동 (사용자 피드백 "가운데로 몰려있다"). 좌-22,우+22.
   ctx.fillStyle = '#D88A99';
-  // 좌측 날개 — 둥근 oval에 outer feather tip 살짝 늘어진 형태
   ctx.beginPath();
-  ctx.ellipse(-15, 8, 8, 12, -0.18, 0, Math.PI*2); ctx.fill();
+  ctx.ellipse(-22, 8, 7, 11, -0.22, 0, Math.PI*2); ctx.fill();
   ctx.beginPath();
-  ctx.ellipse(15, 8, 8, 12, 0.18, 0, Math.PI*2); ctx.fill();
+  ctx.ellipse(22, 8, 7, 11, 0.22, 0, Math.PI*2); ctx.fill();
   // 안쪽 lighter highlight
   ctx.fillStyle = '#F0B8C0';
   ctx.beginPath();
-  ctx.ellipse(-15, 10, 5, 8, -0.18, 0, Math.PI*2); ctx.fill();
+  ctx.ellipse(-22, 10, 4.5, 7.5, -0.22, 0, Math.PI*2); ctx.fill();
   ctx.beginPath();
-  ctx.ellipse(15, 10, 5, 8, 0.18, 0, Math.PI*2); ctx.fill();
-  // 깃털 3-line layering (둥근 곡선)
+  ctx.ellipse(22, 10, 4.5, 7.5, 0.22, 0, Math.PI*2); ctx.fill();
+  // 깃털 곡선 — 외측 위치에 맞춰 조정
   ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(-18, 4);  ctx.quadraticCurveTo(-19, 9, -17, 14); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-16, 6);  ctx.quadraticCurveTo(-17, 11, -15, 16); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(18, 4);   ctx.quadraticCurveTo(19, 9, 17, 14);  ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(16, 6);   ctx.quadraticCurveTo(17, 11, 15, 16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-25, 4);  ctx.quadraticCurveTo(-26, 9, -24, 14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-23, 6);  ctx.quadraticCurveTo(-24, 11, -22, 16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(25, 4);   ctx.quadraticCurveTo(26, 9, 24, 14);  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(23, 6);   ctx.quadraticCurveTo(24, 11, 22, 16); ctx.stroke();
   // Head — husband와 동일 16r로 환원해 눈/부리 비례 자연스럽게.
   ctx.fillStyle = '#E8A8B6';
   ctx.beginPath(); ctx.arc(0, -22, 16, 0, Math.PI*2); ctx.fill();
@@ -6196,34 +6192,22 @@ function drawWifePigeon(ctx, c){
   ctx.beginPath();
   ctx.moveTo(-2, -18); ctx.lineTo(11, -15.5); ctx.lineTo(-2, -14);
   ctx.closePath(); ctx.fill();
-  // === EYE — v12.14 쌍꺼풀 얇게 + 속눈썹 가벼운 곡선 (사용자 피드백 "쌍커풀 너무 두껍다") ===
+  // === EYE — v12.15 husband 스타일 (사용자: "쌍꺼풀 말고 그냥 눈썹 만들어줘") ===
+  // 검정 동공 + 흰 highlight 점 1개. 속눈썹/sclera/lash dot 모두 제거 — husband와 동일.
   if(blink){
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
   } else {
-    // Sclera
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(-4, -26, 2.6, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#FFF';
-    ctx.beginPath(); ctx.ellipse(-4, -26, 3.4, 3.8, 0, 0, Math.PI*2); ctx.fill();
-    // Pupil
-    ctx.fillStyle = '#3B2235';
-    ctx.beginPath(); ctx.arc(-4, -26, 2.2, 0, Math.PI*2); ctx.fill();
-    // Highlight
-    ctx.fillStyle = '#FFF';
-    ctx.beginPath(); ctx.arc(-3, -27, 0.9, 0, Math.PI*2); ctx.fill();
-    // 속눈썹 — 단 한 줄의 가벼운 곡선 (이전 3개 굵은 stroke → 1개 얇은 line)
-    ctx.strokeStyle = '#3B2235'; ctx.lineWidth = 0.6; ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(-7.5, -28.5);
-    ctx.quadraticCurveTo(-4, -30, -0.5, -28.5);
-    ctx.stroke();
-    // 작은 끝부분 액센트 (속눈썹 끝)
-    ctx.beginPath(); ctx.moveTo(-7.5, -28.5); ctx.lineTo(-8.5, -30); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-0.5, -28.5); ctx.lineTo(0.5, -30); ctx.stroke();
+    ctx.beginPath(); ctx.arc(-3, -27, 1.0, 0, Math.PI*2); ctx.fill();
   }
-  // Soft arched eyebrow — 더 가볍게 (얇은 stroke)
-  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+  // 눈썹 — husband 스타일 단순 직선이지만 살짝 부드러운 각도(여성스러움 약간 유지).
+  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(-8, -31); ctx.quadraticCurveTo(-4, -32.5, 0, -31);
+  ctx.moveTo(-10, -31);
+  ctx.lineTo(-1, -33);
   ctx.stroke();
   // Lipstick — small dot under beak (subtle feminine cue)
   ctx.fillStyle = '#D63384';
@@ -6607,11 +6591,27 @@ function spawnBoss(){
 // Pool of basic enemies per wave (1..3) — mixed with chapter-gated new enemies.
 // Wave 1 = warmup (light), Wave 2 = main pressure (medium), Wave 3 = pre-boss surge (heavy).
 function waveEnemyPool(wave){
-  let base;
-  if(wave === 1)      base = ['mouse','mouse','mouse','crow','cat'];
-  else if(wave === 2) base = ['mouse','crow','crow','cat','cat','dog'];
-  else                base = ['cat','dog','dog','tank','crow','crow','tank']; // wave 3
+  // v12.15 Phase 7 — 사용자 검수 메모 "원정 Ⅲ 우주 챕터인데도 베이스 풀이 cat/dog/tank
+  // 그대로". 원정 Ⅲ/Ⅳ에서는 base 자체를 톤에 맞게 교체.
   const c = state.chapter;
+  let base;
+  if(c >= 101){
+    // 원정 Ⅳ 지옥 base — imp/hellhound/soul_husk 위주.
+    if(wave === 1)      base = ['imp','imp','imp','hellhound','hellhound'];
+    else if(wave === 2) base = ['imp','hellhound','hellhound','soul_husk','soul_husk','imp'];
+    else                base = ['hellhound','hellhound','soul_husk','soul_husk','imp','soul_husk','hellhound'];
+  } else if(c >= 71){
+    // 원정 Ⅲ 우주 base — void_drone/star_eye 위주.
+    if(wave === 1)      base = ['void_drone','void_drone','void_drone','star_eye','star_eye'];
+    else if(wave === 2) base = ['void_drone','void_drone','star_eye','star_eye','tank','tank'];
+    else                base = ['void_drone','star_eye','star_eye','tank','tank','tyrant','star_eye'];
+  } else if(wave === 1){
+    base = ['mouse','mouse','mouse','crow','cat'];
+  } else if(wave === 2){
+    base = ['mouse','crow','crow','cat','cat','dog'];
+  } else {
+    base = ['cat','dog','dog','tank','crow','crow','tank'];
+  }
   const pool = base.slice();
   // Chapter 4 — soften crow ranged spam.
   if(c===4){
