@@ -6156,24 +6156,43 @@ function drawWifePigeon(ctx, c){
   ctx.moveTo(-10, 6); ctx.quadraticCurveTo(0, 10+breath, 10, 6);
   ctx.moveTo(-9,  14); ctx.quadraticCurveTo(0, 18+breath, 9, 14);
   ctx.stroke();
-  // v12.15 — 날개를 몸통 외측으로 이동 (사용자 피드백 "가운데로 몰려있다"). 좌-22,우+22.
+  // v12.16 — 날개 펼친 형태. 사용자 피드백 "더 바깥쪽으로, 특히 아랫부분이 밖을 향하도록".
+  // 위는 어깨 가까이(-18/+18), 아래는 외측으로 벌어짐(-30/+30). fan-shape silhouette.
   ctx.fillStyle = '#D88A99';
+  // 좌측 날개
   ctx.beginPath();
-  ctx.ellipse(-22, 8, 7, 11, -0.22, 0, Math.PI*2); ctx.fill();
+  ctx.moveTo(-18, 0);
+  ctx.quadraticCurveTo(-30, 8, -30, 22);
+  ctx.lineTo(-20, 22);
+  ctx.quadraticCurveTo(-16, 10, -18, 0);
+  ctx.closePath(); ctx.fill();
+  // 우측 날개 (mirror)
   ctx.beginPath();
-  ctx.ellipse(22, 8, 7, 11, 0.22, 0, Math.PI*2); ctx.fill();
-  // 안쪽 lighter highlight
+  ctx.moveTo(18, 0);
+  ctx.quadraticCurveTo(30, 8, 30, 22);
+  ctx.lineTo(20, 22);
+  ctx.quadraticCurveTo(16, 10, 18, 0);
+  ctx.closePath(); ctx.fill();
+  // 안쪽 lighter highlight (살짝 들여서)
   ctx.fillStyle = '#F0B8C0';
   ctx.beginPath();
-  ctx.ellipse(-22, 10, 4.5, 7.5, -0.22, 0, Math.PI*2); ctx.fill();
+  ctx.moveTo(-18, 4);
+  ctx.quadraticCurveTo(-26, 10, -26, 20);
+  ctx.lineTo(-21, 20);
+  ctx.quadraticCurveTo(-17, 12, -18, 4);
+  ctx.closePath(); ctx.fill();
   ctx.beginPath();
-  ctx.ellipse(22, 10, 4.5, 7.5, 0.22, 0, Math.PI*2); ctx.fill();
-  // 깃털 곡선 — 외측 위치에 맞춰 조정
+  ctx.moveTo(18, 4);
+  ctx.quadraticCurveTo(26, 10, 26, 20);
+  ctx.lineTo(21, 20);
+  ctx.quadraticCurveTo(17, 12, 18, 4);
+  ctx.closePath(); ctx.fill();
+  // 깃털 곡선 — fan shape에 맞춰 비스듬히
   ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(-25, 4);  ctx.quadraticCurveTo(-26, 9, -24, 14); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-23, 6);  ctx.quadraticCurveTo(-24, 11, -22, 16); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(25, 4);   ctx.quadraticCurveTo(26, 9, 24, 14);  ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(23, 6);   ctx.quadraticCurveTo(24, 11, 22, 16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-22, 6);  ctx.quadraticCurveTo(-26, 13, -27, 20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-19, 8);  ctx.quadraticCurveTo(-22, 14, -22, 20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(22, 6);   ctx.quadraticCurveTo(26, 13, 27, 20);  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(19, 8);   ctx.quadraticCurveTo(22, 14, 22, 20);  ctx.stroke();
   // Head — husband와 동일 16r로 환원해 눈/부리 비례 자연스럽게.
   ctx.fillStyle = '#E8A8B6';
   ctx.beginPath(); ctx.arc(0, -22, 16, 0, Math.PI*2); ctx.fill();
@@ -6209,9 +6228,7 @@ function drawWifePigeon(ctx, c){
   ctx.moveTo(-10, -31);
   ctx.lineTo(-1, -33);
   ctx.stroke();
-  // Lipstick — small dot under beak (subtle feminine cue)
-  ctx.fillStyle = '#D63384';
-  ctx.beginPath(); ctx.arc(7, -10, 1.0, 0, Math.PI*2); ctx.fill();
+  // v12.16 — lipstick 점 제거 (사용자 피드백 "비둘기 안 분홍색 점 너무 이상하다").
   // Hair tufts — three small curls at top of head
   ctx.strokeStyle = '#C97585'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(-5, -36); ctx.quadraticCurveTo(-7, -40, -3, -42); ctx.stroke();
