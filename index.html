@@ -6211,16 +6211,15 @@ function drawWifePigeon(ctx, c){
   ctx.beginPath();
   ctx.moveTo(-2, -18); ctx.lineTo(11, -15.5); ctx.lineTo(-2, -14);
   ctx.closePath(); ctx.fill();
-  // === EYE — v12.15 husband 스타일 (사용자: "쌍꺼풀 말고 그냥 눈썹 만들어줘") ===
-  // 검정 동공 + 흰 highlight 점 1개. 속눈썹/sclera/lash dot 모두 제거 — husband와 동일.
+  // === EYE — v12.16 husband와 정확히 동일 코드 (사용자: "wife_bow.png 눈과 똑같이"). ===
   if(blink){
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.strokeStyle='#000'; ctx.lineWidth=1.8; ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
   } else {
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(-4, -26, 2.6, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#FFF';
-    ctx.beginPath(); ctx.arc(-3, -27, 1.0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#000';
+    ctx.beginPath(); ctx.arc(-4, -26, 3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(-3, -27, 1, 0, Math.PI*2); ctx.fill();
   }
   // 눈썹 — husband 스타일 단순 직선이지만 살짝 부드러운 각도(여성스러움 약간 유지).
   ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
