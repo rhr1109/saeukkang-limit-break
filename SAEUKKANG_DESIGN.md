@@ -2,7 +2,7 @@
 
 > 이 문서는 게임의 현재 사양을 기록한다. 기능이 바뀌면 변경이력에 한 줄을 추가하지 말고 이 문서의 해당 섹션을 직접 수정한다.
 >
-> **현재 빌드 버전: v12.12** (Phase 4: 가족 발 line 정확 정렬 / 코스튬 합성 미리보기 다이얼로그 / 원정 끝 코스튬 reveal 모달 끼우기 / 동료 hurt flash sync / 캐릭터 탭 디자인 부드럽게 / 남편 코스튬에서 여성용(b_feather_robe·w_pink_glove) 제거 + 남성용(b_warrior_belt·w_iron_glove) 신설 / 아기 코스튬 3종 신설(overall·baby_robe·cape_blue) / 상점 코스튬 미리보기 DPR 적용 + 발 line 정렬 / HUD score·kills·coins 별도 panel 분리 + 모바일 잘림 방지 + LV 한 줄 강제)
+> **현재 빌드 버전: v12.13** (Phase 5: 가족 잘림 픽스 husband 0.85×·compScale 1.5 / 스킨 미리보기에 가족 표시 / 시네마틱 오프닝 다시보기(replayHellPrologue) / 챕터 시간 캡 ch51-100 12분으로 단축 / chapterMult 후반 1.022/1.014→1.020/1.013 가파르게 / spawnRate ch51+ 가파른 곡선 / 후반 난이도 강화)
 
 ## 1. 개요
 

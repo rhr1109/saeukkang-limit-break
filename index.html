@@ -3440,6 +3440,41 @@ function drawCostumeWeaponOverlay(ctx, px, py, scale, facing, eq, attackPulse){
 // main loop while the title scene is visible.
 // Draws the costumed pigeon onto the skin-preview modal's canvas — keeps breath/blink/coo
 // animations live while the modal is open so the player sees the title screen as it would feel.
+// v12.13 — 공통 가족 그룹 그리기. drawTitlePigeonFrame 과 drawSkinPreviewPigeonFrame
+// 양쪽에서 호출. 사용자 피드백 "타이틀에서 가족 잘림 / 스킨 미리보기에도 가족 표시" 반영.
+// husband를 0.85× 축소해 가족 셋이 캔버스 안에 모두 들어오게 + footline 동기화 유지.
+function drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, includeFamily){
+  const baseScale = Math.min(cssW, cssH) / 150;
+  const husbandScale = baseScale * 0.85;
+  const cx = cssW / 2;
+  const cy = cssH * 0.55;
+  drawPigeon(ctx2, cx, cy, husbandScale, 1, state.time * 1.4, false, 1, fakePlayer);
+  if(!includeFamily) return;
+  const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
+  const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
+  if(!wifeOk && !childOk) return;
+  // 가족 셋이 cssW 안에 들어가도록 offsetX/compScale 보수적 선택.
+  const compScale = 1.5;
+  const offsetX = baseScale * 50;
+  const husbandFootY = cy + husbandScale * 52;
+  if(wifeOk){
+    ctx2.save();
+    const wifeY = husbandFootY - compScale * 0.85 * 52;
+    ctx2.translate(cx - offsetX, wifeY);
+    ctx2.scale(compScale, compScale);
+    drawCompanion(ctx2, { x:0, y:0, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
+    ctx2.restore();
+  }
+  if(childOk){
+    ctx2.save();
+    const childY = husbandFootY - compScale * 18;
+    ctx2.translate(cx + offsetX, childY);
+    ctx2.scale(compScale, compScale);
+    drawCompanion(ctx2, { x:0, y:0, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+    ctx2.restore();
+  }
+}
+
 function drawSkinPreviewPigeonFrame(){
   const c = document.getElementById('spmPigeon');
   if(!c) return;
@@ -3458,9 +3493,9 @@ function drawSkinPreviewPigeonFrame(){
     fireRate: 1, reloadT: 1, vx: 0, vy: 0,
     costumes: buildPlayerCostumeRefs()
   };
-  // v11 — same clip fix as drawTitlePigeonFrame: smaller denominator + cy 0.55 keeps legs in frame.
-  const scale = Math.min(cssW, cssH) / 150;
-  drawPigeon(ctx2, cssW/2, cssH * 0.55, scale, 1, state.time * 1.4, false, 1, fakePlayer);
+  // v12.13 — 스킨 미리보기에도 가족이 함께 보이게. 사용자 요청 "스킨 구매 전 미리보기에
+  // 안 잘린 비둘기 가족 보이게".
+  drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, true);
 }
 
 function drawTitlePigeonFrame(){
@@ -3486,43 +3521,9 @@ function drawTitlePigeonFrame(){
     costumes: buildPlayerCostumeRefs(),
     hungerState: getPigeonHungerState(),
   };
-  const cx = cssW / 2;
-  // v11 — pigeon vertical extent at scale 1 is ~94px (head top -38 to foot bottom +56), plus
-  // shadow + crown headroom. Previous denominator 130 + cy 0.62 clipped the legs at 240px frame
-  // (foot bottom landed at y=252, 12px past the canvas). New: denominator 150 + cy 0.55 →
-  // head fits with headroom AND legs/feet stay inside the canvas.
-  const scale = Math.min(cssW, cssH) / 150;
-  const cy = cssH * 0.55;
-  // v12.11 Phase 2 hotfix — 동료가 너무 작아 보였던 문제 픽스. 타이틀 화면에서만 동료를
-  // 1.6배 크게 그린다. drawCompanion은 ctx 변환 위에서 호출하면 그대로 곱연산 적용됨.
-  const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
-  const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
-  const offsetX = scale * 70;
-  drawPigeon(ctx2, cx, cy, scale, 1, state.time * 1.4, false, 1, fakePlayer);
-  const compScale = 2.0;
-  // v12.12 — 가족 발 line(husbandFootY)을 기준으로 wife/child 위치를 역산해 발 높이를
-  // 정확히 맞춤. drawPigeon의 그림자는 local y=52에 그려져 husband 발 = cy + 52*scale.
-  // wife: 그림자 local y=52, internal scale 0.85 적용 + compScale 2.0 → 그림자 offset
-  //       = compScale * 0.85 * 52. wcy = husbandFootY - 그림자 offset.
-  // child: 그림자 local y=18, internal scale 없음 + compScale 2.0 → 그림자 offset
-  //        = compScale * 18. ccy = husbandFootY - 그림자 offset.
-  const husbandFootY = cy + scale * 52;
-  if(wifeOk){
-    ctx2.save();
-    const wifeY = husbandFootY - compScale * 0.85 * 52;
-    ctx2.translate(cx - offsetX, wifeY);
-    ctx2.scale(compScale, compScale);
-    drawCompanion(ctx2, { x:0, y:0, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
-    ctx2.restore();
-  }
-  if(childOk){
-    ctx2.save();
-    const childY = husbandFootY - compScale * 18;
-    ctx2.translate(cx + offsetX, childY);
-    ctx2.scale(compScale, compScale);
-    drawCompanion(ctx2, { x:0, y:0, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
-    ctx2.restore();
-  }
+  // v12.13 — 공통 drawFamilyGroup 사용. husband 0.85×, compScale 1.5, offsetX scale*50으로
+  // 가족 셋이 모두 캔버스 안에 들어가게 보수적 선택. 사용자 피드백 "타이틀 가족 잘림" 반영.
+  drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, true);
 }
 
 // Draw a saeukkang (shrimp-chip bag) — used as projectile
@@ -4506,11 +4507,11 @@ function chapterWaveTimes(c){
   } else if(c <= 50){
     each = 200;  cap = 1020;  // 3:20 waves → 10 min waves + 7 min boss = 17 min cap
   } else if(c <= 70){
-    each = 140;  cap = 900;   // 원정 Ⅱ — 2:20 waves → 7분 + 8분 보스 = 15분 cap
+    each = 110;  cap = 720;   // 원정 Ⅱ — v12.13 단축. 1:50 waves → 5:30 + 6:30 보스 = 12분 cap
   } else if(c <= 100){
-    each = 170;  cap = 1200;  // 원정 Ⅲ — 2:50 waves → 8:30 + 11:30 보스 = 20분 cap
+    each = 130;  cap = 720;   // 원정 Ⅲ — v12.13 단축. 2:10 waves → 6:30 + 5:30 보스 = 12분 cap
   } else {
-    each = 170;  cap = 1200;  // 원정 Ⅳ — 동일 ceiling (20분). 지옥 원정도 캡 20분 이내 유지.
+    each = 150;  cap = 900;   // 원정 Ⅳ — 지옥은 약간 여유 있게 15분 cap (난이도 더 높음).
   }
   return [each, each*2, each*3, cap];
 }
@@ -4621,11 +4622,11 @@ function chapterMult(){
   //   20..30  : exp 1.060/1.035 on top of ch20                   (ch30 → 8.97 / 2.92)
   //   30..40  : exp 1.045/1.025 on top of ch30                   (ch40 → 13.93 / 3.74)
   //   40..50  : exp 1.025/1.015 on top of ch40                   (ch50 → 17.83 / 4.34)
-  //   50..70   : exp 1.016/1.011 on top of ch50  (원정 Ⅱ)         (ch70  → ~24.5 / ~5.40)
-  //   70..100  : exp 1.014/1.011 on top of ch70  (원정 Ⅲ)         (ch100 → ~37.2 / ~7.51)
-  //   100..130 : exp 1.012/1.010 on top of ch100 (원정 Ⅳ 지옥)    (ch130 → ~53.4 / ~10.10)
-  //   v12.11 — 지옥 원정은 ch100보다 명확히 어려움이 누적되어야 하지만 캡 20분 안에서
-  //   클리어 가능해야 함. fresh-S 풀빌드 헤드룸 타이트하게 잡힘.
+  //   50..70   : exp 1.022/1.014 on top of ch50  (원정 Ⅱ)         (ch70  ≈ 27.6 / 5.74)
+  //   70..100  : exp 1.020/1.013 on top of ch70  (원정 Ⅲ)         (ch100 ≈ 49.9 / 8.46)
+  //   100..130 : exp 1.014/1.011 on top of ch100 (원정 Ⅳ 지옥)    (ch130 ≈ 76.0 / 11.74)
+  //   v12.13 — 사용자 피드백 "ch51 이후 난이도 쉬움" + 캡 12분으로 단축.
+  //   몬스터 hp/dmg 가파르게 ↑, plus spawnRate 후반 ↑로 처치 부담 강화.
   const HP_CH10  = 1 + 9*0.20;
   const DMG_CH10 = 1 + 9*0.06;
   const HP_CH20  = HP_CH10  * Math.pow(1.060, 10);
@@ -4636,26 +4637,26 @@ function chapterMult(){
   const DMG_CH40 = DMG_CH30 * Math.pow(1.025, 10);
   const HP_CH50  = HP_CH40  * Math.pow(1.025, 10);
   const DMG_CH50 = DMG_CH40 * Math.pow(1.015, 10);
-  const HP_CH70  = HP_CH50  * Math.pow(1.016, 20);
-  const DMG_CH70 = DMG_CH50 * Math.pow(1.011, 20);
-  const HP_CH100 = HP_CH70  * Math.pow(1.014, 30);
-  const DMG_CH100= DMG_CH70 * Math.pow(1.011, 30);
+  const HP_CH70  = HP_CH50  * Math.pow(1.022, 20);
+  const DMG_CH70 = DMG_CH50 * Math.pow(1.014, 20);
+  const HP_CH100 = HP_CH70  * Math.pow(1.020, 30);
+  const DMG_CH100= DMG_CH70 * Math.pow(1.013, 30);
   const hp = c <= 10  ? 1 + (c-1)*0.20
           : c <= 20  ? HP_CH10  * Math.pow(1.060, c-10)
           : c <= 30  ? HP_CH20  * Math.pow(1.060, c-20)
           : c <= 40  ? HP_CH30  * Math.pow(1.045, c-30)
           : c <= 50  ? HP_CH40  * Math.pow(1.025, c-40)
-          : c <= 70  ? HP_CH50  * Math.pow(1.016, c-50)
-          : c <= 100 ? HP_CH70  * Math.pow(1.014, c-70)
-          :            HP_CH100 * Math.pow(1.012, c-100);
+          : c <= 70  ? HP_CH50  * Math.pow(1.022, c-50)
+          : c <= 100 ? HP_CH70  * Math.pow(1.020, c-70)
+          :            HP_CH100 * Math.pow(1.014, c-100);
   const dmg = c <= 10  ? 1 + (c-1)*0.06
             : c <= 20  ? DMG_CH10 * Math.pow(1.030, c-10)
             : c <= 30  ? DMG_CH20 * Math.pow(1.035, c-20)
             : c <= 40  ? DMG_CH30 * Math.pow(1.025, c-30)
             : c <= 50  ? DMG_CH40 * Math.pow(1.015, c-40)
-            : c <= 70  ? DMG_CH50 * Math.pow(1.011, c-50)
-            : c <= 100 ? DMG_CH70 * Math.pow(1.011, c-70)
-            :            DMG_CH100* Math.pow(1.010, c-100);
+            : c <= 70  ? DMG_CH50 * Math.pow(1.014, c-50)
+            : c <= 100 ? DMG_CH70 * Math.pow(1.013, c-70)
+            :            DMG_CH100* Math.pow(1.011, c-100);
   const speed = 1 + Math.min(0.95, (c-1)*0.028);
   return {
     hp,
@@ -6585,13 +6586,15 @@ function waveEnemyPool(wave){
 function stageEnemyPool(){ return waveEnemyPool(state.wave || 1); }
 
 function spawnRateForWave(wave){
-  // v10 탕탕특공대 swarm — wave 2/3 are now true torrents, wave 1 stays slightly lighter so the
-  // first 80s isn't a slaughter-fest that fills your ult + bag of items in 30 seconds.
-  // Wave 1 6.0/s, wave 2 11.0/s, wave 3 14.5/s (scaled by chapter). Combined with ENEMY_DEFS xp
-  // cut ~30%, total chapter XP stays close to v9 while screen density rises ~40% — kills feel
-  // disposable and the next wave of mobs is always already on screen.
+  // Wave 1 6.0/s, wave 2 11.0/s, wave 3 14.5/s (scaled by chapter).
+  // v12.13 — 사용자 피드백 "ch51 이후 너무 쉬움" + 캡 단축. ch51+ 후반 챕터에서 spawn rate
+  // 가파르게 ↑, 한 챕터 안 처치 부담을 늘려 짧지만 빡센 페이스로 만든다.
   const baseByWave = wave === 1 ? 6.0 : wave === 2 ? 11.0 : 14.5;
-  return baseByWave * (1 + (state.chapter-1)*0.024);
+  const c = state.chapter;
+  const chMul = c <= 50  ? 1 + (c-1)*0.024
+              : c <= 100 ? 1 + 49*0.024 + (c-50)*0.040    // ch51+ 가파르게
+              :            1 + 49*0.024 + 50*0.040 + (c-100)*0.030; // 원정 Ⅳ 한 단계 더
+  return baseByWave * chMul;
 }
 // Legacy shim — older call sites that pass `state.stage` now get the equivalent wave-3 rate.
 function spawnRateForStage(){ return spawnRateForWave(state.wave || 1); }
@@ -10764,19 +10767,32 @@ function renderCinematicReplayRow(){
   if(!row) return;
   const cleared = progress.clearedChapter || 0;
   const buttons = [];
-  if(cleared >= 50)  buttons.push({ ch:50,  label:'🌍 원정 Ⅰ 엔딩', color:'#74C0FC' });
-  if(cleared >= 70)  buttons.push({ ch:70,  label:'🪐 원정 Ⅱ 엔딩', color:'#FFB4D8' });
-  if(cleared >= 100) buttons.push({ ch:100, label:'🌌 원정 Ⅲ 엔딩', color:'#9775FA' });
-  if(cleared >= 130) buttons.push({ ch:130, label:'🔥 원정 Ⅳ 엔딩 (최종)', color:'#FF6B6B' });
+  if(cleared >= 50)  buttons.push({ kind:'end', ch:50,  label:'🌍 원정 Ⅰ 엔딩', color:'#74C0FC' });
+  if(cleared >= 70)  buttons.push({ kind:'end', ch:70,  label:'🪐 원정 Ⅱ 엔딩', color:'#FFB4D8' });
+  if(cleared >= 100) buttons.push({ kind:'end', ch:100, label:'🌌 원정 Ⅲ 엔딩', color:'#9775FA' });
+  // v12.13 — 사용자 피드백 "오프닝이 안 보인다" → 다시보기 가능. ch100 클리어 후 노출.
+  if(cleared >= 100) buttons.push({ kind:'hell',          label:'🔥 원정 Ⅳ 오프닝', color:'#FFA94D' });
+  if(cleared >= 130) buttons.push({ kind:'end', ch:130, label:'🔥 원정 Ⅳ 엔딩 (최종)', color:'#FF6B6B' });
   if(buttons.length === 0){ row.style.display = 'none'; row.innerHTML = ''; return; }
   row.style.display = 'flex';
-  row.innerHTML = buttons.map(b =>
-    `<button class="cs-tab" type="button" data-replay-ch="${b.ch}"
+  row.innerHTML = buttons.map((b, i) =>
+    `<button class="cs-tab" type="button" data-replay-i="${i}"
        style="border-color:${b.color};color:${b.color};">🎬 ${b.label} 다시보기</button>`
   ).join('');
-  for(const btn of row.querySelectorAll('button[data-replay-ch]')){
-    btn.addEventListener('click', () => replayCinematic(parseInt(btn.dataset.replayCh, 10)));
+  for(const btn of row.querySelectorAll('button[data-replay-i]')){
+    const idx = parseInt(btn.dataset.replayI, 10);
+    const b = buttons[idx];
+    btn.addEventListener('click', () => {
+      if(b.kind === 'hell') replayHellPrologue();
+      else replayCinematic(b.ch);
+    });
   }
+}
+
+// v12.13 — 원정 Ⅳ 오프닝 다시보기. showHellPrologue를 챕터 셀렉트에서 직접 호출.
+function replayHellPrologue(){
+  document.getElementById('chapterSelect').classList.add('hidden');
+  showHellPrologue();
 }
 
 function replayCinematic(ch){
