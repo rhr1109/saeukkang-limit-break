@@ -4808,30 +4808,22 @@ window.addEventListener('mousemove', e=>{ if(joyActive) onJoyMove(e); });
 window.addEventListener('mouseup', e=>{ if(joyActive) onJoyEnd(e); });
 
 // ---------- Spawning ----------
-// v10 rebalance — 탕탕특공대 swarm feel: per-mob XP cut ~30% so we can pump density ~40%
-// without inflating total wave XP. (See spawnRateForWave + rollItemDrop wave-gating.)
+// v11.2 — XP cuts reverted (user reported "L7 by wave 3 ch10" — XP cuts + steeper level curve
+// + tankier mobs all compounded against leveling). Density (6/11/14.5) stays for swarm feel.
 const ENEMY_DEFS = {
   mouse:  { speed: 90,  hp: 6,   dmg: 6,  size:1, score:1, xp:1, color:'#B0A090' },
-  cat:    { speed: 110, hp: 18,  dmg: 12, size:1.2, score:3, xp:1, color:'#3E2723' },
-  crow:   { speed: 150, hp: 10,  dmg: 10, size:1, score:2, xp:1, color:'#1B1B1B' },
-  dog:    { speed: 80,  hp: 40,  dmg: 15, size:1.5, score:5, xp:3, color:'#7A4A1E' },
-  tank:   { speed: 55,  hp: 90,  dmg: 20, size:1.8, score:10,xp:5, color:'#7A4A1E' },
-  // Ch5+: fast floating ghost, ignores separation, phases
-  ghost:  { speed: 135, hp: 16,  dmg: 12, size:1.1, score:4, xp:2, color:'#E9ECEF' },
-  // Ch10+: kamikaze bomber, explodes on death
-  bomber: { speed: 115, hp: 22,  dmg: 18, size:1.15,score:6, xp:3, color:'#FA5252' },
-  // Ch15+: armored reaper with a scythe, high hp + knockback
-  reaper: { speed: 70,  hp: 130, dmg: 26, size:1.6, score:14,xp:7, color:'#495057' },
-  // Ch20+: long-range sniper owl
-  sniper: { speed: 75,  hp: 34,  dmg: 24, size:1.15,score:8, xp:3, color:'#FFA94D' },
-  // Ch25+: summoner that spawns mice waves
-  summoner:{ speed:55,  hp: 180, dmg: 14, size:1.7, score:20,xp:10, color:'#7950F2' },
-  // Ch28+: tyrant — slow but devastating shockwave AOE; unique to late chapters
-  tyrant: { speed: 60, hp: 320, dmg: 32, size:2.0, score:35, xp:15, color:'#5D0F0F' },
-  // Ch33+ (Abyss tier): leviathan — heavy bulk + periodic 5-shot homing tendril barrage.
-  // HP tuned so even maxed builds spend ~1s+ killing one; damage high enough to punish ignoring it.
-  leviathan:{ speed:50,  hp: 280, dmg: 30, size:2.2, score:42, xp:17, color:'#0B3D47' },
-  boss:   { speed: 70,  hp: 500, dmg: 25, size:2.4, score:100,xp:28, color:'#222' }
+  cat:    { speed: 110, hp: 18,  dmg: 12, size:1.2, score:3, xp:2, color:'#3E2723' },
+  crow:   { speed: 150, hp: 10,  dmg: 10, size:1, score:2, xp:2, color:'#1B1B1B' },
+  dog:    { speed: 80,  hp: 40,  dmg: 15, size:1.5, score:5, xp:4, color:'#7A4A1E' },
+  tank:   { speed: 55,  hp: 90,  dmg: 20, size:1.8, score:10,xp:8, color:'#7A4A1E' },
+  ghost:  { speed: 135, hp: 16,  dmg: 12, size:1.1, score:4, xp:3, color:'#E9ECEF' },
+  bomber: { speed: 115, hp: 22,  dmg: 18, size:1.15,score:6, xp:4, color:'#FA5252' },
+  reaper: { speed: 70,  hp: 130, dmg: 26, size:1.6, score:14,xp:10, color:'#495057' },
+  sniper: { speed: 75,  hp: 34,  dmg: 24, size:1.15,score:8, xp:5, color:'#FFA94D' },
+  summoner:{ speed:55,  hp: 180, dmg: 14, size:1.7, score:20,xp:14, color:'#7950F2' },
+  tyrant: { speed: 60, hp: 320, dmg: 32, size:2.0, score:35, xp:22, color:'#5D0F0F' },
+  leviathan:{ speed:50,  hp: 280, dmg: 30, size:2.2, score:42, xp:25, color:'#0B3D47' },
+  boss:   { speed: 70,  hp: 500, dmg: 25, size:2.4, score:100,xp:40, color:'#222' }
 };
 
 function spawnEnemy(kind){
@@ -4849,16 +4841,17 @@ function spawnEnemy(kind){
   // pre-density curve.
   const ENEMY_HP_MULT = 0.65;
   const ENEMY_DMG_MULT = 0.75;
-  // v11 — mob-only HP boost so wave 2/3 mobs aren't 1-shot at mid chapters (ch5-25). Bosses
-  // share the same boost only via progressionMult below.
-  // ch1-2: 1.0× / ch3-10: 1.0→2.4 / ch11-25: 2.4→3.6 / ch26+: 3.6 cap.
+  // v11.2 — gentler mobHpExtra so mobs don't bottleneck XP flow at mid chapters. Tuned so
+  // mobs need 1.2-2 shots/avg from a basic build, climbing to 2-4 shots in late chapters.
+  // progressionMult REMOVED from mobs (was causing tank-sized mice for shop-heavy players,
+  // which dropped kill rate → XP rate → leveling speed). Boss still gets full progressionMult.
+  // ch1-2: 1.0 / ch3-15: 1.0→1.7 / ch16-30: 1.7→2.3 / ch31+: 2.3 cap.
   const c = state.chapter;
   const mobHpExtra = c <= 2 ? 1.0
-                   : c <= 10 ? 1.0 + (c-2)*0.175
-                   : c <= 25 ? 2.4 + (c-10)*0.08
-                   :           3.6;
-  const prog = progressionMultMob();
-  const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT * mobHpExtra * prog));
+                   : c <= 15 ? 1.0 + (c-2)*(0.7/13)
+                   : c <= 30 ? 1.7 + (c-15)*(0.6/15)
+                   :           2.3;
+  const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT * mobHpExtra));
   const e = {
     x, y, vx:0, vy:0, kind,
     hp, maxHp: hp,
@@ -5363,7 +5356,7 @@ function killEnemy(e){
   // spawns (continuing at 0.5× rate for 30s) add ~70 XP, pushing the deck the rest of the way to
   // near-full-build by the time the boss dies. Boss HP is correspondingly sized so even
   // a full-build player takes ~30s — the ~14-card deck needs 2 ult casts + steady DPS.
-  const GEM_XP_SCALE = 0.36;  // v11: 0.42 → 0.36 — paired with xpToNext 1.22 caps cards ~18-22
+  const GEM_XP_SCALE = 0.42;  // v11.2 — reverted to v10 (was cut to 0.36 in v11; user couldn't level)
   const xpDrop = e.xp||1;
   for(let i=0;i<Math.min(xpDrop,5);i++){
     const a = Math.random()*Math.PI*2;
@@ -5673,10 +5666,10 @@ function gainXP(amount){
     }
     p.xp -= p.xpToNext;
     p.level++;
-    // v11: 1.18 → 1.22 multiplier. Modest tightening so cards picked drop from ~25-28/chapter
-    // to ~18-22 — limits the snowball that was making mid-chapters trivial without crippling
-    // late-chapter DPS scaling.
-    p.xpToNext = Math.round(p.xpToNext * 1.22 + 4);
+    // v11.2 — reverted to 1.18 (v10 value). The 1.22 attempt + GEM_XP_SCALE cut combined to
+    // make leveling far too slow (user reported reaching only L7 by wave 3 of ch10). Snowball
+    // is now controlled via progressionMult on boss HP, not by gating player progression.
+    p.xpToNext = Math.round(p.xpToNext * 1.18 + 4);
     queueLevelUp();
   }
 }
