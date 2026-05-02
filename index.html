@@ -325,6 +325,22 @@
   @keyframes toastWarnPulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.18);}}
   @keyframes toastCritPulse{0%,100%{filter:brightness(1);transform:translateX(-50%) scale(1);}50%{filter:brightness(1.32) saturate(1.2);transform:translateX(-50%) scale(1.04);}}
   @keyframes toastBossPulse{0%,100%{filter:brightness(1) saturate(1);transform:translateX(-50%) scale(1);}50%{filter:brightness(1.45) saturate(1.4);transform:translateX(-50%) scale(1.07);}}
+  /* Boss HP bar — souls-style header pinned to top-center while a chapter boss is alive.
+     Sits BELOW the toast (z 9) so the boss-arrival banner reads first, but above invbar (z 2). */
+  #bossHpBar{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 188px);left:50%;transform:translateX(-50%);width:min(560px,86vw);pointer-events:none;z-index:6;display:flex;flex-direction:column;gap:4px;align-items:center;opacity:0;transition:opacity .25s ease-out;}
+  #bossHpBar.show{opacity:1;}
+  #bossHpBar .boss-hp-name{color:#FFE066;font-weight:900;font-size:13px;letter-spacing:1.5px;text-align:center;text-shadow:0 0 10px rgba(255,23,68,.9),0 0 4px rgba(0,0,0,.95),0 1px 2px #000;text-transform:none;}
+  #bossHpBar .boss-hp-track{position:relative;width:100%;height:18px;background:linear-gradient(180deg,rgba(40,0,0,.92),rgba(15,0,0,.95));border:2px solid #FF1744;border-radius:11px;overflow:hidden;box-shadow:0 0 18px rgba(255,23,68,.55),inset 0 0 10px rgba(0,0,0,.85);}
+  #bossHpBar .boss-hp-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#7A0010 0%,#E03131 35%,#FF6B6B 70%,#FFE066 100%);transition:width .18s linear;box-shadow:0 0 12px rgba(255,80,80,.6);}
+  #bossHpBar .boss-hp-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#FFF9DB;font-weight:900;font-size:11px;text-shadow:0 0 4px #000,0 1px 2px #000;letter-spacing:.5px;font-family:inherit;}
+  #bossHpBar.low .boss-hp-track{animation:bossLowPulse .6s ease-in-out infinite;}
+  @keyframes bossLowPulse{0%,100%{box-shadow:0 0 18px rgba(255,23,68,.55),inset 0 0 10px rgba(0,0,0,.85);}50%{box-shadow:0 0 28px rgba(255,40,80,.95),inset 0 0 12px rgba(0,0,0,.85);}}
+  @media (max-width:520px){
+    #bossHpBar{top:calc(env(safe-area-inset-top, 0px) + 156px);width:92vw;}
+    #bossHpBar .boss-hp-name{font-size:12px;letter-spacing:1px;}
+    #bossHpBar .boss-hp-track{height:16px;}
+    #bossHpBar .boss-hp-text{font-size:10px;}
+  }
   @keyframes pulseUpgrade{0%,100%{transform:scale(1);filter:brightness(1);}50%{transform:scale(1.06);filter:brightness(1.18);}}
   /* Equip picker option styling — bigger cards with stat lines + upgrade chip */
   .ep-option-row{background:rgba(20,8,40,.55);border:2px solid #5F3DC4;border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center;cursor:pointer;font-family:inherit;color:#FFF9DB;text-align:left;width:100%;}
@@ -614,6 +630,13 @@
       </div>
     </div>
     <div class="invbar" id="invBar"></div>
+    <div id="bossHpBar" aria-hidden="true">
+      <div class="boss-hp-name" id="bossHpName">보스</div>
+      <div class="boss-hp-track">
+        <div class="boss-hp-fill" id="bossHpFill" style="width:100%"></div>
+        <div class="boss-hp-text" id="bossHpText">0 / 0</div>
+      </div>
+    </div>
     <div id="toastBanner" class="enter"></div>
     <button class="hud-btn" id="pauseBtn" title="일시정지">⏸</button>
     <div id="joyArea"></div>
@@ -1244,17 +1267,24 @@ const TITLE_BGM_PACK = {
   ],
   interval:190, wave:'triangle', bassShift:'3', vol:.13
 };
-// Boss-fight BGM — short, dissonant minor riff at a faster tempo. Used during chapter boss fights
-// to break the chapter ambience and inject urgency. Volume is pushed slightly so it cuts through.
+// Boss-fight BGM — v10 박진감 강화 (intense action chase pack). Used during chapter boss fights to
+// break the chapter ambience and inject urgency. Tempo bumped 108→82ms (≈30% faster), volume up so
+// it cuts through, and bgmStart() applies a per-tick kick + sub-bass flair specifically when this
+// pack is active. Phrygian/diminished bassline + ascending tension push so it reads as "fight"
+// not "ambient".
 const BOSS_BGM_PACK = {
   label:'BOSS',
   bars:[
-    ['D4','F4','Ab4','D5'],   // diminished — anxious
-    ['Eb4','G4','Bb4','Eb5'], // half-step push, raises tension
+    // Bar 1 — D minor diminished, kicks the fight off with anxious chromatic climb
     ['D4','F4','Ab4','D5'],
-    ['C#4','E4','G4','C#5'],  // resolves down a half — vertigo
+    // Bar 2 — half-step UP, tension spikes
+    ['Eb4','F#4','Bb4','Eb5'],
+    // Bar 3 — back to D, but resolves into the high tritone (vertigo)
+    ['D4','Ab4','D5','Ab4'],
+    // Bar 4 — C# release into descending diminished — momentum dive
+    ['C#4','E4','G4','Bb4'],
   ],
-  interval:108, wave:'sawtooth', bassShift:'3', vol:.14
+  interval:82, wave:'sawtooth', bassShift:'3', vol:.16, isBoss:true
 };
 function currentBgmPack(){
   if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop') return TITLE_BGM_PACK;
@@ -1345,8 +1375,28 @@ function bgmStart(){
     bgmNote(noteName, .15, pack.vol, pack.wave);
     if(noteIdx===0) bgmBassNote(bar[0].replace(/\d/, pack.bassShift), .3);
     if(noteIdx===2) bgmBassNote(bar[0].replace(/\d/, pack.bassShift), .2);
-    if(tier >= 0) bgmFlair(tier, noteIdx, bar, pack);
-    else if(state.scene === 'title'){
+    // Boss pack gets its own action-movie flair regardless of chapter tier — a kick on every beat,
+    // a "snap" noise on the offbeats, sub-bass pulse on beat 1, and an octave-up lead stab on
+    // beats 1 & 3. Designed to read as "boss chase" so it's clearly different from chapter BGM.
+    if(pack.isBoss){
+      noise(.04, .14);                                                // kick (every beat)
+      if(noteIdx===0 || noteIdx===2){
+        bgmNote(bar[noteIdx].replace(/\d/, '5'), .06, pack.vol*0.55, 'sawtooth'); // octave-up lead stab
+        // Sub-bass pulse — fattens the kick on beats 1 & 3 so the fight feels heavy.
+        if(audioCtx && !muted){
+          const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+          o.type='sine'; o.frequency.value=(NOTE[bar[0]]||220)/4;
+          g.gain.value=0; g.gain.linearRampToValueAtTime(pack.vol*0.85, audioCtx.currentTime+.02);
+          g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+.22);
+          o.connect(g); g.connect(bgmGain); o.start(); o.stop(audioCtx.currentTime+.24);
+        }
+      } else {
+        // Hi-hat / snap noise on offbeats — drives the groove forward.
+        noise(.018, .07);
+      }
+    } else if(tier >= 0) {
+      bgmFlair(tier, noteIdx, bar, pack);
+    } else if(state.scene === 'title'){
       // Title flair — a sparkly counter-melody on beats 2 & 4 so the menu has personality.
       if(noteIdx===1 || noteIdx===3) bgmNote(bar[noteIdx].replace(/\d/, '5'), .06, pack.vol*0.55, 'sine');
     }
@@ -3796,13 +3846,13 @@ function drawEnemy(ctx, e, walkPhase){
 //     so the screen wipes clean while the boss takes a hefty chunk).
 const ULT_MAX = 100;
 // Charge tuned for ~2 casts per chapter so the ult feels precious but isn't a single-shot:
-//   Wave 1 (5.0/s × 80s) ≈ 400 kills → 400×0.10 = 40 charge (NOT castable in wave 1 alone — fixes
-//                                                              "벌써 1웨이브에 사용 가능" complaint)
-//   Wave 2 (7.6/s × 80s) ≈ 608 kills → +60.8 charge → first 100% lands ~mid-wave-2 (cast #1)
-//   Wave 3 (10.6/s × 80s) ≈ 848 kills → +85 charge → ~85% by boss spawn (cast #2 ready at boss)
-//   Boss fight (30s @ 0.7×0.7 rate) ≈ 156 kills → +15 charge → not enough for cast #3
+// (v10 — density bumped 5/7.6/10.6 → 6/11/14.5; gain dropped 0.10 → 0.072 to keep ~2 casts.)
+//   Wave 1 (6/s × 80s) ≈ 480 kills → 480×0.072 ≈ 34 charge (NOT castable in wave 1 alone)
+//   Wave 2 (11/s × 80s) ≈ 880 kills → +63 charge → first 100% lands ~mid-wave-2 (cast #1)
+//   Wave 3 (14.5/s × 80s) ≈ 1160 kills → +83 charge → ~83% by boss spawn (cast #2 ready at boss)
+//   Boss fight (30s @ 0.85×0.8 rate) ≈ 296 kills → +21 charge → not enough for cast #3
 //   Net: typically 2 casts per chapter (1 mid-game / saved for boss + 1 at or near boss spawn).
-const ULT_KILL_GAIN = 0.10;    // was 0.06 → 0.10 — enables 2 casts per chapter (matches design intent)
+const ULT_KILL_GAIN = 0.072;   // v9 0.10 → v10 0.072 (density bump compensation)
 const ULT_DAMAGE_PCT = 0.12;   // 12% of boss max HP per cast — 2 casts ≈ 24% of HP off the top.
                                // Lower than v6 (0.18) so the "30s at full build" target isn't
                                // dominated by ult dmg alone — sustained DPS has to do real work.
@@ -4694,28 +4744,30 @@ window.addEventListener('mousemove', e=>{ if(joyActive) onJoyMove(e); });
 window.addEventListener('mouseup', e=>{ if(joyActive) onJoyEnd(e); });
 
 // ---------- Spawning ----------
+// v10 rebalance — 탕탕특공대 swarm feel: per-mob XP cut ~30% so we can pump density ~40%
+// without inflating total wave XP. (See spawnRateForWave + rollItemDrop wave-gating.)
 const ENEMY_DEFS = {
   mouse:  { speed: 90,  hp: 6,   dmg: 6,  size:1, score:1, xp:1, color:'#B0A090' },
-  cat:    { speed: 110, hp: 18,  dmg: 12, size:1.2, score:3, xp:2, color:'#3E2723' },
-  crow:   { speed: 150, hp: 10,  dmg: 10, size:1, score:2, xp:2, color:'#1B1B1B' },
-  dog:    { speed: 80,  hp: 40,  dmg: 15, size:1.5, score:5, xp:4, color:'#7A4A1E' },
-  tank:   { speed: 55,  hp: 90,  dmg: 20, size:1.8, score:10,xp:8, color:'#7A4A1E' },
+  cat:    { speed: 110, hp: 18,  dmg: 12, size:1.2, score:3, xp:1, color:'#3E2723' },
+  crow:   { speed: 150, hp: 10,  dmg: 10, size:1, score:2, xp:1, color:'#1B1B1B' },
+  dog:    { speed: 80,  hp: 40,  dmg: 15, size:1.5, score:5, xp:3, color:'#7A4A1E' },
+  tank:   { speed: 55,  hp: 90,  dmg: 20, size:1.8, score:10,xp:5, color:'#7A4A1E' },
   // Ch5+: fast floating ghost, ignores separation, phases
-  ghost:  { speed: 135, hp: 16,  dmg: 12, size:1.1, score:4, xp:3, color:'#E9ECEF' },
+  ghost:  { speed: 135, hp: 16,  dmg: 12, size:1.1, score:4, xp:2, color:'#E9ECEF' },
   // Ch10+: kamikaze bomber, explodes on death
-  bomber: { speed: 115, hp: 22,  dmg: 18, size:1.15,score:6, xp:4, color:'#FA5252' },
+  bomber: { speed: 115, hp: 22,  dmg: 18, size:1.15,score:6, xp:3, color:'#FA5252' },
   // Ch15+: armored reaper with a scythe, high hp + knockback
-  reaper: { speed: 70,  hp: 130, dmg: 26, size:1.6, score:14,xp:10, color:'#495057' },
+  reaper: { speed: 70,  hp: 130, dmg: 26, size:1.6, score:14,xp:7, color:'#495057' },
   // Ch20+: long-range sniper owl
-  sniper: { speed: 75,  hp: 34,  dmg: 24, size:1.15,score:8, xp:5, color:'#FFA94D' },
+  sniper: { speed: 75,  hp: 34,  dmg: 24, size:1.15,score:8, xp:3, color:'#FFA94D' },
   // Ch25+: summoner that spawns mice waves
-  summoner:{ speed:55,  hp: 180, dmg: 14, size:1.7, score:20,xp:14, color:'#7950F2' },
+  summoner:{ speed:55,  hp: 180, dmg: 14, size:1.7, score:20,xp:10, color:'#7950F2' },
   // Ch28+: tyrant — slow but devastating shockwave AOE; unique to late chapters
-  tyrant: { speed: 60, hp: 320, dmg: 32, size:2.0, score:35, xp:22, color:'#5D0F0F' },
+  tyrant: { speed: 60, hp: 320, dmg: 32, size:2.0, score:35, xp:15, color:'#5D0F0F' },
   // Ch33+ (Abyss tier): leviathan — heavy bulk + periodic 5-shot homing tendril barrage.
   // HP tuned so even maxed builds spend ~1s+ killing one; damage high enough to punish ignoring it.
-  leviathan:{ speed:50,  hp: 280, dmg: 30, size:2.2, score:42, xp:25, color:'#0B3D47' },
-  boss:   { speed: 70,  hp: 500, dmg: 25, size:2.4, score:100,xp:40, color:'#222' }
+  leviathan:{ speed:50,  hp: 280, dmg: 30, size:2.2, score:42, xp:17, color:'#0B3D47' },
+  boss:   { speed: 70,  hp: 500, dmg: 25, size:2.4, score:100,xp:28, color:'#222' }
 };
 
 function spawnEnemy(kind){
@@ -4888,11 +4940,12 @@ function waveEnemyPool(wave){
 function stageEnemyPool(){ return waveEnemyPool(state.wave || 1); }
 
 function spawnRateForWave(wave){
-  // v5 — denser swarms but per-mob XP cut so total chapter XP comes in slower than before.
-  // Wave 1 ~5.0/s, wave 2 ~7.6/s, wave 3 ~10.6/s (scaled by chapter). The pace boost is paired
-  // with GEM_XP_SCALE 0.47 → 0.30 so the player levels less rapidly and the boss isn't hit
-  // by a fully-built deck in the first few seconds.
-  const baseByWave = wave === 1 ? 5.0 : wave === 2 ? 7.6 : 10.6;
+  // v10 탕탕특공대 swarm — wave 2/3 are now true torrents, wave 1 stays slightly lighter so the
+  // first 80s isn't a slaughter-fest that fills your ult + bag of items in 30 seconds.
+  // Wave 1 6.0/s, wave 2 11.0/s, wave 3 14.5/s (scaled by chapter). Combined with ENEMY_DEFS xp
+  // cut ~30%, total chapter XP stays close to v9 while screen density rises ~40% — kills feel
+  // disposable and the next wave of mobs is always already on screen.
+  const baseByWave = wave === 1 ? 6.0 : wave === 2 ? 11.0 : 14.5;
   return baseByWave * (1 + (state.chapter-1)*0.024);
 }
 // Legacy shim — older call sites that pass `state.stage` now get the equivalent wave-3 rate.
@@ -5320,7 +5373,12 @@ function rollItemDrop(e){
   // Higher chapters → slightly more drops & a stronger tilt toward rare items so the loot feels richer.
   const c = state.chapter || 1;
   const chapterDropMult = 1 + Math.min(0.6, (c-1) * 0.04);
-  let dropChance = Math.min(1, table.drop * chapterDropMult);
+  // v10 wave-gating — wave 1 was producing a full bag of items + xp + bomb sweeps in 80s, snowballing
+  // wave 2/3 into "no enemies, just XP collection". Wave 1 drops are now ~½ as frequent and the
+  // strong actives (bomb/golden) are wave-3-only. (Boss drops are unaffected — see boss block.)
+  const wave = (state.bossSpawned ? 3 : (state.wave || 1));
+  const waveDropMult = wave === 1 ? 0.45 : wave === 2 ? 0.78 : 1.0;
+  let dropChance = Math.min(1, table.drop * chapterDropMult * waveDropMult);
   // Pity: every 5 kills without any drop, +100% rate; every 10+, guaranteed.
   if(killsSinceDrop >= 10) dropChance = 1;
   else if(killsSinceDrop >= 5) dropChance = Math.min(1, dropChance * 2);
@@ -5336,7 +5394,16 @@ function rollItemDrop(e){
     if(k==='heal' || k==='coin') w *= (1 - rareBoost*0.5);
     else if(k==='bomb' || k==='golden') w *= (1 + rareBoost);
     else if(k==='magnet') w *= (1 + rareBoost*0.5);
-    mix[k] = Math.max(0.01, w);
+    // v10 wave-gate strong actives so they don't carry wave 1: bomb/golden zeroed in wave 1,
+    // halved in wave 2; magnet halved in wave 1. Wave 3 + boss = full strength.
+    if(wave === 1){
+      if(k==='bomb' || k==='golden') w = 0;
+      else if(k==='magnet') w *= 0.45;
+    } else if(wave === 2){
+      if(k==='bomb') w *= 0.45;
+      else if(k==='golden') w *= 0.55;
+    }
+    mix[k] = Math.max(0, w);
   }
   let total = 0; for(const k in mix) total += mix[k];
   let rr = Math.random()*total;
@@ -5744,9 +5811,9 @@ function update(dt){
     // full build per the design.
     state.spawnTimer -= dt;
     if(state.spawnTimer<=0){
-      state.spawnTimer = 1 / (baseRate*0.7);
+      state.spawnTimer = 1 / (baseRate*0.85);
       const kind = pool[Math.floor(Math.random()*pool.length)];
-      if(Math.random()<0.7) spawnEnemy(kind);
+      if(Math.random()<0.8) spawnEnemy(kind);
     }
     // Hard cap: if total chapter time exceeds the cap during the boss fight, force-finish the boss
     // so a stalemate can't drag the chapter past 15 min.
@@ -6518,6 +6585,42 @@ function syncToast(){
   }
   // Fade out gracefully in last 0.3s of the toast lifetime.
   el.style.opacity = tb.t < 0.3 ? String(Math.max(0, tb.t / 0.3)) : '1';
+}
+
+// ---------- Boss HP bar ----------
+// Souls-style header pinned to top-center while the chapter boss is alive. Replaces the canvas
+// "boss alert pill" (which overlapped with the toast banner and the boss-name head label) — the
+// player now reads the variant from the toast on arrival, then tracks remaining HP on this bar.
+let _bossHpEl = null;
+function syncBossHpBar(){
+  if(!_bossHpEl) _bossHpEl = document.getElementById('bossHpBar');
+  if(!_bossHpEl) return;
+  const showBar = state.scene === 'playing' && state.bossSpawned && state.bossAlive;
+  if(!showBar){
+    if(_bossHpEl.classList.contains('show')){
+      _bossHpEl.classList.remove('show', 'low');
+    }
+    return;
+  }
+  let boss = null;
+  for(const e of state.enemies){
+    if(e.kind === 'boss' && !e.dead){ boss = e; break; }
+  }
+  if(!boss){
+    _bossHpEl.classList.remove('show', 'low');
+    return;
+  }
+  const max = Math.max(1, boss.maxHp || 1);
+  const cur = Math.max(0, Math.min(max, boss.hp));
+  const pct = (cur / max) * 100;
+  const fillEl = document.getElementById('bossHpFill');
+  const txtEl = document.getElementById('bossHpText');
+  const nameEl = document.getElementById('bossHpName');
+  if(fillEl) fillEl.style.width = pct.toFixed(1) + '%';
+  if(txtEl) txtEl.textContent = `${Math.ceil(cur).toLocaleString()} / ${max.toLocaleString()}  (${pct.toFixed(1)}%)`;
+  if(nameEl) nameEl.textContent = '☠ ' + (boss.bossLabel || '챕터 보스');
+  _bossHpEl.classList.add('show');
+  _bossHpEl.classList.toggle('low', pct < 25);
 }
 
 // Inventory HUD — shows acquired upgrade cards with their current level.
@@ -7914,8 +8017,10 @@ function render(){
   // Drawn on top of the world so the pigeon and entities sit inside the ambience, not hidden by the ground.
   drawSkyline(stageHue, themeIdx);
 
-  // Boss warning — emergency-style alert. v2: red vignette flashes, scanline strobes,
-  // siren-emoji slam-in, and a much bigger pulsing pill. Stays for ~5s, then fades.
+  // Boss warning — atmospheric edge-only frame (vignette + hazard stripes). v10: the big slam-in
+  // alert pill was removed — it overlapped with the toast banner ("☠ {variant} 등장!") and the
+  // head-floating label, so all three said the same thing at once. Now: toast says variant name
+  // + danger sub, head label tags the boss for 3s, and the bottom-screen #bossHpBar tracks HP.
   if(state.bossSpawned && state.bossAlive){
     const sinceSpawn = state.time - (state.bossFightStart || state.time);
     const fade = sinceSpawn < 4.2 ? 1 : Math.max(0, 1 - (sinceSpawn-4.2)/1.6);
@@ -7948,70 +8053,13 @@ function render(){
         ctx.closePath(); ctx.fill();
       }
       ctx.restore();
-
-      // The big alert pill — slam in from above for the first 0.45s, then settle.
-      const slam = sinceSpawn < 0.45 ? (1 - sinceSpawn/0.45) : 0;
-      const pulse = 0.55 + 0.45*Math.sin(state.time*7);
-      const text = '☠ 챕터 보스 등장! ☠';
-      const fontSize = Math.max(18, Math.min(30, Math.round(W/16)));
-      const subText = '⚠ DANGER · 비둘기의 외침으로 맞서세요 ⚠';
-      const subFont = Math.max(11, Math.round(fontSize*0.52));
-      ctx.save();
-      ctx.font = `900 ${fontSize}px sans-serif`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      const metrics = ctx.measureText(text);
-      const padX = 28, padY = 16;
-      const pillW = Math.min(W - 24, metrics.width + padX*2);
-      const pillH = fontSize + subFont + padY*2 + 8;
-      const cx = W/2;
-      const cy = Math.round(H * 0.42) - slam * H * 0.6; // slams down from above
-      // Tilt slightly each strobe so it feels unstable.
-      const tilt = Math.sin(state.time*6) * 0.025;
-      ctx.translate(cx, cy);
-      ctx.rotate(tilt);
-      ctx.translate(-cx, -cy);
-      const radius = 14;
-      const x = cx - pillW/2, y = cy - pillH/2;
-      // Outer red glow pulsing
-      ctx.shadowColor = 'rgba(255,23,68,0.95)'; ctx.shadowBlur = 30 * pulse;
-      ctx.globalAlpha = fade * 0.95;
-      ctx.fillStyle = `rgba(40,0,4,${0.92})`;
-      ctx.beginPath();
-      ctx.moveTo(x+radius, y);
-      ctx.lineTo(x+pillW-radius, y); ctx.arcTo(x+pillW, y, x+pillW, y+radius, radius);
-      ctx.lineTo(x+pillW, y+pillH-radius); ctx.arcTo(x+pillW, y+pillH, x+pillW-radius, y+pillH, radius);
-      ctx.lineTo(x+radius, y+pillH); ctx.arcTo(x, y+pillH, x, y+pillH-radius, radius);
-      ctx.lineTo(x, y+radius); ctx.arcTo(x, y, x+radius, y, radius);
-      ctx.closePath();
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      // Heavy red stroke that brightens with pulse
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = `rgba(255, ${Math.round(40+200*pulse)}, ${Math.round(60+60*pulse)}, ${fade})`;
-      ctx.stroke();
-      // Inner gold strobe stroke — only when pulse high
-      if(pulse > 0.7){
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = `rgba(255,224,102,${fade*(pulse-0.7)*3})`;
-        ctx.stroke();
-      }
-      // Main text — bold red with strobing brightness
-      ctx.globalAlpha = fade;
-      ctx.fillStyle = pulse > 0.5 ? '#FFE066' : '#FF6B6B';
-      ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 8;
-      ctx.fillText(text, cx, cy - subFont*0.55);
-      // Subtitle — DANGER label
-      ctx.font = `900 ${subFont}px sans-serif`;
-      ctx.fillStyle = '#FFB4B4';
-      ctx.shadowBlur = 4;
-      ctx.fillText(subText, cx, cy + fontSize*0.55);
-      ctx.restore();
     }
   }
 
   // Stage transition toast — DOM-rendered (#toastBanner) so it always layers above the inventory
   // pill bar and item glow. Sync state → DOM here once per frame.
   syncToast();
+  syncBossHpBar();
 
   // Boss direction indicator — when the chapter boss is alive but offscreen, draw an arrow
   // pinned to the screen edge pointing toward it, with a distance pip so the player knows where to go.
