@@ -2,7 +2,7 @@
 
 > 이 문서는 게임의 현재 사양을 기록한다. 기능이 바뀌면 변경이력에 한 줄을 추가하지 말고 이 문서의 해당 섹션을 직접 수정한다.
 >
-> **현재 빌드 버전: v12.13** (Phase 5: 가족 잘림 픽스 husband 0.85×·compScale 1.5 / 스킨 미리보기에 가족 표시 / 시네마틱 오프닝 다시보기(replayHellPrologue) / 챕터 시간 캡 ch51-100 12분으로 단축 / chapterMult 후반 1.022/1.014→1.020/1.013 가파르게 / spawnRate ch51+ 가파른 곡선 / 후반 난이도 강화)
+> **현재 빌드 버전: v12.14** (Phase 6: 아내 쌍꺼풀 얇게(단일 곡선) + 날개 박쥐→둥근 조류 oval / 원정 보상 스킨 4종 신설(sky_emperor·pigeon_palace·cosmic_throne·hellgate_redeemer, 8-10 layer multi-gradient) / 원정 끝 클리어 시 자동 ownedSkins 추가 + 보상 토스트 / 마이그레이션으로 기존 사용자 자동 해금 / 상점에 잠긴 스킨 표시 + 잠금 토스트)
 
 ## 1. 개요
 

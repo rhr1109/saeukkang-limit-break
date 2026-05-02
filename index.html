@@ -4897,8 +4897,94 @@ const TITLE_SKINS = [
       // Sky → field gradient
       'linear-gradient(180deg, #FFE066 0%, #FAB005 40%, #5A3A04 80%, #1a0a00 100%)'
     ].join(',') },
+  // === v12.14 — 원정 클리어 보상 스킨. price 0이지만 expeditionUnlock 조건이 있어
+  // 해당 원정 끝 챕터를 클리어해야 자동 ownedSkins에 추가됨. 코인으로 구매 불가. ===
+  { id:'sky_emperor', name:'🌅 하늘의 황제 (원정 Ⅰ 보상)', price: 0, expeditionUnlock: 1,
+    grad:[
+      // 떠 있는 왕관 후광
+      'radial-gradient(circle 100px at 50% 22%, rgba(255,243,191,.85) 0%, rgba(255,224,102,.6) 35%, transparent 75%)',
+      // 황금 광선 (방사형)
+      'repeating-conic-gradient(from -45deg at 50% 22%, rgba(255,224,102,.18) 0deg 6deg, transparent 6deg 22deg)',
+      // 구름 layer
+      'radial-gradient(ellipse 70% 18% at 30% 55%, rgba(255,255,255,.4) 0%, transparent 70%)',
+      'radial-gradient(ellipse 60% 14% at 70% 65%, rgba(255,243,191,.35) 0%, transparent 70%)',
+      // 새들이 멀리 작은 점으로
+      'radial-gradient(circle at 18% 38%, rgba(60,40,30,.5) 0%, transparent 0.5%)',
+      'radial-gradient(circle at 76% 32%, rgba(60,40,30,.5) 0%, transparent 0.5%)',
+      'radial-gradient(circle at 60% 48%, rgba(60,40,30,.5) 0%, transparent 0.4%)',
+      // 노을 → 지평선 → 도시 silhouette
+      'linear-gradient(180deg, #FFE3A6 0%, #FFA94D 30%, #E03131 60%, #5A1A04 90%, #18030A 100%)'
+    ].join(',') },
+  { id:'pigeon_palace', name:'🪐 비둘기 궁전 (원정 Ⅱ 보상)', price: 0, expeditionUnlock: 2,
+    grad:[
+      // 떨어지는 깃털
+      'radial-gradient(ellipse 5px 2px at 18% 22%, rgba(255,224,102,.65) 0%, transparent 80%)',
+      'radial-gradient(ellipse 6px 2px at 68% 28%, rgba(255,180,216,.65) 0%, transparent 80%)',
+      'radial-gradient(ellipse 5px 2px at 84% 48%, rgba(255,224,102,.55) 0%, transparent 80%)',
+      'radial-gradient(ellipse 4px 2px at 32% 64%, rgba(255,180,216,.55) 0%, transparent 80%)',
+      // 행성 코어 (가운데 분수)
+      'radial-gradient(circle 70px at 50% 65%, rgba(255,243,191,.7) 0%, rgba(255,180,216,.55) 40%, transparent 75%)',
+      // 깃털 링
+      'radial-gradient(ellipse 100% 25% at 50% 65%, transparent 50%, rgba(255,224,102,.18) 55%, transparent 65%)',
+      // 광장 + 황금 안개
+      'radial-gradient(ellipse 80% 40% at 50% 92%, rgba(255,212,59,.45) 0%, transparent 70%)',
+      // 핑크 새벽 sky
+      'linear-gradient(180deg, #FFE3F2 0%, #FFB4D8 25%, #FA80B0 55%, #5A1A3F 85%, #1A0510 100%)'
+    ].join(',') },
+  { id:'cosmic_throne', name:'🌌 우주의 옥좌 (원정 Ⅲ 보상)', price: 0, expeditionUnlock: 3,
+    grad:[
+      // 별밭 (조밀)
+      'radial-gradient(circle at 8% 14%, rgba(255,255,255,.85) 0%, transparent 0.4%)',
+      'radial-gradient(circle at 22% 28%, rgba(255,224,102,.8) 0%, transparent 0.5%)',
+      'radial-gradient(circle at 36% 48%, rgba(229,153,247,.8) 0%, transparent 0.5%)',
+      'radial-gradient(circle at 52% 12%, rgba(116,192,252,.8) 0%, transparent 0.4%)',
+      'radial-gradient(circle at 68% 36%, rgba(255,255,255,.85) 0%, transparent 0.4%)',
+      'radial-gradient(circle at 82% 58%, rgba(255,224,102,.8) 0%, transparent 0.5%)',
+      'radial-gradient(circle at 92% 24%, rgba(229,153,247,.8) 0%, transparent 0.4%)',
+      // 회전 은하 (중앙)
+      'conic-gradient(from 0deg at 50% 55%, rgba(151,117,250,.45) 0deg, rgba(116,192,252,.35) 90deg, rgba(229,153,247,.45) 180deg, rgba(255,224,102,.35) 270deg, rgba(151,117,250,.45) 360deg)',
+      // 블랙홀 코어
+      'radial-gradient(circle 50px at 50% 55%, #000 0%, #1a0033 60%, transparent 90%)',
+      // 사건의 지평선 (황금 ring)
+      'radial-gradient(ellipse 30% 8% at 50% 55%, transparent 60%, rgba(255,212,59,.55) 65%, transparent 75%)',
+      // 우주 베이스
+      'linear-gradient(180deg, #0a0030 0%, #1a0050 30%, #2a0080 60%, #050015 100%)'
+    ].join(',') },
+  { id:'hellgate_redeemer', name:'🔥 지옥문의 구원자 (원정 Ⅳ 보상)', price: 0, expeditionUnlock: 4,
+    grad:[
+      // 떨어지는 잿불
+      'radial-gradient(circle at 14% 18%, rgba(255,107,107,.7) 0%, transparent 1%)',
+      'radial-gradient(circle at 28% 36%, rgba(255,167,38,.65) 0%, transparent 0.9%)',
+      'radial-gradient(circle at 46% 22%, rgba(255,224,102,.6) 0%, transparent 0.7%)',
+      'radial-gradient(circle at 62% 44%, rgba(255,107,107,.65) 0%, transparent 1%)',
+      'radial-gradient(circle at 78% 28%, rgba(255,167,38,.6) 0%, transparent 0.9%)',
+      'radial-gradient(circle at 92% 56%, rgba(255,224,102,.6) 0%, transparent 0.8%)',
+      // 부서진 지옥문 (가운데 핵)
+      'radial-gradient(circle 90px at 50% 60%, rgba(255,212,59,.7) 0%, rgba(255,107,0,.5) 30%, rgba(122,24,24,.6) 70%, transparent 90%)',
+      // 갈라진 균열 (방사 stripes)
+      'repeating-conic-gradient(from 30deg at 50% 60%, rgba(255,107,0,.16) 0deg 4deg, transparent 4deg 36deg)',
+      // 새벽 광선 (구원의 빛)
+      'linear-gradient(190deg, transparent 0%, rgba(255,243,191,.25) 30%, rgba(255,243,191,.4) 50%, transparent 70%)',
+      // 지옥 base — 어둠 + 크림슨 + ash
+      'linear-gradient(180deg, #1A0505 0%, #5A1010 25%, #C92A2A 55%, #FF6B00 75%, #2A0808 95%, #050000 100%)'
+    ].join(',') },
 ];
 const TITLE_SKINS_BY_ID = Object.fromEntries(TITLE_SKINS.map(s => [s.id, s]));
+// v12.14 — 원정 보상 스킨 마이그레이션. 이미 원정 끝 챕터 클리어한 사용자에게 자동 추가.
+(function migrateExpeditionRewardSkins(){
+  const expEndCh = { 1:50, 2:70, 3:100, 4:130 };
+  const cleared = progress.clearedChapter || 0;
+  let changed = false;
+  for(const s of TITLE_SKINS){
+    if(s.expeditionUnlock && cleared >= expEndCh[s.expeditionUnlock]){
+      if(!progress.ownedSkins.includes(s.id)){
+        progress.ownedSkins.push(s.id);
+        changed = true;
+      }
+    }
+  }
+  if(changed){ try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }catch(e){} }
+})();
 
 function applyTitleSkin(){
   const skinId = progress.skin || 'default';
@@ -6073,26 +6159,25 @@ function drawWifePigeon(ctx, c){
   ctx.moveTo(-10, 6); ctx.quadraticCurveTo(0, 10+breath, 10, 6);
   ctx.moveTo(-9,  14); ctx.quadraticCurveTo(0, 18+breath, 9, 14);
   ctx.stroke();
-  // Wings — small folded wings flush with body (no protruding leaf shape).
+  // v12.14 — 둥근 비둘기 날개 (사용자 피드백 "박쥐 날개라 이상함" 반영). 깃털 3겹 layering.
   ctx.fillStyle = '#D88A99';
+  // 좌측 날개 — 둥근 oval에 outer feather tip 살짝 늘어진 형태
   ctx.beginPath();
-  ctx.moveTo(-19, 0); ctx.quadraticCurveTo(-24, 8, -20, 18); ctx.quadraticCurveTo(-15, 12, -14, 4);
-  ctx.closePath(); ctx.fill();
+  ctx.ellipse(-15, 8, 8, 12, -0.18, 0, Math.PI*2); ctx.fill();
   ctx.beginPath();
-  ctx.moveTo(19, 0); ctx.quadraticCurveTo(24, 8, 20, 18); ctx.quadraticCurveTo(15, 12, 14, 4);
-  ctx.closePath(); ctx.fill();
-  // Wing inner highlight
+  ctx.ellipse(15, 8, 8, 12, 0.18, 0, Math.PI*2); ctx.fill();
+  // 안쪽 lighter highlight
   ctx.fillStyle = '#F0B8C0';
   ctx.beginPath();
-  ctx.moveTo(-18, 2); ctx.quadraticCurveTo(-21, 8, -19, 15); ctx.quadraticCurveTo(-15, 11, -14, 5);
-  ctx.closePath(); ctx.fill();
+  ctx.ellipse(-15, 10, 5, 8, -0.18, 0, Math.PI*2); ctx.fill();
   ctx.beginPath();
-  ctx.moveTo(18, 2); ctx.quadraticCurveTo(21, 8, 19, 15); ctx.quadraticCurveTo(15, 11, 14, 5);
-  ctx.closePath(); ctx.fill();
-  // Single feather line per wing
-  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 0.8; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(-19, 7); ctx.lineTo(-15, 13); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(19, 7);  ctx.lineTo(15, 13);  ctx.stroke();
+  ctx.ellipse(15, 10, 5, 8, 0.18, 0, Math.PI*2); ctx.fill();
+  // 깃털 3-line layering (둥근 곡선)
+  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-18, 4);  ctx.quadraticCurveTo(-19, 9, -17, 14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-16, 6);  ctx.quadraticCurveTo(-17, 11, -15, 16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(18, 4);   ctx.quadraticCurveTo(19, 9, 17, 14);  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(16, 6);   ctx.quadraticCurveTo(17, 11, 15, 16); ctx.stroke();
   // Head — husband와 동일 16r로 환원해 눈/부리 비례 자연스럽게.
   ctx.fillStyle = '#E8A8B6';
   ctx.beginPath(); ctx.arc(0, -22, 16, 0, Math.PI*2); ctx.fill();
@@ -6111,33 +6196,34 @@ function drawWifePigeon(ctx, c){
   ctx.beginPath();
   ctx.moveTo(-2, -18); ctx.lineTo(11, -15.5); ctx.lineTo(-2, -14);
   ctx.closePath(); ctx.fill();
-  // === EYE — husband 동일 좌표(-4,-26) + 살짝 큰 눈 ===
+  // === EYE — v12.14 쌍꺼풀 얇게 + 속눈썹 가벼운 곡선 (사용자 피드백 "쌍커풀 너무 두껍다") ===
   if(blink){
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
   } else {
     // Sclera
     ctx.fillStyle = '#FFF';
-    ctx.beginPath(); ctx.ellipse(-4, -26, 3.6, 4.0, 0, 0, Math.PI*2); ctx.fill();
-    // Pupil — bigger and central
+    ctx.beginPath(); ctx.ellipse(-4, -26, 3.4, 3.8, 0, 0, Math.PI*2); ctx.fill();
+    // Pupil
     ctx.fillStyle = '#3B2235';
-    ctx.beginPath(); ctx.arc(-4, -26, 2.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-4, -26, 2.2, 0, Math.PI*2); ctx.fill();
     // Highlight
     ctx.fillStyle = '#FFF';
-    ctx.beginPath(); ctx.arc(-3, -27, 1.0, 0, Math.PI*2); ctx.fill();
-    // Lower lash dot
-    ctx.fillStyle = '#FFE6F0';
-    ctx.beginPath(); ctx.arc(-4, -23, 0.6, 0, Math.PI*2); ctx.fill();
-    // Upper eyelashes — three short upward curves anchored above sclera
-    ctx.strokeStyle = '#3B2235'; ctx.lineWidth = 1.0; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-7, -29); ctx.quadraticCurveTo(-8, -31, -7.5, -32.5); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-4, -30);   ctx.quadraticCurveTo(-4, -32, -3.6, -33.5); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-1, -29);   ctx.quadraticCurveTo(0, -31, -0.5, -32.5); ctx.stroke();
+    ctx.beginPath(); ctx.arc(-3, -27, 0.9, 0, Math.PI*2); ctx.fill();
+    // 속눈썹 — 단 한 줄의 가벼운 곡선 (이전 3개 굵은 stroke → 1개 얇은 line)
+    ctx.strokeStyle = '#3B2235'; ctx.lineWidth = 0.6; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-7.5, -28.5);
+    ctx.quadraticCurveTo(-4, -30, -0.5, -28.5);
+    ctx.stroke();
+    // 작은 끝부분 액센트 (속눈썹 끝)
+    ctx.beginPath(); ctx.moveTo(-7.5, -28.5); ctx.lineTo(-8.5, -30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-0.5, -28.5); ctx.lineTo(0.5, -30); ctx.stroke();
   }
-  // Soft arched eyebrow above the eye
-  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+  // Soft arched eyebrow — 더 가볍게 (얇은 stroke)
+  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(-8, -31); ctx.quadraticCurveTo(-4, -33, 0, -31);
+  ctx.moveTo(-8, -31); ctx.quadraticCurveTo(-4, -32.5, 0, -31);
   ctx.stroke();
   // Lipstick — small dot under beak (subtle feminine cue)
   ctx.fillStyle = '#D63384';
@@ -7192,6 +7278,18 @@ function onBossDefeated(){
   if(state.chapter >= MAX_CHAPTERS || isExpeditionEnd(state.chapter)){
     state.scene='victory';
     state.victoryExpeditionId = expeditionFor(state.chapter).id;
+    // v12.14 — 원정 보상 스킨 자동 해금. 이미 보유면 noop.
+    const rewardSkin = TITLE_SKINS.find(s => s.expeditionUnlock === state.victoryExpeditionId);
+    if(rewardSkin && !progress.ownedSkins.includes(rewardSkin.id)){
+      progress.ownedSkins.push(rewardSkin.id);
+      saveProgress();
+      // 시네마틱 위에 살짝 떠있는 보상 토스트 (HUD가 hidden이라 토스트만 보임)
+      state.toastBanner = {
+        text:`🎁 보상 스킨 해금: ${rewardSkin.name}`,
+        sub:'타이틀 → 상점 → 배경 스킨에서 적용 가능',
+        t:3.5, maxT:3.5, tone:'critical'
+      };
+    }
     sfxVictory();
     renderVictory(state.chapter >= MAX_CHAPTERS);
     document.getElementById('hud').classList.add('hidden');
@@ -11615,21 +11713,30 @@ function renderSkinShop(){
   grid.innerHTML = '';
   // Sort by price ascending so cheaper skins appear first; equal-price ties keep declaration order.
   const sortedSkins = TITLE_SKINS.slice().sort((a, b) => (a.price || 0) - (b.price || 0));
+  // v12.14 — 원정 보상 스킨은 expedition 끝 챕터 클리어로만 해금. price 0 이지만 코인 구매 불가.
+  const expEndCh = { 1:50, 2:70, 3:100, 4:130 };
   for(const skin of sortedSkins){
     const owned = (progress.ownedSkins||[]).includes(skin.id);
     const equipped = progress.skin === skin.id;
     const canAfford = (progress.coins||0) >= skin.price;
+    const expRequired = skin.expeditionUnlock || 0;
+    const expCleared = expRequired ? (progress.clearedChapter || 0) >= expEndCh[expRequired] : true;
 
     const card = document.createElement('div');
     card.className = 'skin-card' + (owned ? ' owned' : '') + (equipped ? ' equipped' : '');
-    const tag = equipped
-      ? `<span class="skin-tag eq">★ 적용중</span>`
-      : owned ? `<span class="skin-tag">보유</span>` : '';
+    let tag;
+    if(equipped) tag = `<span class="skin-tag eq">★ 적용중</span>`;
+    else if(owned) tag = `<span class="skin-tag">보유</span>`;
+    else if(expRequired && !expCleared) tag = `<span class="skin-tag" style="border-color:#FF6B6B;color:#FF6B6B;">🔒 잠김</span>`;
+    else tag = '';
     let actionHtml;
     if(equipped){
       actionHtml = `<button class="skin-action equipped" type="button">적용 중</button>`;
     } else if(owned){
       actionHtml = `<button class="skin-action equip" type="button">장착</button>`;
+    } else if(expRequired && !expCleared){
+      // 원정 보상 — 잠금 상태
+      actionHtml = `<button class="skin-action poor" type="button">🔒 원정 ${['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'][expRequired]} 클리어 필요</button>`;
     } else if(canAfford){
       actionHtml = `<button class="skin-action" type="button">🪙 ${skin.price.toLocaleString()}</button>`;
     } else {
@@ -11641,10 +11748,18 @@ function renderSkinShop(){
       <div class="skin-name">${skin.name}</div>
       ${actionHtml}
     `;
-    // Tapping anywhere on the card — including the action button — opens the preview modal
-    // first so the player sees how the title screen will look before committing.
     card.style.cursor = 'pointer';
-    card.addEventListener('click', () => openSkinPreviewModal(skin.id));
+    card.addEventListener('click', () => {
+      if(expRequired && !expCleared && !owned){
+        state.toastBanner = {
+          text:`🔒 원정 ${['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'][expRequired]} 보상 스킨`,
+          sub:`ch${expEndCh[expRequired]} 클리어 시 자동 해금`,
+          t:2.5, maxT:2.5, tone:'warn'
+        };
+        return;
+      }
+      openSkinPreviewModal(skin.id);
+    });
     grid.appendChild(card);
   }
 }
