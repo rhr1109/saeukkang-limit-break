@@ -1500,18 +1500,26 @@ function drawPigeon(ctx, x, y, scale, facing, walkPhase=0, hurt=false, angry=1, 
   ctx.fillStyle='rgba(0,0,0,.55)';
   ctx.beginPath(); ctx.ellipse(0, 52 + bodyBob/scale, 34, 5, 0, 0, Math.PI*2); ctx.fill();
 
-  // Legs — alternate stride when moving
+  // Legs — alternate stride when moving. v11 fix: previously the leg shrank from the top while
+  // the foot moved DOWN, opening a 2-6px gap between leg bottom and foot top during stride.
+  // New math: leg keeps full 18px height and the whole leg+foot translates UP together by
+  // `step`, so the foot stays glued to the leg bottom regardless of walk phase.
   const legA = moving ? Math.sin(walkPhase)*6 : 0;
   const legB = moving ? Math.sin(walkPhase+Math.PI)*6 : 0;
+  const stepA = Math.max(0, legA), stepB = Math.max(0, legB);
   ctx.fillStyle='#FFA500';
   // Back leg (behind body, darker)
   ctx.save(); ctx.globalAlpha = 0.85;
-  ctx.fillRect(-10, 34 + Math.max(0,legA), 7, 18 - Math.max(0,legA));
-  ctx.beginPath(); ctx.moveTo(-15, 50 + Math.max(0,legA)); ctx.lineTo(0, 50 + Math.max(0,legA)); ctx.lineTo(-8, 56 + Math.max(0,legA)); ctx.closePath(); ctx.fill();
+  ctx.fillRect(-10, 34 - stepA, 7, 18);
+  ctx.beginPath();
+  ctx.moveTo(-15, 50 - stepA); ctx.lineTo(0, 50 - stepA); ctx.lineTo(-8, 56 - stepA);
+  ctx.closePath(); ctx.fill();
   ctx.restore();
   // Front leg
-  ctx.fillRect(3, 34 + Math.max(0,legB), 7, 18 - Math.max(0,legB));
-  ctx.beginPath(); ctx.moveTo(0, 50 + Math.max(0,legB)); ctx.lineTo(15, 50 + Math.max(0,legB)); ctx.lineTo(8, 56 + Math.max(0,legB)); ctx.closePath(); ctx.fill();
+  ctx.fillRect(3, 34 - stepB, 7, 18);
+  ctx.beginPath();
+  ctx.moveTo(0, 50 - stepB); ctx.lineTo(15, 50 - stepB); ctx.lineTo(8, 56 - stepB);
+  ctx.closePath(); ctx.fill();
 
   // Body with breathing
   ctx.fillStyle = hurt ? '#FFB3B3' : '#8B95A1';
@@ -2986,8 +2994,9 @@ function drawSkinPreviewPigeonFrame(){
     fireRate: 1, reloadT: 1, vx: 0, vy: 0,
     costumes: buildPlayerCostumeRefs()
   };
-  const scale = Math.min(cssW, cssH) / 130;
-  drawPigeon(ctx2, cssW/2, cssH * 0.78, scale, 1, state.time * 1.4, false, 1, fakePlayer);
+  // v11 — same clip fix as drawTitlePigeonFrame: smaller denominator + cy 0.55 keeps legs in frame.
+  const scale = Math.min(cssW, cssH) / 150;
+  drawPigeon(ctx2, cssW/2, cssH * 0.55, scale, 1, state.time * 1.4, false, 1, fakePlayer);
 }
 
 function drawTitlePigeonFrame(){
@@ -3014,10 +3023,12 @@ function drawTitlePigeonFrame(){
     hungerState: getPigeonHungerState(),
   };
   const cx = cssW / 2;
-  // Pigeon footprint is roughly 110px tall at scale 1, with origin at body center; we anchor a
-  // bit below center so the head + crown area has headroom in the canvas frame.
-  const scale = Math.min(cssW, cssH) / 130;
-  const cy = cssH * 0.62;
+  // v11 — pigeon vertical extent at scale 1 is ~94px (head top -38 to foot bottom +56), plus
+  // shadow + crown headroom. Previous denominator 130 + cy 0.62 clipped the legs at 240px frame
+  // (foot bottom landed at y=252, 12px past the canvas). New: denominator 150 + cy 0.55 →
+  // head fits with headroom AND legs/feet stay inside the canvas.
+  const scale = Math.min(cssW, cssH) / 150;
+  const cy = cssH * 0.55;
   drawPigeon(ctx2, cx, cy, scale, 1, state.time * 1.4, false, 1, fakePlayer);
 }
 
@@ -4002,6 +4013,25 @@ function chapterMult(){
   };
 }
 
+// v11 progression scaling — replay/maxed-shop players had compounding damage that one-shot
+// bosses on early chapters (ch8 boss in 3s reported). progressionMult scales BOTH boss HP and
+// mob HP by the player's permanent investment so a maxed account still gets a fight on ch8.
+//   - shopRatio: total shop levels / 55 → 0..1, contributes up to ×2.0 (1 + ratio×1.0)
+//   - chapterGap: how far highChapter is past current → up to ×1.6 (replay penalty)
+//   - Combined max ~×3.2. Fresh first-time first run = ×1.0; partially leveled shop = ×1.4-1.6.
+function progressionMult(){
+  let shopTotal = 0, shopMax = 0;
+  for(const def of SHOP_DEFS){
+    shopTotal += (progress.shop && progress.shop[def.id]) || 0;
+    shopMax += def.max;
+  }
+  const shopRatio = shopMax > 0 ? Math.min(1, shopTotal / shopMax) : 0;
+  const shopMult = 1 + shopRatio * 1.0;          // max ×2.0 (was ×3.0 — too aggressive on fresh)
+  const chapterGap = Math.max(0, (progress.highChapter || 0) - state.chapter);
+  const gapMult = 1 + Math.min(0.6, chapterGap * 0.03);  // max ×1.6 (was ×2.5)
+  return shopMult * gapMult;
+}
+
 // Progress — persisted in localStorage. Includes meta-currency (coins), shop upgrades,
 // costume inventory, equipped slots, and pity counter for chapter-clear costume drops.
 const PROGRESS_KEY = 'saeukkang_progress_v1';
@@ -4811,15 +4841,15 @@ function spawnEnemy(kind){
   const ENEMY_HP_MULT = 0.65;
   const ENEMY_DMG_MULT = 0.75;
   // v11 — mob-only HP boost so wave 2/3 mobs aren't 1-shot at mid chapters (ch5-25). Bosses
-  // are unaffected (this is applied here in spawnEnemy; spawnBoss overwrites .hp directly).
-  // Tuned so avg shots/mob is ≥2 from ch5 onward — the player should see the mob alive briefly,
-  // not vaporize on contact. ch1-2: 1.0× / ch3-10: 1.0→2.4 / ch11-25: 2.4→3.6 / ch26+: 3.6 cap.
+  // share the same boost only via progressionMult below.
+  // ch1-2: 1.0× / ch3-10: 1.0→2.4 / ch11-25: 2.4→3.6 / ch26+: 3.6 cap.
   const c = state.chapter;
   const mobHpExtra = c <= 2 ? 1.0
                    : c <= 10 ? 1.0 + (c-2)*0.175
                    : c <= 25 ? 2.4 + (c-10)*0.08
-                   :           Math.min(3.6, 3.6);
-  const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT * mobHpExtra));
+                   :           3.6;
+  const prog = progressionMult();
+  const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT * mobHpExtra * prog));
   const e = {
     x, y, vx:0, vy:0, kind,
     hp, maxHp: hp,
@@ -4895,7 +4925,9 @@ function spawnBoss(){
   // max-build sub-20s is the reward for an ideal pick string.
   // Formula evolution: v0 (220, 46) <10s, v1 (700, 110) 20s, v2 (1100, 130) 30s for thin
   // 5-card builds, v3 (3500, 110) 30s for the typical full-XP build.
-  b.hp = b.maxHp = Math.ceil((3500 + Math.pow(c, 1.45)*110) * chm.hp * v.hpMult);
+  // v11: × progressionMult() — maxed-shop players replaying old chapters get 2-5× HP so
+  // the boss stays a real fight instead of dying in 3 seconds (reported user complaint).
+  b.hp = b.maxHp = Math.ceil((3500 + Math.pow(c, 1.45)*110) * chm.hp * v.hpMult * progressionMult());
   b.speed = (52 + c*2.2) * chm.speed;
   b.damage = Math.ceil((14 + c*1.8) * chm.dmg * v.dmgMult);
   b.size = 2.9 * v.sizeMult;
@@ -5616,14 +5648,23 @@ function showChapterRewardModal(eq){
   document.getElementById('chapterRewardModal').classList.remove('hidden');
 }
 
+// v11 chapter card cap — maxed-shop players at ch8 were stacking 25-28 cards and oneshotting
+// bosses. Cap caps cards picked per chapter so the player can't compound damage indefinitely.
+// Curve: ch1=12, ch5=14, ch10=16, ch15=18, ch20=20, ch30=24, ch50=28 (hard cap).
+function cardLimitForChapter(c){
+  return Math.min(28, 12 + Math.floor(c * 0.4));
+}
 function gainXP(amount){
   const p = state.player;
   p.xp += amount * p.xpMult;
   while(p.xp >= p.xpToNext){
-    // Level cap — once every chapter-applicable upgrade is maxed, stop leveling. The bar parks
-    // just below full so the player isn't visually stuck "almost ready to level".
+    // Level cap — stop leveling when all chapter-applicable upgrades are maxed OR the chapter
+    // card cap has been reached. The bar parks just below full so the player isn't visually
+    // stuck "almost ready to level".
     const allMaxed = UPGRADES.filter(isUpgradeUnlocked).every(u => isUpgradeMaxed(u, p));
-    if(allMaxed){
+    const cardCap = cardLimitForChapter(state.chapter);
+    const cardsPicked = (p.level || 1) - 1;
+    if(allMaxed || cardsPicked >= cardCap){
       p.xp = Math.min(p.xp, p.xpToNext - 1);
       break;
     }
