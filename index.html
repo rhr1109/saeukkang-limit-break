@@ -5347,11 +5347,14 @@ function killEnemy(e){
   }
   // Trickle meta-coins for every kill so the shop fills up even from regular play.
   // Boss/tyrant pay a richer bounty; trash mobs nudge the meter forward.
+  // v11.6 — random trash-mob drop chance cut 0.35 → 0.10 per user feedback ("코인이 너무 잘
+  // 벌린다"). Per-mob amounts unchanged so elite kills still feel rewarding; the bulk-drop
+  // stream from regular mobs is what bleeds the coin economy looser than intended.
   if(e.kind === 'boss')        awardCoins(20 + state.chapter*5);
   else if(e.kind === 'tyrant' || e.kind === 'leviathan') awardCoins(10);
   else if(e.kind === 'summoner' || e.kind === 'reaper') awardCoins(3);
   else if(e.kind === 'sniper' || e.kind === 'tank')     awardCoins(2);
-  else if(Math.random() < 0.35) awardCoins(1);
+  else if(Math.random() < 0.10) awardCoins(1);
   sfxKill();
   // particles
   for(let i=0;i<14;i++){
