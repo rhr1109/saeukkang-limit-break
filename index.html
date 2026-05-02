@@ -742,8 +742,8 @@
         <h3 style="text-align:center;color:#E599F7;">현재 착용 중</h3>
         <div class="equip-row" id="equipRow"></div>
       </div>
-      <!-- v12.10 Phase 2 — 캐릭터별 탭. 사용자 요청: 동료 코스튬을 남편 코스튬 아래에 두지 말고
-           탭으로 분리해서 클릭 시 확인. 원정 진척에 따라 탭이 활성화. -->
+      <!-- v12.10/v12.11 — 캐릭터별 탭. 가족(아내/아기)만 코스튬 시스템. 원정 Ⅳ 구출 친구들은
+           코스튬 없음 (사용자 명시). -->
       <div class="costume-section">
         <div class="cos-char-tabs" id="cosCharTabs" style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center;">
           <button class="cs-tab on" type="button" data-char="player" style="border-color:#9775FA;">👤 남편</button>
@@ -994,6 +994,21 @@
         <button class="btn alt" id="ccNextBtn">🗺 챕터 선택으로</button>
         <button class="btn alt" id="ccHomeBtn">🏠 홈으로</button>
       </div>
+    </div>
+  </div>
+
+  <!-- v12.11 — 원정 Ⅳ 진입 시네마틱 오프닝. ch101 첫 진입 시 표시 (1회성).
+       지옥 구출 원정 컨셉을 짧은 캡션으로 노출. -->
+  <div id="hellPrologueModal" class="modal hidden">
+    <div class="card" style="max-width:420px;text-align:center;background:linear-gradient(180deg,rgba(40,8,8,.96),rgba(15,2,2,.98));border-color:#FF6B6B;">
+      <h2 style="color:#FF6B6B;text-shadow:0 0 18px rgba(255,107,107,.85);">🔥 원정 Ⅳ — 지옥 구출 원정</h2>
+      <canvas id="hellPrologueCanvas" width="360" height="180" style="display:block;margin:10px auto;background:radial-gradient(circle at 50% 60%, rgba(255,107,107,.4) 0%, rgba(20,5,5,.95) 70%);border-radius:12px;border:2px solid #C92A2A;"></canvas>
+      <div style="font-size:13px;color:#FFE066;font-weight:700;line-height:1.6;margin:6px 0 14px;">
+        우주의 끝에 다다른 그날, 비둘기 가족은 깨달았다.<br>
+        <span style="color:#FFB4D8;">"우리가 정복한 모든 별의 친구들이 지옥에서 울고 있다…"</span><br>
+        <span style="color:#A5D8FF;">억울하게 끌려간 친구들을 구하러,<br>가족은 마지막 원정을 떠난다.</span>
+      </div>
+      <button class="btn" id="hellPrologueCloseBtn" style="width:100%;background:linear-gradient(180deg,#FF6B6B,#7A0F0F);">▶ 지옥문 통과</button>
     </div>
   </div>
 
@@ -3419,7 +3434,9 @@ function drawTitlePigeonFrame(){
   }
   if(childOk){
     ctx2.save();
-    ctx2.translate(cx + offsetX, cy + scale*10);
+    // v12.11 — child도 가족 발 높이로 정렬. drawChildPigeon의 shadow y=18에 맞춰
+    // husband 발 위치(scale*52)와 일치하도록 -34만큼 위로 잡고 그린다.
+    ctx2.translate(cx + offsetX, cy + scale*18);
     ctx2.scale(compScale, compScale);
     drawCompanion(ctx2, { x:0, y:0, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
     ctx2.restore();
@@ -4614,23 +4631,27 @@ const progress = (()=>{
     lastFedAt: Date.now(),
     feedBoostUntil: 0,                                  // ms timestamp when current boost expires
     feedBoostStrength: 0,                               // 0=none, 1=deluxe (+10%), 2=ultra (+20% glow)
-    // v12 phase 2 — companion unlocks. Wife meets player on ch51 clear, child on ch60 clear.
-    // Both fight alongside player in subsequent chapters with reduced-damage shrimp shots.
-    companionUnlocks: { wife:false, child:false },
-    // v12 phase 2.2 — companion costumes. Each kind has a list of unlocked accessory ids and one
-    // currently equipped. Default accessory unlocks the moment the companion joins.
+    // v12 phase 2 / v12.11 phase 3b — companion unlocks. 가족(wife/child)은 코스튬 있음.
+    // 원정 Ⅳ 구출 친구들(sparrow ch105 / magpie ch110 / owl ch115 / parrot ch120 / squirrel ch125)은
+    // 사용자 명시: 별도 코스튬 없음 + 가족 뒤 무리처럼 등장.
+    companionUnlocks: {
+      wife:false, child:false,
+      sparrow:false, magpie:false, owl:false, parrot:false, squirrel:false,
+    },
+    // companion costumes — wife/child만. 구출 친구들은 코스튬 시스템 없음.
     companionCostumes: {
-      wife:  { unlocked:['bow'], equipped:'bow' },
+      wife:  { unlocked:['bow'],      equipped:'bow' },
       child: { unlocked:['pacifier'], equipped:'pacifier' },
     },
   };
+  const cuDefault = {wife:false, child:false, sparrow:false, magpie:false, owl:false, parrot:false, squirrel:false};
   const merged = Object.assign(base, saved || {}, {
     shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}),
     equipped: Object.assign({}, base.equipped, (saved&&saved.equipped)||{}),
     costumes: (saved&&Array.isArray(saved.costumes)) ? saved.costumes : [],
     ownedSkins: (saved&&Array.isArray(saved.ownedSkins) && saved.ownedSkins.length) ? saved.ownedSkins : ['default'],
     skin: (saved && saved.skin) || 'default',
-    companionUnlocks: Object.assign({wife:false, child:false}, (saved&&saved.companionUnlocks)||{}),
+    companionUnlocks: Object.assign({}, cuDefault, (saved&&saved.companionUnlocks)||{}),
     companionCostumes: (() => {
       const def = { wife:{unlocked:['bow'], equipped:'bow'}, child:{unlocked:['pacifier'], equipped:'pacifier'} };
       const sv = (saved && saved.companionCostumes) || {};
@@ -5329,8 +5350,7 @@ function spawnCompanions(){
   state.companions = [];
   const p = state.player;
   if(!p) return;
-  // v12.10 Phase 2 — wife는 항상 좌측, child는 항상 우측 고정 (사용자 요청).
-  // 기존 ox*facing 곱셈으로 player 방향 반전 시 좌우가 뒤집혀 "산만하다"는 피드백 반영.
+  // 가족 — wife 좌측, child 우측 (v12.10 phase 2).
   if(progress.companionUnlocks && progress.companionUnlocks.wife){
     state.companions.push({
       kind:'wife', label:'아내', tint:'#FFB4D8', accent:'#FA80B0',
@@ -5341,11 +5361,35 @@ function spawnCompanions(){
   }
   if(progress.companionUnlocks && progress.companionUnlocks.child){
     state.companions.push({
+      // v12.11 Phase 3b — child oy 12→32. drawChildPigeon shadow는 local y=18에 그려져
+      // child가 가족 발 높이(약 py+50)와 맞으려면 oy=32이 필요. 사용자 피드백 "아기가
+      // 붕 떠있는 것 같다" 반영.
       kind:'child', label:'아기', tint:'#A5D8FF', accent:'#74C0FC',
-      x: p.x + 50, y: p.y + 12, ox:50, oy:12,
+      x: p.x + 50, y: p.y + 32, ox:50, oy:32,
       reloadT: 1.0, fireRate: 1.4,
       damageMult: 0.30, projCount: 1,
     });
+  }
+  // v12.11 Phase 3b — 원정 Ⅳ 구출 친구들. 가족 뒤(아래쪽)에 5각형 무리 배치.
+  // ox/oy는 player 기준 player 발 아래 영역 [-60..60, +35..+75]에 분산. 각자 살짝 다른
+  // damageMult / fireRate로 변화감만 주되 모두 작아 챕터 밸런스 영향 최소.
+  const rescueDefs = [
+    { kind:'sparrow',  ox:-44, oy:42, fireRate:2.2, damageMult:0.20, label:'참새',    tint:'#A87545' },
+    { kind:'magpie',   ox: 44, oy:42, fireRate:1.7, damageMult:0.24, label:'까치',    tint:'#1A1A1A' },
+    { kind:'owl',      ox:-22, oy:62, fireRate:1.0, damageMult:0.32, label:'부엉이',  tint:'#7A5230' },
+    { kind:'parrot',   ox: 22, oy:62, fireRate:1.6, damageMult:0.26, label:'앵무새',  tint:'#2F9E44' },
+    { kind:'squirrel', ox:  0, oy:78, fireRate:1.4, damageMult:0.22, label:'다람쥐',  tint:'#A0522D' },
+  ];
+  for(const def of rescueDefs){
+    if(progress.companionUnlocks && progress.companionUnlocks[def.kind]){
+      state.companions.push({
+        kind:def.kind, label:def.label, tint:def.tint, accent:def.tint,
+        x: p.x + def.ox, y: p.y + def.oy, ox:def.ox, oy:def.oy,
+        reloadT: 0.6 + Math.random()*0.4, fireRate: def.fireRate,
+        damageMult: def.damageMult, projCount: 1,
+        phaseSeed: Math.random()*Math.PI*2,  // 다람쥐 꼬리 흔들림 등에 사용
+      });
+    }
   }
 }
 
@@ -5395,8 +5439,213 @@ function updateCompanions(dt){
 }
 
 function drawCompanion(ctx, c){
-  if(c.kind === 'wife') return drawWifePigeon(ctx, c);
-  return drawChildPigeon(ctx, c);
+  if(c.kind === 'wife')     return drawWifePigeon(ctx, c);
+  if(c.kind === 'child')    return drawChildPigeon(ctx, c);
+  // v12.11 Phase 3b — 원정 Ⅳ 구출 친구들. 작은 사이즈로 가족 뒤에 무리.
+  if(c.kind === 'sparrow')  return drawSparrowFriend(ctx, c);
+  if(c.kind === 'magpie')   return drawMagpieFriend(ctx, c);
+  if(c.kind === 'owl')      return drawOwlFriend(ctx, c);
+  if(c.kind === 'parrot')   return drawParrotFriend(ctx, c);
+  if(c.kind === 'squirrel') return drawSquirrelFriend(ctx, c);
+}
+
+// ---------- v12.11 Phase 3b — 원정 Ⅳ 구출 친구들 ----------
+// 모두 작은 사이즈 (scale 0.40~0.45). 단순한 측면뷰, 단일 눈 + 단일 부리/입.
+// 비주얼 디테일은 의도적으로 작음 — 가족 뒤 "무리" 느낌이 우선.
+
+function _baseFriendShadow(ctx){
+  ctx.fillStyle = 'rgba(0,0,0,.4)';
+  ctx.beginPath(); ctx.ellipse(0, 18, 11, 3, 0, 0, Math.PI*2); ctx.fill();
+}
+
+function drawSparrowFriend(ctx, c){
+  ctx.save(); ctx.translate(c.x, c.y); ctx.scale(0.42, 0.42);
+  _baseFriendShadow(ctx);
+  // Body (warm brown)
+  ctx.fillStyle = '#A87545';
+  ctx.beginPath(); ctx.ellipse(0, 6, 14, 12, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#D4A877';
+  ctx.beginPath(); ctx.ellipse(0, 10, 9, 7, 0, 0, Math.PI*2); ctx.fill();
+  // Head
+  ctx.fillStyle = '#A87545';
+  ctx.beginPath(); ctx.arc(0, -6, 9, 0, Math.PI*2); ctx.fill();
+  // Cheek brown patch
+  ctx.fillStyle = '#7A5230';
+  ctx.beginPath(); ctx.arc(-4, -3, 3, 0, Math.PI*2); ctx.fill();
+  // Beak (stubby)
+  ctx.fillStyle = '#1A1208';
+  ctx.beginPath(); ctx.moveTo(2, -7); ctx.lineTo(9, -5); ctx.lineTo(2, -3); ctx.closePath(); ctx.fill();
+  // Eye
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(-2, -8, 1.6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath(); ctx.arc(-1.4, -8.6, 0.6, 0, Math.PI*2); ctx.fill();
+  // Tail tuft
+  ctx.fillStyle = '#7A5230';
+  ctx.beginPath();
+  ctx.moveTo(-12, 4); ctx.lineTo(-18, 0); ctx.lineTo(-18, 8);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawMagpieFriend(ctx, c){
+  ctx.save(); ctx.translate(c.x, c.y); ctx.scale(0.44, 0.44);
+  _baseFriendShadow(ctx);
+  // Body — black/white split
+  ctx.fillStyle = '#1A1A1A';
+  ctx.beginPath(); ctx.ellipse(0, 6, 15, 13, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#F8F9FA';
+  ctx.beginPath(); ctx.ellipse(0, 10, 9, 8, 0, 0, Math.PI*2); ctx.fill();
+  // Head black
+  ctx.fillStyle = '#1A1A1A';
+  ctx.beginPath(); ctx.arc(0, -6, 9, 0, Math.PI*2); ctx.fill();
+  // White face mask
+  ctx.fillStyle = '#F8F9FA';
+  ctx.beginPath(); ctx.ellipse(2, -4, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+  // Beak (silver — magpie picks shiny things)
+  ctx.fillStyle = '#212529';
+  ctx.beginPath(); ctx.moveTo(2, -7); ctx.lineTo(11, -5); ctx.lineTo(2, -3); ctx.closePath(); ctx.fill();
+  // Eye (yellow — alert)
+  ctx.fillStyle = '#FFE066';
+  ctx.beginPath(); ctx.arc(-1, -8, 1.8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(-1, -8, 0.8, 0, Math.PI*2); ctx.fill();
+  // Tail (long)
+  ctx.fillStyle = '#1A1A1A';
+  ctx.beginPath();
+  ctx.moveTo(-13, 5); ctx.lineTo(-22, -2); ctx.lineTo(-22, 10);
+  ctx.closePath(); ctx.fill();
+  // Iridescent shine spot
+  ctx.fillStyle = '#74C0FC';
+  ctx.beginPath(); ctx.arc(-6, 4, 1.6, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawOwlFriend(ctx, c){
+  ctx.save(); ctx.translate(c.x, c.y); ctx.scale(0.46, 0.46);
+  _baseFriendShadow(ctx);
+  // Body — round, mottled brown
+  ctx.fillStyle = '#7A5230';
+  ctx.beginPath(); ctx.ellipse(0, 4, 14, 14, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#A87545';
+  ctx.beginPath(); ctx.ellipse(0, 8, 9, 9, 0, 0, Math.PI*2); ctx.fill();
+  // Speckles
+  ctx.fillStyle = '#5A3D20';
+  ctx.beginPath(); ctx.arc(-5, 2, 0.8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(5, 6, 0.8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-2, 10, 0.7, 0, Math.PI*2); ctx.fill();
+  // Head — round
+  ctx.fillStyle = '#7A5230';
+  ctx.beginPath(); ctx.arc(0, -8, 11, 0, Math.PI*2); ctx.fill();
+  // Ear tufts
+  ctx.beginPath();
+  ctx.moveTo(-7, -16); ctx.lineTo(-5, -22); ctx.lineTo(-3, -16);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(7, -16); ctx.lineTo(5, -22); ctx.lineTo(3, -16);
+  ctx.closePath(); ctx.fill();
+  // Big eyes (owl signature) — both eyes visible front-facing
+  ctx.fillStyle = '#FFE066';
+  ctx.beginPath(); ctx.arc(-4, -9, 3.6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(4, -9, 3.6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(-4, -9, 1.8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(4, -9, 1.8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath(); ctx.arc(-3.4, -9.6, 0.7, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(4.6, -9.6, 0.7, 0, Math.PI*2); ctx.fill();
+  // Hooked beak
+  ctx.fillStyle = '#FFA94D';
+  ctx.beginPath(); ctx.moveTo(-2, -5); ctx.lineTo(0, -1); ctx.lineTo(2, -5);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawParrotFriend(ctx, c){
+  ctx.save(); ctx.translate(c.x, c.y); ctx.scale(0.43, 0.43);
+  _baseFriendShadow(ctx);
+  // Body — green
+  ctx.fillStyle = '#2F9E44';
+  ctx.beginPath(); ctx.ellipse(0, 6, 14, 13, 0, 0, Math.PI*2); ctx.fill();
+  // Yellow chest
+  ctx.fillStyle = '#FFD43B';
+  ctx.beginPath(); ctx.ellipse(0, 10, 9, 8, 0, 0, Math.PI*2); ctx.fill();
+  // Wing — red
+  ctx.fillStyle = '#FA5252';
+  ctx.beginPath();
+  ctx.moveTo(-12, 3); ctx.quadraticCurveTo(-16, 8, -12, 14);
+  ctx.quadraticCurveTo(-6, 10, -6, 4);
+  ctx.closePath(); ctx.fill();
+  // Head — green
+  ctx.fillStyle = '#2F9E44';
+  ctx.beginPath(); ctx.arc(0, -7, 9, 0, Math.PI*2); ctx.fill();
+  // Crest feather (yellow)
+  ctx.fillStyle = '#FFD43B';
+  ctx.beginPath();
+  ctx.moveTo(-2, -14); ctx.lineTo(0, -22); ctx.lineTo(2, -14);
+  ctx.closePath(); ctx.fill();
+  // Hooked beak (orange)
+  ctx.fillStyle = '#E03131';
+  ctx.beginPath();
+  ctx.moveTo(2, -6); ctx.quadraticCurveTo(11, -2, 6, 0);
+  ctx.lineTo(2, -2);
+  ctx.closePath(); ctx.fill();
+  // Eye
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath(); ctx.arc(-2, -8, 1.8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(-2, -8, 0.9, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawSquirrelFriend(ctx, c){
+  ctx.save(); ctx.translate(c.x, c.y); ctx.scale(0.44, 0.44);
+  _baseFriendShadow(ctx);
+  // Bushy tail (drawn first so body covers attachment)
+  const t = state.time;
+  const tailWag = Math.sin(t*3 + (c.phaseSeed||0)) * 4;
+  ctx.fillStyle = '#A0522D';
+  ctx.beginPath();
+  ctx.moveTo(-10, 8);
+  ctx.quadraticCurveTo(-22, 2 + tailWag, -16, -14 + tailWag);
+  ctx.quadraticCurveTo(-10, -2, -8, 6);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#C58E5A';
+  ctx.beginPath();
+  ctx.moveTo(-12, 4);
+  ctx.quadraticCurveTo(-18, -2 + tailWag, -14, -10 + tailWag);
+  ctx.quadraticCurveTo(-10, -2, -10, 4);
+  ctx.closePath(); ctx.fill();
+  // Body
+  ctx.fillStyle = '#A0522D';
+  ctx.beginPath(); ctx.ellipse(0, 6, 11, 12, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#E8C4A0';
+  ctx.beginPath(); ctx.ellipse(2, 10, 7, 8, 0, 0, Math.PI*2); ctx.fill();
+  // Head
+  ctx.fillStyle = '#A0522D';
+  ctx.beginPath(); ctx.arc(2, -6, 9, 0, Math.PI*2); ctx.fill();
+  // Cheek pouch
+  ctx.fillStyle = '#C58E5A';
+  ctx.beginPath(); ctx.arc(8, -3, 3.6, 0, Math.PI*2); ctx.fill();
+  // Ear (rounded)
+  ctx.fillStyle = '#A0522D';
+  ctx.beginPath(); ctx.ellipse(-3, -14, 3, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(5, -14, 3, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFD8B0';
+  ctx.beginPath(); ctx.ellipse(-3, -13.5, 1.6, 2, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(5, -13.5, 1.6, 2, 0, 0, Math.PI*2); ctx.fill();
+  // Eye
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(0, -7, 1.8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath(); ctx.arc(0.5, -7.6, 0.7, 0, Math.PI*2); ctx.fill();
+  // Nose
+  ctx.fillStyle = '#3B2235';
+  ctx.beginPath(); ctx.arc(8, -5, 0.9, 0, Math.PI*2); ctx.fill();
+  // Acorn in cheek (squirrel signature)
+  ctx.fillStyle = '#7A5230';
+  ctx.beginPath(); ctx.arc(11, -2, 1.6, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
 }
 
 // v12 phase 2.3 — companion costume definitions, now SINGLE-PURCHASE (per user feedback
@@ -6736,8 +6985,8 @@ function onBossDefeated(){
   }
   if(state.score > progress.highScore) progress.highScore = state.score;
   if(state.chapter > progress.highChapter){ progress.highChapter = state.chapter; progress.highStage = WAVES_PER_CHAPTER; }
-  // v12 phase 2 — companion unlocks. Wife meets player on ch51 clear, child on ch60 clear.
-  // newCompanion is a transient flag the chapter-cleared modal reads to show the meet-event banner.
+  // v12 phase 2 / v12.11 phase 3b — companion unlocks. 가족 (ch51 wife, ch60 child) +
+  // 원정 Ⅳ 구출 친구들 (ch105 sparrow, ch110 magpie, ch115 owl, ch120 parrot, ch125 squirrel).
   state.newCompanion = null;
   if(state.chapter === 51 && !progress.companionUnlocks.wife){
     progress.companionUnlocks.wife = true;
@@ -6747,6 +6996,21 @@ function onBossDefeated(){
     progress.companionUnlocks.child = true;
     grantDefaultCompanionCostume('child');
     state.newCompanion = { kind:'child', label:'아기 비둘기', sub:'다음 원정부터 함께 싸웁니다 👶' };
+  } else if(state.chapter === 105 && !progress.companionUnlocks.sparrow){
+    progress.companionUnlocks.sparrow = true;
+    state.newCompanion = { kind:'sparrow', label:'참새 친구', sub:'사냥꾼의 숲에서 구출 🐦' };
+  } else if(state.chapter === 110 && !progress.companionUnlocks.magpie){
+    progress.companionUnlocks.magpie = true;
+    state.newCompanion = { kind:'magpie', label:'까치 친구', sub:'불의 광장에서 구출 🪶' };
+  } else if(state.chapter === 115 && !progress.companionUnlocks.owl){
+    progress.companionUnlocks.owl = true;
+    state.newCompanion = { kind:'owl', label:'부엉이 친구', sub:'뼛가루 사막에서 구출 🦉' };
+  } else if(state.chapter === 120 && !progress.companionUnlocks.parrot){
+    progress.companionUnlocks.parrot = true;
+    state.newCompanion = { kind:'parrot', label:'앵무새 친구', sub:'그림자 전당에서 구출 🦜' };
+  } else if(state.chapter === 125 && !progress.companionUnlocks.squirrel){
+    progress.companionUnlocks.squirrel = true;
+    state.newCompanion = { kind:'squirrel', label:'다람쥐 친구', sub:'심연의 첨탑에서 구출 🐿' };
   }
   // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
   awardCoins(60 + state.chapter * 18);
@@ -6791,17 +7055,49 @@ function showCompanionMeetModal(){
   const titleEl = document.getElementById('cmmTitle');
   const subEl = document.getElementById('cmmSub');
   const storyEl = document.getElementById('cmmStory');
-  if(c.kind === 'wife'){
-    titleEl.textContent = '💗 마누라 비둘기 합류!';
-    titleEl.style.color = '#FFB4D8';
-    subEl.textContent = '비둘기 행성에서 만난 운명의 짝';
-    storyEl.innerHTML = '비둘기 행성에 발 디딘 그날, 깃털 평원에서 만난 한 비둘기.<br>지금부터 모든 원정에서 옆에 함께 서서 새우깡을 던집니다.';
-  } else {
-    titleEl.textContent = '👶 아기 비둘기 합류!';
-    titleEl.style.color = '#A5D8FF';
-    subEl.textContent = '두 비둘기의 사랑으로 태어난 새 생명';
-    storyEl.innerHTML = '남편 비둘기와 마누라 비둘기의 사랑으로 태어난 첫 아이.<br>아빠 따라 작은 새우깡을 던지며 함께 우주를 정복합니다.';
-  }
+  // v12.11 Phase 3b — 5종 구출 친구 분기 추가. 모두 "지옥에서 억울하게 끌려간 친구를 구한다" 톤.
+  const meetCopy = {
+    wife: {
+      title: '💗 마누라 비둘기 합류!', color:'#FFB4D8',
+      sub: '비둘기 행성에서 만난 운명의 짝',
+      story: '비둘기 행성에 발 디딘 그날, 깃털 평원에서 만난 한 비둘기.<br>지금부터 모든 원정에서 옆에 함께 서서 새우깡을 던집니다.',
+    },
+    child: {
+      title: '👶 아기 비둘기 합류!', color:'#A5D8FF',
+      sub: '두 비둘기의 사랑으로 태어난 새 생명',
+      story: '남편 비둘기와 마누라 비둘기의 사랑으로 태어난 첫 아이.<br>아빠 따라 작은 새우깡을 던지며 함께 우주를 정복합니다.',
+    },
+    sparrow: {
+      title: '🐦 참새 친구 구출!', color:'#FFE066',
+      sub: '사냥꾼의 숲 — 그물에 걸려있던 참새',
+      story: '사냥꾼의 숲에서 그물에 걸려 떨고 있던 참새.<br>가족 뒤를 따라 무리지어 작은 깃털을 흩날리며 함께 합니다.',
+    },
+    magpie: {
+      title: '🪶 까치 친구 구출!', color:'#74C0FC',
+      sub: '불의 광장 — 새장에 갇혀 있던 까치',
+      story: '불의 광장 새장 안에서 빛나는 모이로 유혹된 까치.<br>"반짝이는 건 다 못 가져갈 거야!" 하며 가족 뒤에 합류.',
+    },
+    owl: {
+      title: '🦉 부엉이 친구 구출!', color:'#FFA94D',
+      sub: '뼛가루 사막 — 모래 폭풍에 길을 잃었던 부엉이',
+      story: '뼛가루 사막 한가운데서 큰 눈을 깜박이며 길을 잃었던 부엉이.<br>밤하늘을 가르며 가족 뒤를 지켜봅니다.',
+    },
+    parrot: {
+      title: '🦜 앵무새 친구 구출!', color:'#51CF66',
+      sub: '그림자 전당 — 거짓의 회랑에 갇혀있던 앵무새',
+      story: '거짓의 회랑에서 같은 말만 되풀이하던 앵무새.<br>이제는 가족 뒤에서 알록달록한 깃털을 흩날립니다.',
+    },
+    squirrel: {
+      title: '🐿 다람쥐 친구 구출!', color:'#A87545',
+      sub: '심연의 첨탑 — 도토리를 빼앗긴 다람쥐',
+      story: '심연의 첨탑 정상에서 도토리를 빼앗기고 떨고 있던 다람쥐.<br>가족 뒤에서 도토리를 입에 물고 부지런히 따라옵니다.',
+    },
+  };
+  const cp = meetCopy[c.kind] || meetCopy.wife;
+  titleEl.textContent = cp.title;
+  titleEl.style.color = cp.color;
+  subEl.textContent = cp.sub;
+  storyEl.innerHTML = cp.story;
   // Draw the companion at center of canvas with sparkle aura.
   const cv = document.getElementById('cmmCanvas');
   const ctx2 = cv.getContext('2d');
@@ -6820,16 +7116,23 @@ function showCompanionMeetModal(){
       ctx2.beginPath(); ctx2.arc(x, y, 2.2 + Math.sin(t*5+i), 0, Math.PI*2); ctx2.fill();
     }
     ctx2.globalAlpha = 1;
-    // Companion at center, scaled 2× for prominence
-    const fakeC = c.kind === 'wife'
-      ? { x:110, y:135, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' }
-      : { x:110, y:135, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' };
+    // Companion at center, scaled 2× for prominence — v12.11 supports all 7 kinds.
+    const sparkleColor = c.kind === 'wife' ? '#FFE3F2'
+                       : c.kind === 'child' ? '#D0EBFF'
+                       : c.kind === 'sparrow' ? '#FFF3BF'
+                       : c.kind === 'magpie' ? '#E7F5FF'
+                       : c.kind === 'owl' ? '#FFE8CC'
+                       : c.kind === 'parrot' ? '#D3F9D8'
+                       : '#FFE0B2';
+    const fakeC = { x:110, y:135, kind:c.kind, tint:c.tint || '#FFB4D8', accent:c.accent || '#FA80B0' };
     ctx2.save();
     ctx2.translate(110, 135);
-    ctx2.scale(1.6, 1.6);
+    ctx2.scale(2.0, 2.0);
     ctx2.translate(-110, -135);
     drawCompanion(ctx2, fakeC);
     ctx2.restore();
+    // override sparkle color (drew before)
+    void sparkleColor;
   }
   drawFrame();
   if(state._cmmRaf) cancelAnimationFrame(state._cmmRaf);
@@ -9653,6 +9956,14 @@ function render(){
       ['#0A0428','#5F3DC4','#E599F7','#040014','#000000'],
       ['#080020','#1864AB','#74C0FC','#02000F','#000000'],
     ],
+    // v12.11 phase 3 — Tier 8: 원정 Ⅳ Hellfire Rescue (Ch 101-130). Deep crimson + ash + ember.
+    [
+      ['#3D0C0C','#7A1818','#C92A2A','#180000','#000000'],
+      ['#2B0707','#5A1A0A','#FF6B00','#140000','#000000'],
+      ['#1A0A0A','#3A1010','#FFA94D','#0E0000','#000000'],
+      ['#3D0E1A','#7A1830','#FA5252','#150004','#000000'],
+      ['#2B0808','#1A0808','#FFD43B','#0A0000','#000000'],
+    ],
   ];
   const tier = chapterTier(state.chapter);
   // Sky gradient is fixed per chapter — varies across the 5 chapters within a tier
@@ -10075,6 +10386,13 @@ document.addEventListener('click', e => {
 document.getElementById('gachaSingleBtn').addEventListener('click', ()=> doGachaPull(1));
 document.getElementById('gachaTenBtn').addEventListener('click', ()=> doGachaPull(10));
 document.getElementById('cmmContinueBtn').addEventListener('click', continueAfterCompanionMeet);
+// v12.11 — hell prologue 닫기. 1회성 플래그를 progress에 저장.
+document.getElementById('hellPrologueCloseBtn').addEventListener('click', () => {
+  document.getElementById('hellPrologueModal').classList.add('hidden');
+  if(state._hellRaf){ cancelAnimationFrame(state._hellRaf); state._hellRaf = 0; }
+  progress.hellPrologueSeen = true;
+  saveProgress();
+});
 document.getElementById('combineBtn').addEventListener('click', () => {
   // v12 phase 2 — pick the highest combinable grade (so player upgrades the best stack first).
   const grades = findCombinableGrades();
@@ -11420,6 +11738,72 @@ function startGame(startChapter){
   resetRun(startChapter || 1);
   state.scene='playing';
   bgmStart();
+  // v12.11 — 원정 Ⅳ 첫 진입 시 프롤로그 시네마틱. 1회성 (progress.hellPrologueSeen 플래그).
+  if(startChapter === 101 && !progress.hellPrologueSeen){
+    showHellPrologue();
+  }
+}
+
+function showHellPrologue(){
+  const cv = document.getElementById('hellPrologueCanvas');
+  const ctx2 = cv.getContext('2d');
+  const tStart = state.time;
+  function frame(){
+    const t = state.time - tStart;
+    const W = cv.width, H = cv.height;
+    ctx2.clearRect(0, 0, W, H);
+    // Backdrop: dark with crimson sheen
+    const grad = ctx2.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#1A0808');
+    grad.addColorStop(1, '#3A1010');
+    ctx2.fillStyle = grad;
+    ctx2.fillRect(0, 0, W, H);
+    // Falling embers
+    for(let i=0;i<24;i++){
+      const px = (i*47 + t*60) % W;
+      const py = (i*23 + t*120) % (H+30) - 10;
+      ctx2.fillStyle = i%2 ? '#FF6B6B' : '#FFA94D';
+      ctx2.fillRect(px, py, 1.4, 1.4);
+    }
+    // Hellgate silhouette (cracked door with crimson cracks)
+    const cx = W/2, cy = H*0.55;
+    ctx2.fillStyle = '#0A0404';
+    ctx2.beginPath(); ctx2.arc(cx, cy, 50, 0, Math.PI*2); ctx2.fill();
+    ctx2.strokeStyle = '#FF6B00'; ctx2.lineWidth = 2;
+    for(let i=0;i<6;i++){
+      const a = i * Math.PI*2/6 + Math.sin(t*1.2)*0.05;
+      ctx2.beginPath();
+      ctx2.moveTo(cx, cy);
+      ctx2.lineTo(cx + Math.cos(a)*46, cy + Math.sin(a)*46);
+      ctx2.stroke();
+    }
+    ctx2.fillStyle = '#FFD43B';
+    ctx2.beginPath(); ctx2.arc(cx, cy, 8 + Math.sin(t*3)*1.2, 0, Math.PI*2); ctx2.fill();
+    // Tiny silhouettes of friends behind bars (left side)
+    ctx2.fillStyle = '#7A5230';
+    ctx2.beginPath(); ctx2.ellipse(40, cy + 10, 6, 4, 0, 0, Math.PI*2); ctx2.fill();
+    ctx2.fillStyle = '#1A1A1A';
+    ctx2.beginPath(); ctx2.ellipse(60, cy - 14, 6, 4, 0, 0, Math.PI*2); ctx2.fill();
+    ctx2.fillStyle = '#2F9E44';
+    ctx2.beginPath(); ctx2.ellipse(W-50, cy - 12, 6, 4, 0, 0, Math.PI*2); ctx2.fill();
+    ctx2.fillStyle = '#A0522D';
+    ctx2.beginPath(); ctx2.ellipse(W-34, cy + 12, 6, 4, 0, 0, Math.PI*2); ctx2.fill();
+    // Bars over silhouettes
+    ctx2.strokeStyle = '#3A2828'; ctx2.lineWidth = 2;
+    for(let i=0; i<3; i++){
+      ctx2.beginPath(); ctx2.moveTo(35 + i*15, cy - 22); ctx2.lineTo(35 + i*15, cy + 18); ctx2.stroke();
+      ctx2.beginPath(); ctx2.moveTo(W-50 + i*12, cy - 22); ctx2.lineTo(W-50 + i*12, cy + 18); ctx2.stroke();
+    }
+  }
+  frame();
+  if(state._hellRaf) cancelAnimationFrame(state._hellRaf);
+  function loop(){
+    if(document.getElementById('hellPrologueModal').classList.contains('hidden')) return;
+    frame();
+    state._hellRaf = requestAnimationFrame(loop);
+  }
+  state._hellRaf = requestAnimationFrame(loop);
+  document.getElementById('hellPrologueModal').classList.remove('hidden');
 }
 function backToTitle(){
   bgmStop();
