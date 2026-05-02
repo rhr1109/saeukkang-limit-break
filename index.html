@@ -732,6 +732,11 @@
         </div>
         <div class="cos-detail-grid" id="cosDetailGrid"></div>
       </div>
+      <!-- v12 phase 2.2 — companion costume picker. Only shown if at least one companion is unlocked. -->
+      <div class="costume-section" id="companionCostumeSection" style="display:none;">
+        <h3 style="display:flex;align-items:center;gap:8px;color:#FFB4D8;">💗 동료 꾸미기 <span style="color:#A5D8FF;font-size:11px;font-weight:700;">아내 · 아기 비둘기 코스튬</span></h3>
+        <div id="companionCostumeGrid" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;"></div>
+      </div>
     </div>
     <!-- Background skin section — purely cosmetic title-screen backgrounds. -->
     <div id="shopSkinSection" class="hidden">
@@ -4196,6 +4201,12 @@ const progress = (()=>{
     // v12 phase 2 — companion unlocks. Wife meets player on ch51 clear, child on ch60 clear.
     // Both fight alongside player in subsequent chapters with reduced-damage shrimp shots.
     companionUnlocks: { wife:false, child:false },
+    // v12 phase 2.2 — companion costumes. Each kind has a list of unlocked accessory ids and one
+    // currently equipped. Default accessory unlocks the moment the companion joins.
+    companionCostumes: {
+      wife:  { unlocked:['bow'], equipped:'bow' },
+      child: { unlocked:['pacifier'], equipped:'pacifier' },
+    },
   };
   const merged = Object.assign(base, saved || {}, {
     shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}),
@@ -4204,6 +4215,14 @@ const progress = (()=>{
     ownedSkins: (saved&&Array.isArray(saved.ownedSkins) && saved.ownedSkins.length) ? saved.ownedSkins : ['default'],
     skin: (saved && saved.skin) || 'default',
     companionUnlocks: Object.assign({wife:false, child:false}, (saved&&saved.companionUnlocks)||{}),
+    companionCostumes: (() => {
+      const def = { wife:{unlocked:['bow'], equipped:'bow'}, child:{unlocked:['pacifier'], equipped:'pacifier'} };
+      const sv = (saved && saved.companionCostumes) || {};
+      return {
+        wife:  Object.assign({unlocked:['bow'], equipped:'bow'}, sv.wife||{}),
+        child: Object.assign({unlocked:['pacifier'], equipped:'pacifier'}, sv.child||{}),
+      };
+    })(),
   });
   // Sanity: drop equipped uids that no longer exist in inventory.
   for(const slot of ['head','body','weapon']){
@@ -4932,6 +4951,142 @@ function drawCompanion(ctx, c){
   return drawChildPigeon(ctx, c);
 }
 
+// v12 phase 2.2 — companion costume definitions. Each costume has an unlock chapter (auto-unlocks
+// on chapter clear) and a draw(ctx) function called inside the wife/child draw at proper layer.
+// Coords assume the companion's local space (already scaled/translated).
+const COMPANION_COSTUMES = {
+  wife: [
+    { id:'bow',    name:'핑크 리본',   unlockCh:51, icon:'🎀',
+      draw:(ctx)=>{
+        // Side bow on left of head, signature default
+        ctx.fillStyle = '#FA80B0';
+        ctx.beginPath(); ctx.moveTo(-16,-32); ctx.lineTo(-22,-36); ctx.lineTo(-22,-28); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-16,-32); ctx.lineTo(-10,-36); ctx.lineTo(-10,-28); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#D63384';
+        ctx.beginPath(); ctx.arc(-16,-32, 2.4, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'crown',  name:'황금 왕관',   unlockCh:55, icon:'👑',
+      draw:(ctx)=>{
+        // Yellow crown w/ 5 points
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath();
+        ctx.moveTo(-13,-37); ctx.lineTo(-10,-44);
+        ctx.lineTo(-5,-39);  ctx.lineTo(0,-46);
+        ctx.lineTo(5,-39);   ctx.lineTo(10,-44);
+        ctx.lineTo(13,-37);  ctx.lineTo(13,-34); ctx.lineTo(-13,-34);
+        ctx.closePath(); ctx.fill();
+        // Red gem center
+        ctx.fillStyle = '#FA5252';
+        ctx.beginPath(); ctx.arc(0,-39, 1.6, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#FFE066';
+        ctx.fillRect(-13,-36, 26, 1.5);
+      } },
+    { id:'tiara',  name:'다이아 티아라', unlockCh:65, icon:'💎',
+      draw:(ctx)=>{
+        // Silver thin tiara w/ blue gems
+        ctx.strokeStyle = '#DEE2E6'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-12,-36); ctx.quadraticCurveTo(0,-42, 12,-36); ctx.stroke();
+        ctx.fillStyle = '#74C0FC';
+        ctx.beginPath(); ctx.arc(0,-39, 2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-7,-37.5, 1.3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(7,-37.5, 1.3, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath(); ctx.arc(-0.6,-39.4, 0.7, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'veil',   name:'신부 베일',    unlockCh:70, icon:'👰',
+      draw:(ctx)=>{
+        // White veil drapes from head over shoulders
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath();
+        ctx.moveTo(-15,-34); ctx.quadraticCurveTo(-18,-12, -22, 16);
+        ctx.lineTo(22, 16); ctx.quadraticCurveTo(18,-12, 15,-34);
+        ctx.closePath(); ctx.fill();
+        // Lacy bottom dots
+        ctx.fillStyle = 'rgba(220,200,210,0.9)';
+        for(let i=-3; i<=3; i++){
+          ctx.beginPath(); ctx.arc(i*5, 16, 1.6, 0, Math.PI*2); ctx.fill();
+        }
+        // Crown of pearls on top
+        ctx.fillStyle = '#FFE3F2';
+        for(let i=-2; i<=2; i++){
+          ctx.beginPath(); ctx.arc(i*5, -36, 1.4, 0, Math.PI*2); ctx.fill();
+        }
+      } },
+  ],
+  child: [
+    { id:'pacifier', name:'공갈 젖꼭지', unlockCh:60, icon:'🍼',
+      draw:(ctx)=>{
+        ctx.fillStyle = '#74C0FC';
+        ctx.beginPath(); ctx.arc(0, 17, 2.6, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#FFF'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.arc(0, 17, 2.6, 0, Math.PI*2); ctx.stroke();
+        // Hair tuft (default look)
+        ctx.strokeStyle = '#74C0FC'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(2, -22, 0, -25); ctx.stroke();
+      } },
+    { id:'beanie', name:'아기 비니',     unlockCh:63, icon:'🧢',
+      draw:(ctx)=>{
+        // Knit beanie covering top of head
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath();
+        ctx.arc(0, -14, 11, Math.PI, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#FA5252';
+        ctx.fillRect(-11,-15, 22, 2.5);
+        // Pom pom
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath(); ctx.arc(0,-26, 3.2, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'bowtie', name:'나비 넥타이',   unlockCh:67, icon:'🎀',
+      draw:(ctx)=>{
+        // Red bowtie at neck (between body and head)
+        ctx.fillStyle = '#FA5252';
+        ctx.beginPath(); ctx.moveTo(-7,-2); ctx.lineTo(-1,-4); ctx.lineTo(-1, 2); ctx.lineTo(-7, 4); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(7,-2); ctx.lineTo(1,-4); ctx.lineTo(1, 2); ctx.lineTo(7, 4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#C92A2A';
+        ctx.fillRect(-1.5,-3.5, 3, 7);
+        // Single hair tuft
+        ctx.strokeStyle = '#74C0FC'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(2, -22, 0, -25); ctx.stroke();
+      } },
+    { id:'mini_crown', name:'아기 왕관', unlockCh:70, icon:'👑',
+      draw:(ctx)=>{
+        // Tiny crown sized for child head
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath();
+        ctx.moveTo(-8,-19); ctx.lineTo(-6,-23);
+        ctx.lineTo(-2,-20); ctx.lineTo(0,-25);
+        ctx.lineTo(2,-20); ctx.lineTo(6,-23);
+        ctx.lineTo(8,-19); ctx.lineTo(8,-17); ctx.lineTo(-8,-17);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#FA5252';
+        ctx.beginPath(); ctx.arc(0,-21, 1, 0, Math.PI*2); ctx.fill();
+      } },
+  ],
+};
+function getCompanionCostumeDraw(kind){
+  const equipped = (progress.companionCostumes && progress.companionCostumes[kind] && progress.companionCostumes[kind].equipped);
+  const def = (COMPANION_COSTUMES[kind]||[]).find(c => c.id === equipped);
+  return def ? def.draw : null;
+}
+function unlockCompanionCostumesForChapter(c){
+  // Auto-unlock companion costumes whose unlockCh equals or is below current cleared chapter.
+  const newly = [];
+  for(const kind of ['wife','child']){
+    const list = COMPANION_COSTUMES[kind];
+    if(!progress.companionCostumes) progress.companionCostumes = { wife:{unlocked:['bow'], equipped:'bow'}, child:{unlocked:['pacifier'], equipped:'pacifier'} };
+    const slot = progress.companionCostumes[kind];
+    if(!slot.unlocked) slot.unlocked = [];
+    for(const def of list){
+      if(c >= def.unlockCh && !slot.unlocked.includes(def.id)){
+        slot.unlocked.push(def.id);
+        newly.push({ kind, def });
+      }
+    }
+  }
+  return newly;
+}
+
 // v12 phase 2.1 — wife now reads like a feminine variant of the husband pigeon. Silhouette is
 // the same body / arms / head proportions as drawPigeon but at 0.65× scale, body palette uses
 // a warm peach-pink instead of slate-gray, with eyelashes + lipstick + side bow as feminine
@@ -5029,16 +5184,9 @@ function drawWifePigeon(ctx, c){
   ctx.beginPath(); ctx.moveTo(-6, -38); ctx.quadraticCurveTo(-9, -42, -5, -45); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,  -39); ctx.quadraticCurveTo(2,  -44, -1, -47); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(6,  -38); ctx.quadraticCurveTo(9, -42, 5, -45); ctx.stroke();
-  // Side bow — pink ribbon on the side of the head (feminine signature)
-  ctx.fillStyle = c.accent || '#FA80B0';
-  // Two triangles for bow loops
-  ctx.beginPath();
-  ctx.moveTo(-16, -32); ctx.lineTo(-22, -36); ctx.lineTo(-22, -28); ctx.closePath(); ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(-16, -32); ctx.lineTo(-10, -36); ctx.lineTo(-10, -28); ctx.closePath(); ctx.fill();
-  // Bow center knot
-  ctx.fillStyle = '#D63384';
-  ctx.beginPath(); ctx.arc(-16, -32, 2.4, 0, Math.PI*2); ctx.fill();
+  // Equipped wife costume overlay (bow / crown / tiara / veil) — replaces the hardcoded bow.
+  const wifeCostumeDraw = getCompanionCostumeDraw('wife');
+  if(wifeCostumeDraw) wifeCostumeDraw(ctx);
   ctx.restore();
 }
 
@@ -5070,14 +5218,9 @@ function drawChildPigeon(ctx, c){
   ctx.fillStyle = '#FFF';
   ctx.beginPath(); ctx.arc(2.6, -10.7, 1.0, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(1.2, -9.5,  0.5, 0, Math.PI*2); ctx.fill();
-  // Pacifier — colored disc with white rim, mouth area
-  ctx.fillStyle = c.accent || '#74C0FC';
-  ctx.beginPath(); ctx.arc(0, 17, 2.6, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#FFF'; ctx.lineWidth = 0.9;
-  ctx.beginPath(); ctx.arc(0, 17, 2.6, 0, Math.PI*2); ctx.stroke();
-  // Single hair tuft (one curl on top — baby look)
-  ctx.strokeStyle = c.accent || '#74C0FC'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(2, -22, 0, -25); ctx.stroke();
+  // Equipped child costume overlay (pacifier / beanie / bowtie / crown).
+  const childCostumeDraw = getCompanionCostumeDraw('child');
+  if(childCostumeDraw) childCostumeDraw(ctx);
   ctx.restore();
 }
 // Legacy shim — older code paths still call initStage(). Routes to initChapter for the wave system.
@@ -5990,6 +6133,8 @@ function onBossDefeated(){
     progress.companionUnlocks.child = true;
     state.newCompanion = { kind:'child', label:'아기 비둘기', sub:'다음 원정부터 함께 싸웁니다 👶' };
   }
+  // v12 phase 2.2 — auto-unlock companion costumes whose unlockCh ≤ this chapter.
+  state.newCompanionCostumes = unlockCompanionCostumesForChapter(state.chapter);
   // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
   awardCoins(60 + state.chapter * 18);
   // Chapter-clear costume drop: 10% rare drop, with pity guaranteeing one every 10 clears.
@@ -9137,6 +9282,56 @@ function renderCostumeScreen(){
   renderEquipRow();
   // Slot tabs + per-def grid (replaces the old flat inventory + album)
   renderCosDetailGrid();
+  // v12 phase 2.2 — companion costume picker (only if at least one companion is unlocked).
+  renderCompanionCostumeSection();
+}
+
+function renderCompanionCostumeSection(){
+  const sec = document.getElementById('companionCostumeSection');
+  const grid = document.getElementById('companionCostumeGrid');
+  if(!sec || !grid) return;
+  const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
+  const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
+  if(!wifeOk && !childOk){ sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  grid.innerHTML = '';
+  for(const kind of ['wife','child']){
+    if(kind === 'wife' && !wifeOk) continue;
+    if(kind === 'child' && !childOk) continue;
+    const slot = progress.companionCostumes[kind];
+    const list = COMPANION_COSTUMES[kind];
+    // Box per companion
+    const box = document.createElement('div');
+    box.style.cssText = 'border:2px solid '+(kind==='wife'?'#FFB4D8':'#A5D8FF')+';border-radius:14px;padding:10px;background:rgba(20,8,40,.4);min-width:160px;flex:1 1 200px;';
+    const title = document.createElement('div');
+    title.style.cssText = 'font-weight:900;color:'+(kind==='wife'?'#FFB4D8':'#A5D8FF')+';margin-bottom:8px;';
+    title.textContent = (kind==='wife'?'💗 아내':'👶 아기') + ' 비둘기';
+    box.appendChild(title);
+    // Preview canvas — shows companion with each costume
+    const previewWrap = document.createElement('div');
+    previewWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+    for(const def of list){
+      const owned = slot.unlocked.includes(def.id);
+      const equipped = slot.equipped === def.id;
+      const card = document.createElement('button');
+      card.type = 'button';
+      const colorBorder = equipped ? (kind==='wife'?'#D63384':'#1864AB') : (owned ? (kind==='wife'?'#FFB4D8':'#A5D8FF') : '#495057');
+      card.style.cssText = 'cursor:'+(owned?'pointer':'default')+';background:rgba(40,15,70,.6);border:2px solid '+colorBorder+';border-radius:10px;padding:6px;width:64px;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;font-family:inherit;color:#fff;'+(owned?'':'opacity:.45;');
+      card.innerHTML = `<div style="font-size:18px;line-height:1;">${def.icon}</div>
+        <div style="font-size:10px;font-weight:700;text-align:center;letter-spacing:-.3px;">${def.name}</div>
+        <div style="font-size:9px;color:${owned?'#A9E34B':'#868E96'};">${owned ? (equipped ? '✓ 착용' : '클릭') : '🔒 ch'+def.unlockCh}</div>`;
+      if(owned){
+        card.addEventListener('click', () => {
+          slot.equipped = def.id;
+          saveProgress();
+          renderCompanionCostumeSection();
+        });
+      }
+      previewWrap.appendChild(card);
+    }
+    box.appendChild(previewWrap);
+    grid.appendChild(box);
+  }
 }
 
 function renderEquipRow(){
