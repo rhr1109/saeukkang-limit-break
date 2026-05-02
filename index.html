@@ -574,7 +574,14 @@
     #hud .topbar{top:6px;left:6px;right:6px;}
     #hud .bar{width:clamp(110px, 34vw, 160px);}
     #hud .panel{font-size:11px;padding:4px 8px;}
-    #hud .right{gap:3px;}
+    #hud .right{gap:3px;max-width:55vw;}
+    /* v12.10 — 모바일에서 점수/킬/코인 패널이 한 줄에 안 들어가면 자연 줄바꿈 + 폰트 축소.
+       기존엔 텍스트가 잘리거나 옆 패널과 겹쳐 노란 칩이 의미 없는 형태로 잘려 보였음. */
+    #hud #statsPanel{font-size:10px;padding:3px 7px;gap:5px;}
+    #hud #statsPanel span{white-space:nowrap;}
+    #hud .topbar{gap:6px;}
+    /* invBar가 좌측 HP/XP 바로 아래에 너무 가깝게 붙어 LV 영역과 겹치는 듯 보였던 문제 보정 */
+    #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 74px);max-width:62vw;}
     #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 68px);max-width:60vw;gap:3px;}
     #hud .inv-pill{font-size:10px;padding:1px 5px 1px 3px;gap:2px;}
     #hud .inv-pill .ic{font-size:11px;}
@@ -625,13 +632,13 @@
         </div>
       </div>
       <div class="right">
-        <!-- v12.8 — top-right HUD condensed from 6 panels to 3. User reported the stacked yellow
-             panels were visual clutter. Now: chapter+wave on row 1, timer alone on row 2,
-             score · kills · coins inline on row 3. hudHungerPanel still inserts when not normal. -->
-        <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">비둘기 광장</span> · 웨이브 <span id="waveNum">1</span>/3</div>
+        <!-- v12.10 — 챕터와 웨이브 패널 분리. 모바일에서 점수/킬/코인이 한 줄에 들어가지 못하면
+             자연 줄바꿈되도록 flex-wrap. 하단 칩은 모바일 폰트 자동 축소(CSS). -->
+        <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">비둘기 광장</span></div>
+        <div class="panel" id="wavePanel">🌊 웨이브 <span id="waveNum">1</span>/3</div>
         <div class="panel" id="timerPanel">⏱ <span id="timerTxt">60</span></div>
         <div class="panel hidden" id="hudHungerPanel"><span id="hudHungerTxt"></span></div>
-        <div class="panel" style="display:flex;gap:8px;align-items:center;">
+        <div class="panel" id="statsPanel" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <span>⭐ <span id="scoreTxt">0</span></span>
           <span style="opacity:.4;">·</span>
           <span>💀 <span id="killsTxt">0</span></span>
@@ -771,6 +778,9 @@
       <button class="cs-tab" id="csExpTab2" type="button" data-exp="2">🪐 원정 Ⅱ</button>
       <button class="cs-tab" id="csExpTab3" type="button" data-exp="3">🌌 원정 Ⅲ</button>
     </div>
+    <!-- v12.10 — 원정 끝 챕터(50/70/100)를 클리어한 사용자가 시네마틱 엔딩을 다시 볼 수 있는 영역.
+         클리어된 원정 끝마다 버튼이 노출됨. -->
+    <div id="cinematicReplayRow" style="display:none;justify-content:center;gap:8px;flex-wrap:wrap;margin:6px 0;"></div>
     <div class="cs-tabs">
       <button class="cs-tab on" id="csTabFocus" type="button">⭐ 진행</button>
       <button class="cs-tab" id="csTabAll" type="button">🗺 전체 보기</button>
@@ -987,6 +997,8 @@
       <div class="sub" style="color:#FFE066;font-weight:700;">전 챕터를 정복한 전설의 비둘기</div>
       <div id="vStats" style="margin:10px 0;"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <!-- v12.10 — 원정 끝(ch50/70) 클리어 후 다음 원정으로 직진하는 CTA. ch100(최종)에서는 숨김. -->
+        <button class="btn" id="vNextExpBtn" style="flex:2;min-width:160px;display:none;background:linear-gradient(180deg,#FFB4D8,#D63384);">▶ 다음 원정 시작</button>
         <button class="btn" id="vAgainBtn" style="flex:1;min-width:140px;">🔁 처음부터 다시</button>
         <button class="btn alt" id="vHomeBtn" style="flex:1;min-width:140px;">🏠 홈으로</button>
       </div>
@@ -4318,11 +4330,12 @@ function chapterWaveTimes(c){
   } else if(c <= 50){
     each = 200;  cap = 1020;  // 3:20 waves → 10 min waves + 7 min boss = 17 min cap
   } else if(c <= 70){
-    each = 200;  cap = 1100;  // 원정 Ⅱ — same wave length, cap +80s for tougher bosses
+    each = 140;  cap = 900;   // 원정 Ⅱ — 2:20 waves → 7분 + 8분 보스 = 15분 cap
+                              // 사용자 요청: 51부터 웨이브 시간 너무 길었음 → 200→140 단축, cap 18:20→15분
   } else {
-    each = 220;  cap = 1500;  // 원정 Ⅲ — 25min cap (rolled back from 1700). 보스 HP는 크게
-                              // 올렸으나 cap은 동일 → fresh-S 헤드룸이 ch50보다 훨씬 타이트.
-                              // fresh-B 빌드는 ch95+ 정복 위해 A/S 코스튬 업그레이드 필수.
+    each = 170;  cap = 1200;  // 원정 Ⅲ — 2:50 waves → 8:30 + 11:30 보스 = 20분 cap
+                              // 사용자 요청: 캡 20분 이하. 기존 25분→20분, 웨이브 220→170s.
+                              // 보스 HP를 chapterMult 곡선에서 상향했기 때문에 보스 여유 시간은 충분.
   }
   return [each, each*2, each*3, cap];
 }
@@ -4418,9 +4431,10 @@ function chapterMult(){
   //   20..30  : exp 1.060/1.035 on top of ch20                   (ch30 → 8.97 / 2.92)
   //   30..40  : exp 1.045/1.025 on top of ch30                   (ch40 → 13.93 / 3.74)
   //   40..50  : exp 1.025/1.015 on top of ch40                   (ch50 → 17.83 / 4.34)
-  //   50..70  : exp 1.014/1.010 on top of ch50  (원정 Ⅱ)         (ch70 → 23.55 / 5.30)
-  //   70..100 : exp 1.012/1.010 on top of ch70  (원정 Ⅲ)         (ch100 → 33.69 / 7.13) — bumped
-  //                                                                               for "barely-clear" target
+  //   50..70  : exp 1.016/1.011 on top of ch50  (원정 Ⅱ)         (ch70 → ~24.5 / ~5.40)
+  //   70..100 : exp 1.014/1.011 on top of ch70  (원정 Ⅲ)         (ch100 → ~37.2 / ~7.51) —
+  //   사용자 요청: ch51-100 S 풀세트도 어렵게 + 캡 단축(15/20분). 캡 안에서 클리어 가능 범위 내
+  //   에서만 상향. v12.10 simulation 검증 — ch100 fresh-S 풀빌드 ≈ 11-15분 (보스 ~9-13분).
   const HP_CH10  = 1 + 9*0.20;
   const DMG_CH10 = 1 + 9*0.06;
   const HP_CH20  = HP_CH10  * Math.pow(1.060, 10);
@@ -4431,22 +4445,22 @@ function chapterMult(){
   const DMG_CH40 = DMG_CH30 * Math.pow(1.025, 10);
   const HP_CH50  = HP_CH40  * Math.pow(1.025, 10);
   const DMG_CH50 = DMG_CH40 * Math.pow(1.015, 10);
-  const HP_CH70  = HP_CH50  * Math.pow(1.014, 20);
-  const DMG_CH70 = DMG_CH50 * Math.pow(1.010, 20);
+  const HP_CH70  = HP_CH50  * Math.pow(1.016, 20);
+  const DMG_CH70 = DMG_CH50 * Math.pow(1.011, 20);
   const hp = c <= 10 ? 1 + (c-1)*0.20
           : c <= 20 ? HP_CH10  * Math.pow(1.060, c-10)
           : c <= 30 ? HP_CH20  * Math.pow(1.060, c-20)
           : c <= 40 ? HP_CH30  * Math.pow(1.045, c-30)
           : c <= 50 ? HP_CH40  * Math.pow(1.025, c-40)
-          : c <= 70 ? HP_CH50  * Math.pow(1.014, c-50)
-          :           HP_CH70  * Math.pow(1.011, c-70);
+          : c <= 70 ? HP_CH50  * Math.pow(1.016, c-50)
+          :           HP_CH70  * Math.pow(1.014, c-70);
   const dmg = c <= 10 ? 1 + (c-1)*0.06
             : c <= 20 ? DMG_CH10 * Math.pow(1.030, c-10)
             : c <= 30 ? DMG_CH20 * Math.pow(1.035, c-20)
             : c <= 40 ? DMG_CH30 * Math.pow(1.025, c-30)
             : c <= 50 ? DMG_CH40 * Math.pow(1.015, c-40)
-            : c <= 70 ? DMG_CH50 * Math.pow(1.010, c-50)
-            :           DMG_CH70 * Math.pow(1.010, c-70);
+            : c <= 70 ? DMG_CH50 * Math.pow(1.011, c-50)
+            :           DMG_CH70 * Math.pow(1.011, c-70);
   const speed = 1 + Math.min(0.95, (c-1)*0.028);
   return {
     hp,
@@ -4740,7 +4754,8 @@ const COSTUME_DEFS = [
   { id:'w_thunder',    slot:'weapon', name:'천둥의 메이스',    icon:'🔨', expedition:1 },
   { id:'w_phoenix',    slot:'weapon', name:'불사조 클로',      icon:'🔥', expedition:1 },
   // ─── 원정 Ⅱ — 비둘기 행성 (drops only after ch50 cleared) ───
-  { id:'h_pearl_tiara',slot:'head',   name:'진주 티아라',      icon:'💎', expedition:2 },
+  // v12.10 — h_pearl_tiara 제거됨. 사용자 피드백: "남편 비둘기 코스튬으로 티아라가 있으면 안되니까 없애라" —
+  // 진주 티아라는 아내 비둘기 전용 코스튬으로 이전됨 (COMPANION_COSTUMES.wife.tiara가 이미 정의됨).
   { id:'b_feather_robe',slot:'body',  name:'깃털 드레스',      icon:'🪶', expedition:2 },
   { id:'w_pink_glove', slot:'weapon', name:'핑크 글러브',      icon:'🧤', expedition:2 },
   // ─── 원정 Ⅲ — 우주 (drops only after ch70 cleared) ───
@@ -4751,6 +4766,20 @@ const COSTUME_DEFS = [
 const COSTUME_DEFS_BY_ID = Object.fromEntries(COSTUME_DEFS.map(d=>[d.id,d]));
 const COSTUME_DEFS_BY_SLOT = { head:[], body:[], weapon:[] };
 for(const d of COSTUME_DEFS) COSTUME_DEFS_BY_SLOT[d.slot].push(d);
+// v12.10 — costume migration. Drop costumes whose def was removed (e.g. h_pearl_tiara moved
+// to wife-only in v12.10) and clear equipped slots referencing them. Without this the
+// costume album breaks for players who owned a now-removed costume.
+(function migrateRemovedCostumes(){
+  const before = progress.costumes.length;
+  progress.costumes = progress.costumes.filter(c => COSTUME_DEFS_BY_ID[c.defId]);
+  if(progress.costumes.length !== before){
+    for(const slot of ['head','body','weapon']){
+      const uid = progress.equipped[slot];
+      if(uid && !progress.costumes.find(c => c.uid === uid)) progress.equipped[slot] = null;
+    }
+    try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }catch(e){}
+  }
+})();
 // Gacha pricing — coins are easy to earn, so a single pull costs a meaningful share of a chapter clear.
 const GACHA_COST_SINGLE = 1500;
 const GACHA_COST_TEN    = 12000;
@@ -5765,7 +5794,9 @@ function spawnEnemy(kind){
     walkPhase: Math.random()*Math.PI*2,
     collideRadius: 18*def.size,
     attackCd: 0,
-    ranged: kind==='crow' || kind==='sniper',
+    // v12.10 — pigeon_warrior, star_eye도 ranged. 코드 코멘트는 "ranged"로 표기되었으나
+    // 실제 플래그가 빠져 근접 추격으로 동작했던 버그 수정.
+    ranged: kind==='crow' || kind==='sniper' || kind==='pigeon_warrior' || kind==='star_eye',
     rangedCd: 1.5+Math.random(),
   };
   // Kind-specific flags
@@ -5776,6 +5807,8 @@ function spawnEnemy(kind){
   else if(kind==='summoner'){ e.summonCd = 4 + Math.random(); }
   else if(kind==='tyrant'){ e.shockCd = 3 + Math.random()*.8; e.shockTelegraph = 0; }
   else if(kind==='leviathan'){ e.tendrilCd = 4 + Math.random()*1.2; e.tendrilTelegraph = 0; }
+  else if(kind==='pigeon_warrior'){ e.rangedCd = 2.4 + Math.random()*0.6; }   // v12.10 — 깃털 발사
+  else if(kind==='star_eye'){ e.rangedCd = 2.0 + Math.random()*0.5; e.sniperScope=0; }  // v12.10 — 별빛 광선
   state.enemies.push(e);
   return e;
 }
@@ -5802,24 +5835,33 @@ const BOSS_VARIANTS = {
   leviathan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주' },
   phantom:         { hpMult:14.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주' },
   phoenix:         { hpMult:14.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조' },
-  void:            { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },         // ch50 +14% bump
-  // 원정 Ⅱ — 비둘기 행성 (companion: wife). Bumped ~25% to feel meaningfully harder.
-  // ch51-69 보스는 행성 수호자, ch70 최종 보스는 비둘기 행성 군주 (사용자 요청 어휘 정정).
-  pigeon_lord:     { hpMult:14.0, dmgMult:1.40, sizeMult:1.10, label:'행성 수호자' },         // 11→14 (+27%)
-  pigeon_emperor:  { hpMult:15.0, dmgMult:1.60, sizeMult:1.25, label:'비둘기 행성 군주' },    // 12→15 (+25%)
-  // 원정 Ⅲ — 우주 (companions: wife + child). v12.4 — ch95/100 명확하게 ch50보다 어려워야 함.
-  star_devourer:   { hpMult:20.0, dmgMult:1.50, sizeMult:1.15, label:'별 포식자' },            // 18→20
-  cosmic_arbiter:  { hpMult:21.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },        // 17→21
-  omega:           { hpMult:19.0, dmgMult:1.80, sizeMult:1.30, label:'오메가 — 우주의 주재자' }, // 15→19 (최종 보스 응당 가장 어려워야)
+  void:            { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },         // ch50
+  // === 원정 Ⅱ — 비둘기 행성 (companion: wife). 5챕터마다 변종 변경 (사용자 요청). ===
+  pigeon_warlord:  { hpMult:13.5, dmgMult:1.35, sizeMult:1.05, label:'깃털 군주' },          // 51-55
+  pigeon_oracle:   { hpMult:14.0, dmgMult:1.40, sizeMult:1.05, label:'예언의 비둘기' },       // 56-60
+  pigeon_general:  { hpMult:14.5, dmgMult:1.45, sizeMult:1.10, label:'행성 사령관' },         // 61-65
+  pigeon_emperor:  { hpMult:15.5, dmgMult:1.60, sizeMult:1.25, label:'비둘기 행성 군주' },    // 66-70 (원정 Ⅱ 보스)
+  // === 원정 Ⅲ — 우주 (companions: wife + child). 5챕터마다 변종 변경. ===
+  star_devourer:   { hpMult:20.0, dmgMult:1.55, sizeMult:1.15, label:'별 포식자' },           // 71-75
+  nebula_serpent:  { hpMult:21.0, dmgMult:1.60, sizeMult:1.18, label:'성운의 뱀' },           // 76-80
+  black_hole_lord: { hpMult:22.0, dmgMult:1.65, sizeMult:1.20, label:'블랙홀 군주' },         // 81-85
+  cosmic_arbiter:  { hpMult:23.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },       // 86-90
+  void_titan:      { hpMult:24.0, dmgMult:1.75, sizeMult:1.25, label:'보이드 타이탄' },        // 91-95
+  omega:           { hpMult:25.0, dmgMult:1.85, sizeMult:1.32, label:'오메가 — 우주의 주재자' }, // 96-100 (최종)
 };
 function bossVariantForChapter(c){
-  // 원정 Ⅲ — 우주 정복
-  if(c >= 100) return 'omega';
-  if(c >= 90)  return 'cosmic_arbiter';
-  if(c >= 71)  return 'star_devourer';
-  // 원정 Ⅱ — 비둘기 행성 정복
-  if(c >= 70)  return 'pigeon_emperor';
-  if(c >= 51)  return 'pigeon_lord';
+  // 원정 Ⅲ — 우주 정복 (5챕터 간격으로 변종 변경)
+  if(c >= 96) return 'omega';
+  if(c >= 91) return 'void_titan';
+  if(c >= 86) return 'cosmic_arbiter';
+  if(c >= 81) return 'black_hole_lord';
+  if(c >= 76) return 'nebula_serpent';
+  if(c >= 71) return 'star_devourer';
+  // 원정 Ⅱ — 비둘기 행성 정복 (5챕터 간격)
+  if(c >= 66) return 'pigeon_emperor';
+  if(c >= 61) return 'pigeon_general';
+  if(c >= 56) return 'pigeon_oracle';
+  if(c >= 51) return 'pigeon_warlord';
   // 원정 Ⅰ
   if(c >= 50) return 'void';
   if(c >= 45) return 'phoenix';
@@ -7629,7 +7671,17 @@ function updateHUD(){
   document.getElementById('xpFill').style.width = (100*p.xp/p.xpToNext)+'%';
   document.getElementById('hpFill').style.width = (100*p.hp/p.maxHp)+'%';
   document.getElementById('hpTxt').textContent = Math.max(0,Math.ceil(p.hp))+' / '+p.maxHp;
-  document.getElementById('waveNum').textContent = state.wave || 1;
+  // v12.10 — wavePanel은 보스 등장 시 "🐉 BOSS"로 강조 (별도 패널이 분리됐으니 시각 비중↑).
+  const wavePanelEl = document.getElementById('wavePanel');
+  if(wavePanelEl){
+    if(state.bossSpawned){
+      wavePanelEl.innerHTML = '🐉 <b style="color:#FF6B6B;">BOSS</b>';
+      wavePanelEl.style.borderColor = '#FF6B6B';
+    } else {
+      wavePanelEl.innerHTML = '🌊 웨이브 <span id="waveNum">'+(state.wave || 1)+'</span>/3';
+      wavePanelEl.style.borderColor = '#FFD43B';
+    }
+  }
   document.getElementById('chapterNum').textContent = state.chapter;
   const lbl = document.getElementById('chapterLabel');
   lbl.textContent = chapterName(state.chapter);
@@ -9744,6 +9796,12 @@ document.getElementById('retryBtn').addEventListener('click', ()=>{ document.get
 document.getElementById('goTitleBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); backToTitle(); });
 document.getElementById('vAgainBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); startGame(1); });
 document.getElementById('vHomeBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); backToTitle(); });
+// v12.10 — 다음 원정 직진 버튼. 현재 시네마틱이 표시 중인 챕터 + 1로 게임 시작.
+document.getElementById('vNextExpBtn').addEventListener('click', ()=>{
+  document.getElementById('victory').classList.add('hidden');
+  const c = state.chapter || 50;
+  startGame(Math.min(MAX_CHAPTERS, c + 1));
+});
 document.getElementById('ccNextBtn').addEventListener('click', ()=>{
   document.getElementById('chapterCleared').classList.add('hidden');
   if(state.chapter >= MAX_CHAPTERS){
@@ -9808,11 +9866,46 @@ function openChapterSelect(){
     if(b) b.classList.toggle('on', eid === state.csExpedition);
   }
   refreshExpeditionTabs();
+  renderCinematicReplayRow();
   renderChapterFocus();
   renderChapterGrid();
   setChapterSelectMode('focus');
   document.getElementById('chapterSelect').classList.remove('hidden');
   if(!bgmTimer) bgmStart();
+}
+
+// v12.10 — 클리어된 원정 끝 챕터(50/70/100)에 대해 시네마틱 다시보기 버튼을 그린다.
+function renderCinematicReplayRow(){
+  const row = document.getElementById('cinematicReplayRow');
+  if(!row) return;
+  const cleared = progress.clearedChapter || 0;
+  const buttons = [];
+  if(cleared >= 50)  buttons.push({ ch:50,  label:'🌍 원정 Ⅰ 엔딩', color:'#74C0FC' });
+  if(cleared >= 70)  buttons.push({ ch:70,  label:'🪐 원정 Ⅱ 엔딩', color:'#FFB4D8' });
+  if(cleared >= 100) buttons.push({ ch:100, label:'🌌 원정 Ⅲ 엔딩', color:'#9775FA' });
+  if(buttons.length === 0){ row.style.display = 'none'; row.innerHTML = ''; return; }
+  row.style.display = 'flex';
+  row.innerHTML = buttons.map(b =>
+    `<button class="cs-tab" type="button" data-replay-ch="${b.ch}"
+       style="border-color:${b.color};color:${b.color};">🎬 ${b.label} 다시보기</button>`
+  ).join('');
+  for(const btn of row.querySelectorAll('button[data-replay-ch]')){
+    btn.addEventListener('click', () => replayCinematic(parseInt(btn.dataset.replayCh, 10)));
+  }
+}
+
+function replayCinematic(ch){
+  // 시네마틱은 render() 안에서 state.scene === 'victory'면 drawVictoryScene()이 호출된다.
+  // chapter / expeditionId만 세팅 후 victory scene으로 진입.
+  state.scene = 'victory';
+  state.chapter = ch;
+  state.victoryExpeditionId = expeditionFor(ch).id;
+  // 시네마틱 캐시 리셋 — bowEnemies 등이 이전 시청 세션에서 유지되지 않도록.
+  if(typeof _victory !== 'undefined'){ _victory.bowEnemies = null; _victory.fireworks = []; _victory.confetti = []; }
+  renderVictory(ch >= MAX_CHAPTERS);
+  document.getElementById('chapterSelect').classList.add('hidden');
+  document.getElementById('victory').classList.remove('hidden');
+  sfxVictory();
 }
 
 // ---------- Shop / costume screens ----------
@@ -11034,6 +11127,18 @@ function renderVictory(finalEnding){
   const exp = expeditionFor(state.chapter);
   const isExpEnd = isExpeditionEnd(state.chapter);
   const isFinal = state.chapter >= MAX_CHAPTERS;
+  // v12.10 — show "다음 원정 시작" CTA only at ch50 / ch70 expedition ends, not on ch100.
+  const nextBtn = document.getElementById('vNextExpBtn');
+  if(nextBtn){
+    if(isExpEnd && !isFinal){
+      nextBtn.style.display = '';
+      nextBtn.textContent = state.chapter === 50 ? '🪐 원정 Ⅱ — 비둘기 행성으로 ▶' :
+                            state.chapter === 70 ? '🌌 원정 Ⅲ — 우주 정복으로 ▶' :
+                                                    '▶ 다음 원정 시작';
+    } else {
+      nextBtn.style.display = 'none';
+    }
+  }
   const h2 = document.querySelector('#victory .card h2');
   const sub = document.querySelector('#victory .card .sub');
   if(isFinal){
