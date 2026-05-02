@@ -969,7 +969,7 @@
         <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 부동 조이스틱으로 이동. 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ⏸ 일시정지 / 🔊 음소거 버튼.</p>
         <p><b style="color:#FFE066;">🛒 상점:</b> 타이틀에서 진입. 코인은 적/보스 처치, 코인 픽업, 챕터 클리어로 누적되며 영구 업그레이드(시작 HP·공격력·이속·자석 반경·치명타 등)를 살 수 있어 다음 런에 자동 적용됩니다.</p>
         <p><b style="color:#FFE066;">👗 코스튬:</b> 머리·몸통·무기 슬롯에 1개씩 장착. 등급은 S/A/B/C이며, 상점에서 가챠로 뽑거나 챕터 클리어 보상으로 드물게 획득합니다. 10판마다 최소 한 번은 코스튬이 보장됩니다.</p>
-        <p><b style="color:#FFE066;">📕 챕터:</b> 총 50개 챕터. 각 챕터는 3웨이브 + 최종 보스로 진행됩니다. 실제 플레이 시간은 웨이브 길이에 보스 처치 시간이 더해집니다 — Ch1~10 약 4-5분, Ch11~25 약 7-9분, Ch26~40 약 9-12분, Ch41~50 약 11-15분 (보스를 못 잡으면 캡 시간에 자동 처치).</p>
+        <p><b style="color:#FFE066;">📕 챕터:</b> 총 130개 챕터(4원정). 각 챕터는 3웨이브 + 최종 보스로 진행됩니다. 모든 챕터 캡은 15분 이하 — Ch1~10 약 4-5분, Ch11~25 약 7-9분, Ch26~40 약 9-12분, Ch41~50 약 11-15분, Ch51~100(원정 Ⅱ·Ⅲ) 약 7-12분, Ch101~130(원정 Ⅳ 지옥) 약 9-15분 (보스를 못 잡으면 캡 시간에 자동 처치).</p>
         <p><b style="color:#FFE066;">⚔ 웨이브:</b> 시간이 지나면 웨이브가 자동으로 진행되고 적 밀도와 종류가 강해집니다. 웨이브 3 종료 시 챕터 보스 등장!</p>
         <p><b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.</p>
         <p><b style="color:#FFE066;">🎁 드롭 아이템:</b> 적이 확률로 5종 특수 아이템을 떨어뜨립니다 (5킬·10킬 pity 보장):
@@ -4151,9 +4151,19 @@ function drawEnemy(ctx, e, walkPhase){
     ctx.fillStyle = '#FFF';
     ctx.beginPath(); ctx.arc(-1.5*s, -1.5*s, 1.2*s, 0, Math.PI*2); ctx.fill();
   } else if(kind==='boss'){
-    // Boss rendering — dispatches on bossVariant. Default is the cat king (Ch1-29).
-    const variant = e.bossVariant || 'cat_king';
+    // Boss rendering — v12.17. dispatches on baseStyle (alias) so 22 variants share 6 sprites.
+    // 컬러 차별화는 ctx.filter (hue-rotate + saturate) 로 처리. 사용자 "스토리라인대로 잘게 쪼개"
+    // 명령 반영하면서 sprite 6개 유지 → 코드 폭증 방지.
+    const variantId = e.bossVariant || 'cat_king';
+    const variant = bossBaseStyleFor(variantId);
+    const filterStr = bossFilterFor(variantId);
     const t = state.time;
+    let _filtered = false;
+    if(filterStr){
+      ctx.save();
+      ctx.filter = filterStr;
+      _filtered = true;
+    }
     if(variant === 'cat_king'){
       const body = flashing?'#FFB3B3':'#222';
       const belly = flashing?'#FFDADA':'#444';
@@ -4425,6 +4435,10 @@ function drawEnemy(ctx, e, walkPhase){
         }
       }
     }
+    // v12.17 — filter (hue-rotate) restore. label 은 filter 밖에서 그려야 노란 텍스트가 변색 안 됨.
+    if(_filtered){
+      ctx.restore();
+    }
     // Boss label below the boss for clarity (only first 3s of fight)
     if(e.bossLabel && state.bossFightStart && (state.time - state.bossFightStart) < 3){
       const fade = 1 - Math.max(0, (state.time - state.bossFightStart - 2) / 1);
@@ -4471,8 +4485,9 @@ const ULT_DAMAGE_PCT = 0.12;   // 12% of boss max HP per cast — 2 casts ≈ 24
                                // dominated by ult dmg alone — sustained DPS has to do real work.
 
 // WAVES_PER_CHAPTER: each chapter is 3 swelling enemy waves followed by the chapter boss.
-// CHAPTER_TIME_CAP: hard ceiling on a single chapter's playtime — early chapters cap at 10 min,
-// later chapters cap at 15 min so the gauntlet of ch11-50 has more breathing room.
+// CHAPTER_TIME_CAP: hard ceiling on a single chapter's playtime. v12.17 — 사용자 명령 "어떤 챕터든
+// 15분을 넘기지 말라" 반영. 가장 긴 캡(원정 Ⅳ ch101~) = 900초 = 정확히 15분. Ch41-50도 900초로
+// 단축 (이전 1020 → 900). 모든 챕터가 15분 이내에 캡 강제 처치.
 const WAVES_PER_CHAPTER = 3;
 const MAX_CHAPTERS = 130;
 // v12 expedition system — chapters split into four campaigns ending in unique cinematics.
@@ -4503,15 +4518,15 @@ function chapterWaveTimes(c){
   } else if(c <= 25){
     each = 130;  cap = 660;   // 2:10 waves → 6:30 + 4:30 = 11 min cap
   } else if(c <= 40){
-    each = 170;  cap = 870;   // 2:50 waves → 8:30 + 6:00 = 14:30 cap
+    each = 165;  cap = 855;   // 2:45 waves → 8:15 + 6:00 = 14:15 cap (15분 한도 안에서 여유 유지)
   } else if(c <= 50){
-    each = 200;  cap = 1020;  // 3:20 waves → 10 min waves + 7 min boss = 17 min cap
+    each = 175;  cap = 900;   // v12.17 — 사용자 캡 한도 15분 강제. 2:55 waves → 8:45 + 6:15 보스 = 15분 cap
   } else if(c <= 70){
     each = 110;  cap = 720;   // 원정 Ⅱ — v12.13 단축. 1:50 waves → 5:30 + 6:30 보스 = 12분 cap
   } else if(c <= 100){
     each = 130;  cap = 720;   // 원정 Ⅲ — v12.13 단축. 2:10 waves → 6:30 + 5:30 보스 = 12분 cap
   } else {
-    each = 150;  cap = 900;   // 원정 Ⅳ — 지옥은 약간 여유 있게 15분 cap (난이도 더 높음).
+    each = 150;  cap = 900;   // 원정 Ⅳ — 지옥 15분 cap. 사용자 한도 준수.
   }
   return [each, each*2, each*3, cap];
 }
@@ -5426,6 +5441,7 @@ function resetPlayer(){
     regenPerSec: 0,     // body costume contributes
     _regenAccum: 0,
     invT: 0,
+    hitT: 0, // v12.17 — 동료 피격 sync. damagePlayer 에서 set 되며 update tick 으로 감산.
     walkPhase: 0,
     facing: 1,
     level: 1,
@@ -5609,11 +5625,12 @@ function updateCompanions(dt){
     const ty = p.y + c.oy;
     c.x += (tx - c.x) * Math.min(1, dt * 6);
     c.y += (ty - c.y) * Math.min(1, dt * 6);
-    // v12.12 — 동료 피격 효과. player가 hurt 받을 때 모든 동료도 hurt flash.
-    // 사용자 요청 "가족·동료 피격 효과 있어야해". 동료는 hp가 없으므로 시각만 sync.
+    // v12.17 — 동료 피격 효과 1:1 동기화. damagePlayer 가 모든 동료의 c.hitT 를 직접 set 하므로
+    // 여기서는 단순 decay 만. 추가 보정 (player.hitT 이 다른 경로로 set 될 경우) 도 sync.
     if(p.hitT > 0){
-      c.hitT = Math.max(c.hitT || 0, p.hitT * 0.85);
-    } else if(c.hitT > 0){
+      c.hitT = Math.max(c.hitT || 0, p.hitT);
+    }
+    if(c.hitT > 0){
       c.hitT = Math.max(0, c.hitT - dt);
     }
     c.reloadT -= dt;
@@ -5977,6 +5994,101 @@ const COMPANION_COSTUMES = {
         ctx.beginPath(); ctx.arc(-2.5, 16, 0.8, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(-2.5, 24, 0.8, 0, Math.PI*2); ctx.fill();
       } },
+    // === v12.17 — 아내 추가 옷 (사용자 요청 "아기랑 아내 비둘기 코스튬을 좀 추가해줘. 옷 말이야"). ===
+    // 모두 dmgBoost 1.0 (cosmetic). slot:'body'. 발 라인은 wife 의 local y=34~56 안쪽에서 끝나도록.
+    { id:'lace_dress', name:'레이스 드레스', cost:3500, icon:'🤍', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 본체 (옅은 흰색 + 핑크 베이스)
+        ctx.fillStyle = '#FFF5F8';
+        ctx.beginPath();
+        ctx.moveTo(-16, 2); ctx.quadraticCurveTo(-22, 18, -20, 32);
+        ctx.lineTo(20, 32); ctx.quadraticCurveTo(22, 18, 16, 2);
+        ctx.quadraticCurveTo(8, -2, 0, -2); ctx.quadraticCurveTo(-8, -2, -16, 2);
+        ctx.closePath(); ctx.fill();
+        // 레이스 hem dots
+        ctx.fillStyle = '#F8C9D6';
+        for(let i=-3; i<=3; i++){
+          ctx.beginPath(); ctx.arc(i*4.5, 32, 1.1, 0, Math.PI*2); ctx.fill();
+        }
+        // 가슴 리본
+        ctx.fillStyle = '#FA80B0';
+        ctx.beginPath(); ctx.moveTo(-4, 2); ctx.lineTo(-1, 4); ctx.lineTo(-4, 6); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(4, 2);  ctx.lineTo(1, 4);  ctx.lineTo(4, 6);  ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#D63384';
+        ctx.fillRect(-1.2, 2.5, 2.4, 3.5);
+        // 허리 라인
+        ctx.strokeStyle = '#F8C9D6'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.moveTo(-15, 14); ctx.quadraticCurveTo(0, 17, 15, 14); ctx.stroke();
+      } },
+    { id:'hanbok', name:'분홍 한복', cost:5000, icon:'🌸', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 저고리 (상의)
+        ctx.fillStyle = '#FFD9E5';
+        ctx.beginPath();
+        ctx.moveTo(-15, 0); ctx.quadraticCurveTo(-17, 6, -15, 12);
+        ctx.lineTo(15, 12); ctx.quadraticCurveTo(17, 6, 15, 0);
+        ctx.quadraticCurveTo(8, -3, 0, -3); ctx.quadraticCurveTo(-8, -3, -15, 0);
+        ctx.closePath(); ctx.fill();
+        // 옷고름 (cord)
+        ctx.fillStyle = '#D63384';
+        ctx.fillRect(-1.2, 4, 2.4, 8);
+        // 치마 (skirt — 풍성하게)
+        ctx.fillStyle = '#FA80B0';
+        ctx.beginPath();
+        ctx.moveTo(-16, 12); ctx.quadraticCurveTo(-22, 22, -20, 32);
+        ctx.lineTo(20, 32); ctx.quadraticCurveTo(22, 22, 16, 12);
+        ctx.closePath(); ctx.fill();
+        // 깃 (collar trim)
+        ctx.strokeStyle = '#D63384'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-12, 0); ctx.quadraticCurveTo(0, 4, 12, 0); ctx.stroke();
+      } },
+    { id:'wedding_gown', name:'웨딩 드레스', cost:8000, icon:'💍', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // A-line 본체
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(-15, -2); ctx.quadraticCurveTo(-24, 16, -22, 33);
+        ctx.lineTo(22, 33); ctx.quadraticCurveTo(24, 16, 15, -2);
+        ctx.quadraticCurveTo(8, -3, 0, -3); ctx.quadraticCurveTo(-8, -3, -15, -2);
+        ctx.closePath(); ctx.fill();
+        // 펄 트림
+        ctx.fillStyle = '#FFE3F2';
+        for(let i=-4; i<=4; i++){
+          ctx.beginPath(); ctx.arc(i*4, 33, 1.0, 0, Math.PI*2); ctx.fill();
+        }
+        // 허리 코르셋
+        ctx.strokeStyle = '#E5E5F2'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-13, 12); ctx.quadraticCurveTo(0, 16, 13, 12); ctx.stroke();
+        // 가슴 글리터
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath(); ctx.arc(-3, 4, 0.7, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(3, 4, 0.7, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 7, 0.7, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'space_suit', name:'우주복', cost:6500, icon:'🚀', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 메인 슈트 (밝은 민트)
+        ctx.fillStyle = '#C7F5E5';
+        ctx.beginPath();
+        ctx.moveTo(-15, 0); ctx.quadraticCurveTo(-17, 16, -15, 30);
+        ctx.lineTo(15, 30); ctx.quadraticCurveTo(17, 16, 15, 0);
+        ctx.quadraticCurveTo(8, -3, 0, -3); ctx.quadraticCurveTo(-8, -3, -15, 0);
+        ctx.closePath(); ctx.fill();
+        // 가슴 헬멧 ring
+        ctx.strokeStyle = '#1864AB'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(0, 6, 5, 0, Math.PI*2); ctx.stroke();
+        // 가슴 패치 별
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath();
+        ctx.moveTo(0, 4); ctx.lineTo(1.5, 7.5); ctx.lineTo(5, 7.5); ctx.lineTo(2, 9.5);
+        ctx.lineTo(3, 13); ctx.lineTo(0, 11); ctx.lineTo(-3, 13); ctx.lineTo(-2, 9.5);
+        ctx.lineTo(-5, 7.5); ctx.lineTo(-1.5, 7.5); ctx.closePath(); ctx.fill();
+        // 허리 벨트
+        ctx.fillStyle = '#1864AB';
+        ctx.fillRect(-15, 16, 30, 3);
+        ctx.fillStyle = '#FFD43B';
+        ctx.fillRect(-3, 16, 6, 3);
+      } },
   ],
   child: [
     { id:'pacifier', name:'기본 (머리털)', cost:0,     icon:'👶', slot:'head',
@@ -6076,6 +6188,82 @@ const COMPANION_COSTUMES = {
           ctx.lineTo(cx + Math.cos(a2)*r*0.4, cy + Math.sin(a2)*r*0.4);
         }
         ctx.closePath(); ctx.fill();
+      } },
+    // === v12.17 — 아기 추가 옷 (사용자 요청 "아기랑 아내 비둘기 코스튬 좀 추가해줘. 옷 말이야"). ===
+    // 모두 dmgBoost 1.0, slot:'body'. local 좌표는 child body (y=−4~17) 안쪽에서 끝나도록 보수적.
+    { id:'striped_tee', name:'줄무늬 티',   cost:1200, icon:'👕', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(-9, -1); ctx.quadraticCurveTo(-11, 8, -10, 17);
+        ctx.lineTo(10, 17); ctx.quadraticCurveTo(11, 8, 9, -1);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -9, -1);
+        ctx.closePath(); ctx.fill();
+        // 줄무늬
+        ctx.strokeStyle = '#FA5252'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(-9, 2); ctx.lineTo(9, 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-10, 7); ctx.lineTo(10, 7); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-10, 12); ctx.lineTo(10, 12); ctx.stroke();
+      } },
+    { id:'sleep_suit', name:'아기 잠옷',   cost:1800, icon:'🌙', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 한 벌 잠옷 — 별 무늬 patten 있는 padded suit
+        ctx.fillStyle = '#A5D8FF';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 9, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 9, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 별 무늬
+        ctx.fillStyle = '#FFFFFF';
+        const stars = [[-5, 4], [4, 7], [-2, 12], [6, 14], [-7, 13]];
+        for(const [sx, sy] of stars){
+          ctx.beginPath(); ctx.arc(sx, sy, 0.9, 0, Math.PI*2); ctx.fill();
+        }
+        // 가슴 단추
+        ctx.fillStyle = '#1864AB';
+        ctx.beginPath(); ctx.arc(0, 2, 0.7, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 8, 0.7, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'baby_hanbok', name:'아기 한복',   cost:3000, icon:'🎎', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 아기 저고리 (yellow)
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath();
+        ctx.moveTo(-10, -1); ctx.quadraticCurveTo(-11, 5, -10, 9);
+        ctx.lineTo(10, 9); ctx.quadraticCurveTo(11, 5, 10, -1);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -1);
+        ctx.closePath(); ctx.fill();
+        // 옷고름
+        ctx.fillStyle = '#FA5252';
+        ctx.fillRect(-1, 1, 2, 6);
+        // 치마 (red)
+        ctx.fillStyle = '#FF6B6B';
+        ctx.beginPath();
+        ctx.moveTo(-11, 9); ctx.quadraticCurveTo(-13, 14, -11, 18);
+        ctx.lineTo(11, 18); ctx.quadraticCurveTo(13, 14, 11, 9);
+        ctx.closePath(); ctx.fill();
+      } },
+    { id:'dinosaur_onesie', name:'공룡 우주복', cost:4500, icon:'🦖', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 초록 onesie
+        ctx.fillStyle = '#69DB7C';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 등쪽 가시 (spikes — body 윗쪽 살짝 보이게)
+        ctx.fillStyle = '#2F9E44';
+        ctx.beginPath();
+        ctx.moveTo(-9, -1); ctx.lineTo(-7, -4); ctx.lineTo(-5, -1);
+        ctx.lineTo(-2, -4); ctx.lineTo(0, -1);
+        ctx.lineTo(2, -4); ctx.lineTo(5, -1);
+        ctx.lineTo(7, -4); ctx.lineTo(9, -1);
+        ctx.closePath(); ctx.fill();
+        // 배 흰색 (lighter belly)
+        ctx.fillStyle = '#FFF9DB';
+        ctx.beginPath(); ctx.ellipse(0, 11, 5, 5, 0, 0, Math.PI*2); ctx.fill();
       } },
   ],
 };
@@ -6493,33 +6681,63 @@ function spawnEnemy(kind){
 // "ch50이 좀 쉬운데 조금만 높이고 ch51-100도 비례해서 더 높여줘". Companions add ~10-20%
 // effective DPS, so boss HP bumps need to be larger than the companion contribution to feel
 // meaningfully harder.
+// v12.17 — 사용자 명령 "행성 수호자가 너무 오랫동안 보스로 나오고, 별 포식자도 너무 오래 나와.
+// 이 보스들을 잘게 쪼개서 스토리라인대로 레벨 5나 10정도로 쪼개서 새로운 보스가 나와야할거같아".
+// 이전: cat_king 이 Ch1~29 (29챕터!) 단일로 나옴. 그 외 변종도 baseStyle 없이 정의돼 Ch51+
+// 보스가 화면에 안 그려지는 버그 동반.
+// 해결: 두 가지 메타 필드 추가 →
+//   • baseStyle    : 6개 표준 sprite (cat_king/tyrant/leviathan/phantom/phoenix/void) 중 사용
+//   • baseBehavior : 6개 표준 attack 패턴 중 사용
+//   • hueShift / saturate : 같은 sprite 라도 ctx.filter 로 색상 시프트해 시각 차별
+// Ch1~29 도 5챕터 단위 6 sub-tier 보스로 분할 (Day City / Neon / Cave / Ice / Cosmic / Hellfire).
 const BOSS_VARIANTS = {
-  cat_king:        { hpMult:13.0, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕' },
-  tyrant:          { hpMult:14.0, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주' },
-  leviathan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주' },
-  phantom:         { hpMult:14.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주' },
-  phoenix:         { hpMult:14.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조' },
-  void:            { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },         // ch50
-  // === 원정 Ⅱ — 비둘기 행성 (companion: wife). 5챕터마다 변종 변경 (사용자 요청). ===
-  pigeon_warlord:  { hpMult:13.5, dmgMult:1.35, sizeMult:1.05, label:'깃털 군주' },          // 51-55
-  pigeon_oracle:   { hpMult:14.0, dmgMult:1.40, sizeMult:1.05, label:'예언의 비둘기' },       // 56-60
-  pigeon_general:  { hpMult:14.5, dmgMult:1.45, sizeMult:1.10, label:'행성 사령관' },         // 61-65
-  pigeon_emperor:  { hpMult:15.5, dmgMult:1.60, sizeMult:1.25, label:'비둘기 행성 군주' },    // 66-70 (원정 Ⅱ 보스)
-  // === 원정 Ⅲ — 우주 (companions: wife + child). 5챕터마다 변종 변경. ===
-  star_devourer:   { hpMult:20.0, dmgMult:1.55, sizeMult:1.15, label:'별 포식자' },           // 71-75
-  nebula_serpent:  { hpMult:21.0, dmgMult:1.60, sizeMult:1.18, label:'성운의 뱀' },           // 76-80
-  black_hole_lord: { hpMult:22.0, dmgMult:1.65, sizeMult:1.20, label:'블랙홀 군주' },         // 81-85
-  cosmic_arbiter:  { hpMult:23.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },       // 86-90
-  void_titan:      { hpMult:24.0, dmgMult:1.75, sizeMult:1.25, label:'보이드 타이탄' },        // 91-95
-  omega:           { hpMult:25.0, dmgMult:1.85, sizeMult:1.32, label:'오메가 — 우주의 주재자' }, // 96-100 (최종)
-  // === 원정 Ⅳ — 지옥 구출 원정 (companions: 가족 + 구출된 조류 친구들). 5챕터 간격. ===
-  hell_houndmaster:    { hpMult:26.0, dmgMult:1.70, sizeMult:1.20, label:'사냥개의 주인' },      // 101-105
-  flame_overlord:      { hpMult:27.0, dmgMult:1.75, sizeMult:1.22, label:'화염 군주' },           // 106-110
-  bone_archon:         { hpMult:28.0, dmgMult:1.80, sizeMult:1.24, label:'해골 대천사' },         // 111-115
-  shadow_inquisitor:   { hpMult:29.0, dmgMult:1.85, sizeMult:1.22, label:'그림자 심판관' },       // 116-120
-  infernal_seraph:     { hpMult:30.0, dmgMult:1.90, sizeMult:1.26, label:'잿불의 천사' },         // 121-125
-  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.00, sizeMult:1.35, label:'지옥문의 군주' },       // 126-130 (게임 최종)
+  // === 원정 Ⅰ — 지구 정복 (1-50). v12.17 5챕터 단위 분할. ===
+  cat_king:        { hpMult:13.0, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕',     baseStyle:'cat_king',  baseBehavior:'cat_king' },                                  // 1-5 (Day City)
+  neon_warlord:    { hpMult:13.2, dmgMult:1.22, sizeMult:1.02, label:'네온 군주',         baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:200, saturate:1.5 },     // 6-10 (Neon Night)
+  crystal_brute:   { hpMult:13.4, dmgMult:1.24, sizeMult:1.05, label:'수정 골렘',         baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:60,  saturate:0.85 },    // 11-15 (Cave/Crystal)
+  frost_overlord:  { hpMult:13.6, dmgMult:1.26, sizeMult:1.05, label:'얼음 군주',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:180, saturate:0.7 },     // 16-20 (Ice)
+  cosmic_warden:   { hpMult:13.8, dmgMult:1.28, sizeMult:1.05, label:'우주 수문장',       baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:60,  saturate:1.2 },     // 21-25 (Cosmic)
+  ash_titan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.08, label:'잿불 거인',         baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:340, saturate:0.9 },     // 26-29 (Hellfire)
+  // === Ch30+ 기존 6 — 자기 자신 baseStyle. ===
+  tyrant:          { hpMult:14.0, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주',         baseStyle:'tyrant',    baseBehavior:'tyrant' },
+  leviathan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주',         baseStyle:'leviathan', baseBehavior:'leviathan' },
+  phantom:         { hpMult:14.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주',       baseStyle:'phantom',   baseBehavior:'phantom' },
+  phoenix:         { hpMult:14.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조',       baseStyle:'phoenix',   baseBehavior:'phoenix' },
+  void:            { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제',       baseStyle:'void',      baseBehavior:'void' },                                       // ch50
+  // === 원정 Ⅱ — 비둘기 행성 (companion: wife). 5챕터마다 변종 변경. ===
+  pigeon_warlord:  { hpMult:13.5, dmgMult:1.35, sizeMult:1.05, label:'깃털 군주',         baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:320, saturate:1.2 },     // 51-55
+  pigeon_oracle:   { hpMult:14.0, dmgMult:1.40, sizeMult:1.05, label:'예언의 비둘기',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:300, saturate:1.0 },     // 56-60
+  pigeon_general:  { hpMult:14.5, dmgMult:1.45, sizeMult:1.10, label:'행성 사령관',       baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:280, saturate:1.1 },     // 61-65
+  pigeon_emperor:  { hpMult:15.5, dmgMult:1.60, sizeMult:1.25, label:'비둘기 행성 군주',   baseStyle:'void',      baseBehavior:'void',      hueShift:320, saturate:1.1 },     // 66-70
+  // === 원정 Ⅲ — 우주 ===
+  star_devourer:   { hpMult:20.0, dmgMult:1.55, sizeMult:1.15, label:'별 포식자',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:50,  saturate:1.4 },     // 71-75
+  nebula_serpent:  { hpMult:21.0, dmgMult:1.60, sizeMult:1.18, label:'성운의 뱀',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:280, saturate:1.2 },     // 76-80
+  black_hole_lord: { hpMult:22.0, dmgMult:1.65, sizeMult:1.20, label:'블랙홀 군주',       baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:0.4 },     // 81-85
+  cosmic_arbiter:  { hpMult:23.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.4 },     // 86-90
+  void_titan:      { hpMult:24.0, dmgMult:1.75, sizeMult:1.25, label:'보이드 타이탄',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:260, saturate:1.2 },     // 91-95
+  omega:           { hpMult:25.0, dmgMult:1.85, sizeMult:1.32, label:'오메가 — 우주의 주재자', baseStyle:'void',  baseBehavior:'void',      hueShift:60,  saturate:1.3 },     // 96-100
+  // === 원정 Ⅳ — 지옥 구출 원정 ===
+  hell_houndmaster:    { hpMult:26.0, dmgMult:1.70, sizeMult:1.20, label:'사냥개의 주인',  baseStyle:'tyrant',  baseBehavior:'tyrant',  hueShift:0,   saturate:1.4 },          // 101-105
+  flame_overlord:      { hpMult:27.0, dmgMult:1.75, sizeMult:1.22, label:'화염 군주',      baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:0,   saturate:1.3 },          // 106-110
+  bone_archon:         { hpMult:28.0, dmgMult:1.80, sizeMult:1.24, label:'해골 대천사',    baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:0.3 },          // 111-115
+  shadow_inquisitor:   { hpMult:29.0, dmgMult:1.85, sizeMult:1.22, label:'그림자 심판관',  baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:1.5 },          // 116-120
+  infernal_seraph:     { hpMult:30.0, dmgMult:1.90, sizeMult:1.26, label:'잿불의 천사',    baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:30,  saturate:1.1 },          // 121-125
+  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.00, sizeMult:1.35, label:'지옥문의 군주',  baseStyle:'void',    baseBehavior:'void',    hueShift:340, saturate:1.4 },          // 126-130 (게임 최종)
 };
+function bossBaseStyleFor(variant){
+  const v = BOSS_VARIANTS[variant];
+  return (v && v.baseStyle) || variant;
+}
+function bossBaseBehaviorFor(variant){
+  const v = BOSS_VARIANTS[variant];
+  return (v && v.baseBehavior) || variant;
+}
+function bossFilterFor(variant){
+  const v = BOSS_VARIANTS[variant];
+  if(!v || v.hueShift === undefined) return null;
+  const sat = v.saturate != null ? v.saturate : 1;
+  return `hue-rotate(${v.hueShift}deg) saturate(${sat})`;
+}
 function bossVariantForChapter(c){
   // 원정 Ⅳ — 지옥 구출 원정 (5챕터 간격)
   if(c >= 126) return 'hellgate_sovereign';
@@ -6540,13 +6758,18 @@ function bossVariantForChapter(c){
   if(c >= 61) return 'pigeon_general';
   if(c >= 56) return 'pigeon_oracle';
   if(c >= 51) return 'pigeon_warlord';
-  // 원정 Ⅰ
+  // 원정 Ⅰ — v12.17 5챕터 단위 분할 (사용자 명령). 기존 cat_king 1-29 단일 → 6 sub-tier.
   if(c >= 50) return 'void';
   if(c >= 45) return 'phoenix';
   if(c >= 40) return 'phantom';
   if(c >= 35) return 'leviathan';
   if(c >= 30) return 'tyrant';
-  return 'cat_king';
+  if(c >= 26) return 'ash_titan';        // Hellfire (26-29: 지옥 관문/화산 분화구/재의 평원/심판의 문)
+  if(c >= 21) return 'cosmic_warden';    // Cosmic (21-25: 대기권/우주 정거장/소행성대/성운/블랙홀)
+  if(c >= 16) return 'frost_overlord';   // Ice (16-20: 눈보라/얼음 호수/설산/빙하/오로라)
+  if(c >= 11) return 'crystal_brute';    // Cave/Crystal (11-15: 동굴/수정/용암/지하/버섯)
+  if(c >= 6)  return 'neon_warlord';     // Neon Night (6-10: 네온/클럽/심야/버려진 빌딩/달)
+  return 'cat_king';                      // Day City (1-5: 비둘기 광장/도시 공원/뒷골목/시장/옥상)
 }
 
 function spawnBoss(){
@@ -6577,10 +6800,12 @@ function spawnBoss(){
   b.rangedCd = 1.8;        // was 2.4 — tighter shot cadence
   b.specialCd = 4.5;       // was 5.5 — dashes a bit more often
   // Variant-specific timers/state — first-attack windows shortened so the boss starts pressuring immediately.
-  if(variant === 'leviathan') b.tendrilCd = 2.2 + Math.random()*0.6;
-  if(variant === 'phantom') { b.teleportCd = 2.8; b.darkWaveCd = 1.5; }
-  if(variant === 'phoenix') { b.canRevive = true; b.fireRingCd = 2.4; b.reviving = 0; }
-  if(variant === 'void') { b.phase = 1; b.voidBlastCd = 3.0; b.voidTeleportCd = 4.5; }
+  // v12.17 — base behavior 로 alias. e.g. star_devourer (baseBehavior:'leviathan') 도 tendrilCd 세팅.
+  const beh = bossBaseBehaviorFor(variant);
+  if(beh === 'leviathan') b.tendrilCd = 2.2 + Math.random()*0.6;
+  if(beh === 'phantom') { b.teleportCd = 2.8; b.darkWaveCd = 1.5; }
+  if(beh === 'phoenix') { b.canRevive = true; b.fireRingCd = 2.4; b.reviving = 0; }
+  if(beh === 'void') { b.phase = 1; b.voidBlastCd = 3.0; b.voidTeleportCd = 4.5; }
   state.bossSpawned = true;
   state.bossAlive = true;
   state.bossFightStart = state.time;
@@ -6969,7 +7194,7 @@ function damageEnemy(e, dmg, crit=false, knockbackDir=null){
   state.damageNums.push({ x:e.x+(Math.random()*10-5), y:e.y-24, t:0.7, vy:-40, txt:String(dmg), crit });
   if(e.hp<=0){
     // Phoenix boss — first death triggers a revive at 60% HP with brief invulnerability burst.
-    if(e.kind === 'boss' && e.bossVariant === 'phoenix' && e.canRevive){
+    if(e.kind === 'boss' && bossBaseBehaviorFor(e.bossVariant) === 'phoenix' && e.canRevive){
       e.canRevive = false;
       e.hp = Math.ceil(e.maxHp * 0.6);
       e.hitT = 0;
@@ -7546,6 +7771,14 @@ function damagePlayer(dmg){
   }
   p.hp -= dmg;
   p.invT = 0.5;
+  // v12.17 — 사용자 명령 "남편 비둘기 파티원들은 모두가 남편이 공격 당하면 공격당한 효과가 모두
+  // 같이 적용되게 해줘". p.hitT 으로 hurt 시각 신호를 띄워 updateCompanions 에서 모든 동료
+  // (아내/아기/구출 친구들)에게 동일 시간만큼 hitT 전파. 이전 버전은 p.hitT 가 set 되지 않아
+  // 동료 피격 효과가 사실상 한 번도 발동하지 않았음 (사용자가 안 본 이유 = 버그).
+  p.hitT = 0.35;
+  for(const c of state.companions){
+    c.hitT = 0.35;
+  }
   sfxHurt();
   state.camera.shake = Math.min(20, state.camera.shake+8);
   if(p.hp<=0){
@@ -7635,6 +7868,8 @@ function update(dt){
 
   // Invuln
   if(p.invT>0) p.invT -= dt;
+  // v12.17 — hurt-flash decay (동료 sync 용). damagePlayer 에서 set, 여기서 dt 만큼 감산.
+  if(p.hitT>0) p.hitT = Math.max(0, p.hitT - dt);
 
   // Auto shoot — every unlocked weapon ticks its own reload independently.
   for(const wid in p.weapons){
@@ -7810,9 +8045,11 @@ function update(dt){
     const d = Math.hypot(dx,dy)||1;
     e.walkPhase += dt*(e.speed/40);
     if(e.kind==='boss'){
-      // Boss behavior — dispatch on bossVariant. All variants share base movement (approach +
-      // periodic dash) but have unique special attacks. Movement is shared, specials differ.
-      const variant = e.bossVariant || 'cat_king';
+      // Boss behavior — v12.17 dispatch on baseBehavior alias so all 22 variants reuse 6 attack
+      // patterns (cat_king/tyrant/leviathan/phantom/phoenix/void). 시각 차별은 hue-rotate filter,
+      // 행동 차별은 hpMult/dmgMult/sizeMult 로.
+      const variantId = e.bossVariant || 'cat_king';
+      const variant = bossBaseBehaviorFor(variantId);
 
       // Shared dash mechanic (slightly weaker for slow variants)
       e.specialCd -= dt;
@@ -7916,11 +8153,12 @@ function update(dt){
         }
         // Revive logic — handled in damageEnemy via canRevive flag (see kill checks)
       } else if(variant === 'void'){
-        // Multi-phase final boss
-        // Phase transitions based on HP fraction
+        // Multi-phase final boss. v12.17 — phase 토스트 텍스트는 보스 라벨로 동적 치환.
+        // pigeon_emperor / omega / black_hole_lord / hellgate_sovereign 모두 voidBehavior 공유.
         const hpFrac = e.hp / e.maxHp;
-        if(hpFrac < 0.66 && e.phase < 2){ e.phase = 2; state.toastBanner = { text:'⚠ 공허의 황제 — 2단계!', sub:'공허 균열이 시작됩니다', t:2.0, maxT:2.0 }; state.camera.shake = 22; }
-        if(hpFrac < 0.33 && e.phase < 3){ e.phase = 3; state.toastBanner = { text:'⚠ 공허의 황제 — 최종 단계!', sub:'우주가 무너집니다', t:2.4, maxT:2.4 }; state.camera.shake = 30; }
+        const _bossName = e.bossLabel || '공허의 황제';
+        if(hpFrac < 0.66 && e.phase < 2){ e.phase = 2; state.toastBanner = { text:`⚠ ${_bossName} — 2단계!`, sub:'균열이 시작됩니다', t:2.0, maxT:2.0 }; state.camera.shake = 22; }
+        if(hpFrac < 0.33 && e.phase < 3){ e.phase = 3; state.toastBanner = { text:`⚠ ${_bossName} — 최종 단계!`, sub:'세계가 무너집니다', t:2.4, maxT:2.4 }; state.camera.shake = 30; }
         // Phase 1+: void blast (8-shot ring) every 4s
         e.voidBlastCd -= dt;
         if(e.voidBlastCd <= 0){
@@ -11178,9 +11416,10 @@ function renderCompanionGrid(kind, gridId){
     const colorBorder = equipped ? themeAccent : owned ? themeBorder : (affordable ? '#FFD43B' : '#495057');
     const opacityRule = owned ? '' : (affordable ? '' : 'opacity:.55;');
     card.style.cssText = `cursor:pointer;background:rgba(40,15,70,.55);border:2px solid ${colorBorder};border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;${opacityRule}`;
-    // Live preview canvas — actual companion shape with this costume
+    // Live preview canvas — actual companion shape with this costume.
+    // v12.17 — width/height 는 drawCompanionCostumePreview 에서 DPR 곱해 set. 여기는 style 만.
     const cv = document.createElement('canvas');
-    cv.width = 72; cv.height = 88; cv.style.cssText = 'background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.18) 0%, rgba(20,8,40,.35) 70%);border-radius:8px;';
+    cv.style.cssText = 'width:72px;height:88px;background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.18) 0%, rgba(20,8,40,.35) 70%);border-radius:8px;display:block;';
     card.appendChild(cv);
     const name = document.createElement('div');
     name.style.cssText = 'font-size:11px;font-weight:900;color:#FFF9DB;text-align:center;line-height:1.15;';
@@ -11225,36 +11464,50 @@ function renderCompanionGrid(kind, gridId){
   }
 }
 
-// v12.12 — 상점 코스튬 미리보기. DPR 적용으로 픽셀 깨짐 해소 + 발 line을 캔버스 footline에
-// 맞춰 정렬 (사용자 피드백 "기본 템 몸통 지면 정렬 안 맞고 픽셀 깨진다").
+// v12.17 — 상점 코스튬 미리보기. 사용자 명령 "다른 코스튬이랑 지면 위치가 동일하게 + 해상도
+// 깨지게 하지마". 두 가지 핵심 수정:
+//   1) 모든 카드가 "발 끝 = 동일 ground line" 에 닿도록 anchor를 shadow 중심이 아닌 visible 바닥
+//      (아내: 발 삼각형 끝 y=56 / 아기: 그림자 하단 y=21) 으로 변경 → 옷이 길거나 짧아도 카드
+//      간 발 위치 정확히 일치.
+//   2) DPR을 항상 buffer + style 양쪽에 동시에 적용. 이전엔 renderCompanionGrid 에서 cv.width/
+//      height 를 raw 72/88 로 먼저 박아둔 뒤 이 함수가 dpr-resize 를 했는데, browser 가 buffer
+//      재할당 사이에 한 프레임 raw 72×88 픽셀로 잡아 흐려보이는 케이스 발생 → 항상 dpr-buffer +
+//      style 명시.
 function drawCompanionCostumePreview(cv, kind, costumeId){
   const ctx2 = cv.getContext('2d');
   const cssW = 72, cssH = 88;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // 항상 buffer + style 을 DPR 기준으로 sync. 한 프레임짜리 흐림 방지.
   if(cv.width !== cssW * dpr || cv.height !== cssH * dpr){
     cv.width = cssW * dpr;
     cv.height = cssH * dpr;
-    cv.style.width = cssW + 'px';
-    cv.style.height = cssH + 'px';
   }
+  cv.style.width = cssW + 'px';
+  cv.style.height = cssH + 'px';
   ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx2.imageSmoothingEnabled = true;
+  ctx2.imageSmoothingQuality = 'high';
   ctx2.clearRect(0, 0, cssW, cssH);
   const slot = progress.companionCostumes[kind];
   const prev = slot.equipped;
   slot.equipped = costumeId;
-  // 발 line은 canvas footer 가까이 (cssH*0.88). 동료별 그림자 offset을 빼서 anchor를 잡는다.
-  const footY = cssH * 0.88;
-  const previewScale = 0.65;  // wife/child 가 canvas 안에 머리부터 발끝까지 들어오도록.
+  // 공통 ground line (모든 wife/child 카드 동일). 카드 footer 에서 8px 위.
+  const groundY = cssH - 8;
+  const previewScale = 0.65;
   ctx2.save();
   if(kind === 'wife'){
-    // wife shadow at local y=52, internal 0.85 → preview offset = previewScale * 0.85 * 52
-    const offY = previewScale * 0.85 * 52;
-    ctx2.translate(cssW/2, footY - offY);
+    // wife 의 visible 바닥 = 발 삼각형 끝 (local y=56). drawWifePigeon 내부 0.85× 스케일을
+    // 함께 곱해야 실제 화면 픽셀 위치가 맞음.
+    const bottomLocal = 56;
+    const offY = previewScale * 0.85 * bottomLocal;
+    ctx2.translate(cssW/2, groundY - offY);
     ctx2.scale(previewScale, previewScale);
     drawWifePigeon(ctx2, { x:0, y:0 });
   } else {
-    const offY = previewScale * 18;
-    ctx2.translate(cssW/2, footY - offY);
+    // child 는 다리 미렌더 — 그림자 하단 (y=18 + radius 3 = 21) 을 ground line 으로.
+    const bottomLocal = 21;
+    const offY = previewScale * bottomLocal;
+    ctx2.translate(cssW/2, groundY - offY);
     ctx2.scale(previewScale, previewScale);
     drawChildPigeon(ctx2, { x:0, y:0, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
   }
