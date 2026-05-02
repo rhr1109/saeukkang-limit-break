@@ -311,7 +311,7 @@
 
   /* Stage/wave entry toast — DOM-rendered so it always sits above the inventory pill bar (z-index 2)
      and any item glow on the canvas. Slides in from the top, fades out near the end. */
-  #toastBanner{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 130px);left:50%;transform:translateX(-50%);background:rgba(20,8,40,0.92);border:3px solid rgba(255,224,102,.95);border-radius:14px;padding:10px 22px;color:#FFE066;font-weight:900;font-family:inherit;font-size:18px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.7);box-shadow:0 6px 24px rgba(0,0,0,.6),inset 0 0 18px rgba(255,224,102,.18);pointer-events:none;z-index:9;opacity:0;transition:opacity .25s, transform .25s;line-height:1.3;}
+  #toastBanner{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 130px);left:50%;transform:translateX(-50%);background:rgba(20,8,40,0.92);border:3px solid rgba(255,224,102,.95);border-radius:14px;padding:10px 22px;color:#FFE066;font-weight:900;font-family:inherit;font-size:18px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.7);box-shadow:0 6px 24px rgba(0,0,0,.6),inset 0 0 18px rgba(255,224,102,.18);pointer-events:none;z-index:1100;opacity:0;transition:opacity .25s, transform .25s;line-height:1.3;}
   #toastBanner.show{opacity:1;transform:translateX(-50%) translateY(0);}
   #toastBanner.enter{opacity:0;transform:translateX(-50%) translateY(-30px);}
   #toastBanner .toast-sub{display:block;color:#A5D6A7;font-size:13px;margin-top:4px;font-weight:700;}
@@ -608,6 +608,11 @@
 <div id="root">
   <canvas id="canvas"></canvas>
 
+  <!-- v12.5 — Global toast banner. Moved out of #hud (which gets hidden during chapter select /
+       shop / title) so chapter-select tab-lock warnings and similar UI alerts can show in any
+       scene. Style identical to before, just relocated. -->
+  <div id="toastBanner" class="enter"></div>
+
   <!-- HUD -->
   <div id="hud" class="hidden">
     <div class="topbar">
@@ -637,7 +642,6 @@
         <div class="boss-hp-text" id="bossHpText">0 / 0</div>
       </div>
     </div>
-    <div id="toastBanner" class="enter"></div>
     <button class="hud-btn" id="pauseBtn" title="일시정지">⏸</button>
     <div id="joyArea"></div>
     <div id="joystick"><div class="stick"></div></div>
@@ -3668,6 +3672,89 @@ function drawEnemy(ctx, e, walkPhase){
       ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(0, -2*s, 22*s + (1-tt)*8, 0, Math.PI*2); ctx.stroke();
     }
+  } else if(kind==='pigeon_warrior'){
+    // 원정 Ⅱ — pink-feathered pigeon soldier with red bandana (mid HP, ranged feel)
+    const body = flashing?'#FFB3B3':'#D88A99';
+    const accent = flashing?'#FFE3E3':'#FFD8DD';
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.ellipse(0, 8*s, 14*s, 12*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = accent;
+    ctx.beginPath(); ctx.ellipse(0, 12*s, 9*s, 8*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.arc(0, -6*s, 9*s, 0, Math.PI*2); ctx.fill();
+    // Red bandana
+    ctx.fillStyle = '#C92A2A';
+    ctx.fillRect(-9*s, -10*s, 18*s, 3*s);
+    ctx.fillStyle = '#FFA500';
+    ctx.beginPath(); ctx.moveTo(7*s, -6*s); ctx.lineTo(13*s, -5*s); ctx.lineTo(7*s, -3*s); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(3*s, -7*s, 1.4*s, 0, Math.PI*2); ctx.fill();
+  } else if(kind==='pigeon_brute'){
+    // 원정 Ⅱ — armored beefy pigeon (heavy melee)
+    const body = flashing?'#FFB3B3':'#A0606E';
+    const armor = flashing?'#FFDADA':'#5A2030';
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.ellipse(0, 10*s, 18*s, 16*s, 0, 0, Math.PI*2); ctx.fill();
+    // Armor plate
+    ctx.fillStyle = armor;
+    ctx.fillRect(-13*s, 4*s, 26*s, 10*s);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1;
+    ctx.strokeRect(-13*s, 4*s, 26*s, 10*s);
+    // Head
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.arc(0, -8*s, 11*s, 0, Math.PI*2); ctx.fill();
+    // Helmet
+    ctx.fillStyle = armor;
+    ctx.beginPath(); ctx.arc(0, -10*s, 11*s, Math.PI, Math.PI*2); ctx.fill();
+    // Beak
+    ctx.fillStyle = '#FFA500';
+    ctx.beginPath(); ctx.moveTo(8*s, -8*s); ctx.lineTo(15*s, -6*s); ctx.lineTo(8*s, -4*s); ctx.closePath(); ctx.fill();
+    // Eyes red glowing
+    ctx.fillStyle = '#FA5252';
+    ctx.beginPath(); ctx.arc(3*s, -8*s, 1.6*s, 0, Math.PI*2); ctx.fill();
+  } else if(kind==='void_drone'){
+    // 원정 Ⅲ — small purple cosmic drone with single eye (fast swarm)
+    const body = flashing?'#FFB3B3':'#9775FA';
+    const glow = '#E599F7';
+    const t = state.time;
+    // Halo
+    ctx.fillStyle = `rgba(229,153,247,0.3)`;
+    ctx.beginPath(); ctx.arc(0, 0, 14*s + Math.sin(t*4)*1.5, 0, Math.PI*2); ctx.fill();
+    // Body — diamond/orb
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.arc(0, 0, 10*s, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(0, 0, 7*s, 0, Math.PI*2); ctx.fill();
+    // Single big white eye with pupil
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(0, -1*s, 4*s, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1A0033';
+    ctx.beginPath(); ctx.arc(Math.sin(t*2)*1.5*s, -1*s, 2*s, 0, Math.PI*2); ctx.fill();
+  } else if(kind==='star_eye'){
+    // 원정 Ⅲ — large floating starry eye (ranged sniper)
+    const body = flashing?'#FFB3B3':'#5C7CFA';
+    const t = state.time;
+    // Floating starlight aura
+    for(let i=0;i<6;i++){
+      const a = t*0.6 + i*Math.PI/3;
+      ctx.fillStyle = `rgba(229,153,247,${0.4+Math.sin(t*2+i)*0.3})`;
+      ctx.beginPath(); ctx.arc(Math.cos(a)*16*s, Math.sin(a)*16*s, 1.5*s, 0, Math.PI*2); ctx.fill();
+    }
+    // Iris ring
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.arc(0, 0, 14*s, 0, Math.PI*2); ctx.fill();
+    // White sclera
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(0, 0, 10*s, 0, Math.PI*2); ctx.fill();
+    // Iris
+    ctx.fillStyle = '#5C7CFA';
+    ctx.beginPath(); ctx.arc(0, 0, 6*s, 0, Math.PI*2); ctx.fill();
+    // Pupil
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(0, 0, 3*s, 0, Math.PI*2); ctx.fill();
+    // Highlight
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(-1.5*s, -1.5*s, 1.2*s, 0, Math.PI*2); ctx.fill();
   } else if(kind==='boss'){
     // Boss rendering — dispatches on bossVariant. Default is the cat king (Ch1-29).
     const variant = e.bossVariant || 'cat_king';
@@ -5422,6 +5509,12 @@ const ENEMY_DEFS = {
   summoner:{ speed:55,  hp: 180, dmg: 14, size:1.7, score:20,xp:14, color:'#7950F2' },
   tyrant: { speed: 60, hp: 320, dmg: 32, size:2.0, score:35, xp:22, color:'#5D0F0F' },
   leviathan:{ speed:50,  hp: 280, dmg: 30, size:2.2, score:42, xp:25, color:'#0B3D47' },
+  // 원정 Ⅱ — 비둘기 행성 enemies (ch51+)
+  pigeon_warrior: { speed:100, hp:80,  dmg:22, size:1.3, score:8,  xp:7,  color:'#D88A99' },  // mid HP, ranged
+  pigeon_brute:   { speed:65,  hp:220, dmg:34, size:1.7, score:18, xp:15, color:'#A0606E' },  // tanky melee
+  // 원정 Ⅲ — 우주 enemies (ch71+)
+  void_drone:  { speed:165, hp:60,  dmg:18, size:0.9, score:6,  xp:6,  color:'#9775FA' },     // fast swarm
+  star_eye:    { speed:55,  hp:160, dmg:28, size:1.4, score:14, xp:13, color:'#E599F7' },     // ranged sniper
   boss:   { speed: 70,  hp: 500, dmg: 25, size:2.4, score:100,xp:40, color:'#222' }
 };
 
@@ -5622,6 +5715,20 @@ function waveEnemyPool(wave){
   if(c>=45) pool.push('leviathan','tyrant','leviathan','summoner','summoner');
   if(c>=48) pool.push('leviathan','leviathan','tyrant');
   if(c>=50) pool.push('tyrant','leviathan','leviathan'); // final chapter — abyss + tyrant rush
+  // === 원정 Ⅱ — 비둘기 행성 (ch51+) ===
+  if(c>=51) pool.push('pigeon_warrior','pigeon_warrior');
+  if(c>=55) pool.push('pigeon_warrior','pigeon_brute');
+  if(c>=60) pool.push('pigeon_warrior','pigeon_brute','pigeon_brute');
+  if(c>=65) pool.push('pigeon_brute','pigeon_warrior','pigeon_brute');
+  if(c>=70) pool.push('pigeon_brute','pigeon_brute','tyrant');
+  // === 원정 Ⅲ — 우주 (ch71+) ===
+  if(c>=71) pool.push('void_drone','void_drone','void_drone');
+  if(c>=75) pool.push('void_drone','star_eye');
+  if(c>=80) pool.push('void_drone','star_eye','star_eye');
+  if(c>=85) pool.push('star_eye','star_eye','void_drone');
+  if(c>=90) pool.push('star_eye','star_eye','void_drone','void_drone');
+  if(c>=95) pool.push('void_drone','star_eye','star_eye','star_eye');
+  if(c>=100) pool.push('star_eye','star_eye','void_drone','void_drone'); // omega chapter
   return pool;
 }
 // Backwards-compat shim for any code path still calling stageEnemyPool().
@@ -6056,6 +6163,12 @@ const DROP_TABLES = {
   tyrant:   { drop:1.00, mix:{heal:.20, magnet:.10, coin:.10, bomb:.30, golden:.30} },
   // Leviathan drops are heavy on healing (it tanks → reward sustain) + golden for scaling XP.
   leviathan:{ drop:1.00, mix:{heal:.30, magnet:.10, coin:.10, bomb:.20, golden:.30} },
+  // 원정 Ⅱ
+  pigeon_warrior:{ drop:0.50, mix:{heal:.30, magnet:.20, coin:.20, bomb:.15, golden:.15} },
+  pigeon_brute:  { drop:0.85, mix:{heal:.30, magnet:.10, coin:.15, bomb:.20, golden:.25} },
+  // 원정 Ⅲ
+  void_drone:    { drop:0.30, mix:{heal:.30, magnet:.30, coin:.20, bomb:.10, golden:.10} },
+  star_eye:      { drop:0.70, mix:{heal:.25, magnet:.15, coin:.15, bomb:.20, golden:.25} },
 };
 let killsSinceDrop = 0; // pity timer so player sees regular drops even on unlucky streaks
 function rollItemDrop(e){
@@ -6433,6 +6546,12 @@ function update(dt){
   if(state.ultScreenFlash > 0) state.ultScreenFlash = Math.max(0, state.ultScreenFlash - dt * 1.8);
   // Tick the global time clock for menu scenes too — the title pigeon, costume previews, and
   // shop screens use state.time for breathing/halo animation, so freezing it would lock them solid.
+  // v12.5 — toast countdown ticks regardless of scene so chapter-select / shop / title screen
+  // toasts (e.g. expedition lock warnings) auto-dismiss on the same timer as in-game toasts.
+  if(state.toastBanner){
+    state.toastBanner.t -= dt;
+    if(state.toastBanner.t <= 0) state.toastBanner = null;
+  }
   // The gameplay simulation still bails below the early return for non-playing scenes.
   if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop'){
     state.time += dt;
@@ -7076,11 +7195,7 @@ function update(dt){
   }
   state.pickupTexts = state.pickupTexts.filter(t=>t.t>0);
 
-  // Toast banner (stage transition notice) — counts down even during play
-  if(state.toastBanner){
-    state.toastBanner.t -= dt;
-    if(state.toastBanner.t <= 0) state.toastBanner = null;
-  }
+  // (Toast banner countdown — moved to top of update() so it ticks in chapter-select / title.)
 
   // Damage numbers
   for(const d of state.damageNums){
@@ -8821,7 +8936,12 @@ function render(){
   ctx.fillStyle=g;
   ctx.fillRect(0,0,W,H);
 
-  if(state.scene==='title' || state.scene==='shop' || state.scene==='chapterSelect') return; // overlay handles it
+  if(state.scene==='title' || state.scene==='shop' || state.scene==='chapterSelect'){
+    // v12.5 — toasts must still sync in menu scenes (e.g. expedition lock warning on chapter
+    // select). syncToast handles its own DOM updates regardless of canvas state.
+    syncToast();
+    return;
+  }
   // Cinematic victory scene — full-screen canvas celebration that plays behind the modal stats panel.
   // Drawn instead of the gameplay world so the player sees the pigeon, not a paused arena.
   if(state.scene === 'victory'){
