@@ -99,8 +99,12 @@
   #hud .lvbar-wrap{display:flex;align-items:center;gap:6px;}
   #hud .lvbadge{background:#51CF66;color:#052;border:2px solid #fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:900;}
 
-  /* Inventory bar — shows acquired upgrade cards with current level, below HP/XP bars */
-  #hud .invbar{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 78px);left:calc(env(safe-area-inset-left, 0px) + 10px);display:flex;flex-wrap:wrap;gap:4px;max-width:min(62vw, 420px);pointer-events:none;z-index:2;}
+  /* Inventory bar — shows acquired upgrade cards with current level, below HP/XP bars.
+     v12.10 Phase 2 — top을 78→100px로 내려 LV/HP 바 영역과 시각 분리. 사용자 피드백:
+     "빨간 테두리 안 의미없는 노란 UI" — 인벤 칩 두 개가 Lv/HP 칩과 너무 가까워 한 묶음으로
+     보였던 문제. 칩 자체에 "획득" 라벨도 첫 칩 앞에 작게 붙여 인식 향상. */
+  #hud .invbar{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 100px);left:calc(env(safe-area-inset-left, 0px) + 10px);display:flex;flex-wrap:wrap;gap:4px;max-width:min(62vw, 420px);pointer-events:none;z-index:2;align-items:center;}
+  #hud .invbar:not(:empty)::before{content:'🎒';font-size:11px;opacity:.6;margin-right:2px;}
   #hud .inv-pill{display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;border-radius:6px;padding:2px 6px 2px 4px;font-size:11px;font-weight:900;color:#FFE066;line-height:1;}
   #hud .inv-pill.r{border-color:#339AF0;}
   #hud .inv-pill.e{border-color:#BE4BDB;}
@@ -580,8 +584,8 @@
     #hud #statsPanel{font-size:10px;padding:3px 7px;gap:5px;}
     #hud #statsPanel span{white-space:nowrap;}
     #hud .topbar{gap:6px;}
-    /* invBar가 좌측 HP/XP 바로 아래에 너무 가깝게 붙어 LV 영역과 겹치는 듯 보였던 문제 보정 */
-    #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 74px);max-width:62vw;}
+    /* 모바일도 LV/HP 영역(약 60-70px)과 분리되도록 invBar는 88px 부터 (PC는 100px). */
+    #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 88px);max-width:62vw;}
     #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 68px);max-width:60vw;gap:3px;}
     #hud .inv-pill{font-size:10px;padding:1px 5px 1px 3px;gap:2px;}
     #hud .inv-pill .ic{font-size:11px;}
@@ -738,22 +742,39 @@
         <h3 style="text-align:center;color:#E599F7;">현재 착용 중</h3>
         <div class="equip-row" id="equipRow"></div>
       </div>
+      <!-- v12.10 Phase 2 — 캐릭터별 탭. 사용자 요청: 동료 코스튬을 남편 코스튬 아래에 두지 말고
+           탭으로 분리해서 클릭 시 확인. 원정 진척에 따라 탭이 활성화. -->
       <div class="costume-section">
-        <h3 style="display:flex;align-items:center;gap:8px;">
-          📒 코스튬 도감 <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span>
-        </h3>
-        <div class="cos-slot-tabs">
-          <button class="cos-slot-tab on" type="button" data-slot="head">🎩 머리</button>
-          <button class="cos-slot-tab" type="button" data-slot="body">👕 몸통</button>
-          <button class="cos-slot-tab" type="button" data-slot="weapon">⚔ 무기</button>
+        <div class="cos-char-tabs" id="cosCharTabs" style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center;">
+          <button class="cs-tab on" type="button" data-char="player" style="border-color:#9775FA;">👤 남편</button>
+          <button class="cs-tab" type="button" data-char="wife"   style="border-color:#FFB4D8;display:none;">💗 아내 (Ch51)</button>
+          <button class="cs-tab" type="button" data-char="child"  style="border-color:#A5D8FF;display:none;">👶 아기 (Ch60)</button>
         </div>
-        <div class="cos-detail-grid" id="cosDetailGrid"></div>
+        <!-- 남편 코스튬 도감 -->
+        <div id="playerCostumeBlock">
+          <h3 style="display:flex;align-items:center;gap:8px;">
+            📒 남편 코스튬 도감 <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span>
+          </h3>
+          <div class="cos-slot-tabs">
+            <button class="cos-slot-tab on" type="button" data-slot="head">🎩 머리</button>
+            <button class="cos-slot-tab" type="button" data-slot="body">👕 몸통</button>
+            <button class="cos-slot-tab" type="button" data-slot="weapon">⚔ 무기</button>
+          </div>
+          <div class="cos-detail-grid" id="cosDetailGrid"></div>
+        </div>
+        <!-- 아내 코스튬 (ch51 클리어 시 노출) -->
+        <div id="wifeCostumeBlock" style="display:none;">
+          <h3 style="display:flex;align-items:center;gap:8px;color:#FFB4D8;">💗 아내 코스튬 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅱ에서 합류</span></h3>
+          <div id="wifeCostumeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+        </div>
+        <!-- 아기 코스튬 (ch60 클리어 시 노출) -->
+        <div id="childCostumeBlock" style="display:none;">
+          <h3 style="display:flex;align-items:center;gap:8px;color:#A5D8FF;">👶 아기 코스튬 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅱ ch60에서 합류</span></h3>
+          <div id="childCostumeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+        </div>
       </div>
-      <!-- v12 phase 2.2 — companion costume picker. Only shown if at least one companion is unlocked. -->
-      <div class="costume-section" id="companionCostumeSection" style="display:none;">
-        <h3 style="display:flex;align-items:center;gap:8px;color:#FFB4D8;">💗 동료 꾸미기 <span style="color:#A5D8FF;font-size:11px;font-weight:700;">아내 · 아기 비둘기 코스튬</span></h3>
-        <div id="companionCostumeGrid" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;"></div>
-      </div>
+      <!-- 호환성을 위해 placeholder는 남기되 비활성화 (renderCompanionCostumeSection은 새 그리드로 직접 그린다) -->
+      <div id="companionCostumeSection" style="display:none;"><div id="companionCostumeGrid"></div></div>
     </div>
     <!-- Background skin section — purely cosmetic title-screen backgrounds. -->
     <div id="shopSkinSection" class="hidden">
@@ -3349,7 +3370,20 @@ function drawTitlePigeonFrame(){
   // head fits with headroom AND legs/feet stay inside the canvas.
   const scale = Math.min(cssW, cssH) / 150;
   const cy = cssH * 0.55;
+  // v12.10 Phase 2 — 동료 비둘기가 해금되어 있으면 타이틀 화면에 가족이 같이 노출.
+  // 가운데 남편 + 좌측 아내 + 우측 아기. 화면 중앙 정렬을 유지하기 위해 가족 단위 폭에 맞게
+  // 그룹 중심을 cx로 두고 좌우로 오프셋. 동료가 한쪽만 해금된 경우에도 자연스럽게 균형.
+  const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
+  const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
+  // 동료는 0.65 스케일 + 위치 보정. 그룹 폭 ≈ 130px @ scale=1.
+  const offsetX = scale * 56;   // 가족 간격
   drawPigeon(ctx2, cx, cy, scale, 1, state.time * 1.4, false, 1, fakePlayer);
+  if(wifeOk){
+    drawCompanion(ctx2, { x: cx - offsetX, y: cy + scale*8, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
+  }
+  if(childOk){
+    drawCompanion(ctx2, { x: cx + offsetX, y: cy + scale*14, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+  }
 }
 
 // Draw a saeukkang (shrimp-chip bag) — used as projectile
@@ -5233,19 +5267,21 @@ function spawnCompanions(){
   state.companions = [];
   const p = state.player;
   if(!p) return;
+  // v12.10 Phase 2 — wife는 항상 좌측, child는 항상 우측 고정 (사용자 요청).
+  // 기존 ox*facing 곱셈으로 player 방향 반전 시 좌우가 뒤집혀 "산만하다"는 피드백 반영.
   if(progress.companionUnlocks && progress.companionUnlocks.wife){
     state.companions.push({
       kind:'wife', label:'아내', tint:'#FFB4D8', accent:'#FA80B0',
-      x: p.x - 36, y: p.y + 18, ox:-36, oy:18,
-      reloadT: 0.5, fireRate: 1.8,  // 1.8 shots/s
+      x: p.x - 50, y: p.y + 6, ox:-50, oy:6,
+      reloadT: 0.5, fireRate: 1.8,
       damageMult: 0.45, projCount: 1,
     });
   }
   if(progress.companionUnlocks && progress.companionUnlocks.child){
     state.companions.push({
       kind:'child', label:'아기', tint:'#A5D8FF', accent:'#74C0FC',
-      x: p.x + 36, y: p.y + 22, ox:36, oy:22,
-      reloadT: 1.0, fireRate: 1.4,  // 1.4 shots/s
+      x: p.x + 50, y: p.y + 12, ox:50, oy:12,
+      reloadT: 1.0, fireRate: 1.4,
       damageMult: 0.30, projCount: 1,
     });
   }
@@ -5282,9 +5318,9 @@ function updateCompanions(dt){
   const p = state.player;
   if(!p) return;
   for(const c of state.companions){
-    // Smooth follow at offset (offset mirrors with player.facing so they walk on the side
-    // the player isn't currently aimed at — keeps line-of-sight clean).
-    const tx = p.x + c.ox * (p.facing || 1);
+    // v12.10 Phase 2 — wife는 항상 좌측, child는 항상 우측 (facing 무관).
+    // 사용자 피드백: "왼쪽에 고정이 안되어있어서 산만". facing × ox 곱셈을 제거.
+    const tx = p.x + c.ox;
     const ty = p.y + c.oy;
     c.x += (tx - c.x) * Math.min(1, dt * 6);
     c.y += (ty - c.y) * Math.min(1, dt * 6);
@@ -5307,62 +5343,129 @@ function drawCompanion(ctx, c){
 // shop. Draw(ctx) runs in the companion's local space.
 const COMPANION_COSTUMES = {
   wife: [
-    { id:'bow',    name:'핑크 리본',   cost:0,     icon:'🎀',
+    // === HEAD slot (default + cosmetic + boost variants) ===
+    { id:'bow',    name:'핑크 리본',   cost:0,     icon:'🎀', slot:'head',
+      // v12.10 Phase 2 — 머리 위 정중앙으로 옮겨 얼굴을 가리지 않도록 수정 + 더 작게.
       draw:(ctx)=>{
-        // Side bow on left of head, signature default
         ctx.fillStyle = '#FA80B0';
-        ctx.beginPath(); ctx.moveTo(-16,-32); ctx.lineTo(-22,-36); ctx.lineTo(-22,-28); ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(-16,-32); ctx.lineTo(-10,-36); ctx.lineTo(-10,-28); ctx.closePath(); ctx.fill();
+        // Left bow loop (above head, slightly left)
+        ctx.beginPath(); ctx.moveTo(-2,-38); ctx.lineTo(-9,-42); ctx.lineTo(-9,-35); ctx.closePath(); ctx.fill();
+        // Right bow loop
+        ctx.beginPath(); ctx.moveTo(2,-38);  ctx.lineTo(9,-42);  ctx.lineTo(9,-35);  ctx.closePath(); ctx.fill();
+        // Center knot
         ctx.fillStyle = '#D63384';
-        ctx.beginPath(); ctx.arc(-16,-32, 2.4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0,-38, 1.8, 0, Math.PI*2); ctx.fill();
+        // Two ribbon tails dangling
+        ctx.strokeStyle = '#FA80B0'; ctx.lineWidth = 1.6; ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(-1,-37); ctx.lineTo(-3,-33); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(1,-37);  ctx.lineTo(3,-33);  ctx.stroke();
       } },
-    { id:'crown',  name:'황금 왕관',   cost:2000,  icon:'👑', dmgBoost:1.05,
+    { id:'crown',  name:'황금 왕관',   cost:2000,  icon:'👑', slot:'head', dmgBoost:1.05,
       draw:(ctx)=>{
-        // Yellow crown w/ 5 points
         ctx.fillStyle = '#FFD43B';
         ctx.beginPath();
-        ctx.moveTo(-13,-37); ctx.lineTo(-10,-44);
-        ctx.lineTo(-5,-39);  ctx.lineTo(0,-46);
-        ctx.lineTo(5,-39);   ctx.lineTo(10,-44);
-        ctx.lineTo(13,-37);  ctx.lineTo(13,-34); ctx.lineTo(-13,-34);
+        ctx.moveTo(-12,-36); ctx.lineTo(-9,-43);
+        ctx.lineTo(-4,-38);  ctx.lineTo(0,-45);
+        ctx.lineTo(4,-38);   ctx.lineTo(9,-43);
+        ctx.lineTo(12,-36);  ctx.lineTo(12,-33); ctx.lineTo(-12,-33);
         ctx.closePath(); ctx.fill();
-        // Red gem center
         ctx.fillStyle = '#FA5252';
-        ctx.beginPath(); ctx.arc(0,-39, 1.6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0,-38, 1.4, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = '#FFE066';
-        ctx.fillRect(-13,-36, 26, 1.5);
+        ctx.fillRect(-12,-35, 24, 1.2);
       } },
-    { id:'tiara',  name:'다이아 티아라', cost:5000,  icon:'💎', dmgBoost:1.08,
+    { id:'tiara',  name:'다이아 티아라', cost:5000,  icon:'💎', slot:'head', dmgBoost:1.08,
       draw:(ctx)=>{
-        // Silver thin tiara w/ blue gems
-        ctx.strokeStyle = '#DEE2E6'; ctx.lineWidth = 2;
+        ctx.strokeStyle = '#DEE2E6'; ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.moveTo(-12,-36); ctx.quadraticCurveTo(0,-42, 12,-36); ctx.stroke();
+        ctx.moveTo(-11,-35); ctx.quadraticCurveTo(0,-41, 11,-35); ctx.stroke();
         ctx.fillStyle = '#74C0FC';
-        ctx.beginPath(); ctx.arc(0,-39, 2, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(-7,-37.5, 1.3, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(7,-37.5, 1.3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0,-38, 1.8, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-6,-36.5, 1.1, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(6,-36.5, 1.1, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = '#FFF';
-        ctx.beginPath(); ctx.arc(-0.6,-39.4, 0.7, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-0.6,-38.4, 0.6, 0, Math.PI*2); ctx.fill();
       } },
-    { id:'veil',   name:'신부 베일',    cost:10000, icon:'👰', dmgBoost:1.12,
+    { id:'veil',   name:'신부 베일',    cost:10000, icon:'👰', slot:'head', dmgBoost:1.12,
+      // v12.10 Phase 2 — 면사포 투명도 0.85→0.42로 낮춤. 사용자 피드백:
+      // "면사포가 너무 투명하지 않아서 얼굴이 안보임".
       draw:(ctx)=>{
-        // White veil drapes from head over shoulders
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.save();
+        ctx.globalAlpha = 0.42;
+        ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
-        ctx.moveTo(-15,-34); ctx.quadraticCurveTo(-18,-12, -22, 16);
-        ctx.lineTo(22, 16); ctx.quadraticCurveTo(18,-12, 15,-34);
+        ctx.moveTo(-14,-32); ctx.quadraticCurveTo(-17,-12, -21, 16);
+        ctx.lineTo(21, 16); ctx.quadraticCurveTo(17,-12, 14,-32);
         ctx.closePath(); ctx.fill();
-        // Lacy bottom dots
-        ctx.fillStyle = 'rgba(220,200,210,0.9)';
+        // Lacy bottom dots (more opaque so the hem reads)
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = '#DCC8D0';
         for(let i=-3; i<=3; i++){
-          ctx.beginPath(); ctx.arc(i*5, 16, 1.6, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(i*5, 16, 1.4, 0, Math.PI*2); ctx.fill();
         }
-        // Crown of pearls on top
+        ctx.restore();
+        // Crown of pearls on top (fully opaque so it reads as headwear)
         ctx.fillStyle = '#FFE3F2';
         for(let i=-2; i<=2; i++){
-          ctx.beginPath(); ctx.arc(i*5, -36, 1.4, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(i*5, -34, 1.3, 0, Math.PI*2); ctx.fill();
         }
+      } },
+    // === BODY slot — v12.10 Phase 2 NEW. 사용자 요청: "효과없는 옷도 추가". ===
+    // 모두 cost 있지만 dmgBoost 1.0 (cosmetic only). companion costume system은 같은 kind 안에서
+    // 단일 equipped만 허용하므로 "head"와 "body"를 구분하기 위해 slot 필드 추가.
+    { id:'apron',  name:'분홍 앞치마',   cost:1000,  icon:'🥚', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#FA80B0';
+        ctx.beginPath();
+        ctx.moveTo(-14, 4); ctx.lineTo(-10, 30); ctx.lineTo(10, 30); ctx.lineTo(14, 4);
+        ctx.quadraticCurveTo(8, -2, 0, -2); ctx.quadraticCurveTo(-8, -2, -14, 4);
+        ctx.closePath(); ctx.fill();
+        // Pocket
+        ctx.fillStyle = '#FFD8DD';
+        ctx.fillRect(-6, 14, 12, 8);
+        ctx.strokeStyle = '#D63384'; ctx.lineWidth = 1;
+        ctx.strokeRect(-6, 14, 12, 8);
+        // Strap line
+        ctx.strokeStyle = '#FA80B0'; ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-12, 0); ctx.quadraticCurveTo(0, -10, 12, 0);
+        ctx.stroke();
+      } },
+    { id:'sundress', name:'노란 원피스', cost:1500, icon:'🌼', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath();
+        ctx.moveTo(-15, 2); ctx.quadraticCurveTo(-18, 18, -16, 32);
+        ctx.lineTo(16, 32); ctx.quadraticCurveTo(18, 18, 15, 2);
+        ctx.quadraticCurveTo(8, -3, 0, -3); ctx.quadraticCurveTo(-8, -3, -15, 2);
+        ctx.closePath(); ctx.fill();
+        // Daisy
+        ctx.fillStyle = '#FFF';
+        for(let i=0; i<5; i++){
+          const a = i*Math.PI*2/5 - Math.PI/2;
+          ctx.beginPath(); ctx.ellipse(Math.cos(a)*3, 18+Math.sin(a)*3, 1.6, 2.4, a, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.fillStyle = '#FFA94D';
+        ctx.beginPath(); ctx.arc(0, 18, 1.4, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'cardigan', name:'아이보리 가디건', cost:2500, icon:'🧶', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#F5EFE0';
+        ctx.beginPath();
+        ctx.moveTo(-17, 4); ctx.quadraticCurveTo(-20, 18, -18, 28);
+        ctx.lineTo(-3, 28); ctx.lineTo(-3, 0);
+        ctx.quadraticCurveTo(-12, -2, -17, 4);
+        ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(17, 4); ctx.quadraticCurveTo(20, 18, 18, 28);
+        ctx.lineTo(3, 28); ctx.lineTo(3, 0);
+        ctx.quadraticCurveTo(12, -2, 17, 4);
+        ctx.closePath(); ctx.fill();
+        // Buttons
+        ctx.fillStyle = '#C9A87A';
+        ctx.beginPath(); ctx.arc(-2.5, 8, 0.8, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-2.5, 16, 0.8, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-2.5, 24, 0.8, 0, Math.PI*2); ctx.fill();
       } },
   ],
   child: [
@@ -5458,122 +5561,122 @@ function getCompanionDmgBoost(kind){
   return (def && def.dmgBoost) || 1.0;
 }
 
-// v12 phase 2.1 — wife now reads like a feminine variant of the husband pigeon. Silhouette is
-// the same body / arms / head proportions as drawPigeon but at 0.65× scale, body palette uses
-// a warm peach-pink instead of slate-gray, with eyelashes + lipstick + side bow as feminine
-// accents. User feedback: "아내가 아기랑 너무 비슷해 — 남편이랑 닮은 느낌으로".
+// v12.10 Phase 2 — 아내 비둘기 비주얼 재작성. 사용자 피드백 4건 반영:
+//   1) "눈이 못생김" — 한쪽 눈만 있던 구조를 두 눈으로 + 더 둥근 안구 + 작은 동공.
+//   2) "날개가 이상함" — 큰 leaf wing이 작은 몸체와 비례 안 맞아서 작은 folded wing으로 단순화.
+//   3) "리본이 얼굴 삐져나옴" — 사이드 bow가 머리 좌측 하단에 걸쳐있던 걸 제거. 코스튬 'bow'를
+//      머리 위쪽으로 더 작게 옮김 (COMPANION_COSTUMES.wife.bow draw 함수도 수정).
+//   4) 면사포 투명도는 COMPANION_COSTUMES.wife.veil 쪽에서 별도 처리.
 function drawWifePigeon(ctx, c){
   const t = state.time;
   const breath = Math.sin(t*2.6 + 1.2) * 0.9;
   const blink = ((t + 0.7) % 3.4) < 0.12;
   ctx.save();
   ctx.translate(c.x, c.y);
-  ctx.scale(0.65, 0.65);  // wife is 65% of husband size — close kin, not a kid
+  ctx.scale(0.65, 0.65);
   // Shadow
   ctx.fillStyle = 'rgba(0,0,0,.55)';
-  ctx.beginPath(); ctx.ellipse(0, 52, 32, 5, 0, 0, Math.PI*2); ctx.fill();
-  // Legs — orange like husband's
+  ctx.beginPath(); ctx.ellipse(0, 52, 30, 5, 0, 0, Math.PI*2); ctx.fill();
+  // Legs
   ctx.fillStyle = '#FFA500';
-  ctx.fillRect(-10, 34, 7, 18);
-  ctx.beginPath(); ctx.moveTo(-15, 50); ctx.lineTo(0, 50); ctx.lineTo(-8, 56); ctx.closePath(); ctx.fill();
-  ctx.fillRect(3, 34, 7, 18);
-  ctx.beginPath(); ctx.moveTo(0, 50); ctx.lineTo(15, 50); ctx.lineTo(8, 56); ctx.closePath(); ctx.fill();
-  // Body — warm peach-pink, slightly slimmer than husband (32→28 width, 28→26 height)
+  ctx.fillRect(-9, 34, 6, 18);
+  ctx.beginPath(); ctx.moveTo(-13, 50); ctx.lineTo(-1, 50); ctx.lineTo(-7, 56); ctx.closePath(); ctx.fill();
+  ctx.fillRect(3, 34, 6, 18);
+  ctx.beginPath(); ctx.moveTo(1, 50); ctx.lineTo(13, 50); ctx.lineTo(7, 56); ctx.closePath(); ctx.fill();
+  // Body
   ctx.fillStyle = '#E8A8B6';
-  ctx.beginPath(); ctx.ellipse(0, 10, 28, 26 + breath*0.6, 0, 0, Math.PI*2); ctx.fill();
-  // Lighter belly
+  ctx.beginPath(); ctx.ellipse(0, 10, 26, 24 + breath*0.6, 0, 0, Math.PI*2); ctx.fill();
+  // Belly
   ctx.fillStyle = '#FFD8DD';
-  ctx.beginPath(); ctx.ellipse(0, 14, 19, 17 + breath*0.5, 0, 0, Math.PI*2); ctx.fill();
-  // Chest ruffle
-  ctx.strokeStyle = 'rgba(180,100,120,.4)'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.ellipse(0, 14, 17, 15 + breath*0.5, 0, 0, Math.PI*2); ctx.fill();
+  // Chest ruffle (subtle)
+  ctx.strokeStyle = 'rgba(180,100,120,.35)'; ctx.lineWidth = 1.0;
   ctx.beginPath();
-  ctx.moveTo(-12, 6); ctx.quadraticCurveTo(0, 10+breath, 12, 6);
-  ctx.moveTo(-10, 14); ctx.quadraticCurveTo(0, 18+breath, 10, 14);
+  ctx.moveTo(-10, 6); ctx.quadraticCurveTo(0, 10+breath, 10, 6);
+  ctx.moveTo(-9,  14); ctx.quadraticCurveTo(0, 18+breath, 9, 14);
   ctx.stroke();
-  // v12 phase 2.3 — wings (replaces muscular arm mirror per user feedback "팔은 그냥
-  // 비둘기스럽게"). Small folded wings tucked along the body sides with feather strokes.
-  ctx.fillStyle = '#D88A99';
-  // Left wing — leaf-shape from upper body down to lower body
-  ctx.beginPath();
-  ctx.moveTo(-22, -4);
-  ctx.quadraticCurveTo(-34, 6,  -24, 22);
-  ctx.quadraticCurveTo(-20, 14, -18, 4);
-  ctx.closePath(); ctx.fill();
-  // Wing accent (lighter inner curve)
-  ctx.fillStyle = '#F0B8C0';
-  ctx.beginPath();
-  ctx.moveTo(-22, -2);
-  ctx.quadraticCurveTo(-30, 6,  -23, 18);
-  ctx.quadraticCurveTo(-19, 12, -18, 2);
-  ctx.closePath(); ctx.fill();
-  // Right wing (mirror)
+  // Wings — small folded wings flush with body (no protruding leaf shape).
   ctx.fillStyle = '#D88A99';
   ctx.beginPath();
-  ctx.moveTo(22, -4);
-  ctx.quadraticCurveTo(34, 6,  24, 22);
-  ctx.quadraticCurveTo(20, 14, 18, 4);
+  ctx.moveTo(-19, 0); ctx.quadraticCurveTo(-24, 8, -20, 18); ctx.quadraticCurveTo(-15, 12, -14, 4);
   ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(19, 0); ctx.quadraticCurveTo(24, 8, 20, 18); ctx.quadraticCurveTo(15, 12, 14, 4);
+  ctx.closePath(); ctx.fill();
+  // Wing inner highlight
   ctx.fillStyle = '#F0B8C0';
   ctx.beginPath();
-  ctx.moveTo(22, -2);
-  ctx.quadraticCurveTo(30, 6,  23, 18);
-  ctx.quadraticCurveTo(19, 12, 18, 2);
+  ctx.moveTo(-18, 2); ctx.quadraticCurveTo(-21, 8, -19, 15); ctx.quadraticCurveTo(-15, 11, -14, 5);
   ctx.closePath(); ctx.fill();
-  // Feather lines
-  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
-  for(let i=0; i<3; i++){
-    const yo = i*4;
-    ctx.beginPath(); ctx.moveTo(-26+i*1.5, 6+yo); ctx.lineTo(-21, 14+yo); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(26-i*1.5, 6+yo);  ctx.lineTo(21, 14+yo); ctx.stroke();
-  }
+  ctx.beginPath();
+  ctx.moveTo(18, 2); ctx.quadraticCurveTo(21, 8, 19, 15); ctx.quadraticCurveTo(15, 11, 14, 5);
+  ctx.closePath(); ctx.fill();
+  // Single feather line per wing
+  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 0.8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-19, 7); ctx.lineTo(-15, 13); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(19, 7);  ctx.lineTo(15, 13);  ctx.stroke();
   // Head
   ctx.fillStyle = '#E8A8B6';
-  ctx.beginPath(); ctx.arc(0, -22, 16, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -22, 15, 0, Math.PI*2); ctx.fill();
   // Head highlight
   ctx.fillStyle = '#FFD8DD';
   ctx.globalAlpha = 0.7;
-  ctx.beginPath(); ctx.arc(-5, -26, 6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-4, -26, 5, 0, Math.PI*2); ctx.fill();
   ctx.globalAlpha = 1;
-  // Beak — orange like husband, slightly more delicate
+  // Beak (forward-pointing, smaller + cuter than husband's)
   ctx.fillStyle = '#FFA500';
   ctx.beginPath();
-  ctx.moveTo(-2, -20); ctx.lineTo(14, -16); ctx.lineTo(-2, -12);
+  ctx.moveTo(11, -19); ctx.lineTo(15, -16); ctx.lineTo(11, -13);
   ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#FFC87A';
   ctx.beginPath();
-  ctx.moveTo(-2, -18); ctx.lineTo(9, -15.5); ctx.lineTo(-2, -14);
+  ctx.moveTo(11, -17.5); ctx.lineTo(13.5, -16); ctx.lineTo(11, -14.5);
   ctx.closePath(); ctx.fill();
-  // Lipstick accent — small magenta line under beak corner (feminine touch)
-  ctx.strokeStyle = '#D63384';
-  ctx.lineWidth = 1.5; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(2, -12); ctx.lineTo(8, -11.5); ctx.stroke();
-  // Eyes with eyelashes
+  // === EYES — both eyes, rounded cute style ===
   if(blink){
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-9, -24); ctx.lineTo(-3, -24); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(3, -24);  ctx.lineTo(9, -24);  ctx.stroke();
   } else {
-    // Pupil
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(-4, -26, 2.6, 0, Math.PI*2); ctx.fill();
-    // White highlight (cuter, bigger than husband's)
+    // Sclera (white)
     ctx.fillStyle = '#FFF';
-    ctx.beginPath(); ctx.arc(-3, -27, 1.1, 0, Math.PI*2); ctx.fill();
-    // Eyelashes — three short strokes radiating up from upper eye
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.0; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-6, -28.5); ctx.lineTo(-7, -31); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-4, -29);   ctx.lineTo(-4, -32); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-2, -28.5); ctx.lineTo(-1, -31); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(-6, -24, 3.0, 3.6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(6,  -24, 3.0, 3.6, 0, 0, Math.PI*2); ctx.fill();
+    // Pupil — large round, slightly upper inside (cute look)
+    ctx.fillStyle = '#3B2235';
+    ctx.beginPath(); ctx.arc(-6, -24, 1.9, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6,  -24, 1.9, 0, Math.PI*2); ctx.fill();
+    // Highlight (sparkle)
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(-5.4, -25, 0.8, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6.6,  -25, 0.8, 0, Math.PI*2); ctx.fill();
+    // Lower lash dots
+    ctx.fillStyle = '#FFE6F0';
+    ctx.beginPath(); ctx.arc(-6, -22, 0.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6,  -22, 0.5, 0, Math.PI*2); ctx.fill();
+    // Upper eyelashes — short, upward curve
+    ctx.strokeStyle = '#3B2235'; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-8, -27); ctx.quadraticCurveTo(-9, -29, -8.3, -30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-5, -27.5); ctx.quadraticCurveTo(-5, -30, -4.6, -31); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(8, -27); ctx.quadraticCurveTo(9, -29, 8.3, -30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(5, -27.5); ctx.quadraticCurveTo(5, -30, 4.6, -31); ctx.stroke();
   }
-  // Eyebrows — soft arched (vs husband's angry sharp brow)
-  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  // Soft arched eyebrows
+  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(-9, -32); ctx.quadraticCurveTo(-4, -34, 1, -32);
+  ctx.moveTo(-9, -29); ctx.quadraticCurveTo(-6, -30.5, -3, -29);
   ctx.stroke();
-  // Hair tufts — same 3-strand pattern as husband but with curl + warmer color
-  ctx.strokeStyle = '#C97585'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(-6, -38); ctx.quadraticCurveTo(-9, -42, -5, -45); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,  -39); ctx.quadraticCurveTo(2,  -44, -1, -47); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(6,  -38); ctx.quadraticCurveTo(9, -42, 5, -45); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(3, -29); ctx.quadraticCurveTo(6, -30.5, 9, -29);
+  ctx.stroke();
+  // Lipstick — small dot under beak (subtle feminine cue)
+  ctx.fillStyle = '#D63384';
+  ctx.beginPath(); ctx.arc(8, -11, 1.0, 0, Math.PI*2); ctx.fill();
+  // Hair tufts — three small curls at top of head
+  ctx.strokeStyle = '#C97585'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-5, -36); ctx.quadraticCurveTo(-7, -40, -3, -42); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,  -37); ctx.quadraticCurveTo(2,  -41, 0, -43);  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(5,  -36); ctx.quadraticCurveTo(7,  -40, 3, -42);  ctx.stroke();
   // Equipped wife costume overlay (bow / crown / tiara / veil) — replaces the hardcoded bow.
   const wifeCostumeDraw = getCompanionCostumeDraw('wife');
   if(wifeCostumeDraw) wifeCostumeDraw(ctx);
@@ -9718,6 +9821,25 @@ document.addEventListener('click', e => {
   const tab = e.target.closest('.cos-slot-tab');
   if(tab && tab.dataset.slot) setCosBrowseSlot(tab.dataset.slot);
 });
+// v12.10 Phase 2 — 캐릭터 탭 (player/wife/child) 클릭 핸들러 (delegated).
+document.addEventListener('click', e => {
+  const ct = e.target.closest('#cosCharTabs button[data-char]');
+  if(!ct) return;
+  const target = ct.dataset.char;
+  // 잠긴 동료 탭 클릭 시 안내 토스트.
+  const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
+  const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
+  if(target === 'wife' && !wifeOk){
+    state.toastBanner = { text:'🔒 아내 비둘기 잠금', sub:'원정 Ⅱ ch51 클리어 시 합류', t:2.0, maxT:2.0, tone:'warn' };
+    return;
+  }
+  if(target === 'child' && !childOk){
+    state.toastBanner = { text:'🔒 아기 비둘기 잠금', sub:'원정 Ⅱ ch60 클리어 시 합류', t:2.0, maxT:2.0, tone:'warn' };
+    return;
+  }
+  state.cosCharTab = target;
+  renderCompanionCostumeSection();
+});
 document.getElementById('gachaSingleBtn').addEventListener('click', ()=> doGachaPull(1));
 document.getElementById('gachaTenBtn').addEventListener('click', ()=> doGachaPull(10));
 document.getElementById('cmmContinueBtn').addEventListener('click', continueAfterCompanionMeet);
@@ -10109,82 +10231,124 @@ function renderCostumeScreen(){
   renderCompanionCostumeSection();
 }
 
+// v12.10 Phase 2 — 캐릭터별 탭 시스템. 코스튬 섹션 안에서 player/wife/child 탭을 토글한다.
+// state.cosCharTab은 세션 내에 유지 (페이지 이동·새 챕터 진입에도 유지).
+if(typeof state.cosCharTab === 'undefined') state.cosCharTab = 'player';
+
 function renderCompanionCostumeSection(){
-  const sec = document.getElementById('companionCostumeSection');
-  const grid = document.getElementById('companionCostumeGrid');
-  if(!sec || !grid) return;
+  // 캐릭터 탭 가시성 — 동료가 해금된 경우에만 탭 표시.
   const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
   const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
-  if(!wifeOk && !childOk){ sec.style.display = 'none'; return; }
-  sec.style.display = '';
+  const tabBar = document.getElementById('cosCharTabs');
+  if(tabBar){
+    const wifeTab = tabBar.querySelector('button[data-char="wife"]');
+    const childTab = tabBar.querySelector('button[data-char="child"]');
+    if(wifeTab) wifeTab.style.display = wifeOk ? '' : 'none';
+    if(childTab) childTab.style.display = childOk ? '' : 'none';
+    // 잠긴 동료 탭이 활성화되어 있다면 player로 fallback.
+    if((state.cosCharTab === 'wife' && !wifeOk) || (state.cosCharTab === 'child' && !childOk)){
+      state.cosCharTab = 'player';
+    }
+    // 활성 표시
+    for(const b of tabBar.querySelectorAll('button[data-char]')){
+      b.classList.toggle('on', b.dataset.char === state.cosCharTab);
+    }
+  }
+  // 블록 가시성 — 활성 캐릭터 블록만 노출.
+  const playerBlock = document.getElementById('playerCostumeBlock');
+  const wifeBlock = document.getElementById('wifeCostumeBlock');
+  const childBlock = document.getElementById('childCostumeBlock');
+  if(playerBlock) playerBlock.style.display = state.cosCharTab === 'player' ? '' : 'none';
+  if(wifeBlock)   wifeBlock.style.display   = state.cosCharTab === 'wife'   ? '' : 'none';
+  if(childBlock)  childBlock.style.display  = state.cosCharTab === 'child'  ? '' : 'none';
+  // 동료 그리드 렌더 (active 캐릭터에 한해서만 그린다).
+  if(state.cosCharTab === 'wife' && wifeOk)   renderCompanionGrid('wife',  'wifeCostumeGrid');
+  if(state.cosCharTab === 'child' && childOk) renderCompanionGrid('child', 'childCostumeGrid');
+}
+
+function renderCompanionGrid(kind, gridId){
+  const grid = document.getElementById(gridId);
+  if(!grid) return;
+  const slot = progress.companionCostumes[kind];
+  const list = COMPANION_COSTUMES[kind];
+  const themeBorder = kind==='wife' ? '#FFB4D8' : '#A5D8FF';
+  const themeAccent = kind==='wife' ? '#D63384' : '#1864AB';
   grid.innerHTML = '';
-  for(const kind of ['wife','child']){
-    if(kind === 'wife' && !wifeOk) continue;
-    if(kind === 'child' && !childOk) continue;
-    const slot = progress.companionCostumes[kind];
-    const list = COMPANION_COSTUMES[kind];
-    // Box per companion
-    const box = document.createElement('div');
-    box.style.cssText = 'border:2px solid '+(kind==='wife'?'#FFB4D8':'#A5D8FF')+';border-radius:14px;padding:10px;background:rgba(20,8,40,.4);min-width:160px;flex:1 1 200px;';
-    const title = document.createElement('div');
-    title.style.cssText = 'font-weight:900;color:'+(kind==='wife'?'#FFB4D8':'#A5D8FF')+';margin-bottom:8px;';
-    title.textContent = (kind==='wife'?'💗 아내':'👶 아기') + ' 비둘기';
-    box.appendChild(title);
-    // Preview canvas — shows companion with each costume
-    const previewWrap = document.createElement('div');
-    previewWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
-    for(const def of list){
-      const owned = slot.unlocked.includes(def.id);
-      const equipped = slot.equipped === def.id;
-      const affordable = (progress.coins||0) >= def.cost;
-      const card = document.createElement('button');
-      card.type = 'button';
-      const themeBorder = kind==='wife' ? '#FFB4D8' : '#A5D8FF';
-      const themeAccent = kind==='wife' ? '#D63384' : '#1864AB';
-      const colorBorder = equipped ? themeAccent
-                         : owned ? themeBorder
-                         : (affordable ? '#FFD43B' : '#495057');
-      const opacityRule = owned ? '' : (affordable ? '' : 'opacity:.55;');
-      card.style.cssText = `cursor:pointer;background:rgba(40,15,70,.6);border:2px solid ${colorBorder};border-radius:10px;padding:6px;width:74px;height:96px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;font-family:inherit;color:#fff;${opacityRule}`;
-      // Status line: equipped / 클릭 (owned) / cost (unowned)
-      let statusLine;
-      if(equipped) statusLine = '<span style="color:#A9E34B;">✓ 착용</span>';
-      else if(owned) statusLine = '<span style="color:#A5D8FF;">클릭 장착</span>';
-      else if(def.cost === 0) statusLine = '<span style="color:#A9E34B;">기본 제공</span>';
-      else statusLine = `<span style="color:${affordable?'#FFD43B':'#FA5252'};">🪙 ${def.cost.toLocaleString()}</span>`;
-      const dmgBoostLabel = def.dmgBoost && def.dmgBoost > 1 ? `<div style="font-size:8px;color:#74C0FC;font-weight:700;">+${Math.round((def.dmgBoost-1)*100)}% dmg</div>` : '';
-      card.innerHTML = `<div style="font-size:20px;line-height:1;">${def.icon}</div>
-        <div style="font-size:10px;font-weight:700;text-align:center;letter-spacing:-.3px;line-height:1.1;">${def.name}</div>
-        ${dmgBoostLabel}
-        <div style="font-size:9px;font-weight:900;">${statusLine}</div>`;
-      card.addEventListener('click', () => {
-        if(owned){
-          // Equip swap
+  for(const def of list){
+    const owned = slot.unlocked.includes(def.id);
+    const equipped = slot.equipped === def.id;
+    const affordable = (progress.coins||0) >= def.cost;
+    const card = document.createElement('div');
+    const colorBorder = equipped ? themeAccent : owned ? themeBorder : (affordable ? '#FFD43B' : '#495057');
+    const opacityRule = owned ? '' : (affordable ? '' : 'opacity:.55;');
+    card.style.cssText = `cursor:pointer;background:rgba(40,15,70,.55);border:2px solid ${colorBorder};border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;${opacityRule}`;
+    // Live preview canvas — actual companion shape with this costume
+    const cv = document.createElement('canvas');
+    cv.width = 72; cv.height = 88; cv.style.cssText = 'background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.18) 0%, rgba(20,8,40,.35) 70%);border-radius:8px;';
+    card.appendChild(cv);
+    const name = document.createElement('div');
+    name.style.cssText = 'font-size:11px;font-weight:900;color:#FFF9DB;text-align:center;line-height:1.15;';
+    name.textContent = (def.icon || '') + ' ' + def.name;
+    card.appendChild(name);
+    if(def.dmgBoost && def.dmgBoost > 1){
+      const boost = document.createElement('div');
+      boost.style.cssText = 'font-size:9px;color:#74C0FC;font-weight:700;';
+      boost.textContent = `+${Math.round((def.dmgBoost-1)*100)}% dmg`;
+      card.appendChild(boost);
+    }
+    const status = document.createElement('div');
+    status.style.cssText = 'font-size:10px;font-weight:900;';
+    if(equipped)        status.innerHTML = '<span style="color:#A9E34B;">✓ 착용 중</span>';
+    else if(owned)      status.innerHTML = '<span style="color:#A5D8FF;">클릭 장착</span>';
+    else if(def.cost === 0) status.innerHTML = '<span style="color:#A9E34B;">기본 제공</span>';
+    else                status.innerHTML = `<span style="color:${affordable?'#FFD43B':'#FA5252'};">🪙 ${def.cost.toLocaleString()}</span>`;
+    card.appendChild(status);
+    card.addEventListener('click', () => {
+      if(owned){
+        slot.equipped = def.id;
+        saveProgress();
+        renderCompanionCostumeSection();
+      } else {
+        const r = buyCompanionCostume(kind, def.id);
+        if(!r.ok){
+          state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:1.8, maxT:1.8, tone:'warn' };
+        } else {
           slot.equipped = def.id;
           saveProgress();
-          renderCompanionCostumeSection();
-        } else {
-          // Purchase attempt
-          const r = buyCompanionCostume(kind, def.id);
-          if(!r.ok){
-            state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:1.8, maxT:1.8, tone:'warn' };
-          } else {
-            slot.equipped = def.id;
-            saveProgress();
-            sfxLevelUp();
-            state.toastBanner = { text:`✨ ${def.name} 구매!`, sub:`-${def.cost.toLocaleString()} 🪙 → 즉시 장착`, t:2.0, maxT:2.0, tone:'critical' };
-          }
-          renderCompanionCostumeSection();
-          // Refresh shop coin bar too
-          const sc = document.getElementById('shopCoinTxt');
-          if(sc) sc.textContent = (progress.coins||0).toLocaleString();
+          sfxLevelUp();
+          state.toastBanner = { text:`✨ ${def.name} 구매!`, sub:`-${def.cost.toLocaleString()} 🪙 → 즉시 장착`, t:2.0, maxT:2.0, tone:'critical' };
         }
-      });
-      previewWrap.appendChild(card);
-    }
-    box.appendChild(previewWrap);
-    grid.appendChild(box);
+        renderCompanionCostumeSection();
+        const sc = document.getElementById('shopCoinTxt');
+        if(sc) sc.textContent = (progress.coins||0).toLocaleString();
+      }
+    });
+    grid.appendChild(card);
+    // Render preview after attaching to DOM (canvas needs sizing).
+    drawCompanionCostumePreview(cv, kind, def.id);
   }
+}
+
+// 캔버스에 동료 + 코스튬을 그려준다. 상점 카드 미리보기와 모달 미리보기 양쪽에서 사용.
+function drawCompanionCostumePreview(cv, kind, costumeId){
+  const ctx2 = cv.getContext('2d');
+  const w = cv.width, h = cv.height;
+  ctx2.clearRect(0, 0, w, h);
+  // Temporarily override equipped costume, draw, then restore.
+  const slot = progress.companionCostumes[kind];
+  const prev = slot.equipped;
+  slot.equipped = costumeId;
+  ctx2.save();
+  // Center companion in canvas. drawWifePigeon/drawChildPigeon 좌표는 c.x/c.y 기준이므로 가짜 c 객체 + 변환.
+  ctx2.translate(w/2, h*0.78);
+  ctx2.scale(0.72, 0.72);
+  const fakeC = { x:0, y:0, kind, tint:kind==='wife'?'#FFB4D8':'#A5D8FF', accent:kind==='wife'?'#FA80B0':'#74C0FC' };
+  // drawWifePigeon/drawChildPigeon은 ctx.save/translate/restore를 자체적으로 함.
+  // 다만 state.time을 참조하므로 그대로 호출 가능.
+  if(kind === 'wife') drawWifePigeon(ctx2, fakeC);
+  else drawChildPigeon(ctx2, fakeC);
+  ctx2.restore();
+  slot.equipped = prev;
 }
 
 function renderEquipRow(){

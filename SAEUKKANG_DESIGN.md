@@ -2,7 +2,7 @@
 
 > 이 문서는 게임의 현재 사양을 기록한다. 기능이 바뀌면 변경이력에 한 줄을 추가하지 말고 이 문서의 해당 섹션을 직접 수정한다.
 >
-> **현재 빌드 버전: v12.10** (Phase 1 일괄: 챕터 시간 캡 단축 / 보스 5챕터 간격 변종 / ranged 플래그 보정 / 후반 chapterMult 상향 / 남편 코스튬에서 티아라 제거 / Victory 모달 다음 원정 CTA / 시네마틱 다시보기 / HUD 챕터·웨이브 패널 분리 + 모바일 stat 패널 줄바꿈 / invBar 위치 보정)
+> **현재 빌드 버전: v12.10** (Phase 1+2 일괄: 챕터 시간 캡 단축 / 보스 5챕터 간격 변종 / ranged 플래그 보정 / 후반 chapterMult 상향 / 남편 코스튬에서 티아라 제거 / Victory 모달 다음 원정 CTA / 시네마틱 다시보기 / HUD 챕터·웨이브 패널 분리 / 모바일 stat 패널 줄바꿈 / invBar 100px 분리 / 아내 비주얼 재작성(눈·날개·리본) / 면사포 투명도 0.42 / 동료 좌·우 고정 / 타이틀 화면 가족 동반 / 코스튬 캐릭터 탭 분리 / 동료 코스튬 캔버스 미리보기 / 아내 효과없는 의상 3종 추가)
 
 ## 1. 개요
 
@@ -791,6 +791,19 @@ saeukkang-limit-break/
 
 ## 18. v12 검수 메모 + 후속 작업 트래커
 
+### v12.10 Phase 2에서 처리된 항목 ✅
+
+12. **아내 비주얼 재작성** — 한쪽 눈만 그리던 구조를 두 눈으로 + 더 둥근 안구 + 작은 동공 + 위쪽 속눈썹. 큰 leaf-shape wing → 몸체에 붙는 작은 folded wing. 사이드 bow 제거.
+13. **리본 위치 정정** — `COMPANION_COSTUMES.wife.bow` draw를 머리 좌측(-22,-32)에서 머리 위 정중앙(0,-38)으로. 얼굴을 가리지 않음.
+14. **면사포 투명도** — `wife.veil` draw에서 alpha 0.85→0.42. 얼굴이 면사포 너머로 비치도록.
+15. **동료 좌·우 고정** — `spawnCompanions`/`updateCompanions`에서 `c.ox * (p.facing||1)` 곱셈을 제거. 아내는 항상 player 좌측, 아기는 항상 우측. ox -36→-50, child 36→50 (간격도 약간 넓힘).
+16. **타이틀 화면 가족 동반** — `drawTitlePigeonFrame`이 해금된 동료를 그룹 단위로 중앙 정렬해 그린다. 가운데 남편 + 좌측 아내 + 우측 아기.
+17. **코스튬 캐릭터 탭 분리** — 코스튬 섹션 상단에 [👤 남편][💗 아내 (Ch51)][👶 아기 (Ch60)] 탭. 잠긴 동료 탭 클릭 시 warn 토스트로 안내. 탭별 코스튬 도감만 노출.
+18. **동료 코스튬 캔버스 미리보기** — `renderCompanionGrid` + `drawCompanionCostumePreview(cv, kind, costumeId)`. 카드별 72×88 캔버스에 실제 동료 + 해당 코스튬 모양을 그려 줌. 등급/가격/구매 흐름 그대로.
+19. **아내 효과 없는 의상 3종** — `apron` (분홍 앞치마, 1k코인) / `sundress` (노란 원피스, 1.5k) / `cardigan` (아이보리 가디건, 2.5k). dmgBoost 1.0 (코스메틱 only). 각 코스튬에 `slot` 필드(head/body) 추가했으나 단일 equipped는 유지 (dual-slot은 추후 Phase 4 후보).
+20. **invBar 시각 분리** — top 78→100px (모바일 88px). 첫 칩 앞에 🎒 라벨 추가. 사용자 보고된 "오류화면1" 좌상단 의미없는 노란 칩 정체 = LV/HP 영역과 너무 가까이 붙었던 inv-pill로 진단됨.
+21. **남편 코스튬 도감 헤더에 "남편" 명시** — 캐릭터 탭 도입과 함께 라벨 명확화.
+
 ### v12.10 Phase 1에서 처리된 항목 ✅
 
 1. ~~victory 모달의 "다음 원정으로" CTA 부재~~ → **`#vNextExpBtn` 추가** (ch50/70 시네마틱 후 ch51/ch71 직진).
@@ -805,12 +818,12 @@ saeukkang-limit-break/
 10. ~~모바일 HUD UI 깨짐~~ → **statsPanel(점수·킬·코인) 모바일 폰트 축소(10px) + flex-wrap 허용** + invBar 위치 4px 위로 보정.
 11. ~~"오류화면1" 노란 칩~~ → 좌상단 영역 정비(invBar top 78→74, max-width 60→62vw, panel 폰트 축소). 정확한 element는 추측이라 추가 정보 받으면 후속 정밀 픽스.
 
-### Phase 2 이후로 미룬 항목
+### Phase 3 이후로 미룬 항목
 
 - **코스튬 합성 미리보기 UI** — `combineCostumes`의 oldest-first 자동 소비를 사전 확인 다이얼로그로 변경 (Phase 4)
 - **원정 Ⅲ 베이스 잡몹 라인업** — 우주 챕터의 cat/dog/tank/crow를 우주 톤 mob으로 교체 (Phase 4)
-- **신규 보스 변종 외형 분기** — 현재 6종이 cat_king fallback으로 그려짐. drawEnemy의 boss 분기 확장 (Phase 3)
-- **원정 끝 챕터의 chapterRewardModal 스킵** — ch50/70/100에서 떨어진 코스튬 reveal을 시네마틱 전 또는 후에 끼우기 (Phase 2)
-- **동료 시스템 정비** (Phase 2) — 아내/아이 코스튬 별도 탭 + 미리보기 / 면사포 투명도 / 아내 눈·날개·리본 / 왼쪽-오른쪽 고정 / 타이틀 동반 / 효과 없는 옷 추가
+- **신규 보스 변종 외형 분기** — pigeon_warlord/oracle/general/nebula_serpent/black_hole_lord/void_titan 6종이 cat_king fallback으로 그려짐. drawEnemy의 boss 분기 확장 (Phase 3)
+- **원정 끝 챕터의 chapterRewardModal 스킵** — ch50/70/100에서 떨어진 코스튬 reveal을 시네마틱 전후에 끼우기 (Phase 4)
+- **동료 dual-slot** — 현재 단일 equipped로 머리·옷 동시 장착 불가. 사용자가 동시 장착 원하면 Phase 4에서 head/body 슬롯 분리 + UI/progress 마이그레이션 (Phase 4 후보)
 - **원정 4 — 지옥 원정** (Phase 3) — 챕터 101~?, 새 동료(구출된 친구들), 티어 8 배경, 보스 변종 5챕터, 시네마틱 오프닝 전환
 - **원정 4 상점** (Phase 3) — 동료/코스튬 게이팅
