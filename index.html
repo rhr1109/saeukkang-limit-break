@@ -8455,12 +8455,29 @@ const _victory = {
 function drawVictoryScene(){
   const t = state.time;
   if(_victory.bowEnemies == null) initVictoryScene();
-  // ── Sky overlay — dark cosmic violet so the celebration glows against it
+  // v12 Phase 5 — expedition-aware cinematic. Each expedition end gets its own sky palette,
+  // centerpiece celestial body, headline, and confetti hue scheme so ch50/70/100 feel
+  // visually distinct.
+  const expId = state.victoryExpeditionId || 1;
+  // ── Sky overlay — palette per expedition
   ctx.save();
   const sky = ctx.createLinearGradient(0, 0, 0, H);
-  sky.addColorStop(0, 'rgba(10,2,30,.85)');
-  sky.addColorStop(0.5, 'rgba(60,18,90,.65)');
-  sky.addColorStop(1, 'rgba(120,40,140,.4)');
+  if(expId === 2){
+    // 원정 Ⅱ — pigeon planet rose dawn
+    sky.addColorStop(0, 'rgba(40,8,30,.85)');
+    sky.addColorStop(0.5, 'rgba(140,40,90,.55)');
+    sky.addColorStop(1, 'rgba(255,140,180,.4)');
+  } else if(expId === 3){
+    // 원정 Ⅲ — cosmic deep void
+    sky.addColorStop(0, 'rgba(2,1,10,.95)');
+    sky.addColorStop(0.5, 'rgba(20,8,60,.75)');
+    sky.addColorStop(1, 'rgba(60,30,140,.45)');
+  } else {
+    // 원정 Ⅰ — original cosmic violet
+    sky.addColorStop(0, 'rgba(10,2,30,.85)');
+    sky.addColorStop(0.5, 'rgba(60,18,90,.65)');
+    sky.addColorStop(1, 'rgba(120,40,140,.4)');
+  }
   ctx.fillStyle = sky;
   ctx.fillRect(0,0,W,H);
   // Twinkling stars
@@ -8515,7 +8532,14 @@ function drawVictoryScene(){
   const earthCx = W/2;
   const earthR = Math.min(W*0.16, (sceneBottom - sceneTop)*0.32, 110);
   const earthCy = sceneBottom - earthR * 0.55;
-  drawVictoryEarth(earthCx, earthCy, earthR, t);
+  // v12 Phase 5 — centerpiece changes per expedition.
+  if(expId === 2){
+    drawVictoryPigeonPlanet(earthCx, earthCy, earthR, t);
+  } else if(expId === 3){
+    drawVictoryCosmicSingularity(earthCx, earthCy, earthR, t);
+  } else {
+    drawVictoryEarth(earthCx, earthCy, earthR, t);
+  }
 
   // ── Bowing enemies arranged in a semicircle behind the globe ──
   for(const be of _victory.bowEnemies){
@@ -8576,7 +8600,14 @@ function drawVictoryScene(){
   // Earth emoji to the left of the text — drawn separately so the text outline doesn't
   // wrap the emoji and create a weird halo around it.
   ctx.font = `900 ${fs}px sans-serif`;
-  const text = '전 세계 정복!';
+  // v12 Phase 5 — headline + emoji vary per expedition.
+  const heroEmoji = expId === 3 ? '🌌' : expId === 2 ? '🪐' : '🌍';
+  const text = expId === 3 ? '전 우주 정복!' :
+               expId === 2 ? '비둘기 행성 정복!' :
+                              '전 세계 정복!';
+  const heroShadowCol = expId === 3 ? 'rgba(151,117,250,0.85)' :
+                        expId === 2 ? 'rgba(255,180,216,0.85)' :
+                                       'rgba(116,192,252,0.65)';
   const textW = ctx.measureText(text).width;
   const emojiSize = fs * 0.95;
   const gap = fs * 0.25;
@@ -8584,12 +8615,12 @@ function drawVictoryScene(){
   const startX = W/2 - totalW/2;
   const emojiX = startX + emojiSize/2;
   const textX = startX + emojiSize + gap + textW/2;
-  // Earth emoji — floating slightly above the text baseline to feel celebratory.
+  // Hero emoji — floating slightly above the text baseline to feel celebratory.
   const eBob = Math.sin(t*1.8)*4;
   ctx.font = `${emojiSize}px sans-serif`;
-  ctx.shadowColor = 'rgba(116,192,252,0.65)';
+  ctx.shadowColor = heroShadowCol;
   ctx.shadowBlur = 18;
-  ctx.fillText('🌍', emojiX, headlineY + eBob);
+  ctx.fillText(heroEmoji, emojiX, headlineY + eBob);
   ctx.shadowBlur = 0;
   // Title text — yellow with red drop shadow + glow
   ctx.font = `900 ${fs}px sans-serif`;
@@ -8697,6 +8728,109 @@ function spawnVictoryConfetti(){
       color: colors[Math.floor(Math.random()*colors.length)]
     });
   }
+}
+
+// v12 Phase 5 — 원정 Ⅱ centerpiece: pink/peach pigeon planet with feather rings + nest icon.
+function drawVictoryPigeonPlanet(cx, cy, r, t){
+  ctx.save();
+  // Warm pink halo
+  const glow = ctx.createRadialGradient(cx, cy, r*0.9, cx, cy, r*1.5);
+  glow.addColorStop(0, 'rgba(255,180,216,0.65)');
+  glow.addColorStop(1, 'rgba(255,180,216,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(cx, cy, r*1.5, 0, Math.PI*2); ctx.fill();
+  // Planet body — peach gradient
+  const surf = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, r*0.2, cx, cy, r);
+  surf.addColorStop(0, '#FFE3F2');
+  surf.addColorStop(0.5, '#FFB4D8');
+  surf.addColorStop(1, '#D63384');
+  ctx.fillStyle = surf;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  // Cloud bands rotating
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
+  for(let i=0;i<4;i++){
+    const yOff = (i*r*0.5 + t*8) % (r*2) - r;
+    ctx.fillStyle = `rgba(255,243,191,${0.25 - i*0.04})`;
+    ctx.beginPath(); ctx.ellipse(cx, cy + yOff, r*1.3, r*0.18, 0, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  // Tilted feather ring around planet (rotates slowly)
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(0.4);
+  ctx.strokeStyle = 'rgba(255,224,102,0.7)'; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.ellipse(0, 0, r*1.35, r*0.35, 0, 0, Math.PI*2); ctx.stroke();
+  // Feathers along ring
+  for(let i=0;i<14;i++){
+    const a = i*(Math.PI*2/14) + t*0.5;
+    const fx = Math.cos(a)*r*1.35, fy = Math.sin(a)*r*0.35;
+    ctx.fillStyle = i%2 ? '#FFD43B' : '#FFE3F2';
+    ctx.beginPath(); ctx.ellipse(fx, fy, 5, 2.2, a, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  // Heart on the planet (love conquered the world)
+  ctx.fillStyle = '#FA5252';
+  ctx.font = `${r*0.6}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(255,255,255,0.8)'; ctx.shadowBlur = 10;
+  ctx.fillText('💗', cx, cy);
+  ctx.shadowBlur = 0;
+  ctx.restore();
+}
+
+// v12 Phase 5 — 원정 Ⅲ centerpiece: cosmic singularity with spiral galaxy + black-hole core.
+function drawVictoryCosmicSingularity(cx, cy, r, t){
+  ctx.save();
+  // Bright violet halo
+  const glow = ctx.createRadialGradient(cx, cy, r*0.5, cx, cy, r*1.8);
+  glow.addColorStop(0, 'rgba(229,153,247,0.65)');
+  glow.addColorStop(0.5, 'rgba(116,64,255,0.4)');
+  glow.addColorStop(1, 'rgba(116,64,255,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(cx, cy, r*1.8, 0, Math.PI*2); ctx.fill();
+  // Spiral arms — 3 arms rotating
+  ctx.save();
+  ctx.translate(cx, cy);
+  for(let arm=0; arm<3; arm++){
+    ctx.save();
+    ctx.rotate(t*0.3 + arm*Math.PI*2/3);
+    ctx.strokeStyle = arm===0 ? 'rgba(229,153,247,0.7)' :
+                      arm===1 ? 'rgba(116,192,252,0.7)' :
+                                 'rgba(255,224,102,0.65)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for(let p=0; p<60; p++){
+      const ang = p*0.18;
+      const rad = p * r/60;
+      const px = Math.cos(ang) * rad;
+      const py = Math.sin(ang) * rad;
+      if(p===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    // Star dots along arm
+    for(let p=4; p<60; p+=4){
+      const ang = p*0.18;
+      const rad = p * r/60;
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath();
+      ctx.arc(Math.cos(ang)*rad, Math.sin(ang)*rad, 1.2 + Math.sin(t*4+p)*0.4, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  ctx.restore();
+  // Black-hole core
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.35, 0, Math.PI*2); ctx.fill();
+  // Event horizon ring (golden)
+  ctx.strokeStyle = '#FFD43B';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.38, 0, Math.PI*2); ctx.stroke();
+  // Inner accretion disk shimmer
+  ctx.fillStyle = 'rgba(255,224,102,0.35)';
+  ctx.beginPath(); ctx.ellipse(cx, cy, r*0.55, r*0.18, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
 }
 
 function drawVictoryEarth(cx, cy, r, t){
