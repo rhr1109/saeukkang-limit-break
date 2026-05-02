@@ -2,7 +2,7 @@
 
 > 이 문서는 게임의 현재 사양을 기록한다. 기능이 바뀌면 변경이력에 한 줄을 추가하지 말고 이 문서의 해당 섹션을 직접 수정한다.
 >
-> **현재 빌드 버전: v12.11** (Phase 3a+3b 일괄: MAX_CHAPTERS 130 / 원정 Ⅳ 지옥 구출 / 보스 6변종 5챕터 / 잡몹 imp·soul_husk·hellhound / BGM 30곡 / 티어 8 배경 / TIER_HUES tier 8 / 5종 구출 친구(참새·까치·부엉이·앵무새·다람쥐) 가족 뒤 무리 배치 / 합류 모달 5종 메시지 / 원정 Ⅲ→Ⅳ 진입 프롤로그 시네마틱 / 시네마틱 HUD 숨김 / 아내 비주얼 일관 픽스 / child shadow ground-line 정렬)
+> **현재 빌드 버전: v12.12** (Phase 4: 가족 발 line 정확 정렬 / 코스튬 합성 미리보기 다이얼로그 / 원정 끝 코스튬 reveal 모달 끼우기 / 동료 hurt flash sync / 캐릭터 탭 디자인 부드럽게 / 남편 코스튬에서 여성용(b_feather_robe·w_pink_glove) 제거 + 남성용(b_warrior_belt·w_iron_glove) 신설 / 아기 코스튬 3종 신설(overall·baby_robe·cape_blue) / 상점 코스튬 미리보기 DPR 적용 + 발 line 정렬 / HUD score·kills·coins 별도 panel 분리 + 모바일 잘림 방지 + LV 한 줄 강제)
 
 ## 1. 개요
 

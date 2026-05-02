@@ -288,6 +288,12 @@
   #chapterSelect .cs-tabs{display:flex;gap:6px;justify-content:center;margin:2px 0 10px;}
   #chapterSelect .cs-tab{background:rgba(0,0,0,.4);border:2px solid #FFD43B;color:#FFE066;font-weight:900;font-family:inherit;font-size:13px;padding:8px 16px;border-radius:999px;cursor:pointer;letter-spacing:-.2px;}
   #chapterSelect .cs-tab.on{background:linear-gradient(180deg,#FFD43B,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 3px 0 rgba(0,0,0,.4);}
+  /* v12.12 — 캐릭터 탭 (남편/아내/아기) 부드럽고 가벼운 pill style. 사용자 피드백 "투박해". */
+  .cos-char-tabs .cs-tab{background:rgba(40,15,70,.45);border:1.5px solid currentColor;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:800;letter-spacing:-.3px;backdrop-filter:blur(2px);transition:transform .12s, box-shadow .15s, background .15s;color:inherit;cursor:pointer;font-family:inherit;}
+  .cos-char-tabs .cs-tab:hover{transform:translateY(-1px);}
+  .cos-char-tabs .cs-tab.on{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.25)),currentColor;color:#FFF9DB!important;box-shadow:0 0 14px currentColor, 0 2px 0 rgba(0,0,0,.35);text-shadow:0 1px 1px rgba(0,0,0,.4);}
+  /* on 상태에서는 currentColor가 글자색으로 변하면서 안에 텍스트가 안보일 수 있어 강제 흰색 */
+  .cos-char-tabs .cs-tab.on > *{color:inherit;}
   #chapterSelect .cs-focus{max-width:520px;width:100%;margin:0 auto 14px;display:flex;flex-direction:column;gap:8px;}
   .ch-hero{position:relative;background:linear-gradient(180deg,var(--ch-color,#FFD43B) 0%, rgba(0,0,0,.55) 100%);border:4px solid #FFF9DB;border-radius:20px;padding:22px 18px;text-align:center;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 0 28px rgba(255,255,255,.12);overflow:hidden;}
   .ch-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%, rgba(255,255,255,.35) 0%, transparent 60%);pointer-events:none;}
@@ -577,15 +583,19 @@
   @media (max-width:480px){
     #hud .topbar{top:6px;left:6px;right:6px;}
     #hud .bar{width:clamp(110px, 34vw, 160px);}
-    #hud .panel{font-size:11px;padding:4px 8px;}
-    #hud .right{gap:3px;max-width:55vw;}
-    /* v12.10 — 모바일에서 점수/킬/코인 패널이 한 줄에 안 들어가면 자연 줄바꿈 + 폰트 축소.
-       기존엔 텍스트가 잘리거나 옆 패널과 겹쳐 노란 칩이 의미 없는 형태로 잘려 보였음. */
-    #hud #statsPanel{font-size:10px;padding:3px 7px;gap:5px;}
-    #hud #statsPanel span{white-space:nowrap;}
+    /* v12.12 — 모바일 HUD 정비. 사용자 피드백:
+       1) "각각 한 줄로 수정" → score/kills/coins를 별도 panel로 (HTML에서 분리됨)
+       2) "위 상단이 잘린다"  → 패널 폰트/패딩 축소 + max-width로 화면 밖 방지
+       3) "LV이 한 줄로 잘 나오게" → lvbar-wrap이 줄바꿈 안 되도록 nowrap. */
+    #hud .panel{font-size:10px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;}
+    #hud .right{gap:2px;max-width:52vw;align-items:flex-end;}
+    #hud #chapterPanel{max-width:52vw;}
+    #hud #scorePanel, #hud #killsPanel, #hud #coinsPanel{font-size:10px;padding:2px 6px;}
     #hud .topbar{gap:6px;}
-    /* 모바일도 LV/HP 영역(약 60-70px)과 분리되도록 invBar는 88px 부터 (PC는 100px). */
-    #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 88px);max-width:62vw;}
+    #hud .left{flex-shrink:1;min-width:0;}
+    #hud .lvbar-wrap{flex-wrap:nowrap;}
+    #hud .lvbar-wrap .bar{flex-shrink:1;min-width:60px;}
+    #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 92px);max-width:60vw;}
     #hud .invbar{top:calc(env(safe-area-inset-top, 0px) + 68px);max-width:60vw;gap:3px;}
     #hud .inv-pill{font-size:10px;padding:1px 5px 1px 3px;gap:2px;}
     #hud .inv-pill .ic{font-size:11px;}
@@ -636,19 +646,15 @@
         </div>
       </div>
       <div class="right">
-        <!-- v12.10 — 챕터와 웨이브 패널 분리. 모바일에서 점수/킬/코인이 한 줄에 들어가지 못하면
-             자연 줄바꿈되도록 flex-wrap. 하단 칩은 모바일 폰트 자동 축소(CSS). -->
+        <!-- v12.12 — 사용자 피드백 "위 상단 점수·처치·코인이 한 UI로 묶여있는데 각각 한 줄로".
+             score/kills/coins를 별도 panel로 분리. 모바일에서도 각자 한 줄. -->
         <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">비둘기 광장</span></div>
         <div class="panel" id="wavePanel">🌊 웨이브 <span id="waveNum">1</span>/3</div>
         <div class="panel" id="timerPanel">⏱ <span id="timerTxt">60</span></div>
         <div class="panel hidden" id="hudHungerPanel"><span id="hudHungerTxt"></span></div>
-        <div class="panel" id="statsPanel" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <span>⭐ <span id="scoreTxt">0</span></span>
-          <span style="opacity:.4;">·</span>
-          <span>💀 <span id="killsTxt">0</span></span>
-          <span style="opacity:.4;">·</span>
-          <span style="color:#FFD43B;">🪙 <span id="hudCoinTxt">0</span></span>
-        </div>
+        <div class="panel" id="scorePanel">⭐ <span id="scoreTxt">0</span></div>
+        <div class="panel" id="killsPanel">💀 <span id="killsTxt">0</span></div>
+        <div class="panel" id="coinsPanel" style="color:#FFD43B;">🪙 <span id="hudCoinTxt">0</span></div>
       </div>
     </div>
     <div class="invbar" id="invBar"></div>
@@ -993,6 +999,22 @@
         <button class="btn" id="ccNextDirectBtn">⚔ 다음 챕터 바로 도전 ▶</button>
         <button class="btn alt" id="ccNextBtn">🗺 챕터 선택으로</button>
         <button class="btn alt" id="ccHomeBtn">🏠 홈으로</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- v12.12 — 코스튬 합성 미리보기 다이얼로그. oldest-first 자동 소비를 사전 확인. -->
+  <div id="combinePreviewModal" class="modal hidden">
+    <div class="card" style="max-width:380px;text-align:center;">
+      <h2 style="color:#FFD43B;">🔧 코스튬 합성 확인</h2>
+      <div class="sub" id="cpmGradeText">같은 등급 3장 → 상위 1장</div>
+      <div id="cpmConsumeList" style="background:rgba(255,107,107,.10);border:2px dashed #FA5252;border-radius:10px;padding:10px;margin:10px 0;font-size:12px;color:#FFE3E3;line-height:1.5;text-align:left;"></div>
+      <div style="font-size:12px;color:#FFE066;font-weight:700;margin:6px 0 12px;line-height:1.5;">
+        ⚠ 위 3장이 영구 소비됩니다.<br>결과 코스튬은 무작위 슬롯·외형으로 나옵니다.
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn alt small" id="combineCancelBtn" style="flex:1;">취소</button>
+        <button class="btn small" id="combineConfirmBtn" style="flex:2;background:linear-gradient(180deg,#FFD43B,#F76707);">✨ 합성 진행</button>
       </div>
     </div>
   </div>
@@ -2907,6 +2929,35 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
       ctx.moveTo(30, -16); ctx.lineTo(40, -8); ctx.lineTo(32, -4);
       ctx.closePath(); ctx.fill();
     }
+  } else if(def.id === 'b_warrior_belt'){
+    // v12.12 — 원정 Ⅱ male body. C 단순 가죽띠 → B + 금속 버클 → A + 어깨 링 → S + 적색 망토.
+    ctx.fillStyle = '#5A3D20';
+    ctx.fillRect(-22, -2, 44, 8);
+    ctx.fillStyle = '#3A2510';
+    ctx.fillRect(-22, 4, 44, 2);
+    if(tier >= 1){
+      // Buckle
+      ctx.fillStyle = '#FFD43B';
+      ctx.fillRect(-4, -3, 8, 10);
+      ctx.fillStyle = '#FFA94D';
+      ctx.fillRect(-2, -1, 4, 6);
+    }
+    if(tier >= 2){
+      // Shoulder rings
+      ctx.fillStyle = '#868E96';
+      ctx.beginPath(); ctx.arc(-18, -10, 4, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(18, -10, 4, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#212529';
+      ctx.beginPath(); ctx.arc(-18, -10, 2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(18, -10, 2, 0, Math.PI*2); ctx.fill();
+    }
+    if(tier >= 3){
+      // Red short cape
+      ctx.fillStyle = '#C92A2A';
+      ctx.beginPath();
+      ctx.moveTo(-22, -8); ctx.lineTo(-26, 14); ctx.lineTo(26, 14); ctx.lineTo(22, -8);
+      ctx.closePath(); ctx.fill();
+    }
   } else if(def.id === 'b_feather_robe'){
     // 원정 Ⅱ — pink feather dress. C plain pink → B + ruffles → A + gold trim → S + flowing feathers
     ctx.fillStyle = '#E8A8B6';
@@ -3283,6 +3334,31 @@ function drawWeaponCostumeAt(ctx, lx, ly, scale, eq){
       ctx.lineTo(2, 16); ctx.quadraticCurveTo(0, 26, -2, 16);
       ctx.closePath(); ctx.fill();
     }
+  } else if(def.id === 'w_iron_glove'){
+    // v12.12 — male 원정 Ⅱ weapon. 강철 글러브.
+    ctx.fillStyle = '#495057';
+    ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#212529';
+    ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI*2); ctx.fill();
+    if(tier >= 1){
+      // Studs (knuckle plates)
+      ctx.fillStyle = '#868E96';
+      for(let i=-1;i<=1;i++){
+        ctx.beginPath(); ctx.arc(i*4, -4, 1.4, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    if(tier >= 2){
+      // Steel rivets
+      ctx.fillStyle = '#FFD43B';
+      ctx.beginPath(); ctx.arc(0, 0, 1.6, 0, Math.PI*2); ctx.fill();
+    }
+    if(tier >= 3){
+      // S — orange spark ring
+      const t2 = state.time;
+      ctx.strokeStyle = `rgba(255,140,0,${0.6 + Math.sin(t2*4)*0.3})`;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI*2); ctx.stroke();
+    }
   } else if(def.id === 'w_pink_glove'){
     // 원정 Ⅱ — soft pink boxing glove. C plain → B + lacing → A + heart → S + sparkle ring
     ctx.fillStyle = '#FFB4D8';
@@ -3423,20 +3499,26 @@ function drawTitlePigeonFrame(){
   const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
   const offsetX = scale * 70;
   drawPigeon(ctx2, cx, cy, scale, 1, state.time * 1.4, false, 1, fakePlayer);
-  // v12.11 hotfix — 1.6 → 2.0. 사용자 피드백 "너무 작다" 추가 반영.
   const compScale = 2.0;
+  // v12.12 — 가족 발 line(husbandFootY)을 기준으로 wife/child 위치를 역산해 발 높이를
+  // 정확히 맞춤. drawPigeon의 그림자는 local y=52에 그려져 husband 발 = cy + 52*scale.
+  // wife: 그림자 local y=52, internal scale 0.85 적용 + compScale 2.0 → 그림자 offset
+  //       = compScale * 0.85 * 52. wcy = husbandFootY - 그림자 offset.
+  // child: 그림자 local y=18, internal scale 없음 + compScale 2.0 → 그림자 offset
+  //        = compScale * 18. ccy = husbandFootY - 그림자 offset.
+  const husbandFootY = cy + scale * 52;
   if(wifeOk){
     ctx2.save();
-    ctx2.translate(cx - offsetX, cy + scale*4);
+    const wifeY = husbandFootY - compScale * 0.85 * 52;
+    ctx2.translate(cx - offsetX, wifeY);
     ctx2.scale(compScale, compScale);
     drawCompanion(ctx2, { x:0, y:0, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
     ctx2.restore();
   }
   if(childOk){
     ctx2.save();
-    // v12.11 — child도 가족 발 높이로 정렬. drawChildPigeon의 shadow y=18에 맞춰
-    // husband 발 위치(scale*52)와 일치하도록 -34만큼 위로 잡고 그린다.
-    ctx2.translate(cx + offsetX, cy + scale*18);
+    const childY = husbandFootY - compScale * 18;
+    ctx2.translate(cx + offsetX, childY);
     ctx2.scale(compScale, compScale);
     drawCompanion(ctx2, { x:0, y:0, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
     ctx2.restore();
@@ -4871,10 +4953,12 @@ const COSTUME_DEFS = [
   { id:'w_thunder',    slot:'weapon', name:'천둥의 메이스',    icon:'🔨', expedition:1 },
   { id:'w_phoenix',    slot:'weapon', name:'불사조 클로',      icon:'🔥', expedition:1 },
   // ─── 원정 Ⅱ — 비둘기 행성 (drops only after ch50 cleared) ───
-  // v12.10 — h_pearl_tiara 제거됨. 사용자 피드백: "남편 비둘기 코스튬으로 티아라가 있으면 안되니까 없애라" —
-  // 진주 티아라는 아내 비둘기 전용 코스튬으로 이전됨 (COMPANION_COSTUMES.wife.tiara가 이미 정의됨).
-  { id:'b_feather_robe',slot:'body',  name:'깃털 드레스',      icon:'🪶', expedition:2 },
-  { id:'w_pink_glove', slot:'weapon', name:'핑크 글러브',      icon:'🧤', expedition:2 },
+  // v12.10 — h_pearl_tiara 제거됨 (남편이 입을 코스튬이 아님 → wife.tiara로 이전됨).
+  // v12.12 — 사용자 피드백 "남편 코스튬에 여성 코스튬은 다 없애줘". b_feather_robe(깃털
+  // 드레스) 와 w_pink_glove(핑크 글러브)도 남편 풀에서 제거. (보유 사용자는 migrateRemovedCostumes
+  // 가 인벤토리·equipped를 청소함.)
+  { id:'b_warrior_belt',slot:'body',  name:'전사 벨트',        icon:'⚙️', expedition:2 },
+  { id:'w_iron_glove', slot:'weapon', name:'철권 글러브',      icon:'🥊', expedition:2 },
   // ─── 원정 Ⅲ — 우주 (drops only after ch70 cleared) ───
   { id:'h_galaxy_helm',slot:'head',   name:'은하 헬멧',        icon:'🌌', expedition:3 },
   { id:'b_void_robe',  slot:'body',   name:'보이드 로브',      icon:'⚫', expedition:3 },
@@ -5350,22 +5434,26 @@ function spawnCompanions(){
   state.companions = [];
   const p = state.player;
   if(!p) return;
-  // 가족 — wife 좌측, child 우측 (v12.10 phase 2).
+  // v12.12 — 가족 + 5종 친구의 발 line을 player 발(local y=52, draw scale=PLAYER_DRAW_SCALE)
+  // 기준으로 정확히 맞춤. world y of player foot = py + 52*PLAYER_DRAW_SCALE.
+  // 각 동료의 oy는 그림자 offset을 빼서 footline에 맞춤.
+  const playerFootOffset = 52 * PLAYER_DRAW_SCALE;
+  // wife: shadow at local 52, internal scale 0.85 → 그림자 offset = 0.85*52 = 44.2
   if(progress.companionUnlocks && progress.companionUnlocks.wife){
+    const wifeOy = playerFootOffset - 0.85 * 52;
     state.companions.push({
       kind:'wife', label:'아내', tint:'#FFB4D8', accent:'#FA80B0',
-      x: p.x - 50, y: p.y + 6, ox:-50, oy:6,
+      x: p.x - 50, y: p.y + wifeOy, ox:-50, oy:wifeOy,
       reloadT: 0.5, fireRate: 1.8,
       damageMult: 0.45, projCount: 1,
     });
   }
+  // child: shadow at local 18, no internal scale → 그림자 offset = 18
   if(progress.companionUnlocks && progress.companionUnlocks.child){
+    const childOy = playerFootOffset - 18;
     state.companions.push({
-      // v12.11 Phase 3b — child oy 12→32. drawChildPigeon shadow는 local y=18에 그려져
-      // child가 가족 발 높이(약 py+50)와 맞으려면 oy=32이 필요. 사용자 피드백 "아기가
-      // 붕 떠있는 것 같다" 반영.
       kind:'child', label:'아기', tint:'#A5D8FF', accent:'#74C0FC',
-      x: p.x + 50, y: p.y + 32, ox:50, oy:32,
+      x: p.x + 50, y: p.y + childOy, ox:50, oy:childOy,
       reloadT: 1.0, fireRate: 1.4,
       damageMult: 0.30, projCount: 1,
     });
@@ -5373,21 +5461,27 @@ function spawnCompanions(){
   // v12.11 Phase 3b — 원정 Ⅳ 구출 친구들. 가족 뒤(아래쪽)에 5각형 무리 배치.
   // ox/oy는 player 기준 player 발 아래 영역 [-60..60, +35..+75]에 분산. 각자 살짝 다른
   // damageMult / fireRate로 변화감만 주되 모두 작아 챕터 밸런스 영향 최소.
+  // v12.12 — 5종 구출 친구도 footline 정렬. 친구들 그림자는 모두 local y=18 (작은 사이즈).
+  // 친구 internal scale ≈ 0.43 → 그림자 offset = 0.43*18 ≈ 7.7.
+  // 가족 뒤(footline + 18~38) 영역에 무리를 그리되, 친구 자체 발도 자기 그림자 위치에서 끝나게.
+  const friendShadowOffset = 0.43 * 18;
+  const friendFootBase = playerFootOffset - friendShadowOffset; // footline 일치 시 oy
   const rescueDefs = [
-    { kind:'sparrow',  ox:-44, oy:42, fireRate:2.2, damageMult:0.20, label:'참새',    tint:'#A87545' },
-    { kind:'magpie',   ox: 44, oy:42, fireRate:1.7, damageMult:0.24, label:'까치',    tint:'#1A1A1A' },
-    { kind:'owl',      ox:-22, oy:62, fireRate:1.0, damageMult:0.32, label:'부엉이',  tint:'#7A5230' },
-    { kind:'parrot',   ox: 22, oy:62, fireRate:1.6, damageMult:0.26, label:'앵무새',  tint:'#2F9E44' },
-    { kind:'squirrel', ox:  0, oy:78, fireRate:1.4, damageMult:0.22, label:'다람쥐',  tint:'#A0522D' },
+    { kind:'sparrow',  ox:-50, oyAdj:14, fireRate:2.2, damageMult:0.20, label:'참새',    tint:'#A87545' },
+    { kind:'magpie',   ox: 50, oyAdj:14, fireRate:1.7, damageMult:0.24, label:'까치',    tint:'#1A1A1A' },
+    { kind:'owl',      ox:-26, oyAdj:30, fireRate:1.0, damageMult:0.32, label:'부엉이',  tint:'#7A5230' },
+    { kind:'parrot',   ox: 26, oyAdj:30, fireRate:1.6, damageMult:0.26, label:'앵무새',  tint:'#2F9E44' },
+    { kind:'squirrel', ox:  0, oyAdj:46, fireRate:1.4, damageMult:0.22, label:'다람쥐',  tint:'#A0522D' },
   ];
   for(const def of rescueDefs){
     if(progress.companionUnlocks && progress.companionUnlocks[def.kind]){
+      const oy = friendFootBase + def.oyAdj;
       state.companions.push({
         kind:def.kind, label:def.label, tint:def.tint, accent:def.tint,
-        x: p.x + def.ox, y: p.y + def.oy, ox:def.ox, oy:def.oy,
+        x: p.x + def.ox, y: p.y + oy, ox:def.ox, oy:oy,
         reloadT: 0.6 + Math.random()*0.4, fireRate: def.fireRate,
         damageMult: def.damageMult, projCount: 1,
-        phaseSeed: Math.random()*Math.PI*2,  // 다람쥐 꼬리 흔들림 등에 사용
+        phaseSeed: Math.random()*Math.PI*2,
       });
     }
   }
@@ -5424,12 +5518,17 @@ function updateCompanions(dt){
   const p = state.player;
   if(!p) return;
   for(const c of state.companions){
-    // v12.10 Phase 2 — wife는 항상 좌측, child는 항상 우측 (facing 무관).
-    // 사용자 피드백: "왼쪽에 고정이 안되어있어서 산만". facing × ox 곱셈을 제거.
     const tx = p.x + c.ox;
     const ty = p.y + c.oy;
     c.x += (tx - c.x) * Math.min(1, dt * 6);
     c.y += (ty - c.y) * Math.min(1, dt * 6);
+    // v12.12 — 동료 피격 효과. player가 hurt 받을 때 모든 동료도 hurt flash.
+    // 사용자 요청 "가족·동료 피격 효과 있어야해". 동료는 hp가 없으므로 시각만 sync.
+    if(p.hitT > 0){
+      c.hitT = Math.max(c.hitT || 0, p.hitT * 0.85);
+    } else if(c.hitT > 0){
+      c.hitT = Math.max(0, c.hitT - dt);
+    }
     c.reloadT -= dt;
     if(c.reloadT <= 0){
       c.reloadT = 1 / c.fireRate;
@@ -5439,6 +5538,19 @@ function updateCompanions(dt){
 }
 
 function drawCompanion(ctx, c){
+  // v12.12 — 피격 시 brightness/saturate filter로 일괄 hurt flash. drawXxxFriend 내부 픽
+  // 분기를 추가하지 않고 단일 filter로 처리하여 코드 복잡도 최소화.
+  const flashing = (c.hitT || 0) > 0;
+  if(flashing){
+    ctx.save();
+    ctx.filter = 'brightness(1.6) saturate(1.4) hue-rotate(-15deg)';
+  }
+  _drawCompanionInner(ctx, c);
+  if(flashing){
+    ctx.restore();
+  }
+}
+function _drawCompanionInner(ctx, c){
   if(c.kind === 'wife')     return drawWifePigeon(ctx, c);
   if(c.kind === 'child')    return drawChildPigeon(ctx, c);
   // v12.11 Phase 3b — 원정 Ⅳ 구출 친구들. 작은 사이즈로 가족 뒤에 무리.
@@ -5780,7 +5892,7 @@ const COMPANION_COSTUMES = {
       } },
   ],
   child: [
-    { id:'pacifier', name:'공갈 젖꼭지', cost:0,     icon:'🍼',
+    { id:'pacifier', name:'공갈 젖꼭지', cost:0,     icon:'🍼', slot:'head',
       draw:(ctx)=>{
         ctx.fillStyle = '#74C0FC';
         ctx.beginPath(); ctx.arc(0, 17, 2.6, 0, Math.PI*2); ctx.fill();
@@ -5814,9 +5926,8 @@ const COMPANION_COSTUMES = {
         ctx.strokeStyle = '#74C0FC'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(2, -22, 0, -25); ctx.stroke();
       } },
-    { id:'mini_crown', name:'아기 왕관', cost:8000,  icon:'👑', dmgBoost:1.12,
+    { id:'mini_crown', name:'아기 왕관', cost:8000,  icon:'👑', slot:'head', dmgBoost:1.12,
       draw:(ctx)=>{
-        // Tiny crown sized for child head
         ctx.fillStyle = '#FFD43B';
         ctx.beginPath();
         ctx.moveTo(-8,-19); ctx.lineTo(-6,-23);
@@ -5826,6 +5937,61 @@ const COMPANION_COSTUMES = {
         ctx.closePath(); ctx.fill();
         ctx.fillStyle = '#FA5252';
         ctx.beginPath(); ctx.arc(0,-21, 1, 0, Math.PI*2); ctx.fill();
+      } },
+    // === v12.12 — child 신규 옷류 (몸통 슬롯, dmgBoost 1.0). 사용자 요청 "옷이 부족" ===
+    { id:'overall',   name:'멜빵 오버롤', cost:1000, icon:'👶', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#74C0FC';
+        ctx.beginPath();
+        ctx.moveTo(-9, 0); ctx.lineTo(-10, 18); ctx.lineTo(10, 18); ctx.lineTo(9, 0);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -9, 0);
+        ctx.closePath(); ctx.fill();
+        // 멜빵 strap
+        ctx.strokeStyle = '#1864AB'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(-5, -2); ctx.lineTo(-5, 8); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(5, -2); ctx.lineTo(5, 8); ctx.stroke();
+        // 단추
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath(); ctx.arc(-5, 3, 0.7, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(5, 3, 0.7, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'baby_robe', name:'아기 가운',  cost:2000, icon:'🛁', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#FFE3F2';
+        ctx.beginPath();
+        ctx.moveTo(-10, -1); ctx.quadraticCurveTo(-12, 10, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 10, 10, -1);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -1);
+        ctx.closePath(); ctx.fill();
+        // 모자 후드
+        ctx.fillStyle = '#FFB4D8';
+        ctx.beginPath(); ctx.arc(0, -16, 9, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#FFE3F2';
+        ctx.beginPath(); ctx.arc(0, -15, 6, 0, Math.PI*2); ctx.fill();
+        // 가운 매듭
+        ctx.fillStyle = '#FA80B0';
+        ctx.beginPath(); ctx.arc(0, 6, 1.4, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'cape_blue', name:'슈퍼 망토',  cost:3500, icon:'🦸', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // Cape behind body — drawn first if visible
+        ctx.fillStyle = '#1864AB';
+        ctx.beginPath();
+        ctx.moveTo(-12, -1); ctx.quadraticCurveTo(-18, 8, -16, 22);
+        ctx.lineTo(16, 22); ctx.quadraticCurveTo(18, 8, 12, -1);
+        ctx.lineTo(8, 0); ctx.quadraticCurveTo(0, -1, -8, 0);
+        ctx.closePath(); ctx.fill();
+        // 가슴 별
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath();
+        const cx = 0, cy = 6, r = 4;
+        for(let i=0;i<5;i++){
+          const a1 = -Math.PI/2 + i*Math.PI*2/5;
+          const a2 = a1 + Math.PI/5;
+          ctx.lineTo(cx + Math.cos(a1)*r, cy + Math.sin(a1)*r);
+          ctx.lineTo(cx + Math.cos(a2)*r*0.4, cy + Math.sin(a2)*r*0.4);
+        }
+        ctx.closePath(); ctx.fill();
       } },
   ],
 };
@@ -7025,11 +7191,17 @@ function onBossDefeated(){
     state.victoryExpeditionId = expeditionFor(state.chapter).id;
     sfxVictory();
     renderVictory(state.chapter >= MAX_CHAPTERS);
-    // v12.11 — 시네마틱 진입 시 HUD 숨김. 사용자 보고 "시네마틱 캡처들에 의미없는 노란 UI
-    // 반복" → 좌상단 invBar/chapterPanel/timerPanel/statsPanel이 시네마틱 위에 그대로
-    // 노출되어 있던 버그 수정.
     document.getElementById('hud').classList.add('hidden');
-    document.getElementById('victory').classList.remove('hidden');
+    // v12.12 — 원정 끝 챕터(ch50/70/100/130)에서도 떨어진 코스튬이 있으면 reveal 모달 먼저
+    // 노출. 닫으면 시네마틱(victory)으로 진입. 사용자 검수 메모 "원정 끝 reveal 모달 스킵" 처리.
+    if(state.earnedCostumeThisChapter){
+      // showChapterRewardModal는 closeBtn에서 chapterCleared 모달을 여는 흐름. 여기서는
+      // 원정 끝이라 chapterCleared 대신 victory로 가야 하므로 별도 임시 플래그를 세움.
+      state._pendingVictoryAfterReveal = true;
+      showChapterRewardModal(state.earnedCostumeThisChapter);
+    } else {
+      document.getElementById('victory').classList.remove('hidden');
+    }
     return;
   }
   state.scene='chapterCleared';
@@ -7200,6 +7372,12 @@ function showChapterRewardModal(eq){
       progress.equipped[def.slot] = eq.uid;
       saveProgress();
       sfxLevelUp();
+    }
+    // v12.12 — 원정 끝 챕터에서 reveal 후 victory로 진입하는 분기. 일반 챕터는 chapterCleared로.
+    if(state._pendingVictoryAfterReveal){
+      state._pendingVictoryAfterReveal = false;
+      document.getElementById('victory').classList.remove('hidden');
+      return;
     }
     renderChapterCleared();
     document.getElementById('chapterCleared').classList.remove('hidden');
@@ -10394,7 +10572,7 @@ document.getElementById('hellPrologueCloseBtn').addEventListener('click', () => 
   saveProgress();
 });
 document.getElementById('combineBtn').addEventListener('click', () => {
-  // v12 phase 2 — pick the highest combinable grade (so player upgrades the best stack first).
+  // v12.12 — 합성 시 미리보기 다이얼로그를 먼저 열어 oldest-first로 소비될 3장을 사전 노출.
   const grades = findCombinableGrades();
   if(grades.length === 0){
     state.toastBanner = { text:'합성할 코스튬 부족', sub:'같은 등급 3장이 필요합니다 (장착 중인 것 제외)', t:2.0, maxT:2.0, tone:'warn' };
@@ -10403,6 +10581,40 @@ document.getElementById('combineBtn').addEventListener('click', () => {
   const order = { A:3, B:2, C:1 };
   grades.sort((a,b) => (order[b]||0) - (order[a]||0));
   const grade = grades[0];
+  const next = COSTUME_COMBINE_NEXT[grade];
+  // oldest-first 3 — combineCostumes와 동일 로직.
+  const equippedUids = new Set([progress.equipped.head, progress.equipped.body, progress.equipped.weapon].filter(Boolean));
+  const candidates = [];
+  for(const c of progress.costumes){
+    if(equippedUids.has(c.uid)) continue;
+    if(c.grade === grade) candidates.push(c);
+    if(candidates.length >= 3) break;
+  }
+  // 미리보기 노출
+  document.getElementById('cpmGradeText').innerHTML =
+    `<b style="color:#FFD43B;">${grade}×3</b> → <b style="color:#FA5252;">${next}</b> 등급 1장`;
+  const slotLabel = { head:'머리', body:'몸통', weapon:'무기' };
+  const consumeListEl = document.getElementById('cpmConsumeList');
+  consumeListEl.innerHTML = candidates.map((c, i) => {
+    const def = COSTUME_DEFS_BY_ID[c.defId];
+    if(!def) return '';
+    return `<div>${i+1}. ${def.icon} <b>${def.name}</b> · ${slotLabel[def.slot] || ''} · <span style="color:#FFE066;">${grade} 등급</span></div>`;
+  }).join('');
+  document.getElementById('combinePreviewModal').classList.remove('hidden');
+  // 확정/취소 핸들러는 한 번만 등록되어 있음 (밑에).
+  state._pendingCombineGrade = grade;
+});
+
+// v12.12 — 합성 확정/취소
+document.getElementById('combineCancelBtn').addEventListener('click', () => {
+  document.getElementById('combinePreviewModal').classList.add('hidden');
+  state._pendingCombineGrade = null;
+});
+document.getElementById('combineConfirmBtn').addEventListener('click', () => {
+  const grade = state._pendingCombineGrade;
+  document.getElementById('combinePreviewModal').classList.add('hidden');
+  state._pendingCombineGrade = null;
+  if(!grade) return;
   const result = combineCostumes(grade);
   if(result){
     const def = COSTUME_DEFS_BY_ID[result.defId];
@@ -10883,24 +11095,39 @@ function renderCompanionGrid(kind, gridId){
   }
 }
 
-// 캔버스에 동료 + 코스튬을 그려준다. 상점 카드 미리보기와 모달 미리보기 양쪽에서 사용.
+// v12.12 — 상점 코스튬 미리보기. DPR 적용으로 픽셀 깨짐 해소 + 발 line을 캔버스 footline에
+// 맞춰 정렬 (사용자 피드백 "기본 템 몸통 지면 정렬 안 맞고 픽셀 깨진다").
 function drawCompanionCostumePreview(cv, kind, costumeId){
   const ctx2 = cv.getContext('2d');
-  const w = cv.width, h = cv.height;
-  ctx2.clearRect(0, 0, w, h);
-  // Temporarily override equipped costume, draw, then restore.
+  const cssW = 72, cssH = 88;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if(cv.width !== cssW * dpr || cv.height !== cssH * dpr){
+    cv.width = cssW * dpr;
+    cv.height = cssH * dpr;
+    cv.style.width = cssW + 'px';
+    cv.style.height = cssH + 'px';
+  }
+  ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx2.clearRect(0, 0, cssW, cssH);
   const slot = progress.companionCostumes[kind];
   const prev = slot.equipped;
   slot.equipped = costumeId;
+  // 발 line은 canvas footer 가까이 (cssH*0.88). 동료별 그림자 offset을 빼서 anchor를 잡는다.
+  const footY = cssH * 0.88;
+  const previewScale = 0.65;  // wife/child 가 canvas 안에 머리부터 발끝까지 들어오도록.
   ctx2.save();
-  // Center companion in canvas. drawWifePigeon/drawChildPigeon 좌표는 c.x/c.y 기준이므로 가짜 c 객체 + 변환.
-  ctx2.translate(w/2, h*0.78);
-  ctx2.scale(0.72, 0.72);
-  const fakeC = { x:0, y:0, kind, tint:kind==='wife'?'#FFB4D8':'#A5D8FF', accent:kind==='wife'?'#FA80B0':'#74C0FC' };
-  // drawWifePigeon/drawChildPigeon은 ctx.save/translate/restore를 자체적으로 함.
-  // 다만 state.time을 참조하므로 그대로 호출 가능.
-  if(kind === 'wife') drawWifePigeon(ctx2, fakeC);
-  else drawChildPigeon(ctx2, fakeC);
+  if(kind === 'wife'){
+    // wife shadow at local y=52, internal 0.85 → preview offset = previewScale * 0.85 * 52
+    const offY = previewScale * 0.85 * 52;
+    ctx2.translate(cssW/2, footY - offY);
+    ctx2.scale(previewScale, previewScale);
+    drawWifePigeon(ctx2, { x:0, y:0 });
+  } else {
+    const offY = previewScale * 18;
+    ctx2.translate(cssW/2, footY - offY);
+    ctx2.scale(previewScale, previewScale);
+    drawChildPigeon(ctx2, { x:0, y:0, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+  }
   ctx2.restore();
   slot.equipped = prev;
 }
