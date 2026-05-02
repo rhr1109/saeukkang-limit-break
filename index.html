@@ -4017,7 +4017,9 @@ function chapterWaveTimes(c){
   } else if(c <= 70){
     each = 200;  cap = 1100;  // 원정 Ⅱ — same wave length, cap +80s for tougher bosses
   } else {
-    each = 220;  cap = 1500;  // 원정 Ⅲ — 3:40 waves + 6 min boss budget = 25 min cap
+    each = 220;  cap = 1500;  // 원정 Ⅲ — 25min cap (rolled back from 1700). 보스 HP는 크게
+                              // 올렸으나 cap은 동일 → fresh-S 헤드룸이 ch50보다 훨씬 타이트.
+                              // fresh-B 빌드는 ch95+ 정복 위해 A/S 코스튬 업그레이드 필수.
   }
   return [each, each*2, each*3, cap];
 }
@@ -4414,26 +4416,34 @@ function rollGachaGrade(rates){
 // Costume catalogue — each entry can drop at any grade. Slot determines which body part it overlays.
 const COSTUME_DEFS = [
   // ─── HEAD ───
-  { id:'h_beanie',     slot:'head',   name:'동네 비니',       icon:'🧢' },
-  { id:'h_strawhat',   slot:'head',   name:'밀짚모자',         icon:'👒' },
-  { id:'h_helmet',     slot:'head',   name:'전투용 헬멧',      icon:'⛑️' },
-  { id:'h_tophat',     slot:'head',   name:'마법 실크햇',      icon:'🎩' },
-  { id:'h_crown',      slot:'head',   name:'황금 왕관',        icon:'👑' },
-  { id:'h_halo',       slot:'head',   name:'별빛 후광',        icon:'💫' },
+  { id:'h_beanie',     slot:'head',   name:'동네 비니',       icon:'🧢', expedition:1 },
+  { id:'h_strawhat',   slot:'head',   name:'밀짚모자',         icon:'👒', expedition:1 },
+  { id:'h_helmet',     slot:'head',   name:'전투용 헬멧',      icon:'⛑️', expedition:1 },
+  { id:'h_tophat',     slot:'head',   name:'마법 실크햇',      icon:'🎩', expedition:1 },
+  { id:'h_crown',      slot:'head',   name:'황금 왕관',        icon:'👑', expedition:1 },
+  { id:'h_halo',       slot:'head',   name:'별빛 후광',        icon:'💫', expedition:1 },
   // ─── BODY ───
-  { id:'b_jersey',     slot:'body',   name:'운동복',           icon:'👕' },
-  { id:'b_cape',       slot:'body',   name:'영웅의 망토',      icon:'🦸' },
-  { id:'b_robe',       slot:'body',   name:'마법 로브',        icon:'🪄' },
-  { id:'b_tux',        slot:'body',   name:'턱시도',           icon:'🤵' },
-  { id:'b_armor',      slot:'body',   name:'기사 갑옷',        icon:'🛡️' },
-  { id:'b_dragon',     slot:'body',   name:'용비늘 갑주',      icon:'🐉' },
+  { id:'b_jersey',     slot:'body',   name:'운동복',           icon:'👕', expedition:1 },
+  { id:'b_cape',       slot:'body',   name:'영웅의 망토',      icon:'🦸', expedition:1 },
+  { id:'b_robe',       slot:'body',   name:'마법 로브',        icon:'🪄', expedition:1 },
+  { id:'b_tux',        slot:'body',   name:'턱시도',           icon:'🤵', expedition:1 },
+  { id:'b_armor',      slot:'body',   name:'기사 갑옷',        icon:'🛡️', expedition:1 },
+  { id:'b_dragon',     slot:'body',   name:'용비늘 갑주',      icon:'🐉', expedition:1 },
   // ─── WEAPON (gloves/fists) ───
-  { id:'w_ribbon',     slot:'weapon', name:'리본 글러브',      icon:'🎀' },
-  { id:'w_brass',      slot:'weapon', name:'브라스 너클',      icon:'👊' },
-  { id:'w_gauntlet',   slot:'weapon', name:'전투 건틀릿',      icon:'🦾' },
-  { id:'w_blade',      slot:'weapon', name:'쌍수도',          icon:'⚔️' },
-  { id:'w_thunder',    slot:'weapon', name:'천둥의 메이스',    icon:'🔨' },
-  { id:'w_phoenix',    slot:'weapon', name:'불사조 클로',      icon:'🔥' },
+  { id:'w_ribbon',     slot:'weapon', name:'리본 글러브',      icon:'🎀', expedition:1 },
+  { id:'w_brass',      slot:'weapon', name:'브라스 너클',      icon:'👊', expedition:1 },
+  { id:'w_gauntlet',   slot:'weapon', name:'전투 건틀릿',      icon:'🦾', expedition:1 },
+  { id:'w_blade',      slot:'weapon', name:'쌍수도',          icon:'⚔️', expedition:1 },
+  { id:'w_thunder',    slot:'weapon', name:'천둥의 메이스',    icon:'🔨', expedition:1 },
+  { id:'w_phoenix',    slot:'weapon', name:'불사조 클로',      icon:'🔥', expedition:1 },
+  // ─── 원정 Ⅱ — 비둘기 행성 (drops only after ch50 cleared) ───
+  { id:'h_pearl_tiara',slot:'head',   name:'진주 티아라',      icon:'💎', expedition:2 },
+  { id:'b_feather_robe',slot:'body',  name:'깃털 드레스',      icon:'🪶', expedition:2 },
+  { id:'w_pink_glove', slot:'weapon', name:'핑크 글러브',      icon:'🧤', expedition:2 },
+  // ─── 원정 Ⅲ — 우주 (drops only after ch70 cleared) ───
+  { id:'h_galaxy_helm',slot:'head',   name:'은하 헬멧',        icon:'🌌', expedition:3 },
+  { id:'b_void_robe',  slot:'body',   name:'보이드 로브',      icon:'⚫', expedition:3 },
+  { id:'w_star_blade', slot:'weapon', name:'별의 검',          icon:'⭐', expedition:3 },
 ];
 const COSTUME_DEFS_BY_ID = Object.fromEntries(COSTUME_DEFS.map(d=>[d.id,d]));
 const COSTUME_DEFS_BY_SLOT = { head:[], body:[], weapon:[] };
@@ -4489,9 +4499,14 @@ function buildPlayerCostumeRefs(){
 let _uidCounter = Date.now();
 function newCostumeUid(){ _uidCounter++; return 'c'+_uidCounter.toString(36); }
 function awardCostume(grade, slotFilter){
-  // Pick a random definition (optionally constrained to a specific slot).
-  const pool = slotFilter ? COSTUME_DEFS_BY_SLOT[slotFilter] : COSTUME_DEFS;
-  const def = pool[Math.floor(Math.random()*pool.length)];
+  // Pick a random definition. v12 phase 3 — gate by expedition: 원정 Ⅱ costumes drop only after
+  // ch50 cleared, 원정 Ⅲ only after ch70 cleared. Outside player's reached expedition tier the
+  // costume is filtered out so they're not awarded prematurely.
+  const cleared = progress.clearedChapter || 0;
+  const maxExp = cleared >= 70 ? 3 : cleared >= 50 ? 2 : 1;
+  const fullPool = slotFilter ? COSTUME_DEFS_BY_SLOT[slotFilter] : COSTUME_DEFS;
+  const pool = fullPool.filter(d => (d.expedition||1) <= maxExp);
+  const def = pool[Math.floor(Math.random()*pool.length)] || fullPool[0];
   const item = { uid:newCostumeUid(), defId:def.id, grade };
   progress.costumes.push(item);
   saveProgress();
@@ -5483,10 +5498,10 @@ const BOSS_VARIANTS = {
   // ch51-69 보스는 행성 수호자, ch70 최종 보스는 비둘기 행성 군주 (사용자 요청 어휘 정정).
   pigeon_lord:     { hpMult:14.0, dmgMult:1.40, sizeMult:1.10, label:'행성 수호자' },         // 11→14 (+27%)
   pigeon_emperor:  { hpMult:15.0, dmgMult:1.60, sizeMult:1.25, label:'비둘기 행성 군주' },    // 12→15 (+25%)
-  // 원정 Ⅲ — 우주 (companions: wife + child). v12.3 — bumped further to "barely-clear" target.
-  star_devourer:   { hpMult:18.0, dmgMult:1.50, sizeMult:1.15, label:'별 포식자' },            // 14→18
-  cosmic_arbiter:  { hpMult:17.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },        // 16→17
-  omega:           { hpMult:15.0, dmgMult:1.80, sizeMult:1.30, label:'오메가 — 우주의 주재자' }, // 13→15
+  // 원정 Ⅲ — 우주 (companions: wife + child). v12.4 — ch95/100 명확하게 ch50보다 어려워야 함.
+  star_devourer:   { hpMult:20.0, dmgMult:1.50, sizeMult:1.15, label:'별 포식자' },            // 18→20
+  cosmic_arbiter:  { hpMult:21.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },        // 17→21
+  omega:           { hpMult:19.0, dmgMult:1.80, sizeMult:1.30, label:'오메가 — 우주의 주재자' }, // 15→19 (최종 보스 응당 가장 어려워야)
 };
 function bossVariantForChapter(c){
   // 원정 Ⅲ — 우주 정복
