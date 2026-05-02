@@ -4013,12 +4013,16 @@ function chapterMult(){
   };
 }
 
-// v11 progression scaling — replay/maxed-shop players had compounding damage that one-shot
-// bosses on early chapters (ch8 boss in 3s reported). progressionMult scales BOTH boss HP and
-// mob HP by the player's permanent investment so a maxed account still gets a fight on ch8.
-//   - shopRatio: total shop levels / 55 → 0..1, contributes up to ×2.0 (1 + ratio×1.0)
-//   - chapterGap: how far highChapter is past current → up to ×1.6 (replay penalty)
-//   - Combined max ~×3.2. Fresh first-time first run = ×1.0; partially leveled shop = ×1.4-1.6.
+// v11.1 progression scaling — applied to boss HP at full strength, to mobs at reduced (capped
+// at ×3). Without the card cap, maxed-shop players can stack 28+ cards and reach ~150k DPS at
+// ch8. progressionMult brings boss HP up to ~1.6M at ch8 maxed, keeping the fight at ~15s
+// instead of 3s. Player still feels powerful (it's the reward for grinding) but boss isn't
+// trivial.
+// Curve:
+//   Fresh first-time first run        (ratio 0,    gap 0)  → ×1.0
+//   Partially leveled shop            (ratio 0.3,  gap 0)  → ×1.36
+//   Half-leveled shop                 (ratio 0.5,  gap 0)  → ×2.0
+//   Maxed shop, replay ch8 from ch50  (ratio 1.0,  gap 42) → ×10
 function progressionMult(){
   let shopTotal = 0, shopMax = 0;
   for(const def of SHOP_DEFS){
@@ -4026,10 +4030,15 @@ function progressionMult(){
     shopMax += def.max;
   }
   const shopRatio = shopMax > 0 ? Math.min(1, shopTotal / shopMax) : 0;
-  const shopMult = 1 + shopRatio * 1.0;          // max ×2.0 (was ×3.0 — too aggressive on fresh)
+  // Quadratic: ratio 0/0.25/0.5/0.75/1.0 → mult 1.0 / 1.25 / 2.0 / 3.25 / 5.0.
+  const shopMult = 1 + 4 * shopRatio * shopRatio;
   const chapterGap = Math.max(0, (progress.highChapter || 0) - state.chapter);
-  const gapMult = 1 + Math.min(0.6, chapterGap * 0.03);  // max ×1.6 (was ×2.5)
+  const gapMult = 1 + Math.min(1.0, chapterGap * 0.03);  // max ×2 at gap≥34
   return shopMult * gapMult;
+}
+// Mobs use a softer cap so they don't become bullet sponges. Capped at ×3.
+function progressionMultMob(){
+  return Math.min(progressionMult(), 3);
 }
 
 // Progress — persisted in localStorage. Includes meta-currency (coins), shop upgrades,
@@ -4848,7 +4857,7 @@ function spawnEnemy(kind){
                    : c <= 10 ? 1.0 + (c-2)*0.175
                    : c <= 25 ? 2.4 + (c-10)*0.08
                    :           3.6;
-  const prog = progressionMult();
+  const prog = progressionMultMob();
   const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT * mobHpExtra * prog));
   const e = {
     x, y, vx:0, vy:0, kind,
@@ -5648,23 +5657,17 @@ function showChapterRewardModal(eq){
   document.getElementById('chapterRewardModal').classList.remove('hidden');
 }
 
-// v11 chapter card cap — maxed-shop players at ch8 were stacking 25-28 cards and oneshotting
-// bosses. Cap caps cards picked per chapter so the player can't compound damage indefinitely.
-// Curve: ch1=12, ch5=14, ch10=16, ch15=18, ch20=20, ch30=24, ch50=28 (hard cap).
-function cardLimitForChapter(c){
-  return Math.min(28, 12 + Math.floor(c * 0.4));
-}
 function gainXP(amount){
   const p = state.player;
   p.xp += amount * p.xpMult;
   while(p.xp >= p.xpToNext){
-    // Level cap — stop leveling when all chapter-applicable upgrades are maxed OR the chapter
-    // card cap has been reached. The bar parks just below full so the player isn't visually
-    // stuck "almost ready to level".
+    // Level cap — stop leveling when all chapter-applicable upgrades are maxed. The bar parks
+    // just below full so the player isn't visually stuck "almost ready to level".
+    // (v11 chapter card-count cap removed — user feedback: "새우깡 먹어도 레벨이 안 올라가면
+    //  의도한거야? 이렇게 난이도를 조절하면 안되지". Difficulty is now scaled via the
+    //  progressionMult on boss/mob HP, NOT by capping the player's progression.)
     const allMaxed = UPGRADES.filter(isUpgradeUnlocked).every(u => isUpgradeMaxed(u, p));
-    const cardCap = cardLimitForChapter(state.chapter);
-    const cardsPicked = (p.level || 1) - 1;
-    if(allMaxed || cardsPicked >= cardCap){
+    if(allMaxed){
       p.xp = Math.min(p.xp, p.xpToNext - 1);
       break;
     }
@@ -9374,6 +9377,11 @@ function togglePause(){
   } else if(state.scene==='paused'){
     state.scene='playing';
     document.getElementById('pauseModal').classList.add('hidden');
+    // v11 fix — browsers can suspend the AudioContext while the pause modal is up (no user
+    // input on the canvas). Resume it explicitly so BGM/SFX come back on resume; without this
+    // both bgm AND every sfx call (beep/noise) silently no-op until next page interaction.
+    initAudio();
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     bgmStart();
   }
 }
