@@ -754,6 +754,13 @@
       <h2>챕터 선택</h2>
       <div style="width:40px;"></div>
     </div>
+    <!-- v12.5 — 원정 선택 탭. 클리어 진척도에 따라 원정 Ⅱ(ch50 cleared)와 원정 Ⅲ(ch70 cleared)
+         가 잠금 해제. 잠긴 원정 탭은 비활성 + 잠금 라벨 노출. -->
+    <div class="cs-tabs" id="csExpTabs">
+      <button class="cs-tab on" id="csExpTab1" type="button" data-exp="1">🌍 원정 Ⅰ</button>
+      <button class="cs-tab" id="csExpTab2" type="button" data-exp="2">🪐 원정 Ⅱ</button>
+      <button class="cs-tab" id="csExpTab3" type="button" data-exp="3">🌌 원정 Ⅲ</button>
+    </div>
     <div class="cs-tabs">
       <button class="cs-tab on" id="csTabFocus" type="button">⭐ 진행</button>
       <button class="cs-tab" id="csTabAll" type="button">🗺 전체 보기</button>
@@ -9265,6 +9272,11 @@ document.getElementById('csBackBtn').addEventListener('click', ()=>{
 });
 document.getElementById('csTabFocus').addEventListener('click', ()=> setChapterSelectMode('focus'));
 document.getElementById('csTabAll').addEventListener('click', ()=> setChapterSelectMode('all'));
+// v12.5 — expedition tab handlers
+for(const expId of [1,2,3]){
+  const btn = document.getElementById('csExpTab'+expId);
+  if(btn) btn.addEventListener('click', () => setChapterExpeditionTab(expId));
+}
 document.getElementById('retryBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); startGame(state.chapter); });
 document.getElementById('goTitleBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); backToTitle(); });
 document.getElementById('vAgainBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); startGame(1); });
@@ -9326,6 +9338,13 @@ function openChapterSelect(){
   if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
   state.scene = 'chapterSelect';
   document.getElementById('title').classList.add('hidden');
+  // v12.5 — default to the player's current expedition tab on open.
+  state.csExpedition = defaultExpeditionTab();
+  for(const eid of [1,2,3]){
+    const b = document.getElementById('csExpTab'+eid);
+    if(b) b.classList.toggle('on', eid === state.csExpedition);
+  }
+  refreshExpeditionTabs();
   renderChapterFocus();
   renderChapterGrid();
   setChapterSelectMode('focus');
@@ -9773,7 +9792,20 @@ function renderCosDetailGrid(){
     dupCount[k] = (dupCount[k] || 0) + 1;
   }
 
-  for(const def of COSTUME_DEFS_BY_SLOT[slot]){
+  // v12.5 — sort defs so the player's CURRENT expedition items show first, prior expeditions
+  // after, and locked-expedition items hidden. cleared progresses through expeditions:
+  // 0-49 → exp 1 only; 50-69 → exp 1+2 (exp 2 first); 70+ → exp 1+2+3 (exp 3 first).
+  const cleared = progress.clearedChapter || 0;
+  const currentExpId = cleared >= 70 ? 3 : cleared >= 50 ? 2 : 1;
+  const visibleDefs = COSTUME_DEFS_BY_SLOT[slot].filter(d => (d.expedition||1) <= currentExpId);
+  visibleDefs.sort((a,b) => {
+    // Current expedition first, then descending order (so prior exp follows current).
+    const ae = a.expedition||1, be = b.expedition||1;
+    const aPri = (ae === currentExpId) ? 0 : currentExpId - ae;
+    const bPri = (be === currentExpId) ? 0 : currentExpId - be;
+    return aPri - bPri;
+  });
+  for(const def of visibleDefs){
     const grades = collected[def.id];
     const anyOwned = grades.S || grades.A || grades.B || grades.C;
     const isEquippedDef = equippedItem && equippedItem.defId === def.id;
@@ -10211,7 +10243,9 @@ function renderChapterGrid(){
   const grid = document.getElementById('chapterGrid');
   grid.innerHTML = '';
   const unlocked = unlockedChapters();
-  for(let i=1;i<=MAX_CHAPTERS;i++){
+  // v12.5 — only show chapters belonging to the active expedition tab.
+  const exp = EXPEDITIONS.find(e => e.id === state.csExpedition) || EXPEDITIONS[0];
+  for(let i=exp.range[0]; i<=exp.range[1]; i++){
     const card = document.createElement('button');
     const locked = i > unlocked;
     const cleared = i <= progress.clearedChapter;
@@ -10223,7 +10257,6 @@ function renderChapterGrid(){
       card.style.borderColor = '#FFF9DB';
       card.style.color = '#120300';
     }
-    // Compute scaling using the actual chapterMult formula (preview only — no state mutation).
     const oldCh = state.chapter; state.chapter = i;
     const chm = chapterMult();
     state.chapter = oldCh;
@@ -10249,8 +10282,20 @@ function renderChapterFocus(){
   const upcomingStrip = document.getElementById('csUpcomingStrip');
   const cleared = progress.clearedChapter || 0;
   const allDone = cleared >= MAX_CHAPTERS;
-  // The "current" focus is the next un-cleared chapter, capped at MAX.
-  const focusCh = Math.min(MAX_CHAPTERS, cleared + 1);
+  // v12.5 — focus follows the active expedition tab. If the tab is the player's frontier, hero
+  // is the next un-cleared chapter. If the tab is a previous expedition, show the first chapter
+  // there as the entry point for replay.
+  const exp = EXPEDITIONS.find(e => e.id === state.csExpedition) || EXPEDITIONS[0];
+  let focusCh;
+  if(cleared >= exp.range[1]){
+    // Whole expedition cleared — focus on its first chapter as a replay entry.
+    focusCh = exp.range[0];
+  } else if(cleared < exp.range[0] - 1){
+    // Tab is FUTURE expedition (not yet unlocked, but tab clicked anyway). Focus on first ch.
+    focusCh = exp.range[0];
+  } else {
+    focusCh = Math.min(exp.range[1], cleared + 1);
+  }
   const color = chapterColor(focusCh);
   // Compute scaling preview without mutating state.
   const oldCh = state.chapter; state.chapter = focusCh;
@@ -10330,6 +10375,56 @@ function renderChapterFocus(){
       tile.innerHTML = `<div class="m-num">CH.${i}</div><div class="m-name">🔒 ???</div>`;
       upcomingStrip.appendChild(tile);
     }
+  }
+}
+
+// v12.5 — expedition-locked unlock check. 원정 Ⅱ requires ch50 cleared, 원정 Ⅲ requires ch70.
+function isExpeditionUnlocked(expId){
+  const cleared = progress.clearedChapter || 0;
+  if(expId === 1) return true;
+  if(expId === 2) return cleared >= 50;
+  if(expId === 3) return cleared >= 70;
+  return false;
+}
+// Default expedition tab is the player's current frontier — the one with the next un-cleared chapter.
+function defaultExpeditionTab(){
+  const cleared = progress.clearedChapter || 0;
+  if(cleared >= 70) return 3;
+  if(cleared >= 50) return 2;
+  return 1;
+}
+// Active expedition tab in chapter select. Persists across re-renders within a session.
+if(typeof state.csExpedition === 'undefined') state.csExpedition = 1;
+
+function setChapterExpeditionTab(expId){
+  if(!isExpeditionUnlocked(expId)){
+    state.toastBanner = {
+      text:`🔒 원정 ${['','Ⅰ','Ⅱ','Ⅲ'][expId]} 잠금`,
+      sub: expId===2 ? '원정 Ⅰ(ch50)을 먼저 정복하세요' : '원정 Ⅱ(ch70)을 먼저 정복하세요',
+      t:2.0, maxT:2.0, tone:'warn'
+    };
+    return;
+  }
+  state.csExpedition = expId;
+  // Toggle visual on
+  for(const eid of [1,2,3]){
+    const b = document.getElementById('csExpTab'+eid);
+    if(b) b.classList.toggle('on', eid === expId);
+  }
+  // Re-render whatever view is currently showing
+  renderChapterFocus();
+  renderChapterGrid();
+}
+
+// Apply the locked-state classes to expedition tabs based on progress.
+function refreshExpeditionTabs(){
+  for(const eid of [1,2,3]){
+    const b = document.getElementById('csExpTab'+eid);
+    if(!b) continue;
+    const unlocked = isExpeditionUnlocked(eid);
+    b.classList.toggle('locked-tab', !unlocked);
+    b.style.opacity = unlocked ? '1' : '.45';
+    b.title = unlocked ? '' : (eid===2 ? '원정 Ⅰ(ch50) 클리어 시 해금' : '원정 Ⅱ(ch70) 클리어 시 해금');
   }
 }
 
