@@ -625,13 +625,19 @@
         </div>
       </div>
       <div class="right">
-        <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">비둘기 광장</span></div>
-        <div class="panel">웨이브 <span id="waveNum">1</span> / 3</div>
+        <!-- v12.8 — top-right HUD condensed from 6 panels to 3. User reported the stacked yellow
+             panels were visual clutter. Now: chapter+wave on row 1, timer alone on row 2,
+             score · kills · coins inline on row 3. hudHungerPanel still inserts when not normal. -->
+        <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">비둘기 광장</span> · 웨이브 <span id="waveNum">1</span>/3</div>
         <div class="panel" id="timerPanel">⏱ <span id="timerTxt">60</span></div>
         <div class="panel hidden" id="hudHungerPanel"><span id="hudHungerTxt"></span></div>
-        <div class="panel">⭐ <span id="scoreTxt">0</span></div>
-        <div class="panel">💀 <span id="killsTxt">0</span></div>
-        <div class="panel" style="color:#FFD43B;">🪙 <span id="hudCoinTxt">0</span></div>
+        <div class="panel" style="display:flex;gap:8px;align-items:center;">
+          <span>⭐ <span id="scoreTxt">0</span></span>
+          <span style="opacity:.4;">·</span>
+          <span>💀 <span id="killsTxt">0</span></span>
+          <span style="opacity:.4;">·</span>
+          <span style="color:#FFD43B;">🪙 <span id="hudCoinTxt">0</span></span>
+        </div>
       </div>
     </div>
     <div class="invbar" id="invBar"></div>
