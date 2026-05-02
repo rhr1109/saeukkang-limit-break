@@ -4881,10 +4881,12 @@ function spawnBoss(){
   setTimeout(()=>{ if(state.scene === 'playing') state.camera.shake = Math.max(state.camera.shake, 32); }, 240);
   setTimeout(()=>{ if(state.scene === 'playing') state.camera.shake = Math.max(state.camera.shake, 22); }, 580);
   // Boss-tone toast banner — pulsing red+gold so the player feels the emergency.
+  // v10: shortened 4.0s → 2.6s so the HP bar (which sits in the same screen real estate on mobile)
+  // can fade in shortly after without the toast covering it.
   state.toastBanner = {
     text: '☠ ' + (v.label || '챕터 보스') + ' 등장! ☠',
     sub: '⚠ 위험 — 비둘기의 외침으로 맞서세요',
-    t: 4.0, maxT: 4.0, tone: 'boss'
+    t: 2.6, maxT: 2.6, tone: 'boss'
   };
   // Stack: deep boss sting + warning rumble + air-raid klaxon.
   sfxBoss();
@@ -6591,6 +6593,9 @@ function syncToast(){
 // Souls-style header pinned to top-center while the chapter boss is alive. Replaces the canvas
 // "boss alert pill" (which overlapped with the toast banner and the boss-name head label) — the
 // player now reads the variant from the toast on arrival, then tracks remaining HP on this bar.
+// Fade-in is intentionally delayed until the boss-tone toast finishes its strong pulse window so
+// the two never compete for the same screen real estate (the boss toast is ~95px tall on mobile
+// and the bossHpBar sits at top:156px — without the delay, the toast covers the bar at spawn).
 let _bossHpEl = null;
 function syncBossHpBar(){
   if(!_bossHpEl) _bossHpEl = document.getElementById('bossHpBar');
@@ -6610,6 +6615,11 @@ function syncBossHpBar(){
     _bossHpEl.classList.remove('show', 'low');
     return;
   }
+  // Delay show until the boss-arrival toast has finished. Toast lifetime is 2.6s and only fades
+  // in its last 0.3s, so we wait 2.5s before fading in the bar (its own .25s opacity transition
+  // overlaps cleanly with the toast's fade-out tail). Pre-compute values so the bar is correct
+  // the instant it appears.
+  const sinceSpawn = state.time - (state.bossFightStart || state.time);
   const max = Math.max(1, boss.maxHp || 1);
   const cur = Math.max(0, Math.min(max, boss.hp));
   const pct = (cur / max) * 100;
@@ -6619,6 +6629,10 @@ function syncBossHpBar(){
   if(fillEl) fillEl.style.width = pct.toFixed(1) + '%';
   if(txtEl) txtEl.textContent = `${Math.ceil(cur).toLocaleString()} / ${max.toLocaleString()}  (${pct.toFixed(1)}%)`;
   if(nameEl) nameEl.textContent = '☠ ' + (boss.bossLabel || '챕터 보스');
+  if(sinceSpawn < 2.5){
+    _bossHpEl.classList.remove('show', 'low');
+    return;
+  }
   _bossHpEl.classList.add('show');
   _bossHpEl.classList.toggle('low', pct < 25);
 }
@@ -8023,7 +8037,8 @@ function render(){
   // + danger sub, head label tags the boss for 3s, and the bottom-screen #bossHpBar tracks HP.
   if(state.bossSpawned && state.bossAlive){
     const sinceSpawn = state.time - (state.bossFightStart || state.time);
-    const fade = sinceSpawn < 4.2 ? 1 : Math.max(0, 1 - (sinceSpawn-4.2)/1.6);
+    // v10: hold until 2.8s (toast lifetime + small buffer), then fade over 1.6s.
+    const fade = sinceSpawn < 2.8 ? 1 : Math.max(0, 1 - (sinceSpawn-2.8)/1.6);
     if(fade > 0.02){
       // Pulsing "danger" red vignette around the screen edges — strobing siren feel.
       const sirenPulse = 0.55 + 0.45*Math.abs(Math.sin(state.time*5.2));
