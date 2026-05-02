@@ -1437,6 +1437,22 @@ function bgmResync(){
   if(bgmTimer){ bgmStop(); bgmStart(); }
 }
 
+// v11.5 — pause audio entirely when the page goes hidden (screen locked, tab switched, app
+// backgrounded). Without this, BGM kept playing on Android/iOS lock screens because the JS
+// timer kept ticking even though the player wasn't watching.
+let _bgmWasRunningBeforeHide = false;
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){
+    _bgmWasRunningBeforeHide = !!bgmTimer;
+    bgmStop();
+    if(audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+  } else {
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    if(_bgmWasRunningBeforeHide) bgmStart();
+    _bgmWasRunningBeforeHide = false;
+  }
+});
+
 document.getElementById('muteBtn').addEventListener('click',()=>{
   muted=!muted;
   document.getElementById('muteBtn').textContent = muted?'🔇':'🔊';
@@ -5876,15 +5892,21 @@ function update(dt){
       spawnEnemy(kind);
     }
     // Boss spawns at the end of wave 3 (= waveTimes[2]).
-    // v11.4: if the player has fully maxed every available upgrade, jump straight to the boss
-    // regardless of which wave the timer is on — further wave time is dead time (XP gains
-    // can't level them up). Applies to wave 2 *and* wave 3, since hitting max in wave 2 used
-    // to leave the player idling until wave 3 timer ran out.
+    // v11.5: trigger early-spawn at "main-build saturation" — when the three core damage cards
+    // (dmg, rate, proj) are all maxed. allMaxed across all 90+ unlocks is mathematically
+    // unreachable from chapter XP (verified — needs billions of XP, chapters yield thousands),
+    // so the v11.4 trigger was dead code. Saturation fires reliably by mid-wave-2 in low
+    // chapters and earlier in higher chapters where player power scales faster.
     if(state.chapterTime >= wt[2]){
       spawnBoss();
     } else if(state.player){
-      const allMaxed = UPGRADES.filter(isUpgradeUnlocked).every(u => isUpgradeMaxed(u, state.player));
-      if(allMaxed) spawnBoss();
+      const p = state.player;
+      const dmgMaxed = (p.upg && p.upg.dmg) >= 8;
+      const rateMaxed = (p.upg && p.upg.rate) >= 8;
+      const projMaxed = (p.upg && p.upg.proj) >= 4;
+      // Check allMaxed too — fires the rare theoretical case (e.g., test mode or future buff).
+      const allMaxed = UPGRADES.filter(isUpgradeUnlocked).every(u => isUpgradeMaxed(u, p));
+      if(allMaxed || (dmgMaxed && rateMaxed && projMaxed)) spawnBoss();
     }
   } else if(state.bossAlive){
     // Continue spawning trash during the boss — kept fairly dense (0.7× wave-3 rate) so the
