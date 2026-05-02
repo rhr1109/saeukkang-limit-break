@@ -714,6 +714,9 @@
         <button class="gacha-btn" id="gachaSingleBtn">🎲 1회 뽑기<span class="cost">🪙 1,500</span></button>
         <button class="gacha-btn gacha-ten" id="gachaTenBtn">🎰 10연 뽑기<span class="cost">🪙 12,000 · A 보장</span></button>
       </div>
+      <div class="gacha-row" id="combineRow" style="margin-top:6px;">
+        <button class="gacha-btn" id="combineBtn" style="background:linear-gradient(180deg,#FFD43B,#F76707);border-color:#FFE066;">🔧 코스튬 합성<span class="cost" id="combineCostText">같은 등급 3장 → 상위 1장</span></button>
+      </div>
       <div class="costume-section">
         <h3 style="text-align:center;color:#E599F7;">현재 착용 중</h3>
         <div class="equip-row" id="equipRow"></div>
@@ -4178,6 +4181,9 @@ const progress = (()=>{
     lastFedAt: Date.now(),
     feedBoostUntil: 0,                                  // ms timestamp when current boost expires
     feedBoostStrength: 0,                               // 0=none, 1=deluxe (+10%), 2=ultra (+20% glow)
+    // v12 phase 2 — companion unlocks. Wife meets player on ch51 clear, child on ch60 clear.
+    // Both fight alongside player in subsequent chapters with reduced-damage shrimp shots.
+    companionUnlocks: { wife:false, child:false },
   };
   const merged = Object.assign(base, saved || {}, {
     shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}),
@@ -4185,6 +4191,7 @@ const progress = (()=>{
     costumes: (saved&&Array.isArray(saved.costumes)) ? saved.costumes : [],
     ownedSkins: (saved&&Array.isArray(saved.ownedSkins) && saved.ownedSkins.length) ? saved.ownedSkins : ['default'],
     skin: (saved && saved.skin) || 'default',
+    companionUnlocks: Object.assign({wife:false, child:false}, (saved&&saved.companionUnlocks)||{}),
   });
   // Sanity: drop equipped uids that no longer exist in inventory.
   for(const slot of ['head','body','weapon']){
@@ -4458,6 +4465,37 @@ function awardCostume(grade, slotFilter){
   saveProgress();
   return item;
 }
+
+// v12 phase 2 — costume combining. 3 unequipped same-grade costumes → 1 random next-grade.
+// Same-grade rules: C×3 → B, B×3 → A, A×3 → S. S is top tier — cannot combine further.
+const COSTUME_COMBINE_NEXT = { C:'B', B:'A', A:'S' };
+function findCombinableGrades(){
+  // Returns array of grades that have ≥3 unequipped costumes available.
+  const equippedUids = new Set([progress.equipped.head, progress.equipped.body, progress.equipped.weapon].filter(Boolean));
+  const counts = { C:0, B:0, A:0, S:0 };
+  for(const c of progress.costumes){
+    if(equippedUids.has(c.uid)) continue;
+    counts[c.grade] = (counts[c.grade]||0) + 1;
+  }
+  return Object.keys(COSTUME_COMBINE_NEXT).filter(g => counts[g] >= 3);
+}
+function combineCostumes(grade){
+  // Consume 3 unequipped costumes of `grade` (oldest first), produce 1 of next grade.
+  const next = COSTUME_COMBINE_NEXT[grade];
+  if(!next) return null;
+  const equippedUids = new Set([progress.equipped.head, progress.equipped.body, progress.equipped.weapon].filter(Boolean));
+  const candidates = [];
+  for(const c of progress.costumes){
+    if(equippedUids.has(c.uid)) continue;
+    if(c.grade === grade) candidates.push(c);
+    if(candidates.length >= 3) break;
+  }
+  if(candidates.length < 3) return null;
+  const consumeUids = new Set(candidates.map(c => c.uid));
+  progress.costumes = progress.costumes.filter(c => !consumeUids.has(c.uid));
+  const result = awardCostume(next);  // saveProgress() inside
+  return result;
+}
 function pullGachaSingle(rates){
   return awardCostume(rollGachaGrade(rates || GACHA_RATES_PAID));
 }
@@ -4696,7 +4734,8 @@ const state = {
   spawnTimer: 0,
   abilities: { orbit:0, bomb:0, lightning:0, heal:0, shield:0 },
   abilityTimers: { orbit:0, bomb:0, lightning:0, heal:0 },
-  lastDt: 0
+  lastDt: 0,
+  companions: [],   // v12 phase 2 — wife/child pigeons spawned per progress.companionUnlocks
 };
 
 function resetPlayer(){
@@ -4804,6 +4843,118 @@ function initChapter(){
   state.ultFlashT = 0;
   state.ultScreenFlash = 0;
   updateUltButton();
+  spawnCompanions();
+}
+
+// v12 phase 2 — companion entities. Wife unlocks on ch51 clear, child on ch60 clear.
+// They follow the player at fixed offsets and auto-fire reduced-damage shrimp at the nearest
+// enemy. Damage and rate tuned so combined contribution is ~10-20% of player DPS — meaningful
+// flavor without trivializing boss fights (boss HP curve is also bumped to compensate).
+function spawnCompanions(){
+  state.companions = [];
+  const p = state.player;
+  if(!p) return;
+  if(progress.companionUnlocks && progress.companionUnlocks.wife){
+    state.companions.push({
+      kind:'wife', label:'아내', tint:'#FFB4D8', accent:'#FA80B0',
+      x: p.x - 36, y: p.y + 18, ox:-36, oy:18,
+      reloadT: 0.5, fireRate: 1.8,  // 1.8 shots/s
+      damageMult: 0.45, projCount: 1,
+    });
+  }
+  if(progress.companionUnlocks && progress.companionUnlocks.child){
+    state.companions.push({
+      kind:'child', label:'아기', tint:'#A5D8FF', accent:'#74C0FC',
+      x: p.x + 36, y: p.y + 22, ox:36, oy:22,
+      reloadT: 1.0, fireRate: 1.4,  // 1.4 shots/s
+      damageMult: 0.30, projCount: 1,
+    });
+  }
+}
+
+function fireCompanionShrimp(c){
+  // Find nearest enemy from companion position, shoot reduced-damage saeukkang.
+  let nearest = null, nd = Infinity;
+  for(const e of state.enemies){
+    if(e.dead) continue;
+    const dx = e.x - c.x, dy = e.y - c.y;
+    const d = dx*dx + dy*dy;
+    if(d < nd){ nd = d; nearest = e; }
+  }
+  if(!nearest) return;
+  const p = state.player;
+  const a = Math.atan2(nearest.y - c.y, nearest.x - c.x);
+  const speed = p.projSpeed * 0.95;
+  const dmg = Math.max(1, Math.round(p.damage * c.damageMult));
+  state.bullets.push({
+    kind:'shrimp', x:c.x, y:c.y - 14,
+    vx: Math.cos(a)*speed, vy: Math.sin(a)*speed,
+    r: 8, life: 1.1, damage: dmg, crit:false, pierce:0, hit:new Set(),
+    angle:a, spin:(Math.random()<.5?-1:1)*8, _t:0, _behavior:'straight',
+    _ownerSpeed:speed, _aoe:0, _returnAt:0, _homingStr:0,
+    _companionTint: c.tint,   // hint for renderer to tint the shrimp
+  });
+}
+
+function updateCompanions(dt){
+  if(!state.companions.length) return;
+  const p = state.player;
+  if(!p) return;
+  for(const c of state.companions){
+    // Smooth follow at offset (offset mirrors with player.facing so they walk on the side
+    // the player isn't currently aimed at — keeps line-of-sight clean).
+    const tx = p.x + c.ox * (p.facing || 1);
+    const ty = p.y + c.oy;
+    c.x += (tx - c.x) * Math.min(1, dt * 6);
+    c.y += (ty - c.y) * Math.min(1, dt * 6);
+    c.reloadT -= dt;
+    if(c.reloadT <= 0){
+      c.reloadT = 1 / c.fireRate;
+      fireCompanionShrimp(c);
+    }
+  }
+}
+
+function drawCompanion(ctx, c){
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,.42)';
+  ctx.beginPath(); ctx.ellipse(0, 24, 16, 4, 0, 0, Math.PI*2); ctx.fill();
+  // Body
+  ctx.fillStyle = c.tint;
+  ctx.beginPath(); ctx.ellipse(0, 8, 16, 14, 0, 0, Math.PI*2); ctx.fill();
+  // Belly highlight
+  ctx.fillStyle = '#FFF';
+  ctx.globalAlpha = 0.35;
+  ctx.beginPath(); ctx.ellipse(0, 11, 10, 9, 0, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+  // Head
+  ctx.fillStyle = c.tint;
+  ctx.beginPath(); ctx.arc(0, -8, 9, 0, Math.PI*2); ctx.fill();
+  // Beak
+  ctx.fillStyle = '#FFA500';
+  ctx.beginPath();
+  ctx.moveTo(8, -8); ctx.lineTo(15, -7); ctx.lineTo(8, -5);
+  ctx.closePath(); ctx.fill();
+  // Eye (cute)
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.arc(3, -10, 1.8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath(); ctx.arc(3.5, -10.6, 0.7, 0, Math.PI*2); ctx.fill();
+  // Cute accent — tiny bow on wife, pacifier on child
+  if(c.kind === 'wife'){
+    ctx.fillStyle = c.accent;
+    ctx.beginPath(); ctx.arc(-4, -14, 2.4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath(); ctx.arc(-4, -14, 1, 0, Math.PI*2); ctx.fill();
+  } else if(c.kind === 'child'){
+    ctx.fillStyle = c.accent;
+    ctx.beginPath(); ctx.arc(0, 17, 2.2, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#FFF'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.arc(0, 17, 2.2, 0, Math.PI*2); ctx.stroke();
+  }
+  ctx.restore();
 }
 // Legacy shim — older code paths still call initStage(). Routes to initChapter for the wave system.
 function initStage(){ initChapter(); }
@@ -5007,23 +5158,24 @@ function spawnEnemy(kind){
 //   Peak max-extreme (~3500 DPS): 13s — still fast but no longer 3s.
 //   Weak build (~250 DPS): 187s — uses chapter cap as safety net (cap bumped to 480s for ch1-10
 //   to accommodate this in chapterWaveTimes).
-// v12 boss HP cuts — sim-tuned so each chapter is humanly clearable within its cap.
-// 원정 Ⅰ: 6 variants ch1-50. 원정 Ⅱ: pigeon planet bosses (51-70).
-// 원정 Ⅲ: cosmic bosses (71-100). Late variants reuse special patterns from earlier ones.
+// v12 phase 2 boss HP — bumped to compensate for companion DPS contribution + user feedback
+// "ch50이 좀 쉬운데 조금만 높이고 ch51-100도 비례해서 더 높여줘". Companions add ~10-20%
+// effective DPS, so boss HP bumps need to be larger than the companion contribution to feel
+// meaningfully harder.
 const BOSS_VARIANTS = {
   cat_king:        { hpMult:13.0, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕' },
-  tyrant:          { hpMult:13.0, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주' },
-  leviathan:       { hpMult:13.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주' },
-  phantom:         { hpMult:13.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주' },
-  phoenix:         { hpMult:13.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조' },
-  void:            { hpMult:14.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },
-  // 원정 Ⅱ — 비둘기 행성 (sim-tuned for ch51-70 cap 1100s)
-  pigeon_lord:     { hpMult:11.0, dmgMult:1.40, sizeMult:1.10, label:'행성 비둘기 군주' },
-  pigeon_emperor:  { hpMult:12.0, dmgMult:1.60, sizeMult:1.25, label:'비둘기 황제' },
-  // 원정 Ⅲ — 우주 (sim-tuned for ch71-100 cap 1500s)
-  star_devourer:   { hpMult:11.0, dmgMult:1.50, sizeMult:1.15, label:'별 포식자' },
-  cosmic_arbiter:  { hpMult:12.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },
-  omega:           { hpMult:10.0, dmgMult:1.80, sizeMult:1.30, label:'오메가 — 우주의 주재자' },
+  tyrant:          { hpMult:14.0, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주' },
+  leviathan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주' },
+  phantom:         { hpMult:14.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주' },
+  phoenix:         { hpMult:14.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조' },
+  void:            { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },         // ch50 +14% bump
+  // 원정 Ⅱ — 비둘기 행성 (companion: wife). Bumped ~25% to feel meaningfully harder.
+  pigeon_lord:     { hpMult:14.0, dmgMult:1.40, sizeMult:1.10, label:'행성 비둘기 군주' },     // 11→14 (+27%)
+  pigeon_emperor:  { hpMult:15.0, dmgMult:1.60, sizeMult:1.25, label:'비둘기 황제' },          // 12→15 (+25%)
+  // 원정 Ⅲ — 우주 (companions: wife + child). Bumped ~30%.
+  star_devourer:   { hpMult:14.0, dmgMult:1.50, sizeMult:1.15, label:'별 포식자' },            // 11→14 (+27%)
+  cosmic_arbiter:  { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },        // 12→16 (+33%)
+  omega:           { hpMult:13.0, dmgMult:1.80, sizeMult:1.30, label:'오메가 — 우주의 주재자' }, // 10→13 (+30%)
 };
 function bossVariantForChapter(c){
   // 원정 Ⅲ — 우주 정복
@@ -5703,6 +5855,16 @@ function onBossDefeated(){
   }
   if(state.score > progress.highScore) progress.highScore = state.score;
   if(state.chapter > progress.highChapter){ progress.highChapter = state.chapter; progress.highStage = WAVES_PER_CHAPTER; }
+  // v12 phase 2 — companion unlocks. Wife meets player on ch51 clear, child on ch60 clear.
+  // newCompanion is a transient flag the chapter-cleared modal reads to show the meet-event banner.
+  state.newCompanion = null;
+  if(state.chapter === 51 && !progress.companionUnlocks.wife){
+    progress.companionUnlocks.wife = true;
+    state.newCompanion = { kind:'wife', label:'아내 비둘기', sub:'다음 원정부터 함께 싸웁니다 💗' };
+  } else if(state.chapter === 60 && !progress.companionUnlocks.child){
+    progress.companionUnlocks.child = true;
+    state.newCompanion = { kind:'child', label:'아기 비둘기', sub:'다음 원정부터 함께 싸웁니다 👶' };
+  }
   // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
   awardCoins(60 + state.chapter * 18);
   // Chapter-clear costume drop: 10% rare drop, with pity guaranteeing one every 10 clears.
@@ -5966,6 +6128,9 @@ function update(dt){
       p.hp = Math.min(p.maxHp, p.hp + 1 * (1 + (state.abilities.heal-1)*0.5));
     }
   }
+
+  // v12 phase 2 — companion follow + auto-fire.
+  updateCompanions(dt);
 
   // Wave logic — chapter time advances waves automatically; boss spawns at end of wave 3.
   // Wave transitions show a toast banner and a soft camera shake so the player feels the escalation.
@@ -8161,6 +8326,9 @@ function render(){
   if(!flash){
     drawPigeon(ctx, p.x, p.y, PLAYER_DRAW_SCALE, p.facing, p.walkPhase, p.invT>0, 1, p);
   }
+  // v12 phase 2 — companions drawn AFTER player so they layer in front (player is the focal
+  // point; companions are visual flair next to them).
+  for(const c of state.companions) drawCompanion(ctx, c);
 
   // Player bullets — dispatch by weapon kind. Missile also drops thrust particles per frame.
   for(const b of state.bullets){
@@ -8443,6 +8611,29 @@ document.addEventListener('click', e => {
 });
 document.getElementById('gachaSingleBtn').addEventListener('click', ()=> doGachaPull(1));
 document.getElementById('gachaTenBtn').addEventListener('click', ()=> doGachaPull(10));
+document.getElementById('combineBtn').addEventListener('click', () => {
+  // v12 phase 2 — pick the highest combinable grade (so player upgrades the best stack first).
+  const grades = findCombinableGrades();
+  if(grades.length === 0){
+    state.toastBanner = { text:'합성할 코스튬 부족', sub:'같은 등급 3장이 필요합니다 (장착 중인 것 제외)', t:2.0, maxT:2.0, tone:'warn' };
+    return;
+  }
+  const order = { A:3, B:2, C:1 };
+  grades.sort((a,b) => (order[b]||0) - (order[a]||0));
+  const grade = grades[0];
+  const result = combineCostumes(grade);
+  if(result){
+    const def = COSTUME_DEFS_BY_ID[result.defId];
+    const g = COSTUME_GRADES[result.grade];
+    state.toastBanner = {
+      text:`✨ ${grade}×3 → ${result.grade} 합성!`,
+      sub:`${def.icon} ${def.name} (${g.label})`,
+      t:2.4, maxT:2.4, tone:'critical'
+    };
+    sfxLevelUp();
+    if(typeof renderCostumeScreen === 'function') renderCostumeScreen();
+  }
+});
 document.getElementById('gachaCloseBtn').addEventListener('click', ()=>{
   document.getElementById('gachaModal').classList.add('hidden');
   renderCostumeScreen();
@@ -9580,7 +9771,18 @@ function renderChapterCleared(){
     const tilPity = Math.max(0, 10 - since);
     costumeLine = `<div class="statline" style="opacity:.7;font-size:12px;"><span>🎁 코스튬</span><b>${tilPity}판 후 보장</b></div>`;
   }
+  // v12 phase 2 — companion meet-event banner (wife on ch51, child on ch60).
+  let companionLine = '';
+  if(state.newCompanion){
+    const c = state.newCompanion;
+    companionLine = `
+      <div class="statline" style="border:2px solid #FFB4D8;background:rgba(255,180,216,.15);color:#FFE066;padding:10px 12px;margin:6px 0;border-radius:10px;animation:pulseUpgrade 1.6s ease-in-out infinite;">
+        <span style="font-weight:900;">💗 ${c.label} 합류!</span>
+        <b style="color:#FFE066;font-size:12px;">${c.sub}</b>
+      </div>`;
+  }
   document.getElementById('ccStats').innerHTML = `
+    ${companionLine}
     <div class="statline"><span>누적 처치</span><b>${state.kills}</b></div>
     <div class="statline"><span>점수</span><b>${state.score}</b></div>
     <div class="statline"><span>레벨</span><b>${state.player.level}</b></div>
