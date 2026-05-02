@@ -1284,7 +1284,7 @@ const BGM_CHAPTER_PACKS = [
   { label:'폐허 신전',     bars:[['D4','F4','A4','D5'],['A3','C4','E4','A4'],['G3','Bb3','D4','G4'],['F3','A3','C4','F4']], interval:158, wave:'square',   bassShift:'3', vol:.13 },
   { label:'시계탑 광장',   bars:[['C4','E4','G4','C5'],['G3','B3','D4','G4'],['A3','C4','E4','A4'],['D4','F4','A4','D5']], interval:155, wave:'square',   bassShift:'3', vol:.13 },
   { label:'황금 둥지',     bars:[['F4','A4','C5','F5'],['D4','F#4','A4','D5'],['G4','B4','D5','G5'],['C4','E4','G4','C5']], interval:152, wave:'square',   bassShift:'3', vol:.14 },
-  { label:'보육원의 새 생명',bars:[['C5','E5','G5','C5'],['G4','B4','D5','G5'],['F4','A4','C5','F5'],['C4','E4','G4','C5']], interval:148, wave:'triangle', bassShift:'3', vol:.14 },
+  { label:'사랑의 결실',   bars:[['C5','E5','G5','C5'],['G4','B4','D5','G5'],['F4','A4','C5','F5'],['C4','E4','G4','C5']], interval:148, wave:'triangle', bassShift:'3', vol:.14 },
   { label:'가족 정원',     bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:160, wave:'triangle', bassShift:'3', vol:.13 },
   { label:'행성 의회',     bars:[['G3','B3','D4','G4'],['D4','F#4','A4','D5'],['A3','C#4','E4','A4'],['E4','G4','B4','E5']], interval:155, wave:'square',   bassShift:'3', vol:.13 },
   { label:'군대 사령부',   bars:[['E3','G3','B3','E4'],['A3','C4','E4','A4'],['F3','A3','C4','F4'],['G3','B3','D4','G4']], interval:148, wave:'sawtooth', bassShift:'3', vol:.13 },
@@ -4064,7 +4064,7 @@ const CHAPTER_NAMES = [
   '시간의 균열','잊혀진 제국','별먼지 회랑','심판자의 옥좌','무한 너머',
   // === 원정 Ⅱ — 비둘기 행성 정복 (51-70) ===
   '비둘기 행성 착륙','깃털 평원','곡식 들판','둥지 마을','광장 분수',
-  '모래 사구의 비석','폐허 신전','시계탑 광장','황금 둥지','보육원의 새 생명',
+  '모래 사구의 비석','폐허 신전','시계탑 광장','황금 둥지','사랑의 결실 — 새 생명',
   '가족 정원','행성 의회','군대 사령부','성스러운 깃털 신전','행성 코어',
   '용암 둥지','심해 비둘기 동굴','위성 기지','행성 방어 격납고','비둘기 황제의 옥좌',
   // === 원정 Ⅲ — 우주 정복 (71-100) ===
@@ -4114,7 +4114,8 @@ function chapterMult(){
   //   30..40  : exp 1.045/1.025 on top of ch30                   (ch40 → 13.93 / 3.74)
   //   40..50  : exp 1.025/1.015 on top of ch40                   (ch50 → 17.83 / 4.34)
   //   50..70  : exp 1.014/1.010 on top of ch50  (원정 Ⅱ)         (ch70 → 23.55 / 5.30)
-  //   70..100 : exp 1.008/1.008 on top of ch70  (원정 Ⅲ)         (ch100 → 29.91 / 6.73)
+  //   70..100 : exp 1.012/1.010 on top of ch70  (원정 Ⅲ)         (ch100 → 33.69 / 7.13) — bumped
+  //                                                                               for "barely-clear" target
   const HP_CH10  = 1 + 9*0.20;
   const DMG_CH10 = 1 + 9*0.06;
   const HP_CH20  = HP_CH10  * Math.pow(1.060, 10);
@@ -4133,14 +4134,14 @@ function chapterMult(){
           : c <= 40 ? HP_CH30  * Math.pow(1.045, c-30)
           : c <= 50 ? HP_CH40  * Math.pow(1.025, c-40)
           : c <= 70 ? HP_CH50  * Math.pow(1.014, c-50)
-          :           HP_CH70  * Math.pow(1.008, c-70);
+          :           HP_CH70  * Math.pow(1.011, c-70);
   const dmg = c <= 10 ? 1 + (c-1)*0.06
             : c <= 20 ? DMG_CH10 * Math.pow(1.030, c-10)
             : c <= 30 ? DMG_CH20 * Math.pow(1.035, c-20)
             : c <= 40 ? DMG_CH30 * Math.pow(1.025, c-30)
             : c <= 50 ? DMG_CH40 * Math.pow(1.015, c-40)
             : c <= 70 ? DMG_CH50 * Math.pow(1.010, c-50)
-            :           DMG_CH70 * Math.pow(1.008, c-70);
+            :           DMG_CH70 * Math.pow(1.010, c-70);
   const speed = 1 + Math.min(0.95, (c-1)*0.028);
   return {
     hp,
@@ -4916,7 +4917,9 @@ function fireCompanionShrimp(c){
   const p = state.player;
   const a = Math.atan2(nearest.y - c.y, nearest.x - c.x);
   const speed = p.projSpeed * 0.95;
-  const dmg = Math.max(1, Math.round(p.damage * c.damageMult));
+  // Companion costume gives a tiny dmgBoost (×1.05~1.12) — minor effect per user spec.
+  const boost = getCompanionDmgBoost(c.kind);
+  const dmg = Math.max(1, Math.round(p.damage * c.damageMult * boost));
   state.bullets.push({
     kind:'shrimp', x:c.x, y:c.y - 14,
     vx: Math.cos(a)*speed, vy: Math.sin(a)*speed,
@@ -4951,12 +4954,13 @@ function drawCompanion(ctx, c){
   return drawChildPigeon(ctx, c);
 }
 
-// v12 phase 2.2 — companion costume definitions. Each costume has an unlock chapter (auto-unlocks
-// on chapter clear) and a draw(ctx) function called inside the wife/child draw at proper layer.
-// Coords assume the companion's local space (already scaled/translated).
+// v12 phase 2.3 — companion costume definitions, now SINGLE-PURCHASE (per user feedback
+// "뽑기제가 아니라 단건 구매"). Each costume has a fixed coin cost. Default starter (bow /
+// pacifier) is free and auto-grants when companion joins; the rest must be bought from the
+// shop. Draw(ctx) runs in the companion's local space.
 const COMPANION_COSTUMES = {
   wife: [
-    { id:'bow',    name:'핑크 리본',   unlockCh:51, icon:'🎀',
+    { id:'bow',    name:'핑크 리본',   cost:0,     icon:'🎀',
       draw:(ctx)=>{
         // Side bow on left of head, signature default
         ctx.fillStyle = '#FA80B0';
@@ -4965,7 +4969,7 @@ const COMPANION_COSTUMES = {
         ctx.fillStyle = '#D63384';
         ctx.beginPath(); ctx.arc(-16,-32, 2.4, 0, Math.PI*2); ctx.fill();
       } },
-    { id:'crown',  name:'황금 왕관',   unlockCh:55, icon:'👑',
+    { id:'crown',  name:'황금 왕관',   cost:2000,  icon:'👑', dmgBoost:1.05,
       draw:(ctx)=>{
         // Yellow crown w/ 5 points
         ctx.fillStyle = '#FFD43B';
@@ -4981,7 +4985,7 @@ const COMPANION_COSTUMES = {
         ctx.fillStyle = '#FFE066';
         ctx.fillRect(-13,-36, 26, 1.5);
       } },
-    { id:'tiara',  name:'다이아 티아라', unlockCh:65, icon:'💎',
+    { id:'tiara',  name:'다이아 티아라', cost:5000,  icon:'💎', dmgBoost:1.08,
       draw:(ctx)=>{
         // Silver thin tiara w/ blue gems
         ctx.strokeStyle = '#DEE2E6'; ctx.lineWidth = 2;
@@ -4994,7 +4998,7 @@ const COMPANION_COSTUMES = {
         ctx.fillStyle = '#FFF';
         ctx.beginPath(); ctx.arc(-0.6,-39.4, 0.7, 0, Math.PI*2); ctx.fill();
       } },
-    { id:'veil',   name:'신부 베일',    unlockCh:70, icon:'👰',
+    { id:'veil',   name:'신부 베일',    cost:10000, icon:'👰', dmgBoost:1.12,
       draw:(ctx)=>{
         // White veil drapes from head over shoulders
         ctx.fillStyle = 'rgba(255,255,255,0.85)';
@@ -5015,7 +5019,7 @@ const COMPANION_COSTUMES = {
       } },
   ],
   child: [
-    { id:'pacifier', name:'공갈 젖꼭지', unlockCh:60, icon:'🍼',
+    { id:'pacifier', name:'공갈 젖꼭지', cost:0,     icon:'🍼',
       draw:(ctx)=>{
         ctx.fillStyle = '#74C0FC';
         ctx.beginPath(); ctx.arc(0, 17, 2.6, 0, Math.PI*2); ctx.fill();
@@ -5025,7 +5029,7 @@ const COMPANION_COSTUMES = {
         ctx.strokeStyle = '#74C0FC'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(2, -22, 0, -25); ctx.stroke();
       } },
-    { id:'beanie', name:'아기 비니',     unlockCh:63, icon:'🧢',
+    { id:'beanie', name:'아기 비니',     cost:1500,  icon:'🧢', dmgBoost:1.05,
       draw:(ctx)=>{
         // Knit beanie covering top of head
         ctx.fillStyle = '#FFD43B';
@@ -5037,7 +5041,7 @@ const COMPANION_COSTUMES = {
         ctx.fillStyle = '#FFF';
         ctx.beginPath(); ctx.arc(0,-26, 3.2, 0, Math.PI*2); ctx.fill();
       } },
-    { id:'bowtie', name:'나비 넥타이',   unlockCh:67, icon:'🎀',
+    { id:'bowtie', name:'나비 넥타이',   cost:3000,  icon:'🎀', dmgBoost:1.08,
       draw:(ctx)=>{
         // Red bowtie at neck (between body and head)
         ctx.fillStyle = '#FA5252';
@@ -5049,7 +5053,7 @@ const COMPANION_COSTUMES = {
         ctx.strokeStyle = '#74C0FC'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(2, -22, 0, -25); ctx.stroke();
       } },
-    { id:'mini_crown', name:'아기 왕관', unlockCh:70, icon:'👑',
+    { id:'mini_crown', name:'아기 왕관', cost:8000,  icon:'👑', dmgBoost:1.12,
       draw:(ctx)=>{
         // Tiny crown sized for child head
         ctx.fillStyle = '#FFD43B';
@@ -5069,22 +5073,42 @@ function getCompanionCostumeDraw(kind){
   const def = (COMPANION_COSTUMES[kind]||[]).find(c => c.id === equipped);
   return def ? def.draw : null;
 }
-function unlockCompanionCostumesForChapter(c){
-  // Auto-unlock companion costumes whose unlockCh equals or is below current cleared chapter.
-  const newly = [];
-  for(const kind of ['wife','child']){
-    const list = COMPANION_COSTUMES[kind];
-    if(!progress.companionCostumes) progress.companionCostumes = { wife:{unlocked:['bow'], equipped:'bow'}, child:{unlocked:['pacifier'], equipped:'pacifier'} };
-    const slot = progress.companionCostumes[kind];
-    if(!slot.unlocked) slot.unlocked = [];
-    for(const def of list){
-      if(c >= def.unlockCh && !slot.unlocked.includes(def.id)){
-        slot.unlocked.push(def.id);
-        newly.push({ kind, def });
-      }
-    }
+// v12 phase 2.3 — companions ship with their default starter costume only (free). All others
+// are purchased from the shop with coins via buyCompanionCostume().
+function grantDefaultCompanionCostume(kind){
+  if(!progress.companionCostumes) progress.companionCostumes = { wife:{unlocked:['bow'], equipped:'bow'}, child:{unlocked:['pacifier'], equipped:'pacifier'} };
+  const slot = progress.companionCostumes[kind];
+  if(!slot.unlocked) slot.unlocked = [];
+  const starter = (COMPANION_COSTUMES[kind]||[])[0];
+  if(starter && !slot.unlocked.includes(starter.id)){
+    slot.unlocked.push(starter.id);
+    if(!slot.equipped) slot.equipped = starter.id;
+    return starter;
   }
-  return newly;
+  return null;
+}
+function buyCompanionCostume(kind, costumeId){
+  const list = COMPANION_COSTUMES[kind];
+  if(!list) return { ok:false, reason:'invalid kind' };
+  const def = list.find(c => c.id === costumeId);
+  if(!def) return { ok:false, reason:'unknown costume' };
+  const slot = progress.companionCostumes[kind];
+  if(slot.unlocked.includes(costumeId)) return { ok:false, reason:'이미 보유 중' };
+  if((progress.coins||0) < def.cost) return { ok:false, reason:'코인 부족' };
+  progress.coins -= def.cost;
+  slot.unlocked.push(costumeId);
+  saveProgress();
+  return { ok:true, def };
+}
+// Companion DPS is multiplied by their equipped costume's dmgBoost (default 1.0 — minor effect
+// per user spec). companion costume effects are intentionally small so they don't change
+// chapter difficulty significantly — chapter HP curve carries the weight.
+function getCompanionDmgBoost(kind){
+  const slot = progress.companionCostumes && progress.companionCostumes[kind];
+  if(!slot || !slot.equipped) return 1.0;
+  const list = COMPANION_COSTUMES[kind] || [];
+  const def = list.find(c => c.id === slot.equipped);
+  return (def && def.dmgBoost) || 1.0;
 }
 
 // v12 phase 2.1 — wife now reads like a feminine variant of the husband pigeon. Silhouette is
@@ -5119,23 +5143,42 @@ function drawWifePigeon(ctx, c){
   ctx.moveTo(-12, 6); ctx.quadraticCurveTo(0, 10+breath, 12, 6);
   ctx.moveTo(-10, 14); ctx.quadraticCurveTo(0, 18+breath, 10, 14);
   ctx.stroke();
-  // Slim arms — not bulging muscle, smaller fists. Mirrors husband's arm placement.
+  // v12 phase 2.3 — wings (replaces muscular arm mirror per user feedback "팔은 그냥
+  // 비둘기스럽게"). Small folded wings tucked along the body sides with feather strokes.
   ctx.fillStyle = '#D88A99';
-  // Left arm
-  roundRect(ctx, -36, -4, 14, 12, 3); ctx.fill();
-  roundRect(ctx, -34, -22, 10, 18, 2); ctx.fill();
+  // Left wing — leaf-shape from upper body down to lower body
+  ctx.beginPath();
+  ctx.moveTo(-22, -4);
+  ctx.quadraticCurveTo(-34, 6,  -24, 22);
+  ctx.quadraticCurveTo(-20, 14, -18, 4);
+  ctx.closePath(); ctx.fill();
+  // Wing accent (lighter inner curve)
   ctx.fillStyle = '#F0B8C0';
-  roundRect(ctx, -32, -19, 6, 10, 2); ctx.fill();
-  ctx.fillStyle = '#C97585';
-  ctx.beginPath(); ctx.arc(-29, -24, 6.5, 0, Math.PI*2); ctx.fill();  // smaller fist
-  // Right arm
+  ctx.beginPath();
+  ctx.moveTo(-22, -2);
+  ctx.quadraticCurveTo(-30, 6,  -23, 18);
+  ctx.quadraticCurveTo(-19, 12, -18, 2);
+  ctx.closePath(); ctx.fill();
+  // Right wing (mirror)
   ctx.fillStyle = '#D88A99';
-  roundRect(ctx, 22, -4, 14, 12, 3); ctx.fill();
-  roundRect(ctx, 24, -22, 10, 18, 2); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(22, -4);
+  ctx.quadraticCurveTo(34, 6,  24, 22);
+  ctx.quadraticCurveTo(20, 14, 18, 4);
+  ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#F0B8C0';
-  roundRect(ctx, 26, -19, 6, 10, 2); ctx.fill();
-  ctx.fillStyle = '#C97585';
-  ctx.beginPath(); ctx.arc(29, -24, 6.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(22, -2);
+  ctx.quadraticCurveTo(30, 6,  23, 18);
+  ctx.quadraticCurveTo(19, 12, 18, 2);
+  ctx.closePath(); ctx.fill();
+  // Feather lines
+  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
+  for(let i=0; i<3; i++){
+    const yo = i*4;
+    ctx.beginPath(); ctx.moveTo(-26+i*1.5, 6+yo); ctx.lineTo(-21, 14+yo); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(26-i*1.5, 6+yo);  ctx.lineTo(21, 14+yo); ctx.stroke();
+  }
   // Head
   ctx.fillStyle = '#E8A8B6';
   ctx.beginPath(); ctx.arc(0, -22, 16, 0, Math.PI*2); ctx.fill();
@@ -5440,10 +5483,10 @@ const BOSS_VARIANTS = {
   // ch51-69 보스는 행성 수호자, ch70 최종 보스는 비둘기 행성 군주 (사용자 요청 어휘 정정).
   pigeon_lord:     { hpMult:14.0, dmgMult:1.40, sizeMult:1.10, label:'행성 수호자' },         // 11→14 (+27%)
   pigeon_emperor:  { hpMult:15.0, dmgMult:1.60, sizeMult:1.25, label:'비둘기 행성 군주' },    // 12→15 (+25%)
-  // 원정 Ⅲ — 우주 (companions: wife + child). Bumped ~30%.
-  star_devourer:   { hpMult:14.0, dmgMult:1.50, sizeMult:1.15, label:'별 포식자' },            // 11→14 (+27%)
-  cosmic_arbiter:  { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },        // 12→16 (+33%)
-  omega:           { hpMult:13.0, dmgMult:1.80, sizeMult:1.30, label:'오메가 — 우주의 주재자' }, // 10→13 (+30%)
+  // 원정 Ⅲ — 우주 (companions: wife + child). v12.3 — bumped further to "barely-clear" target.
+  star_devourer:   { hpMult:18.0, dmgMult:1.50, sizeMult:1.15, label:'별 포식자' },            // 14→18
+  cosmic_arbiter:  { hpMult:17.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },        // 16→17
+  omega:           { hpMult:15.0, dmgMult:1.80, sizeMult:1.30, label:'오메가 — 우주의 주재자' }, // 13→15
 };
 function bossVariantForChapter(c){
   // 원정 Ⅲ — 우주 정복
@@ -6128,13 +6171,13 @@ function onBossDefeated(){
   state.newCompanion = null;
   if(state.chapter === 51 && !progress.companionUnlocks.wife){
     progress.companionUnlocks.wife = true;
+    grantDefaultCompanionCostume('wife');
     state.newCompanion = { kind:'wife', label:'아내 비둘기', sub:'다음 원정부터 함께 싸웁니다 💗' };
   } else if(state.chapter === 60 && !progress.companionUnlocks.child){
     progress.companionUnlocks.child = true;
+    grantDefaultCompanionCostume('child');
     state.newCompanion = { kind:'child', label:'아기 비둘기', sub:'다음 원정부터 함께 싸웁니다 👶' };
   }
-  // v12 phase 2.2 — auto-unlock companion costumes whose unlockCh ≤ this chapter.
-  state.newCompanionCostumes = unlockCompanionCostumesForChapter(state.chapter);
   // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
   awardCoins(60 + state.chapter * 18);
   // Chapter-clear costume drop: 10% rare drop, with pity guaranteeing one every 10 clears.
@@ -6182,8 +6225,8 @@ function showCompanionMeetModal(){
   } else {
     titleEl.textContent = '👶 아기 비둘기 합류!';
     titleEl.style.color = '#A5D8FF';
-    subEl.textContent = '보육원에서 태어난 새 생명';
-    storyEl.innerHTML = '비둘기 행성 보육원에서 태어난 첫 아이.<br>아빠 따라 작은 새우깡을 던지며 함께 우주를 정복합니다.';
+    subEl.textContent = '두 비둘기의 사랑으로 태어난 새 생명';
+    storyEl.innerHTML = '남편 비둘기와 마누라 비둘기의 사랑으로 태어난 첫 아이.<br>아빠 따라 작은 새우깡을 던지며 함께 우주를 정복합니다.';
   }
   // Draw the companion at center of canvas with sparkle aura.
   const cv = document.getElementById('cmmCanvas');
@@ -7395,7 +7438,14 @@ function updateInvBar(){
 // systems (background props, tier hues) only have 6 tier-art sets. For chapters 31-50, we cycle
 // the tier index back through the early biomes — each cycle shifts the chapter palette via
 // (state.chapter-1)%5 indexing within the tier so the look is similar but not identical.
-function chapterTier(ch){ return Math.min(5, Math.floor(((ch-1) % 30)/5)); }
+function chapterTier(ch){
+  // v12 phase 3 — expedition-aware tier mapping. 원정 Ⅰ uses the original 6 visual tiers cycled
+  // via modulo (ch1-50). 원정 Ⅱ (ch51-70) gets new tier 6 (Pigeon Planet). 원정 Ⅲ (ch71-100)
+  // gets new tier 7 (Cosmos). drawArenaFloor / drawSkyline / glow color all branch on these.
+  if(ch >= 71) return 7;
+  if(ch >= 51) return 6;
+  return Math.min(5, Math.floor(((ch-1) % 30)/5));
+}
 function themeId(){
   // Each chapter has a fixed biome — stages inside a chapter share the same background.
   // Sub-theme rotates with chapter so the 5 chapters in each tier still feel distinct.
@@ -7468,7 +7518,7 @@ function drawSkyline(stageHue, themeIdx){
       ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx-40, sy-18); ctx.stroke();
       ctx.globalAlpha = 1;
     }
-  } else {
+  } else if(tier===5){
     // Hellfire: rising embers + falling ash
     for(let i=0;i<40;i++){
       const px = (i*71 + Math.sin(t+i)*18) % W;
@@ -7483,6 +7533,63 @@ function drawSkyline(stageHue, themeIdx){
       ctx.fillStyle = 'rgba(97,97,97,.6)';
       ctx.fillRect(px, py, 2.5, 1.5);
     }
+  } else if(tier===6){
+    // 원정 Ⅱ — Pigeon Planet: drifting pink/gold petals (like cherry blossom snow)
+    for(let i=0;i<22;i++){
+      const px = ((i*97 + t*16) % (W+40));
+      const py = ((i*61 + t*22) % (H+40));
+      const swirl = Math.sin(t*1.5 + i*0.7) * 6;
+      ctx.fillStyle = i%3===0 ? 'rgba(255,180,216,.65)' :
+                      i%3===1 ? 'rgba(255,224,102,.55)' :
+                                 'rgba(232,168,182,.55)';
+      ctx.beginPath();
+      ctx.ellipse(px+swirl, py, 3.2, 1.6, t*0.7+i, 0, Math.PI*2);
+      ctx.fill();
+    }
+    // Pigeon-shaped silhouette flying across (every ~6s)
+    const flyT = (t*0.18 + state.chapter*0.3) % 6;
+    if(flyT < 1.5){
+      const fx = -50 + flyT * (W+100), fy = H*0.18 + Math.sin(flyT*4)*6;
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = '#FFD8A8';
+      ctx.beginPath(); ctx.ellipse(fx, fy, 8, 4, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(fx-6, fy, 5, 2, 0.3, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  } else {
+    // 원정 Ⅲ — Cosmos: dense starfield + occasional comet streak + cosmic dust drift
+    for(let i=0;i<140;i++){
+      const px = (i*53 + t*2) % W;
+      const py = (i*31 + t*4) % H;
+      const tw = 0.2 + Math.abs(Math.sin(t*2.5 + i*0.3))*0.8;
+      ctx.globalAlpha = tw;
+      ctx.fillStyle = i%11===0 ? 'rgba(229,153,247,.95)' :
+                      i%7===0  ? 'rgba(116,192,252,.95)' :
+                                  'rgba(255,255,255,.85)';
+      const sz = (i%17===0 ? 2.4 : i%7===0 ? 1.8 : 1.0);
+      ctx.fillRect(px, py, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+    // Comet streak every 3s (more frequent than tier 4)
+    const cmT = (t*0.3 + state.chapter*0.5) % 3;
+    if(cmT < 0.5){
+      ctx.globalAlpha = 1 - cmT/0.5;
+      ctx.strokeStyle = 'rgba(229,153,247,.9)'; ctx.lineWidth = 2.5;
+      const sx = W*0.05 + cmT*W*1.8, sy = H*0.05 + cmT*H*0.6;
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx-50, sy-22); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,249,219,1)';
+      ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    // Cosmic dust drift (slow purple wisps)
+    for(let i=0;i<20;i++){
+      const px = (i*71 + t*8) % W;
+      const py = (i*47 + t*6) % H;
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = 'rgba(151,117,250,.7)';
+      ctx.beginPath(); ctx.arc(px, py, 6 + (i%4), 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
   }
   ctx.restore();
 
@@ -7497,7 +7604,16 @@ function drawSkyline(stageHue, themeIdx){
 
   // Center ambient glow (colored by tier mood)
   ctx.save();
-  const glowCol = ['rgba(255,224,102,.18)','rgba(255,64,129,.14)','rgba(176,104,255,.14)','rgba(174,214,241,.14)','rgba(116,64,255,.18)','rgba(255,107,107,.18)'][tier];
+  const glowCol = [
+    'rgba(255,224,102,.18)', // 0 day
+    'rgba(255,64,129,.14)',  // 1 neon
+    'rgba(176,104,255,.14)', // 2 cave
+    'rgba(174,214,241,.14)', // 3 ice
+    'rgba(116,64,255,.18)',  // 4 space
+    'rgba(255,107,107,.18)', // 5 hell
+    'rgba(255,180,216,.22)', // 6 pigeon planet — warm pink
+    'rgba(151,117,250,.20)', // 7 cosmos — deep violet
+  ][tier];
   const gg = ctx.createRadialGradient(W/2, H/2, 60, W/2, H/2, Math.max(W,H)*0.45);
   gg.addColorStop(0, glowCol);
   gg.addColorStop(1, 'rgba(0,0,0,0)');
@@ -7532,6 +7648,8 @@ function drawArenaFloor(camX, camY, themeIdx, stageHue){
     ['#DCE8F2','#B8D4E8','#CFD8DC'], // 3 Ice: snow / frozen / aurora snow
     ['#0A0620','#0A0820','#120A30'], // 4 Space: dark void
     ['#2A0808','#250B05','#1F1A1A'], // 5 Hell: charred earth
+    ['#E8B8C0','#F0CCAA','#FFD8DD'], // 6 원정 Ⅱ Pigeon Planet: peach/rose stone
+    ['#0F0A28','#1A0F36','#0A0828'], // 7 원정 Ⅲ Cosmos: deep void
   ][tier][themeIdx];
   ctx.save();
   ctx.fillStyle = groundCol;
@@ -7658,7 +7776,7 @@ function drawTileProps(tx, ty, tile, tier, themeIdx, hue){
     if(propType < 12){ drawAsteroid(jx, jy, h); }
     else if(propType < 20){ drawStardust(jx, jy, h); }
     else if(propType < 26){ drawPortalGlyph(jx, jy, h); }
-  } else {
+  } else if(tier === 5){
     // ░ Hellfire
     if(themeIdx === 0 || themeIdx === 1){
       if(propType < 14){ drawLavaCrack(jx, jy, tile, h); }
@@ -7671,7 +7789,106 @@ function drawTileProps(tx, ty, tile, tier, themeIdx, hue){
       else if(propType < 26){ drawCharredRock(jx, jy, h); }
       else if(propType < 32){ drawLavaEmber(jx, jy, h); }
     }
+  } else if(tier === 6){
+    // ░ 원정 Ⅱ — Pigeon Planet — nests, gold pebbles, feather scatter
+    if(propType < 14){ drawPigeonNest(jx, jy, h); }
+    else if(propType < 24){ drawGoldPebble(jx, jy, h); }
+    else if(propType < 32){ drawFeatherScatter(jx, jy, h, rot); }
+  } else if(tier === 7){
+    // ░ 원정 Ⅲ — Cosmos — star fragments, planet rings, void runes
+    if(propType < 14){ drawStarFragment(jx, jy, h); }
+    else if(propType < 22){ drawPlanetRing(jx, jy, h); }
+    else if(propType < 30){ drawVoidRune(jx, jy, h, rot); }
   }
+}
+
+// v12 phase 3 — props for 원정 Ⅱ (Pigeon Planet)
+function drawPigeonNest(x, y, h){
+  propShadow(x, y+4, 18, 5);
+  // Twig nest ring
+  ctx.fillStyle = '#8B6F47';
+  ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#A88963';
+  ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI*2); ctx.fill();
+  // Three little eggs
+  ctx.fillStyle = '#FFE3F2';
+  ctx.beginPath(); ctx.ellipse(x-5, y-1, 3, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x+5, y-1, 3, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x, y+4, 3, 4, 0, 0, Math.PI*2); ctx.fill();
+  // Pink dots on eggs
+  ctx.fillStyle = '#FFB4D8';
+  ctx.beginPath(); ctx.arc(x-5, y-2, 0.7, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+5, y-2, 0.7, 0, Math.PI*2); ctx.fill();
+}
+function drawGoldPebble(x, y, h){
+  // Small gold pebble cluster
+  ctx.fillStyle = '#E8C870';
+  ctx.beginPath(); ctx.ellipse(x, y, 5, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFD43B';
+  ctx.beginPath(); ctx.ellipse(x-1, y-1, 3, 2, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFF3BF';
+  ctx.beginPath(); ctx.arc(x-1.5, y-1.5, 0.8, 0, Math.PI*2); ctx.fill();
+}
+function drawFeatherScatter(x, y, h, rot){
+  // Scattered pink/cream feathers
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  ctx.fillStyle = (h & 1) ? '#FFE3F2' : '#FFF3BF';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 8, 3, 0, 0, Math.PI*2);
+  ctx.fill();
+  // Spine
+  ctx.strokeStyle = 'rgba(140,80,100,.5)'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(7, 0); ctx.stroke();
+  ctx.restore();
+}
+
+// v12 phase 3 — props for 원정 Ⅲ (Cosmos)
+function drawStarFragment(x, y, h){
+  // Glowing star shard
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(((h>>>20) & 0xFF) / 255 * Math.PI*2);
+  ctx.fillStyle = 'rgba(255,224,102,0.4)';
+  ctx.beginPath();
+  ctx.moveTo(0,-9); ctx.lineTo(2,-2); ctx.lineTo(9,0);
+  ctx.lineTo(2,2); ctx.lineTo(0,9); ctx.lineTo(-2,2);
+  ctx.lineTo(-9,0); ctx.lineTo(-2,-2);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.beginPath(); ctx.arc(0, 0, 1.5, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function drawPlanetRing(x, y, h){
+  // Tiny planet w/ ring viewed at angle
+  ctx.fillStyle = (h&1) ? '#9775FA' : '#5C7CFA';
+  ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = (h&1) ? '#7048E8' : '#4263EB';
+  ctx.beginPath(); ctx.arc(x-1.5, y-1.5, 1.5, 0, Math.PI*2); ctx.fill();
+  // Ring
+  ctx.strokeStyle = 'rgba(229,153,247,0.7)'; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.ellipse(x, y, 9, 2, 0.2, 0, Math.PI*2); ctx.stroke();
+}
+function drawVoidRune(x, y, h, rot){
+  // Floating geometric rune (triangle / square based on hash)
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  ctx.strokeStyle = 'rgba(151,117,250,0.7)'; ctx.lineWidth = 1.5;
+  if(h & 1){
+    // Triangle
+    ctx.beginPath();
+    ctx.moveTo(0, -7); ctx.lineTo(6, 5); ctx.lineTo(-6, 5);
+    ctx.closePath(); ctx.stroke();
+    ctx.fillStyle = 'rgba(116,192,252,0.4)';
+    ctx.beginPath(); ctx.arc(0, 1, 1.5, 0, Math.PI*2); ctx.fill();
+  } else {
+    // Square
+    ctx.strokeRect(-5, -5, 10, 10);
+    ctx.strokeRect(-3, -3, 6, 6);
+  }
+  ctx.restore();
 }
 
 // ── Top-down prop primitives (all drawn at world coords) ──
@@ -8553,6 +8770,22 @@ function render(){
       ['#30070C','#9C0D38','#FF4D6D','#17000A','#000000'],
       ['#1B0303','#4A0E0E','#E63946','#0C0000','#000000'],
     ],
+    // v12 phase 3 — Tier 6: 원정 Ⅱ Pigeon Planet (Ch 51-70). Warm pink/peach/gold horizons.
+    [
+      ['#FFE3F2','#FFB4D8','#F08CB6','#3D0F2A','#000000'],
+      ['#FFEEDB','#FFC078','#E8956B','#3A1F0A','#000000'],
+      ['#FFF3BF','#FFD43B','#E8A45C','#3D2B0F','#000000'],
+      ['#FFE3F2','#FFA8D8','#D63384','#2A0820','#000000'],
+      ['#FFE3D0','#FFB37D','#E8506B','#3A0F1A','#000000'],
+    ],
+    // v12 phase 3 — Tier 7: 원정 Ⅲ Cosmos (Ch 71-100). Deep void with violet/cyan accents.
+    [
+      ['#0F0A28','#1A0F36','#7048E8','#0A0428','#000000'],
+      ['#0A0828','#23034D','#9775FA','#050018','#000000'],
+      ['#0F0428','#3D2B6B','#5C7CFA','#080020','#000000'],
+      ['#0A0428','#5F3DC4','#E599F7','#040014','#000000'],
+      ['#080020','#1864AB','#74C0FC','#02000F','#000000'],
+    ],
   ];
   const tier = chapterTier(state.chapter);
   // Sky gradient is fixed per chapter — varies across the 5 chapters within a tier
@@ -9313,20 +9546,50 @@ function renderCompanionCostumeSection(){
     for(const def of list){
       const owned = slot.unlocked.includes(def.id);
       const equipped = slot.equipped === def.id;
+      const affordable = (progress.coins||0) >= def.cost;
       const card = document.createElement('button');
       card.type = 'button';
-      const colorBorder = equipped ? (kind==='wife'?'#D63384':'#1864AB') : (owned ? (kind==='wife'?'#FFB4D8':'#A5D8FF') : '#495057');
-      card.style.cssText = 'cursor:'+(owned?'pointer':'default')+';background:rgba(40,15,70,.6);border:2px solid '+colorBorder+';border-radius:10px;padding:6px;width:64px;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;font-family:inherit;color:#fff;'+(owned?'':'opacity:.45;');
-      card.innerHTML = `<div style="font-size:18px;line-height:1;">${def.icon}</div>
-        <div style="font-size:10px;font-weight:700;text-align:center;letter-spacing:-.3px;">${def.name}</div>
-        <div style="font-size:9px;color:${owned?'#A9E34B':'#868E96'};">${owned ? (equipped ? '✓ 착용' : '클릭') : '🔒 ch'+def.unlockCh}</div>`;
-      if(owned){
-        card.addEventListener('click', () => {
+      const themeBorder = kind==='wife' ? '#FFB4D8' : '#A5D8FF';
+      const themeAccent = kind==='wife' ? '#D63384' : '#1864AB';
+      const colorBorder = equipped ? themeAccent
+                         : owned ? themeBorder
+                         : (affordable ? '#FFD43B' : '#495057');
+      const opacityRule = owned ? '' : (affordable ? '' : 'opacity:.55;');
+      card.style.cssText = `cursor:pointer;background:rgba(40,15,70,.6);border:2px solid ${colorBorder};border-radius:10px;padding:6px;width:74px;height:96px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;font-family:inherit;color:#fff;${opacityRule}`;
+      // Status line: equipped / 클릭 (owned) / cost (unowned)
+      let statusLine;
+      if(equipped) statusLine = '<span style="color:#A9E34B;">✓ 착용</span>';
+      else if(owned) statusLine = '<span style="color:#A5D8FF;">클릭 장착</span>';
+      else if(def.cost === 0) statusLine = '<span style="color:#A9E34B;">기본 제공</span>';
+      else statusLine = `<span style="color:${affordable?'#FFD43B':'#FA5252'};">🪙 ${def.cost.toLocaleString()}</span>`;
+      const dmgBoostLabel = def.dmgBoost && def.dmgBoost > 1 ? `<div style="font-size:8px;color:#74C0FC;font-weight:700;">+${Math.round((def.dmgBoost-1)*100)}% dmg</div>` : '';
+      card.innerHTML = `<div style="font-size:20px;line-height:1;">${def.icon}</div>
+        <div style="font-size:10px;font-weight:700;text-align:center;letter-spacing:-.3px;line-height:1.1;">${def.name}</div>
+        ${dmgBoostLabel}
+        <div style="font-size:9px;font-weight:900;">${statusLine}</div>`;
+      card.addEventListener('click', () => {
+        if(owned){
+          // Equip swap
           slot.equipped = def.id;
           saveProgress();
           renderCompanionCostumeSection();
-        });
-      }
+        } else {
+          // Purchase attempt
+          const r = buyCompanionCostume(kind, def.id);
+          if(!r.ok){
+            state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:1.8, maxT:1.8, tone:'warn' };
+          } else {
+            slot.equipped = def.id;
+            saveProgress();
+            sfxLevelUp();
+            state.toastBanner = { text:`✨ ${def.name} 구매!`, sub:`-${def.cost.toLocaleString()} 🪙 → 즉시 장착`, t:2.0, maxT:2.0, tone:'critical' };
+          }
+          renderCompanionCostumeSection();
+          // Refresh shop coin bar too
+          const sc = document.getElementById('shopCoinTxt');
+          if(sc) sc.textContent = (progress.coins||0).toLocaleString();
+        }
+      });
       previewWrap.appendChild(card);
     }
     box.appendChild(previewWrap);
