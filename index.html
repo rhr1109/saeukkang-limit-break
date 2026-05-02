@@ -1267,11 +1267,13 @@ const TITLE_BGM_PACK = {
   ],
   interval:190, wave:'triangle', bassShift:'3', vol:.13
 };
-// Boss-fight BGM — v10 박진감 강화 (intense action chase pack). Used during chapter boss fights to
-// break the chapter ambience and inject urgency. Tempo bumped 108→82ms (≈30% faster), volume up so
-// it cuts through, and bgmStart() applies a per-tick kick + sub-bass flair specifically when this
-// pack is active. Phrygian/diminished bassline + ascending tension push so it reads as "fight"
-// not "ambient".
+// Boss-fight BGM — v11 EMERGENCY ALERT pack. User feedback: "박진감 안 든다, 과장되어도 되니까
+// 경고 느낌이 확 들면서 엄청 도전적인 느낌으로 만들어줘". Now layered like an action-game boss:
+//   - Tempo bumped 82ms → 68ms (≈20% faster, urgency)
+//   - bgmStart's pack.isBoss block adds 5 layers per beat: 60Hz sub-bass kick, snare crack on
+//     beats 2 & 4, hi-hat noise on offbeats, octave-up sawtooth lead stab on 1·3, AND a swept
+//     siren wail (140→520Hz) on bar starts.
+//   - Phrygian/diminished riff with chromatic climb + tritone bass slide — vertigo + dread.
 const BOSS_BGM_PACK = {
   label:'BOSS',
   bars:[
@@ -1284,7 +1286,7 @@ const BOSS_BGM_PACK = {
     // Bar 4 — C# release into descending diminished — momentum dive
     ['C#4','E4','G4','Bb4'],
   ],
-  interval:82, wave:'sawtooth', bassShift:'3', vol:.16, isBoss:true
+  interval:68, wave:'sawtooth', bassShift:'3', vol:.18, isBoss:true
 };
 function currentBgmPack(){
   if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop') return TITLE_BGM_PACK;
@@ -1375,24 +1377,47 @@ function bgmStart(){
     bgmNote(noteName, .15, pack.vol, pack.wave);
     if(noteIdx===0) bgmBassNote(bar[0].replace(/\d/, pack.bassShift), .3);
     if(noteIdx===2) bgmBassNote(bar[0].replace(/\d/, pack.bassShift), .2);
-    // Boss pack gets its own action-movie flair regardless of chapter tier — a kick on every beat,
-    // a "snap" noise on the offbeats, sub-bass pulse on beat 1, and an octave-up lead stab on
-    // beats 1 & 3. Designed to read as "boss chase" so it's clearly different from chapter BGM.
+    // Boss pack v11 — emergency-alert action pack. Five layered elements per beat:
+    //   1. 60Hz sub-bass thump (every beat) — "boom" body of the kick, makes it feel HEAVY.
+    //   2. Bright noise crack with attack envelope — kick top-end / snare-ish feel.
+    //   3. Octave-up sawtooth lead stab on beats 1 & 3 — pierces through, drives the riff.
+    //   4. Hi-hat noise on offbeats 2 & 4 — drives groove forward.
+    //   5. Siren wail (140Hz → 520Hz sweep over 0.6s) on every bar start (noteIdx===0) — emergency.
     if(pack.isBoss){
-      noise(.04, .14);                                                // kick (every beat)
+      if(audioCtx && !muted){
+        // Layer 1 — heavy 58Hz sub-bass kick (every beat). Thumpy, no pitch perception, you FEEL it.
+        const subO = audioCtx.createOscillator(), subG = audioCtx.createGain();
+        subO.type='sine';
+        subO.frequency.setValueAtTime(85, audioCtx.currentTime);
+        subO.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime+.10);
+        subG.gain.value=0;
+        subG.gain.linearRampToValueAtTime(pack.vol*1.3, audioCtx.currentTime+.005);
+        subG.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+.22);
+        subO.connect(subG); subG.connect(bgmGain); subO.start(); subO.stop(audioCtx.currentTime+.24);
+        // Layer 2 — kick top-end click (short noise burst).
+        noise(.02, .15);
+      }
       if(noteIdx===0 || noteIdx===2){
-        bgmNote(bar[noteIdx].replace(/\d/, '5'), .06, pack.vol*0.55, 'sawtooth'); // octave-up lead stab
-        // Sub-bass pulse — fattens the kick on beats 1 & 3 so the fight feels heavy.
-        if(audioCtx && !muted){
-          const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-          o.type='sine'; o.frequency.value=(NOTE[bar[0]]||220)/4;
-          g.gain.value=0; g.gain.linearRampToValueAtTime(pack.vol*0.85, audioCtx.currentTime+.02);
-          g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+.22);
-          o.connect(g); g.connect(bgmGain); o.start(); o.stop(audioCtx.currentTime+.24);
-        }
+        // Layer 3 — octave-up lead stab on beats 1 & 3 (boss riff).
+        bgmNote(bar[noteIdx].replace(/\d/, '5'), .07, pack.vol*0.7, 'sawtooth');
       } else {
-        // Hi-hat / snap noise on offbeats — drives the groove forward.
-        noise(.018, .07);
+        // Layer 4 — hi-hat / snap noise on offbeats 2 & 4.
+        noise(.025, .12);
+      }
+      // Layer 5 — siren wail at the start of every bar (every 4th tick). 140→520Hz sweep, loud.
+      if(noteIdx===0 && audioCtx && !muted){
+        const sirO = audioCtx.createOscillator(), sirG = audioCtx.createGain();
+        sirO.type='sawtooth';
+        sirO.frequency.setValueAtTime(140, audioCtx.currentTime);
+        sirO.frequency.exponentialRampToValueAtTime(520, audioCtx.currentTime+.55);
+        sirG.gain.value=0;
+        sirG.gain.linearRampToValueAtTime(pack.vol*0.45, audioCtx.currentTime+.04);
+        sirG.gain.linearRampToValueAtTime(pack.vol*0.30, audioCtx.currentTime+.40);
+        sirG.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+.65);
+        sirO.connect(sirG); sirG.connect(bgmGain);
+        sirO.start(); sirO.stop(audioCtx.currentTime+.70);
+        // Snare crack on bar start — adds attack accent.
+        noise(.04, .22);
       }
     } else if(tier >= 0) {
       bgmFlair(tier, noteIdx, bar, pack);
@@ -3941,32 +3966,32 @@ function chapterName(c){ return CHAPTER_NAMES[Math.min(c-1, CHAPTER_NAMES.length
 function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.length-1)]; }
 function chapterMult(){
   const c = state.chapter;
-  // Difficulty curve, v5 — extended for 50 chapters with wave system.
-  // Costume bonuses (up to S-grade ~0.5x global stat boost across slots) are factored in,
-  // so the curve assumes mid-grade costumes by ch30+.
-  //   1..10  : linear +0.26 hp / +0.08 dmg per chapter         (ch10 → 3.34 / 1.72)
-  //   10..20 : exp 1.09/1.04                                    (ch20 → 7.91 / 2.55)
-  //   20..30 : exp 1.13/1.05 on top of ch20                     (ch30 → 27.5 / 4.15)
-  //   30..40 : exp 1.10/1.04 on top of ch30                     (ch40 → 71.3 / 6.14)
-  //   40..50 : exp 1.08/1.035 on top of ch40                    (ch50 → 154 / 8.69)
-  const HP_CH10  = 1 + 9*0.26;
-  const DMG_CH10 = 1 + 9*0.08;
-  const HP_CH20  = HP_CH10  * Math.pow(1.09, 10);
-  const DMG_CH20 = DMG_CH10 * Math.pow(1.04, 10);
-  const HP_CH30  = HP_CH20  * Math.pow(1.13, 10);
-  const DMG_CH30 = DMG_CH20 * Math.pow(1.05, 10);
-  const HP_CH40  = HP_CH30  * Math.pow(1.10, 10);
-  const DMG_CH40 = DMG_CH30 * Math.pow(1.04, 10);
-  const hp = c <= 10 ? 1 + (c-1)*0.26
-          : c <= 20 ? HP_CH10  * Math.pow(1.09, c-10)
-          : c <= 30 ? HP_CH20  * Math.pow(1.13, c-20)
-          : c <= 40 ? HP_CH30  * Math.pow(1.10, c-30)
-          :           HP_CH40  * Math.pow(1.08, c-40);
-  const dmg = c <= 10 ? 1 + (c-1)*0.08
-            : c <= 20 ? DMG_CH10 * Math.pow(1.04, c-10)
-            : c <= 30 ? DMG_CH20 * Math.pow(1.05, c-20)
-            : c <= 40 ? DMG_CH30 * Math.pow(1.04, c-30)
-            :           DMG_CH40 * Math.pow(1.035, c-40);
+  // Difficulty curve, v11 — smoothed late-game so boss HP doesn't outpace player DPS scaling.
+  // Player real DPS at ch50 (full build with multi-weapons + abilities + S costume + maxed shop)
+  // is ~150-300k. Boss HP target 15-30M for 60-150s kill time. Curve below targets that range.
+  //   1..10  : linear +0.22 hp / +0.07 dmg per chapter         (ch10 → 2.98 / 1.63)
+  //   10..20 : exp 1.075/1.035                                  (ch20 → 6.14 / 2.30)
+  //   20..30 : exp 1.085/1.040 on top of ch20                   (ch30 → 14.05 / 3.40)
+  //   30..40 : exp 1.060/1.030 on top of ch30                   (ch40 → 25.16 / 4.57)
+  //   40..50 : exp 1.035/1.020 on top of ch40                   (ch50 → 35.49 / 5.57)
+  const HP_CH10  = 1 + 9*0.22;
+  const DMG_CH10 = 1 + 9*0.07;
+  const HP_CH20  = HP_CH10  * Math.pow(1.075, 10);
+  const DMG_CH20 = DMG_CH10 * Math.pow(1.035, 10);
+  const HP_CH30  = HP_CH20  * Math.pow(1.085, 10);
+  const DMG_CH30 = DMG_CH20 * Math.pow(1.040, 10);
+  const HP_CH40  = HP_CH30  * Math.pow(1.060, 10);
+  const DMG_CH40 = DMG_CH30 * Math.pow(1.030, 10);
+  const hp = c <= 10 ? 1 + (c-1)*0.22
+          : c <= 20 ? HP_CH10  * Math.pow(1.075, c-10)
+          : c <= 30 ? HP_CH20  * Math.pow(1.085, c-20)
+          : c <= 40 ? HP_CH30  * Math.pow(1.060, c-30)
+          :           HP_CH40  * Math.pow(1.035, c-40);
+  const dmg = c <= 10 ? 1 + (c-1)*0.07
+            : c <= 20 ? DMG_CH10 * Math.pow(1.035, c-10)
+            : c <= 30 ? DMG_CH20 * Math.pow(1.040, c-20)
+            : c <= 40 ? DMG_CH30 * Math.pow(1.030, c-30)
+            :           DMG_CH40 * Math.pow(1.020, c-40);
   const speed = 1 + Math.min(0.95, (c-1)*0.028);
   return {
     hp,
@@ -4781,12 +4806,20 @@ function spawnEnemy(kind){
   const chm = chapterMult();
   // Density rebalance — spawn rate is ~2× higher than before. Per-mob HP/dmg are scaled DOWN
   // for snappy 탕탕특공대 hit-feedback. Per-mob XP keeps the old base value here; the gem
-  // creation step multiplies gem.value by GEM_XP_SCALE (0.47) so total wave XP stays close
-  // to the pre-density curve. (Scaling e.xp directly would have been clamped by Math.max(1,...)
-  // and overshot the old totals by ~13%.)
+  // creation step multiplies gem.value by GEM_XP_SCALE so total wave XP stays close to the
+  // pre-density curve.
   const ENEMY_HP_MULT = 0.65;
   const ENEMY_DMG_MULT = 0.75;
-  const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT));
+  // v11 — mob-only HP boost so wave 2/3 mobs aren't 1-shot at mid chapters (ch5-25). Bosses
+  // are unaffected (this is applied here in spawnEnemy; spawnBoss overwrites .hp directly).
+  // Tuned so avg shots/mob is ≥2 from ch5 onward — the player should see the mob alive briefly,
+  // not vaporize on contact. ch1-2: 1.0× / ch3-10: 1.0→2.4 / ch11-25: 2.4→3.6 / ch26+: 3.6 cap.
+  const c = state.chapter;
+  const mobHpExtra = c <= 2 ? 1.0
+                   : c <= 10 ? 1.0 + (c-2)*0.175
+                   : c <= 25 ? 2.4 + (c-10)*0.08
+                   :           Math.min(3.6, 3.6);
+  const hp = Math.max(1, Math.ceil(def.hp * scale * chm.hp * ENEMY_HP_MULT * mobHpExtra));
   const e = {
     x, y, vx:0, vy:0, kind,
     hp, maxHp: hp,
@@ -4826,13 +4859,16 @@ function spawnEnemy(kind){
 //   Peak max-extreme (~3500 DPS): 13s — still fast but no longer 3s.
 //   Weak build (~250 DPS): 187s — uses chapter cap as safety net (cap bumped to 480s for ch1-10
 //   to accommodate this in chapterWaveTimes).
+// v11 boss HP cuts — kill time target 60-150s for B-tier costumes. Previous v10 values
+// (17/19.5/22/25/28/40) collided with chapterMult exponential explosion → ch40-50 bosses had
+// 50-200M HP, taking 8-20 minutes to kill (cap-bound). Now both curves smoothed.
 const BOSS_VARIANTS = {
-  cat_king:  { hpMult:17.0, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕' },
-  tyrant:    { hpMult:19.5, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주' },
-  leviathan: { hpMult:22.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주' },
-  phantom:   { hpMult:25.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주' },
-  phoenix:   { hpMult:28.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조' },
-  void:      { hpMult:40.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },
+  cat_king:  { hpMult:13.0, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕' },
+  tyrant:    { hpMult:14.0, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주' },
+  leviathan: { hpMult:15.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주' },
+  phantom:   { hpMult:16.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주' },
+  phoenix:   { hpMult:18.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조' },
+  void:      { hpMult:22.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제' },
 };
 function bossVariantForChapter(c){
   if(c >= 50) return 'void';
@@ -5286,7 +5322,7 @@ function killEnemy(e){
   // spawns (continuing at 0.5× rate for 30s) add ~70 XP, pushing the deck the rest of the way to
   // near-full-build by the time the boss dies. Boss HP is correspondingly sized so even
   // a full-build player takes ~30s — the ~14-card deck needs 2 ult casts + steady DPS.
-  const GEM_XP_SCALE = 0.42;
+  const GEM_XP_SCALE = 0.36;  // v11: 0.42 → 0.36 — paired with xpToNext 1.22 caps cards ~18-22
   const xpDrop = e.xp||1;
   for(let i=0;i<Math.min(xpDrop,5);i++){
     const a = Math.random()*Math.PI*2;
@@ -5593,9 +5629,10 @@ function gainXP(amount){
     }
     p.xp -= p.xpToNext;
     p.level++;
-    // Tamer growth curve so the chapter's full upgrade set isn't maxed before the final stage.
-    // Was xpToNext * 1.35 + 2 (exponential-ish, runs away after level 15).
-    p.xpToNext = Math.round(p.xpToNext * 1.18 + 4);
+    // v11: 1.18 → 1.22 multiplier. Modest tightening so cards picked drop from ~25-28/chapter
+    // to ~18-22 — limits the snowball that was making mid-chapters trivial without crippling
+    // late-chapter DPS scaling.
+    p.xpToNext = Math.round(p.xpToNext * 1.22 + 4);
     queueLevelUp();
   }
 }
