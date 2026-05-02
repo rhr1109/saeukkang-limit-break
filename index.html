@@ -103,8 +103,10 @@
      v12.10 Phase 2 — top을 78→100px로 내려 LV/HP 바 영역과 시각 분리. 사용자 피드백:
      "빨간 테두리 안 의미없는 노란 UI" — 인벤 칩 두 개가 Lv/HP 칩과 너무 가까워 한 묶음으로
      보였던 문제. 칩 자체에 "획득" 라벨도 첫 칩 앞에 작게 붙여 인식 향상. */
-  #hud .invbar{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 100px);left:calc(env(safe-area-inset-left, 0px) + 10px);display:flex;flex-wrap:wrap;gap:4px;max-width:min(62vw, 420px);pointer-events:none;z-index:2;align-items:center;}
-  #hud .invbar:not(:empty)::before{content:'🎒';font-size:11px;opacity:.6;margin-right:2px;}
+  /* v12.18 — invbar 5개/줄 그리드. 사용자 피드백 "첫번째 줄에 가방 아이템 있어서 5개 안 맞음".
+     이전 ::before 의 🎒 가 첫째 줄 첫 칸을 차지해 첫 줄만 4개로 보였음. 가방 emoji 제거 +
+     auto-fill grid 로 모든 줄이 5개 균일. */
+  #hud .invbar{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 100px);left:calc(env(safe-area-inset-left, 0px) + 10px);display:grid;grid-template-columns:repeat(5, max-content);gap:4px;max-width:min(62vw, 420px);pointer-events:none;z-index:2;}
   #hud .inv-pill{display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.72);border:2px solid #FFD43B;border-radius:6px;padding:2px 6px 2px 4px;font-size:11px;font-weight:900;color:#FFE066;line-height:1;}
   #hud .inv-pill.r{border-color:#339AF0;}
   #hud .inv-pill.e{border-color:#BE4BDB;}
@@ -251,15 +253,25 @@
   .statline b{color:#FFE066;}
 
   /* Cinematic victory — the canvas scene fills the upper portion of the screen; the modal is a
-     compact bottom-anchored panel that doesn't black out the celebration behind it. */
+     compact bottom-anchored panel that doesn't black out the celebration behind it.
+     v12.18 — 사용자 피드백 "엔딩 다시보기 모바일 하단 짤려" 수정. card 안에서 stat 영역만
+     스크롤 가능하게, 하단 버튼은 sticky 로 고정 + safe-area 패딩 강화. */
   #victory{background:transparent;align-items:flex-end;justify-content:center;padding:0 14px calc(env(safe-area-inset-bottom, 0px) + 14px) 14px;pointer-events:none;}
-  #victory .card{pointer-events:auto;background:linear-gradient(180deg,rgba(40,15,70,.92),rgba(15,2,30,.97));border-color:#FFD43B;box-shadow:0 -10px 40px rgba(0,0,0,.6),0 0 22px rgba(255,224,102,.4);max-width:560px;width:100%;padding:14px 18px;max-height:42vh;overflow-y:auto;}
-  #victory .card h2{background:linear-gradient(90deg,#FFE066,#FF6B6B,#E599F7,#74C0FC,#FFE066);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;animation:rainbowText 4s linear infinite;font-size:min(6.5vw,22px);margin:0 0 4px;}
-  #victory .card .sub{margin-bottom:8px;font-size:11px;}
+  #victory .card{pointer-events:auto;background:linear-gradient(180deg,rgba(40,15,70,.92),rgba(15,2,30,.97));border-color:#FFD43B;box-shadow:0 -10px 40px rgba(0,0,0,.6),0 0 22px rgba(255,224,102,.4);max-width:560px;width:100%;padding:14px 18px calc(env(safe-area-inset-bottom, 0px) + 14px);max-height:min(60vh, 540px);display:flex;flex-direction:column;}
+  #victory .card h2{background:linear-gradient(90deg,#FFE066,#FF6B6B,#E599F7,#74C0FC,#FFE066);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;animation:rainbowText 4s linear infinite;font-size:min(6.5vw,22px);margin:0 0 4px;flex:0 0 auto;}
+  #victory .card .sub{margin-bottom:8px;font-size:11px;flex:0 0 auto;}
   #victory .card .statline{padding:3px 0;font-size:12px;}
+  /* v12.18 — stat 영역만 flex 로 스크롤. 하단 button row 는 항상 보이도록 flex:0. */
+  #victory .card #vStats{flex:1 1 auto;min-height:0;overflow-y:auto;margin:6px 0;}
+  #victory .card .v-actions{flex:0 0 auto;display:flex;gap:8px;flex-wrap:wrap;padding-top:6px;border-top:1px dashed rgba(255,224,102,.25);margin-top:auto;}
   @keyframes rainbowText{to{background-position:200% center;}}
+  /* v12.18 — replay-mode 진입 시 hidden CTA 토글. */
+  #victory.v-replay #vNextExpBtn,
+  #victory.v-replay #vAgainBtn{display:none !important;}
+  #victory.v-replay #vBackBtn{display:inline-block;}
+  #vBackBtn{display:none;flex:1;min-width:140px;background:linear-gradient(180deg,#A5D8FF,#1864AB);}
   @media (max-width:480px){
-    #victory .card{max-height:38vh;padding:12px 14px;}
+    #victory .card{max-height:min(70vh, 520px);padding:12px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);}
     #victory .card h2{font-size:18px;}
   }
 
@@ -755,6 +767,7 @@
           <button class="cs-tab on" type="button" data-char="player" style="border-color:#9775FA;">👤 남편</button>
           <button class="cs-tab" type="button" data-char="wife"   style="border-color:#FFB4D8;display:none;">💗 아내 (Ch51)</button>
           <button class="cs-tab" type="button" data-char="child"  style="border-color:#A5D8FF;display:none;">👶 아기 (Ch60)</button>
+          <button class="cs-tab" type="button" data-char="rescued" style="border-color:#FFA94D;display:none;">🐦 구출 친구 세트 (Ch125)</button>
         </div>
         <!-- 남편 코스튬 도감 -->
         <div id="playerCostumeBlock">
@@ -768,15 +781,33 @@
           </div>
           <div class="cos-detail-grid" id="cosDetailGrid"></div>
         </div>
-        <!-- 아내 코스튬 (ch51 클리어 시 노출) -->
+        <!-- 아내 코스튬 (ch51 클리어 시 노출). v12.18 — head/body 서브탭 분리. -->
         <div id="wifeCostumeBlock" style="display:none;">
-          <h3 style="display:flex;align-items:center;gap:8px;color:#FFB4D8;">💗 아내 코스튬 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅱ에서 합류</span></h3>
+          <h3 style="display:flex;align-items:center;gap:8px;color:#FFB4D8;">💗 아내 코스튬 <span style="color:#FFE066;font-size:11px;font-weight:700;">머리장식 1개 + 옷 1개 동시 착용</span></h3>
+          <div class="cos-slot-tabs" data-companion="wife" style="margin-bottom:6px;">
+            <button class="cos-slot-tab on" type="button" data-slot="head">🎀 머리장식</button>
+            <button class="cos-slot-tab" type="button" data-slot="body">👗 옷</button>
+          </div>
           <div id="wifeCostumeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
         </div>
-        <!-- 아기 코스튬 (ch60 클리어 시 노출) -->
+        <!-- 아기 코스튬 (ch60 클리어 시 노출). v12.18 — head/body 서브탭 분리. -->
         <div id="childCostumeBlock" style="display:none;">
-          <h3 style="display:flex;align-items:center;gap:8px;color:#A5D8FF;">👶 아기 코스튬 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅱ ch60에서 합류</span></h3>
+          <h3 style="display:flex;align-items:center;gap:8px;color:#A5D8FF;">👶 아기 코스튬 <span style="color:#FFE066;font-size:11px;font-weight:700;">머리장식 1개 + 옷 1개 동시 착용</span></h3>
+          <div class="cos-slot-tabs" data-companion="child" style="margin-bottom:6px;">
+            <button class="cos-slot-tab on" type="button" data-slot="head">🧢 머리장식</button>
+            <button class="cos-slot-tab" type="button" data-slot="body">👶 옷</button>
+          </div>
           <div id="childCostumeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+        </div>
+        <!-- v12.18 — 구출 친구 5종 세트 (Ch125 다람쥐까지 합류해야 활성). 사용자 명령
+             "지옥에서 영입되는 동료들은 일괄 코스튬 적용될 수 있도록 5종 코스튬이 1세트로". -->
+        <div id="rescuedCostumeBlock" style="display:none;">
+          <h3 style="display:flex;align-items:center;gap:8px;color:#FFA94D;">🐦 구출 친구 세트 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅳ Ch125 까지 진행 시 활성</span></h3>
+          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;">
+            5명의 친구(참새·까치·부엉이·앵무새·다람쥐) 가 같은 세트의 코스튬을 입으면 추가 세트 보너스가 발동.
+            친구 화력에만 영향 — 챕터 난이도엔 미미 (~+1.5~3% 풀파티 DPS).
+          </div>
+          <div id="rescuedSetGrid" style="display:flex;flex-direction:column;gap:10px;"></div>
         </div>
       </div>
       <!-- 호환성을 위해 placeholder는 남기되 비활성화 (renderCompanionCostumeSection은 새 그리드로 직접 그린다) -->
@@ -1053,11 +1084,14 @@
     <div class="card" style="max-width:520px;text-align:center;">
       <h2>🏆 한계돌파 성공!</h2>
       <div class="sub" style="color:#FFE066;font-weight:700;">전 챕터를 정복한 전설의 비둘기</div>
-      <div id="vStats" style="margin:10px 0;"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div id="vStats"></div>
+      <!-- v12.18 — 하단 버튼 row 를 .v-actions 로 묶어 sticky 로 고정. card 가 짤려도 버튼은 항상 보임. -->
+      <div class="v-actions">
         <!-- v12.10 — 원정 끝(ch50/70) 클리어 후 다음 원정으로 직진하는 CTA. ch100(최종)에서는 숨김. -->
         <button class="btn" id="vNextExpBtn" style="flex:2;min-width:160px;display:none;background:linear-gradient(180deg,#FFB4D8,#D63384);">▶ 다음 원정 시작</button>
         <button class="btn" id="vAgainBtn" style="flex:1;min-width:140px;">🔁 처음부터 다시</button>
+        <!-- v12.18 — replay-mode 전용 back 버튼 (사용자 "엔딩 다시보기 뒤로가기 버튼 없음"). -->
+        <button class="btn" id="vBackBtn">🔙 챕터 선택으로</button>
         <button class="btn alt" id="vHomeBtn" style="flex:1;min-width:140px;">🏠 홈으로</button>
       </div>
     </div>
@@ -3453,8 +3487,10 @@ function drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, includeFamily){
   const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
   const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
   if(!wifeOk && !childOk) return;
-  // 가족 셋이 cssW 안에 들어가도록 offsetX/compScale 보수적 선택.
-  const compScale = 1.5;
+  // v12.18 — 사용자 피드백 "스킨 미리보기에서 아내가 남편보다 큼" 수정. 이전엔 compScale 이
+  // 고정 1.5 라 작은 canvas (baseScale<1) 에서 husband 0.85× 보다 wife 가 시각적으로 더
+  // 컸음. baseScale 비례로 묶어 husband 와 동일 비율 유지 + 가족 톤으로 살짝 작게(0.92).
+  const compScale = baseScale * 0.92;
   const offsetX = baseScale * 50;
   const husbandFootY = cy + husbandScale * 52;
   if(wifeOk){
@@ -4736,10 +4772,16 @@ const progress = (()=>{
       wife:false, child:false,
       sparrow:false, magpie:false, owl:false, parrot:false, squirrel:false,
     },
-    // companion costumes — wife/child만. 구출 친구들은 코스튬 시스템 없음.
+    // companion costumes — v12.18: wife/child + 구출 친구 5종도 슬롯 init.
+    // equipped 는 {head,body} 객체. 이전 string 포맷은 _normalizeCompanionEquipped 가 자동 마이그레이션.
     companionCostumes: {
-      wife:  { unlocked:['bow'],      equipped:'bow' },
-      child: { unlocked:['pacifier'], equipped:'pacifier' },
+      wife:     { unlocked:['bow'],      equipped:{head:'bow',      body:null} },
+      child:    { unlocked:['pacifier'], equipped:{head:'pacifier', body:null} },
+      sparrow:  { unlocked:[],           equipped:{head:null, body:null} },
+      magpie:   { unlocked:[],           equipped:{head:null, body:null} },
+      owl:      { unlocked:[],           equipped:{head:null, body:null} },
+      parrot:   { unlocked:[],           equipped:{head:null, body:null} },
+      squirrel: { unlocked:[],           equipped:{head:null, body:null} },
     },
   };
   const cuDefault = {wife:false, child:false, sparrow:false, magpie:false, owl:false, parrot:false, squirrel:false};
@@ -4751,12 +4793,18 @@ const progress = (()=>{
     skin: (saved && saved.skin) || 'default',
     companionUnlocks: Object.assign({}, cuDefault, (saved&&saved.companionUnlocks)||{}),
     companionCostumes: (() => {
-      const def = { wife:{unlocked:['bow'], equipped:'bow'}, child:{unlocked:['pacifier'], equipped:'pacifier'} };
       const sv = (saved && saved.companionCostumes) || {};
-      return {
-        wife:  Object.assign({unlocked:['bow'], equipped:'bow'}, sv.wife||{}),
-        child: Object.assign({unlocked:['pacifier'], equipped:'pacifier'}, sv.child||{}),
-      };
+      const out = {};
+      // wife/child 기본 코스튬 보장.
+      out.wife  = Object.assign({ unlocked:['bow'],      equipped:{head:'bow',      body:null} }, sv.wife  || {});
+      out.child = Object.assign({ unlocked:['pacifier'], equipped:{head:'pacifier', body:null} }, sv.child || {});
+      // 구출 친구 5종 — 신규 정상 init.
+      for(const k of ['sparrow','magpie','owl','parrot','squirrel']){
+        out[k] = Object.assign({ unlocked:[], equipped:{head:null, body:null} }, sv[k] || {});
+      }
+      // _normalizeCompanionEquipped 는 RESCUED_KINDS / COMPANION_COSTUMES 가 정의된 후에만 동작.
+      // 여기선 데이터 형태만 보장하고, 실제 정규화는 첫 사용 시점에 lazy 처리.
+      return out;
     })(),
   });
   // Sanity: drop equipped uids that no longer exist in inventory.
@@ -5701,6 +5749,9 @@ function drawSparrowFriend(ctx, c){
   ctx.beginPath();
   ctx.moveTo(-12, 4); ctx.lineTo(-18, 0); ctx.lineTo(-18, 8);
   ctx.closePath(); ctx.fill();
+  // v12.18 — equipped set costume overlay
+  const sparrowDraws = getCompanionCostumeDraws('sparrow');
+  for(const d of sparrowDraws) d(ctx);
   ctx.restore();
 }
 
@@ -5734,6 +5785,8 @@ function drawMagpieFriend(ctx, c){
   // Iridescent shine spot
   ctx.fillStyle = '#74C0FC';
   ctx.beginPath(); ctx.arc(-6, 4, 1.6, 0, Math.PI*2); ctx.fill();
+  const magpieDraws = getCompanionCostumeDraws('magpie');
+  for(const d of magpieDraws) d(ctx);
   ctx.restore();
 }
 
@@ -5774,6 +5827,8 @@ function drawOwlFriend(ctx, c){
   ctx.fillStyle = '#FFA94D';
   ctx.beginPath(); ctx.moveTo(-2, -5); ctx.lineTo(0, -1); ctx.lineTo(2, -5);
   ctx.closePath(); ctx.fill();
+  const owlDraws = getCompanionCostumeDraws('owl');
+  for(const d of owlDraws) d(ctx);
   ctx.restore();
 }
 
@@ -5811,6 +5866,8 @@ function drawParrotFriend(ctx, c){
   ctx.beginPath(); ctx.arc(-2, -8, 1.8, 0, Math.PI*2); ctx.fill();
   ctx.fillStyle = '#000';
   ctx.beginPath(); ctx.arc(-2, -8, 0.9, 0, Math.PI*2); ctx.fill();
+  const parrotDraws = getCompanionCostumeDraws('parrot');
+  for(const d of parrotDraws) d(ctx);
   ctx.restore();
 }
 
@@ -5861,6 +5918,8 @@ function drawSquirrelFriend(ctx, c){
   // Acorn in cheek (squirrel signature)
   ctx.fillStyle = '#7A5230';
   ctx.beginPath(); ctx.arc(11, -2, 1.6, 0, Math.PI*2); ctx.fill();
+  const squirrelDraws = getCompanionCostumeDraws('squirrel');
+  for(const d of squirrelDraws) d(ctx);
   ctx.restore();
 }
 
@@ -6267,21 +6326,244 @@ const COMPANION_COSTUMES = {
       } },
   ],
 };
+
+// === v12.18 — 구출 친구 5종 세트 코스튬 시스템 ===
+// 사용자 명령 "지옥에서 영입되는 동료들은 일괄 코스튬 적용될 수 있도록 5종 코스튬이 1세트로
+// 선택할 수 있게끔 상점에 만들어줘. 각각의 미미한 효과가 있고, 이 효과도 산정해서 난이도 검수".
+// 5명(참새/까치/부엉이/앵무새/다람쥐) × 3세트 = 15 코스튬. 한 세트가 통째로 일괄 구매·일괄 장착.
+// 효과: 각 코스튬 dmgBoost 1.01~1.03 (미미). 전세트 동시 착용 시 RESCUED_SET_DEFS.setDmgBoost
+// 곱연산 추가. 최대 풀세트 효과 = ~1.15× companion DPS = 챕터 전체 DPS 기준 ~+1.5~3% 미미.
+const RESCUED_KINDS = ['sparrow','magpie','owl','parrot','squirrel'];
+const RESCUED_SET_DEFS = [
+  {
+    id:'ashBrigade',
+    name:'잿불 의장단',
+    icon:'🔥',
+    accent:'#FF6B35',
+    description:'지옥에서 함께한 친구들이 잿불 갑옷을 두른다',
+    perPieceBoost:1.01,    // 각 +1%
+    setBonus:1.04,          // 풀세트 추가 ×1.04 → 합산 ~×1.092 (+9.2%)
+    costPerPiece:1500,
+  },
+  {
+    id:'salvationChoir',
+    name:'구원의 합창단',
+    icon:'✨',
+    accent:'#FFE066',
+    description:'천상의 빛을 담은 옷자락 — 친구들의 사기가 오른다',
+    perPieceBoost:1.015,
+    setBonus:1.04,
+    costPerPiece:2000,
+  },
+  {
+    id:'abyssalPact',
+    name:'심연의 결사대',
+    icon:'🌑',
+    accent:'#7048E8',
+    description:'심연의 기운으로 강화된 결사 — 친구 화력 대폭 ↑',
+    perPieceBoost:1.02,
+    setBonus:1.05,
+    costPerPiece:2500,
+  },
+];
+// 각 세트의 친구별 코스튬 외형 (단순 컬러 오버레이) — 친구의 작은 사이즈에 어울리게 컴팩트.
+function _makeRescuedSetCostume(setId, kind, name, accent, secondary){
+  const setDef = RESCUED_SET_DEFS.find(s => s.id === setId);
+  return {
+    id: setId + '_' + kind,
+    name,
+    icon: setDef.icon,
+    cost: setDef.costPerPiece,
+    slot: 'body',
+    setId,
+    dmgBoost: setDef.perPieceBoost,
+    draw:(ctx)=>{
+      // 친구 본체 위에 컬러 망토/장비 오버레이. 친구 draw 좌표계 (scale 0.42~0.46) 안에서 그려짐.
+      // 본체가 작아 디테일 최소 — accent 색 둥근 망토 + secondary 라인.
+      ctx.save();
+      ctx.fillStyle = accent;
+      ctx.globalAlpha = 0.92;
+      ctx.beginPath();
+      ctx.moveTo(-12, 2); ctx.quadraticCurveTo(-15, 10, -12, 18);
+      ctx.lineTo(12, 18); ctx.quadraticCurveTo(15, 10, 12, 2);
+      ctx.quadraticCurveTo(6, 0, 0, 0); ctx.quadraticCurveTo(-6, 0, -12, 2);
+      ctx.closePath(); ctx.fill();
+      // 가슴 엠블럼
+      ctx.fillStyle = secondary;
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(0, 8, 2.4, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+  };
+}
+// Ash brigade: 잿불 (오렌지/금)
+COMPANION_COSTUMES.sparrow = [
+  _makeRescuedSetCostume('ashBrigade',     'sparrow', '잿불 망토',   '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'sparrow', '천상 망토',   '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'sparrow', '심연 망토',   '#7048E8', '#E599F7'),
+];
+COMPANION_COSTUMES.magpie = [
+  _makeRescuedSetCostume('ashBrigade',     'magpie',  '잿불 흉갑',   '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'magpie',  '천상 옷자락', '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'magpie',  '심연 갑옷',   '#7048E8', '#E599F7'),
+];
+COMPANION_COSTUMES.owl = [
+  _makeRescuedSetCostume('ashBrigade',     'owl',     '잿불 두건',   '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'owl',     '천상 두건',   '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'owl',     '심연 망토',   '#7048E8', '#E599F7'),
+];
+COMPANION_COSTUMES.parrot = [
+  _makeRescuedSetCostume('ashBrigade',     'parrot',  '잿불 어깨갑', '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'parrot',  '천상 깃옷',   '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'parrot',  '심연 깃옷',   '#7048E8', '#E599F7'),
+];
+COMPANION_COSTUMES.squirrel = [
+  _makeRescuedSetCostume('ashBrigade',     'squirrel','잿불 띠',     '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'squirrel','천상 띠',     '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'squirrel','심연 띠',     '#7048E8', '#E599F7'),
+];
+// 5명 모두 같은 setId 의 코스튬을 입었을 때 active. 한 명이라도 다른 세트면 보너스 0.
+function getActiveRescuedSetId(){
+  if(!progress.companionCostumes) return null;
+  let activeSetId = null;
+  for(const k of RESCUED_KINDS){
+    const slot = progress.companionCostumes[k];
+    if(!slot) return null;
+    _normalizeCompanionEquipped(slot, k);
+    const eq = slot.equipped.body;
+    if(!eq) return null;
+    const def = (COMPANION_COSTUMES[k] || []).find(c => c.id === eq);
+    if(!def || !def.setId) return null;
+    if(activeSetId === null) activeSetId = def.setId;
+    else if(activeSetId !== def.setId) return null;
+  }
+  return activeSetId;
+}
+function getRescuedSetBonus(){
+  const id = getActiveRescuedSetId();
+  if(!id) return 1.0;
+  const def = RESCUED_SET_DEFS.find(s => s.id === id);
+  return def ? def.setBonus : 1.0;
+}
+// 일괄 구매 — 한 세트의 5 친구 코스튬을 모두 unlocked 에 추가하고, 같은 세트로 자동 장착.
+function buyRescuedSet(setId){
+  const setDef = RESCUED_SET_DEFS.find(s => s.id === setId);
+  if(!setDef) return { ok:false, reason:'세트를 찾을 수 없음' };
+  // 해금 안 된 친구가 있으면 거부
+  for(const k of RESCUED_KINDS){
+    if(!progress.companionUnlocks || !progress.companionUnlocks[k]){
+      return { ok:false, reason:'아직 모든 친구가 합류하지 않음 (Ch125 까지 진행 필요)' };
+    }
+  }
+  // 이미 보유한 친구는 비용에서 제외
+  let toBuy = 0;
+  for(const k of RESCUED_KINDS){
+    const slot = progress.companionCostumes[k] || { unlocked:[] };
+    const itemId = setId + '_' + k;
+    if(!slot.unlocked || !slot.unlocked.includes(itemId)) toBuy++;
+  }
+  const totalCost = toBuy * setDef.costPerPiece;
+  if((progress.coins||0) < totalCost) return { ok:false, reason:`코인 부족 (필요 ${totalCost.toLocaleString()})` };
+  // 구매 + 장착
+  progress.coins -= totalCost;
+  for(const k of RESCUED_KINDS){
+    if(!progress.companionCostumes[k]) progress.companionCostumes[k] = { unlocked:[], equipped:{head:null, body:null} };
+    const slot = progress.companionCostumes[k];
+    _normalizeCompanionEquipped(slot, k);
+    const itemId = setId + '_' + k;
+    if(!slot.unlocked.includes(itemId)) slot.unlocked.push(itemId);
+    slot.equipped.body = itemId;  // body 슬롯에 일괄 장착
+  }
+  saveProgress();
+  return { ok:true, def:setDef, cost:totalCost };
+}
+// 세트 통째로 해제 (5명 모두 body 슬롯을 null 로).
+function unequipRescuedSet(){
+  if(!progress.companionCostumes) return;
+  for(const k of RESCUED_KINDS){
+    const slot = progress.companionCostumes[k];
+    if(!slot) continue;
+    _normalizeCompanionEquipped(slot, k);
+    slot.equipped.body = null;
+  }
+  saveProgress();
+}
+// 세트 통째로 장착 (이미 보유 중일 때).
+function equipRescuedSet(setId){
+  if(!progress.companionCostumes) return false;
+  for(const k of RESCUED_KINDS){
+    const slot = progress.companionCostumes[k];
+    if(!slot) return false;
+    _normalizeCompanionEquipped(slot, k);
+    const itemId = setId + '_' + k;
+    if(!slot.unlocked || !slot.unlocked.includes(itemId)) return false;
+    slot.equipped.body = itemId;
+  }
+  saveProgress();
+  return true;
+}
+// v12.18 — 사용자 피드백 "아내·아기 비둘기는 머리장식이랑 옷을 각각 1개씩 착용할 수 있는데
+// 둘다 합쳐서 1개만 착용가능". 이전 `slot.equipped` 가 단일 string 이라 head 또는 body 중
+// 하나만 동시에 착용 가능했음. 새 데이터 형식: `slot.equipped = { head:id|null, body:id|null }`.
+// legacy string 은 자동 migration.
+function _normalizeCompanionEquipped(slot, kind){
+  if(!slot.equipped) slot.equipped = { head:null, body:null };
+  else if(typeof slot.equipped === 'string'){
+    // Legacy migration: 그 코스튬의 slot 필드를 보고 head/body 중 한 곳에 할당.
+    const list = COMPANION_COSTUMES[kind] || [];
+    const def = list.find(c => c.id === slot.equipped);
+    const sk = (def && def.slot) || 'head';
+    slot.equipped = { head:null, body:null, [sk]: slot.equipped };
+  } else if(typeof slot.equipped === 'object'){
+    if(!('head' in slot.equipped)) slot.equipped.head = null;
+    if(!('body' in slot.equipped)) slot.equipped.body = null;
+  }
+  return slot;
+}
+function getCompanionEquipped(kind, slotKey){
+  const slot = progress.companionCostumes && progress.companionCostumes[kind];
+  if(!slot) return null;
+  _normalizeCompanionEquipped(slot, kind);
+  return slot.equipped[slotKey] || null;
+}
+// v12.18 — 한 동료에게 동시 적용된 모든 코스튬 draw 함수 배열 반환 (body 먼저, head 위에 덧칠).
+function getCompanionCostumeDraws(kind){
+  const slot = progress.companionCostumes && progress.companionCostumes[kind];
+  if(!slot) return [];
+  _normalizeCompanionEquipped(slot, kind);
+  const list = COMPANION_COSTUMES[kind] || [];
+  const draws = [];
+  for(const sk of ['body','head']){  // body 먼저 그려야 옷 위에 머리장식이 올라옴
+    const id = slot.equipped[sk];
+    if(!id) continue;
+    const def = list.find(c => c.id === id);
+    if(def) draws.push(def.draw);
+  }
+  return draws;
+}
+// 호환 shim — 단일 draw 가 필요한 케이스(없어졌지만) 를 위해 head 우선 반환.
 function getCompanionCostumeDraw(kind){
-  const equipped = (progress.companionCostumes && progress.companionCostumes[kind] && progress.companionCostumes[kind].equipped);
-  const def = (COMPANION_COSTUMES[kind]||[]).find(c => c.id === equipped);
-  return def ? def.draw : null;
+  const draws = getCompanionCostumeDraws(kind);
+  return draws.length ? draws[draws.length - 1] : null;
 }
 // v12 phase 2.3 — companions ship with their default starter costume only (free). All others
 // are purchased from the shop with coins via buyCompanionCostume().
 function grantDefaultCompanionCostume(kind){
-  if(!progress.companionCostumes) progress.companionCostumes = { wife:{unlocked:['bow'], equipped:'bow'}, child:{unlocked:['pacifier'], equipped:'pacifier'} };
+  if(!progress.companionCostumes){
+    progress.companionCostumes = {
+      wife:{unlocked:['bow'],      equipped:{head:'bow',      body:null}},
+      child:{unlocked:['pacifier'], equipped:{head:'pacifier', body:null}}
+    };
+  }
+  if(!progress.companionCostumes[kind]) progress.companionCostumes[kind] = { unlocked:[], equipped:{head:null, body:null} };
   const slot = progress.companionCostumes[kind];
   if(!slot.unlocked) slot.unlocked = [];
+  _normalizeCompanionEquipped(slot, kind);
   const starter = (COMPANION_COSTUMES[kind]||[])[0];
   if(starter && !slot.unlocked.includes(starter.id)){
     slot.unlocked.push(starter.id);
-    if(!slot.equipped) slot.equipped = starter.id;
+    const ssl = starter.slot || 'head';
+    if(!slot.equipped[ssl]) slot.equipped[ssl] = starter.id;
     return starter;
   }
   return null;
@@ -6292,6 +6574,7 @@ function buyCompanionCostume(kind, costumeId){
   const def = list.find(c => c.id === costumeId);
   if(!def) return { ok:false, reason:'unknown costume' };
   const slot = progress.companionCostumes[kind];
+  _normalizeCompanionEquipped(slot, kind);
   if(slot.unlocked.includes(costumeId)) return { ok:false, reason:'이미 보유 중' };
   if((progress.coins||0) < def.cost) return { ok:false, reason:'코인 부족' };
   progress.coins -= def.cost;
@@ -6299,15 +6582,37 @@ function buyCompanionCostume(kind, costumeId){
   saveProgress();
   return { ok:true, def };
 }
-// Companion DPS is multiplied by their equipped costume's dmgBoost (default 1.0 — minor effect
-// per user spec). companion costume effects are intentionally small so they don't change
-// chapter difficulty significantly — chapter HP curve carries the weight.
+// v12.18 — 코스튬 장착 (head/body 슬롯 분리). 같은 슬롯의 다른 아이템 자동 교체.
+function equipCompanionCostume(kind, costumeId){
+  const list = COMPANION_COSTUMES[kind] || [];
+  const def = list.find(c => c.id === costumeId);
+  if(!def) return false;
+  const slot = progress.companionCostumes[kind];
+  _normalizeCompanionEquipped(slot, kind);
+  const sk = def.slot || 'head';
+  slot.equipped[sk] = costumeId;
+  saveProgress();
+  return true;
+}
+// v12.18 — Companion DPS 는 head + body 두 슬롯의 dmgBoost 곱 + (rescued 친구라면) 5종 세트 보너스.
+// 각 코스튬 효과는 의도적으로 작아 챕터 난이도를 크게 흔들지 않도록 설계.
 function getCompanionDmgBoost(kind){
   const slot = progress.companionCostumes && progress.companionCostumes[kind];
-  if(!slot || !slot.equipped) return 1.0;
+  if(!slot) return 1.0;
+  _normalizeCompanionEquipped(slot, kind);
   const list = COMPANION_COSTUMES[kind] || [];
-  const def = list.find(c => c.id === slot.equipped);
-  return (def && def.dmgBoost) || 1.0;
+  let mult = 1.0;
+  for(const sk of ['head','body']){
+    const id = slot.equipped[sk];
+    if(!id) continue;
+    const def = list.find(c => c.id === id);
+    if(def && def.dmgBoost) mult *= def.dmgBoost;
+  }
+  // 구출 친구 5종 세트 보너스 (모두 같은 setId 의 코스튬을 입고 있을 때만 적용).
+  if(typeof RESCUED_KINDS !== 'undefined' && RESCUED_KINDS.includes(kind)){
+    mult *= getRescuedSetBonus();
+  }
+  return mult;
 }
 
 // v12.10 Phase 2 — 아내 비둘기 비주얼 재작성. 사용자 피드백 4건 반영:
@@ -6421,9 +6726,9 @@ function drawWifePigeon(ctx, c){
   ctx.beginPath(); ctx.moveTo(-5, -36); ctx.quadraticCurveTo(-7, -40, -3, -42); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,  -37); ctx.quadraticCurveTo(2,  -41, 0, -43);  ctx.stroke();
   ctx.beginPath(); ctx.moveTo(5,  -36); ctx.quadraticCurveTo(7,  -40, 3, -42);  ctx.stroke();
-  // Equipped wife costume overlay (bow / crown / tiara / veil) — replaces the hardcoded bow.
-  const wifeCostumeDraw = getCompanionCostumeDraw('wife');
-  if(wifeCostumeDraw) wifeCostumeDraw(ctx);
+  // v12.18 — head + body 슬롯 동시 렌더 (이전엔 단일 슬롯이라 둘 중 하나만 보였음).
+  const wifeCostumeDraws = getCompanionCostumeDraws('wife');
+  for(const d of wifeCostumeDraws) d(ctx);
   ctx.restore();
 }
 
@@ -6455,9 +6760,9 @@ function drawChildPigeon(ctx, c){
   ctx.fillStyle = '#FFF';
   ctx.beginPath(); ctx.arc(2.6, -10.7, 1.0, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(1.2, -9.5,  0.5, 0, Math.PI*2); ctx.fill();
-  // Equipped child costume overlay (pacifier / beanie / bowtie / crown).
-  const childCostumeDraw = getCompanionCostumeDraw('child');
-  if(childCostumeDraw) childCostumeDraw(ctx);
+  // v12.18 — head + body 슬롯 동시 렌더.
+  const childCostumeDraws = getCompanionCostumeDraws('child');
+  for(const d of childCostumeDraws) d(ctx);
   ctx.restore();
 }
 // Legacy shim — older code paths still call initStage(). Routes to initChapter for the wave system.
@@ -6704,25 +7009,27 @@ const BOSS_VARIANTS = {
   phantom:         { hpMult:14.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주',       baseStyle:'phantom',   baseBehavior:'phantom' },
   phoenix:         { hpMult:14.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조',       baseStyle:'phoenix',   baseBehavior:'phoenix' },
   void:            { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제',       baseStyle:'void',      baseBehavior:'void' },                                       // ch50
-  // === 원정 Ⅱ — 비둘기 행성 (companion: wife). 5챕터마다 변종 변경. ===
-  pigeon_warlord:  { hpMult:13.5, dmgMult:1.35, sizeMult:1.05, label:'깃털 군주',         baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:320, saturate:1.2 },     // 51-55
-  pigeon_oracle:   { hpMult:14.0, dmgMult:1.40, sizeMult:1.05, label:'예언의 비둘기',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:300, saturate:1.0 },     // 56-60
-  pigeon_general:  { hpMult:14.5, dmgMult:1.45, sizeMult:1.10, label:'행성 사령관',       baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:280, saturate:1.1 },     // 61-65
-  pigeon_emperor:  { hpMult:15.5, dmgMult:1.60, sizeMult:1.25, label:'비둘기 행성 군주',   baseStyle:'void',      baseBehavior:'void',      hueShift:320, saturate:1.1 },     // 66-70
-  // === 원정 Ⅲ — 우주 ===
-  star_devourer:   { hpMult:20.0, dmgMult:1.55, sizeMult:1.15, label:'별 포식자',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:50,  saturate:1.4 },     // 71-75
-  nebula_serpent:  { hpMult:21.0, dmgMult:1.60, sizeMult:1.18, label:'성운의 뱀',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:280, saturate:1.2 },     // 76-80
-  black_hole_lord: { hpMult:22.0, dmgMult:1.65, sizeMult:1.20, label:'블랙홀 군주',       baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:0.4 },     // 81-85
-  cosmic_arbiter:  { hpMult:23.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.4 },     // 86-90
-  void_titan:      { hpMult:24.0, dmgMult:1.75, sizeMult:1.25, label:'보이드 타이탄',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:260, saturate:1.2 },     // 91-95
-  omega:           { hpMult:25.0, dmgMult:1.85, sizeMult:1.32, label:'오메가 — 우주의 주재자', baseStyle:'void',  baseBehavior:'void',      hueShift:60,  saturate:1.3 },     // 96-100
-  // === 원정 Ⅳ — 지옥 구출 원정 ===
-  hell_houndmaster:    { hpMult:26.0, dmgMult:1.70, sizeMult:1.20, label:'사냥개의 주인',  baseStyle:'tyrant',  baseBehavior:'tyrant',  hueShift:0,   saturate:1.4 },          // 101-105
-  flame_overlord:      { hpMult:27.0, dmgMult:1.75, sizeMult:1.22, label:'화염 군주',      baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:0,   saturate:1.3 },          // 106-110
-  bone_archon:         { hpMult:28.0, dmgMult:1.80, sizeMult:1.24, label:'해골 대천사',    baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:0.3 },          // 111-115
-  shadow_inquisitor:   { hpMult:29.0, dmgMult:1.85, sizeMult:1.22, label:'그림자 심판관',  baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:1.5 },          // 116-120
-  infernal_seraph:     { hpMult:30.0, dmgMult:1.90, sizeMult:1.26, label:'잿불의 천사',    baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:30,  saturate:1.1 },          // 121-125
-  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.00, sizeMult:1.35, label:'지옥문의 군주',  baseStyle:'void',    baseBehavior:'void',    hueShift:340, saturate:1.4 },          // 126-130 (게임 최종)
+  // === 원정 Ⅱ — 비둘기 행성 (companion: wife). v12.18 hpMult/dmgMult 단조증가 보정. ===
+  // 이전 13.5/1.35 → 17.0/1.70 등으로 상향. 사용자 명령 "챕터 올라갈수록 더 어려워지는지" 반영.
+  // Ch50 void (16.0/1.70) → Ch51 pigeon_warlord 가 보스 HP 13% 떨어지는 회귀 버그 수정.
+  pigeon_warlord:  { hpMult:17.0, dmgMult:1.70, sizeMult:1.05, label:'깃털 군주',         baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:320, saturate:1.2 },     // 51-55
+  pigeon_oracle:   { hpMult:17.5, dmgMult:1.75, sizeMult:1.05, label:'예언의 비둘기',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:300, saturate:1.0 },     // 56-60
+  pigeon_general:  { hpMult:18.0, dmgMult:1.80, sizeMult:1.10, label:'행성 사령관',       baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:280, saturate:1.1 },     // 61-65
+  pigeon_emperor:  { hpMult:18.5, dmgMult:1.90, sizeMult:1.25, label:'비둘기 행성 군주',   baseStyle:'void',      baseBehavior:'void',      hueShift:320, saturate:1.1 },     // 66-70
+  // === 원정 Ⅲ — 우주. dmgMult 단조증가 보정 (이전 1.55~1.85 → 1.95~2.25). ===
+  star_devourer:   { hpMult:20.0, dmgMult:1.95, sizeMult:1.15, label:'별 포식자',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:50,  saturate:1.4 },     // 71-75
+  nebula_serpent:  { hpMult:21.0, dmgMult:2.00, sizeMult:1.18, label:'성운의 뱀',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:280, saturate:1.2 },     // 76-80
+  black_hole_lord: { hpMult:22.0, dmgMult:2.05, sizeMult:1.20, label:'블랙홀 군주',       baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:0.4 },     // 81-85
+  cosmic_arbiter:  { hpMult:23.0, dmgMult:2.10, sizeMult:1.20, label:'우주의 심판자',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.4 },     // 86-90
+  void_titan:      { hpMult:24.0, dmgMult:2.15, sizeMult:1.25, label:'보이드 타이탄',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:260, saturate:1.2 },     // 91-95
+  omega:           { hpMult:25.0, dmgMult:2.25, sizeMult:1.32, label:'오메가 — 우주의 주재자', baseStyle:'void',  baseBehavior:'void',      hueShift:60,  saturate:1.3 },     // 96-100
+  // === 원정 Ⅳ — 지옥. dmgMult 단조증가 보정 (이전 1.70~2.00 → 2.30~2.65). ===
+  hell_houndmaster:    { hpMult:26.0, dmgMult:2.30, sizeMult:1.20, label:'사냥개의 주인',  baseStyle:'tyrant',  baseBehavior:'tyrant',  hueShift:0,   saturate:1.4 },          // 101-105
+  flame_overlord:      { hpMult:27.0, dmgMult:2.35, sizeMult:1.22, label:'화염 군주',      baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:0,   saturate:1.3 },          // 106-110
+  bone_archon:         { hpMult:28.0, dmgMult:2.40, sizeMult:1.24, label:'해골 대천사',    baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:0.3 },          // 111-115
+  shadow_inquisitor:   { hpMult:29.0, dmgMult:2.45, sizeMult:1.22, label:'그림자 심판관',  baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:1.5 },          // 116-120
+  infernal_seraph:     { hpMult:30.0, dmgMult:2.50, sizeMult:1.26, label:'잿불의 천사',    baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:30,  saturate:1.1 },          // 121-125
+  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.65, sizeMult:1.35, label:'지옥문의 군주',  baseStyle:'void',    baseBehavior:'void',    hueShift:340, saturate:1.4 },          // 126-130 (게임 최종)
 };
 function bossBaseStyleFor(variant){
   const v = BOSS_VARIANTS[variant];
@@ -10893,24 +11200,32 @@ document.getElementById('shopTabSkill').addEventListener('click', ()=> setShopTa
 document.getElementById('shopTabCostume').addEventListener('click', ()=> setShopTab('costume'));
 document.getElementById('shopTabSkin').addEventListener('click', ()=> setShopTab('skin'));
 // Costume slot tabs (머리/몸통/무기) — delegated since the grid is re-rendered.
+// v12.18 — 동료 서브탭 (wife/child head/body) 과 분리. data-companion 가 없는 husband 탭만 처리.
 document.addEventListener('click', e => {
   const tab = e.target.closest('.cos-slot-tab');
-  if(tab && tab.dataset.slot) setCosBrowseSlot(tab.dataset.slot);
+  if(!tab || !tab.dataset.slot) return;
+  if(tab.closest('.cos-slot-tabs[data-companion]')) return;  // 동료 서브탭은 별도 핸들러
+  setCosBrowseSlot(tab.dataset.slot);
 });
 // v12.10 Phase 2 — 캐릭터 탭 (player/wife/child) 클릭 핸들러 (delegated).
 document.addEventListener('click', e => {
   const ct = e.target.closest('#cosCharTabs button[data-char]');
   if(!ct) return;
   const target = ct.dataset.char;
-  // 잠긴 동료 탭 클릭 시 안내 토스트.
   const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
   const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
+  const rescuedOk = progress.companionUnlocks && (typeof RESCUED_KINDS !== 'undefined') &&
+    RESCUED_KINDS.every(k => progress.companionUnlocks[k]);
   if(target === 'wife' && !wifeOk){
     state.toastBanner = { text:'🔒 아내 비둘기 잠금', sub:'원정 Ⅱ ch51 클리어 시 합류', t:2.0, maxT:2.0, tone:'warn' };
     return;
   }
   if(target === 'child' && !childOk){
     state.toastBanner = { text:'🔒 아기 비둘기 잠금', sub:'원정 Ⅱ ch60 클리어 시 합류', t:2.0, maxT:2.0, tone:'warn' };
+    return;
+  }
+  if(target === 'rescued' && !rescuedOk){
+    state.toastBanner = { text:'🔒 구출 친구 세트 잠금', sub:'원정 Ⅳ Ch125 까지 진행 시 활성', t:2.4, maxT:2.4, tone:'warn' };
     return;
   }
   state.cosCharTab = target;
@@ -11033,8 +11348,26 @@ for(const expId of [1,2,3,4]){
 }
 document.getElementById('retryBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); startGame(state.chapter); });
 document.getElementById('goTitleBtn').addEventListener('click', ()=>{ document.getElementById('gameOver').classList.add('hidden'); backToTitle(); });
-document.getElementById('vAgainBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); startGame(1); });
-document.getElementById('vHomeBtn').addEventListener('click', ()=>{ document.getElementById('victory').classList.add('hidden'); backToTitle(); });
+document.getElementById('vAgainBtn').addEventListener('click', ()=>{
+  const vm = document.getElementById('victory');
+  vm.classList.add('hidden'); vm.classList.remove('v-replay');
+  state._cinematicReplayMode = false;
+  startGame(1);
+});
+document.getElementById('vHomeBtn').addEventListener('click', ()=>{
+  const vm = document.getElementById('victory');
+  vm.classList.add('hidden'); vm.classList.remove('v-replay');
+  state._cinematicReplayMode = false;
+  backToTitle();
+});
+// v12.18 — replay 전용 "🔙 챕터 선택으로" 버튼 핸들러. 시네마틱 다시보기 후 챕터 셀렉트로 복귀.
+document.getElementById('vBackBtn').addEventListener('click', ()=>{
+  const vm = document.getElementById('victory');
+  vm.classList.add('hidden'); vm.classList.remove('v-replay');
+  state._cinematicReplayMode = false;
+  // 챕터 셀렉트 다시 표시 (챕터 선택 화면이 hidden 처리되어 있었음).
+  document.getElementById('chapterSelect').classList.remove('hidden');
+});
 // v12.10 — 다음 원정 직진 버튼. 현재 시네마틱이 표시 중인 챕터 + 1로 게임 시작.
 document.getElementById('vNextExpBtn').addEventListener('click', ()=>{
   document.getElementById('victory').classList.add('hidden');
@@ -11143,6 +11476,7 @@ function renderCinematicReplayRow(){
 
 // v12.13 — 원정 Ⅳ 오프닝 다시보기. showHellPrologue를 챕터 셀렉트에서 직접 호출.
 function replayHellPrologue(){
+  state._cinematicReplayMode = true;
   document.getElementById('chapterSelect').classList.add('hidden');
   showHellPrologue();
 }
@@ -11153,14 +11487,18 @@ function replayCinematic(ch){
   state.scene = 'victory';
   state.chapter = ch;
   state.victoryExpeditionId = expeditionFor(ch).id;
+  // v12.18 — replay 모드 플래그. CSS .v-replay 토글로 "🔁 처음부터 다시" 숨기고 "🔙 챕터 선택으로"
+  // 노출. 사용자 명령 "엔딩 다시보기 클릭하면 뒤로가기 버튼도 없고".
+  state._cinematicReplayMode = true;
   // 시네마틱 캐시 리셋 — bowEnemies 등이 이전 시청 세션에서 유지되지 않도록.
   if(typeof _victory !== 'undefined'){ _victory.bowEnemies = null; _victory.fireworks = []; _victory.confetti = []; }
   renderVictory(ch >= MAX_CHAPTERS);
   document.getElementById('chapterSelect').classList.add('hidden');
-  // v12.11 — 시네마틱 다시보기에서도 HUD 숨김 (HUD가 hidden 상태에서 진입했더라도
-  // 호환성을 위해 명시적으로 add).
+  // v12.11 — 시네마틱 다시보기에서도 HUD 숨김.
   document.getElementById('hud').classList.add('hidden');
-  document.getElementById('victory').classList.remove('hidden');
+  const vm = document.getElementById('victory');
+  vm.classList.add('v-replay');
+  vm.classList.remove('hidden');
   sfxVictory();
 }
 
@@ -11373,51 +11711,200 @@ function renderCompanionCostumeSection(){
   // 캐릭터 탭 가시성 — 동료가 해금된 경우에만 탭 표시.
   const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
   const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
+  // v12.18 — 구출 친구 세트는 5명 모두 합류 시(Ch125 클리어 후) 활성.
+  const rescuedOk = progress.companionUnlocks && RESCUED_KINDS.every(k => progress.companionUnlocks[k]);
   const tabBar = document.getElementById('cosCharTabs');
   if(tabBar){
     const wifeTab = tabBar.querySelector('button[data-char="wife"]');
     const childTab = tabBar.querySelector('button[data-char="child"]');
+    const rescuedTab = tabBar.querySelector('button[data-char="rescued"]');
     if(wifeTab) wifeTab.style.display = wifeOk ? '' : 'none';
     if(childTab) childTab.style.display = childOk ? '' : 'none';
-    // 잠긴 동료 탭이 활성화되어 있다면 player로 fallback.
-    if((state.cosCharTab === 'wife' && !wifeOk) || (state.cosCharTab === 'child' && !childOk)){
+    if(rescuedTab) rescuedTab.style.display = rescuedOk ? '' : 'none';
+    if((state.cosCharTab === 'wife' && !wifeOk) ||
+       (state.cosCharTab === 'child' && !childOk) ||
+       (state.cosCharTab === 'rescued' && !rescuedOk)){
       state.cosCharTab = 'player';
     }
-    // 활성 표시
     for(const b of tabBar.querySelectorAll('button[data-char]')){
       b.classList.toggle('on', b.dataset.char === state.cosCharTab);
     }
   }
-  // 블록 가시성 — 활성 캐릭터 블록만 노출.
   const playerBlock = document.getElementById('playerCostumeBlock');
   const wifeBlock = document.getElementById('wifeCostumeBlock');
   const childBlock = document.getElementById('childCostumeBlock');
-  if(playerBlock) playerBlock.style.display = state.cosCharTab === 'player' ? '' : 'none';
-  if(wifeBlock)   wifeBlock.style.display   = state.cosCharTab === 'wife'   ? '' : 'none';
-  if(childBlock)  childBlock.style.display  = state.cosCharTab === 'child'  ? '' : 'none';
-  // 동료 그리드 렌더 (active 캐릭터에 한해서만 그린다).
+  const rescuedBlock = document.getElementById('rescuedCostumeBlock');
+  if(playerBlock)  playerBlock.style.display  = state.cosCharTab === 'player'  ? '' : 'none';
+  if(wifeBlock)    wifeBlock.style.display    = state.cosCharTab === 'wife'    ? '' : 'none';
+  if(childBlock)   childBlock.style.display   = state.cosCharTab === 'child'   ? '' : 'none';
+  if(rescuedBlock) rescuedBlock.style.display = state.cosCharTab === 'rescued' ? '' : 'none';
   if(state.cosCharTab === 'wife' && wifeOk)   renderCompanionGrid('wife',  'wifeCostumeGrid');
   if(state.cosCharTab === 'child' && childOk) renderCompanionGrid('child', 'childCostumeGrid');
+  if(state.cosCharTab === 'rescued' && rescuedOk) renderRescuedSetGrid();
 }
+
+// v12.18 — 구출 친구 세트 그리드. 3개 세트 카드, 각 카드는 "5종 일괄 구매/장착/해제".
+function renderRescuedSetGrid(){
+  const grid = document.getElementById('rescuedSetGrid');
+  if(!grid) return;
+  _ensureRescuedCompanionCostumes();
+  const activeId = getActiveRescuedSetId();
+  grid.innerHTML = '';
+  for(const setDef of RESCUED_SET_DEFS){
+    // 보유 여부 — 5명 모두 이 세트의 코스튬을 unlocked 에 가지고 있어야 보유로 판정.
+    let ownedCount = 0;
+    for(const k of RESCUED_KINDS){
+      const slot = progress.companionCostumes[k];
+      if(slot && slot.unlocked && slot.unlocked.includes(setDef.id + '_' + k)) ownedCount++;
+    }
+    const fullyOwned = ownedCount === 5;
+    const isActive = activeId === setDef.id;
+    const remaining = 5 - ownedCount;
+    const totalCost = remaining * setDef.costPerPiece;
+    const affordable = (progress.coins||0) >= totalCost;
+    const card = document.createElement('div');
+    const border = isActive ? setDef.accent : (fullyOwned ? '#A5D8FF' : '#495057');
+    card.style.cssText = `border:2px solid ${border};border-radius:14px;padding:12px 14px;background:linear-gradient(180deg,rgba(40,15,70,.6),rgba(15,2,30,.85));display:flex;flex-direction:column;gap:8px;`;
+    // 헤더 — 이름 + 효과
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+    const perPct = Math.round((setDef.perPieceBoost - 1) * 100 * 10) / 10;  // 1자리 소수
+    const setPct = Math.round((setDef.setBonus - 1) * 100 * 10) / 10;
+    const fullPct = Math.round((Math.pow(setDef.perPieceBoost, 5) * setDef.setBonus - 1) * 100 * 10) / 10;
+    header.innerHTML = `
+      <span style="font-size:18px;">${setDef.icon}</span>
+      <span style="font-weight:900;color:${setDef.accent};font-size:14px;">${setDef.name}</span>
+      ${isActive ? '<span style="font-size:10px;color:#A9E34B;font-weight:900;">✓ 풀세트 발동 중</span>' : ''}
+    `;
+    card.appendChild(header);
+    const desc = document.createElement('div');
+    desc.style.cssText = 'font-size:11px;color:#FFF9DB;opacity:.85;line-height:1.45;';
+    desc.innerHTML = `${setDef.description}<br>
+      <span style="color:#74C0FC;">각 코스튬</span> +${perPct}% 친구 DPS ·
+      <span style="color:#FFE066;">풀세트 보너스</span> ×${setDef.setBonus.toFixed(2)} (
+      <b style="color:${setDef.accent};">합산 +${fullPct}%</b>)`;
+    card.appendChild(desc);
+    // 5명 미니 프리뷰
+    const previewRow = document.createElement('div');
+    previewRow.style.cssText = 'display:flex;justify-content:space-around;gap:4px;background:rgba(0,0,0,.25);border-radius:10px;padding:6px 4px;';
+    for(const k of RESCUED_KINDS){
+      const cell = document.createElement('div');
+      cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;';
+      const cv = document.createElement('canvas');
+      cv.style.cssText = 'width:46px;height:54px;background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.12) 0%, rgba(20,8,40,.3) 70%);border-radius:6px;';
+      cell.appendChild(cv);
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:9px;color:#FFE066;font-weight:700;';
+      lbl.textContent = ({sparrow:'참새', magpie:'까치', owl:'부엉이', parrot:'앵무새', squirrel:'다람쥐'})[k];
+      cell.appendChild(lbl);
+      previewRow.appendChild(cell);
+      drawRescuedFriendPreview(cv, k, setDef.id + '_' + k);
+    }
+    card.appendChild(previewRow);
+    // 액션 버튼
+    const btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
+    if(fullyOwned){
+      const eqBtn = document.createElement('button');
+      eqBtn.className = 'btn';
+      eqBtn.style.cssText = `flex:1;min-width:120px;background:linear-gradient(180deg,${setDef.accent},rgba(0,0,0,.5));`;
+      eqBtn.textContent = isActive ? '✓ 착용 중 (해제)' : '🔄 일괄 장착';
+      eqBtn.addEventListener('click', () => {
+        if(isActive) unequipRescuedSet();
+        else equipRescuedSet(setDef.id);
+        renderCompanionCostumeSection();
+      });
+      btnRow.appendChild(eqBtn);
+    } else {
+      const buyBtn = document.createElement('button');
+      buyBtn.className = 'btn';
+      buyBtn.style.cssText = `flex:1;min-width:120px;background:linear-gradient(180deg,${affordable?'#FFD43B':'#495057'},${affordable?'#F76707':'#212529'});${affordable?'':'opacity:.7;'}`;
+      const haveLabel = ownedCount > 0 ? ` (보유 ${ownedCount}/5 · 잔여 ${remaining}종)` : ' (5종 일괄)';
+      buyBtn.textContent = `🪙 ${totalCost.toLocaleString()} — 구매${haveLabel}`;
+      buyBtn.addEventListener('click', () => {
+        const r = buyRescuedSet(setDef.id);
+        if(!r.ok){
+          state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:2.0, maxT:2.0, tone:'warn' };
+        } else {
+          sfxLevelUp();
+          state.toastBanner = { text:`✨ ${setDef.name} 일괄 구매!`, sub:`-${r.cost.toLocaleString()} 🪙 → 5명 일괄 장착`, t:2.4, maxT:2.4, tone:'critical' };
+        }
+        renderCompanionCostumeSection();
+        const sc = document.getElementById('shopCoinTxt');
+        if(sc) sc.textContent = (progress.coins||0).toLocaleString();
+      });
+      btnRow.appendChild(buyBtn);
+    }
+    card.appendChild(btnRow);
+    grid.appendChild(card);
+  }
+}
+
+// v12.18 — 구출 친구 미니 프리뷰. 작은 46×54 canvas 에 친구 + 세트 코스튬 합성.
+function drawRescuedFriendPreview(cv, kind, costumeId){
+  const ctx2 = cv.getContext('2d');
+  const cssW = 46, cssH = 54;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if(cv.width !== cssW * dpr || cv.height !== cssH * dpr){
+    cv.width = cssW * dpr;
+    cv.height = cssH * dpr;
+  }
+  cv.style.width = cssW + 'px';
+  cv.style.height = cssH + 'px';
+  ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx2.imageSmoothingQuality = 'high';
+  ctx2.clearRect(0, 0, cssW, cssH);
+  if(!progress.companionCostumes[kind]) progress.companionCostumes[kind] = { unlocked:[], equipped:{head:null, body:null} };
+  const slot = progress.companionCostumes[kind];
+  _normalizeCompanionEquipped(slot, kind);
+  const prev = { head: slot.equipped.head, body: slot.equipped.body };
+  slot.equipped = { head: prev.head, body: costumeId };
+  // 그림자 하단 y=21 의 친구를 cssH-6 ground 에 발 맞춤. friend 는 내부 0.42~0.46 스케일.
+  const groundY = cssH - 6;
+  const previewScale = 0.85;  // 작은 canvas 기준으로 친구는 충분히 크게.
+  ctx2.save();
+  // 모든 friend 가 같은 _baseFriendShadow 좌표(y=18) 사용. 친구별 내부 scale 다름 → bottomLocal
+  // = 18 + 3 (shadow radius) = 21. friend 의 추가 scale (0.42~0.46) 은 각 draw 함수 내에서 적용.
+  // preview-scale 0.85 로 더 키워주면 칸을 채움.
+  ctx2.translate(cssW/2, groundY - previewScale * 21 * 0.46);
+  ctx2.scale(previewScale, previewScale);
+  const drawFn = ({sparrow:drawSparrowFriend, magpie:drawMagpieFriend, owl:drawOwlFriend, parrot:drawParrotFriend, squirrel:drawSquirrelFriend})[kind];
+  if(drawFn) drawFn(ctx2, { x:0, y:0, kind, phaseSeed:0 });
+  ctx2.restore();
+  slot.equipped = prev;
+}
+
+// v12.18 — 동료별 활성 슬롯 (head/body) 추적. 사용자 명령 "탭으로 구분해서 각각 1개씩 고르게".
+if(!state.cosCompanionSlot) state.cosCompanionSlot = { wife:'head', child:'head' };
 
 function renderCompanionGrid(kind, gridId){
   const grid = document.getElementById(gridId);
   if(!grid) return;
   const slot = progress.companionCostumes[kind];
+  _normalizeCompanionEquipped(slot, kind);
   const list = COMPANION_COSTUMES[kind];
   const themeBorder = kind==='wife' ? '#FFB4D8' : '#A5D8FF';
   const themeAccent = kind==='wife' ? '#D63384' : '#1864AB';
+  // 활성 슬롯 (사용자가 머리/옷 탭 클릭으로 토글). 기본 head.
+  const activeSk = state.cosCompanionSlot[kind] || 'head';
+  // 슬롯 탭 활성 표시 동기화.
+  const tabBar = document.querySelector(`.cos-slot-tabs[data-companion="${kind}"]`);
+  if(tabBar){
+    for(const b of tabBar.querySelectorAll('button[data-slot]')){
+      b.classList.toggle('on', b.dataset.slot === activeSk);
+    }
+  }
   grid.innerHTML = '';
-  for(const def of list){
+  // 활성 슬롯의 코스튬만 그리드에 표시 — 사용자 헷갈림 제거.
+  const sub = list.filter(c => (c.slot || 'head') === activeSk);
+  for(const def of sub){
     const owned = slot.unlocked.includes(def.id);
-    const equipped = slot.equipped === def.id;
+    const equipped = slot.equipped[activeSk] === def.id;
     const affordable = (progress.coins||0) >= def.cost;
     const card = document.createElement('div');
     const colorBorder = equipped ? themeAccent : owned ? themeBorder : (affordable ? '#FFD43B' : '#495057');
     const opacityRule = owned ? '' : (affordable ? '' : 'opacity:.55;');
     card.style.cssText = `cursor:pointer;background:rgba(40,15,70,.55);border:2px solid ${colorBorder};border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;${opacityRule}`;
-    // Live preview canvas — actual companion shape with this costume.
-    // v12.17 — width/height 는 drawCompanionCostumePreview 에서 DPR 곱해 set. 여기는 style 만.
     const cv = document.createElement('canvas');
     cv.style.cssText = 'width:72px;height:88px;background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.18) 0%, rgba(20,8,40,.35) 70%);border-radius:8px;display:block;';
     card.appendChild(cv);
@@ -11440,7 +11927,8 @@ function renderCompanionGrid(kind, gridId){
     card.appendChild(status);
     card.addEventListener('click', () => {
       if(owned){
-        slot.equipped = def.id;
+        if(slot.equipped[activeSk] === def.id) slot.equipped[activeSk] = null;
+        else slot.equipped[activeSk] = def.id;
         saveProgress();
         renderCompanionCostumeSection();
       } else {
@@ -11448,7 +11936,7 @@ function renderCompanionGrid(kind, gridId){
         if(!r.ok){
           state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:1.8, maxT:1.8, tone:'warn' };
         } else {
-          slot.equipped = def.id;
+          slot.equipped[activeSk] = def.id;
           saveProgress();
           sfxLevelUp();
           state.toastBanner = { text:`✨ ${def.name} 구매!`, sub:`-${def.cost.toLocaleString()} 🪙 → 즉시 장착`, t:2.0, maxT:2.0, tone:'critical' };
@@ -11459,10 +11947,20 @@ function renderCompanionGrid(kind, gridId){
       }
     });
     grid.appendChild(card);
-    // Render preview after attaching to DOM (canvas needs sizing).
     drawCompanionCostumePreview(cv, kind, def.id);
   }
 }
+// v12.18 — 동료 코스튬 head/body 서브탭 클릭 핸들러 (delegated).
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.cos-slot-tabs[data-companion] button[data-slot]');
+  if(!btn) return;
+  const tabBar = btn.closest('.cos-slot-tabs[data-companion]');
+  const kind = tabBar.dataset.companion;
+  const sk = btn.dataset.slot;
+  if(!state.cosCompanionSlot) state.cosCompanionSlot = { wife:'head', child:'head' };
+  state.cosCompanionSlot[kind] = sk;
+  renderCompanionCostumeSection();
+});
 
 // v12.17 — 상점 코스튬 미리보기. 사용자 명령 "다른 코스튬이랑 지면 위치가 동일하게 + 해상도
 // 깨지게 하지마". 두 가지 핵심 수정:
@@ -11477,7 +11975,6 @@ function drawCompanionCostumePreview(cv, kind, costumeId){
   const ctx2 = cv.getContext('2d');
   const cssW = 72, cssH = 88;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  // 항상 buffer + style 을 DPR 기준으로 sync. 한 프레임짜리 흐림 방지.
   if(cv.width !== cssW * dpr || cv.height !== cssH * dpr){
     cv.width = cssW * dpr;
     cv.height = cssH * dpr;
@@ -11489,8 +11986,14 @@ function drawCompanionCostumePreview(cv, kind, costumeId){
   ctx2.imageSmoothingQuality = 'high';
   ctx2.clearRect(0, 0, cssW, cssH);
   const slot = progress.companionCostumes[kind];
-  const prev = slot.equipped;
-  slot.equipped = costumeId;
+  _normalizeCompanionEquipped(slot, kind);
+  // v12.18 — preview 시 미리보는 슬롯만 해당 코스튬으로, 다른 슬롯은 현재 장착중 유지 → 두 슬롯
+  // 동시 착용 외관을 카드에서도 미리 볼 수 있게.
+  const prev = { head: slot.equipped.head, body: slot.equipped.body };
+  const list = COMPANION_COSTUMES[kind] || [];
+  const def = list.find(c => c.id === costumeId);
+  const sk = (def && def.slot) || 'head';
+  slot.equipped = { head: prev.head, body: prev.body, [sk]: costumeId };
   // 공통 ground line (모든 wife/child 카드 동일). 카드 footer 에서 8px 위.
   const groundY = cssH - 8;
   const previewScale = 0.65;
@@ -11513,6 +12016,18 @@ function drawCompanionCostumePreview(cv, kind, costumeId){
   }
   ctx2.restore();
   slot.equipped = prev;
+}
+
+function _ensureRescuedCompanionCostumes(){
+  // v12.18 — 구출 친구들에게도 기본 슬롯 init. 저장된 프로그레스에 미존재 시 만든다.
+  if(!progress.companionCostumes) return;
+  for(const k of (typeof RESCUED_KINDS !== 'undefined' ? RESCUED_KINDS : [])){
+    if(!progress.companionCostumes[k]){
+      progress.companionCostumes[k] = { unlocked:[], equipped:{ head:null, body:null } };
+    } else {
+      _normalizeCompanionEquipped(progress.companionCostumes[k], k);
+    }
+  }
 }
 
 function renderEquipRow(){
