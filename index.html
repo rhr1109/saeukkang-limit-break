@@ -5876,15 +5876,13 @@ function update(dt){
       spawnEnemy(kind);
     }
     // Boss spawns at the end of wave 3 (= waveTimes[2]).
-    // v11.4: skip the rest of wave 3 when the player has fully maxed every available upgrade —
-    // grinding more XP from this point is wasted (level-ups silently no-op once allMaxed) so we
-    // jump straight to the boss instead of making them wait out the timer.
+    // v11.4: if the player has fully maxed every available upgrade, jump straight to the boss
+    // regardless of which wave the timer is on — further wave time is dead time (XP gains
+    // can't level them up). Applies to wave 2 *and* wave 3, since hitting max in wave 2 used
+    // to leave the player idling until wave 3 timer ran out.
     if(state.chapterTime >= wt[2]){
       spawnBoss();
-    } else if(state.wave === 3 && state.player){
-      // spawnBoss replaces state.toastBanner with its own boss-arrival banner — the player
-      // already knows they triggered this (they just picked the last card), so a separate
-      // "full build achieved" toast would just compete with the boss banner.
+    } else if(state.player){
       const allMaxed = UPGRADES.filter(isUpgradeUnlocked).every(u => isUpgradeMaxed(u, state.player));
       if(allMaxed) spawnBoss();
     }
