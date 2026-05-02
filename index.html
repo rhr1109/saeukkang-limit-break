@@ -792,12 +792,12 @@
       <h2>챕터 선택</h2>
       <div style="width:40px;"></div>
     </div>
-    <!-- v12.5 — 원정 선택 탭. 클리어 진척도에 따라 원정 Ⅱ(ch50 cleared)와 원정 Ⅲ(ch70 cleared)
-         가 잠금 해제. 잠긴 원정 탭은 비활성 + 잠금 라벨 노출. -->
+    <!-- v12.5/v12.11 — 원정 선택 탭. ch50/70/100 클리어 시 원정 Ⅱ/Ⅲ/Ⅳ 해금. -->
     <div class="cs-tabs" id="csExpTabs">
       <button class="cs-tab on" id="csExpTab1" type="button" data-exp="1">🌍 원정 Ⅰ</button>
       <button class="cs-tab" id="csExpTab2" type="button" data-exp="2">🪐 원정 Ⅱ</button>
       <button class="cs-tab" id="csExpTab3" type="button" data-exp="3">🌌 원정 Ⅲ</button>
+      <button class="cs-tab" id="csExpTab4" type="button" data-exp="4">🔥 원정 Ⅳ</button>
     </div>
     <!-- v12.10 — 원정 끝 챕터(50/70/100)를 클리어한 사용자가 시네마틱 엔딩을 다시 볼 수 있는 영역.
          클리어된 원정 끝마다 버튼이 노출됨. -->
@@ -1376,6 +1376,38 @@ const BGM_CHAPTER_PACKS = [
   { label:'무한 회랑',     bars:[['D4','F4','A4','D5'],['Eb4','G4','Bb4','Eb5'],['F4','A4','C5','F5'],['G4','Bb4','D5','G5']], interval:128, wave:'sawtooth', bassShift:'3', vol:.14 },
   { label:'절대자의 방',   bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:115, wave:'sawtooth', bassShift:'3', vol:.15 },
   { label:'우주의 주재자', bars:[['C4','E4','G4','C5'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['C5','E5','G5','C5']], interval:100, wave:'sawtooth', bassShift:'3', vol:.16 },
+  // === 원정 Ⅳ — 지옥 구출 원정 (101-130). v12.11. Sawtooth + minor/diminished chords,
+  // dread 100-150ms tempo. 5챕터 단위로 분위기가 더 무거워지며, 마지막 ch130은 100ms ===
+  { label:'지옥문 통과',     bars:[['D3','F3','A3','D4'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4'],['A3','C4','E4','A4']], interval:140, wave:'sawtooth', bassShift:'3', vol:.14 },
+  { label:'검은 강 나루터',  bars:[['E3','G3','B3','E4'],['Bb3','D4','F4','Bb4'],['F3','Ab3','C4','F4'],['A3','C#4','E4','A4']], interval:135, wave:'sawtooth', bassShift:'3', vol:.14 },
+  { label:'심판의 광장',     bars:[['F3','Ab3','C4','F4'],['Bb3','D4','F4','Bb4'],['Eb3','G3','Bb3','Eb4'],['G3','Bb3','D4','G4']], interval:130, wave:'sawtooth', bassShift:'3', vol:.14 },
+  { label:'죄수의 골목',     bars:[['A3','C4','E4','A4'],['F3','Ab3','C4','F4'],['Bb3','D4','F4','Bb4'],['E3','G3','B3','E4']], interval:138, wave:'sawtooth', bassShift:'3', vol:.14 },
+  { label:'사냥꾼의 숲',     bars:[['Eb3','G3','Bb3','Eb4'],['Bb3','D4','F4','Bb4'],['F3','Ab3','C4','F4'],['Ab3','C4','Eb4','Ab4']], interval:128, wave:'sawtooth', bassShift:'3', vol:.14 },
+  { label:'용암 분지',       bars:[['F3','A3','C4','F4'],['C4','Eb4','G4','C5'],['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4']], interval:125, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'화염 협곡',       bars:[['E3','G3','B3','E4'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4'],['A3','C#4','E4','A4']], interval:122, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'잿빛 다리',       bars:[['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4'],['F3','A3','C4','F4'],['Bb3','D4','F4','Bb4']], interval:140, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'심판자 신전',     bars:[['D4','F4','A4','D5'],['Bb3','D4','F4','Bb4'],['G3','Bb3','D4','G4'],['F3','A3','C4','F4']], interval:130, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'불의 광장',       bars:[['F3','A3','C4','F4'],['C4','Eb4','G4','C5'],['Bb3','D4','F4','Bb4'],['G3','Bb3','D4','G4']], interval:118, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'뼈의 평원',       bars:[['A3','C4','E4','A4'],['F3','A3','C4','F4'],['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4']], interval:135, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'해골 회랑',       bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:130, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'죽음의 시계탑',   bars:[['Bb3','D4','F4','Bb4'],['Eb3','G3','Bb3','Eb4'],['F3','Ab3','C4','F4'],['G3','Bb3','D4','G4']], interval:120, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'순장의 문',       bars:[['G3','B3','D4','G4'],['F3','A3','C4','F4'],['A3','C4','E4','A4'],['D4','F4','A4','D5']], interval:128, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'뼛가루 사막',     bars:[['F3','A3','C4','F4'],['Bb3','D4','F4','Bb4'],['Eb3','G3','Bb3','Eb4'],['Ab3','C4','Eb4','Ab4']], interval:125, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'그림자 대성당',   bars:[['E3','G3','B3','E4'],['Bb3','D4','F4','Bb4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4']], interval:118, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'검은 의회',       bars:[['D4','F4','A4','D5'],['G3','Bb3','D4','G4'],['F3','A3','C4','F4'],['A3','C4','E4','A4']], interval:130, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'거짓의 회랑',     bars:[['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4'],['F3','Ab3','C4','F4'],['Bb3','D4','F4','Bb4']], interval:135, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'심판의 옥좌',     bars:[['F3','A3','C4','F4'],['Bb3','D4','F4','Bb4'],['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4']], interval:120, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'그림자 전당',     bars:[['A3','C4','E4','A4'],['Bb3','D4','F4','Bb4'],['F3','Ab3','C4','F4'],['E3','G3','B3','E4']], interval:115, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'천사의 추락',     bars:[['G3','B3','D4','G4'],['F3','A3','C4','F4'],['Eb3','G3','Bb3','Eb4'],['Ab3','C4','Eb4','Ab4']], interval:130, wave:'square',   bassShift:'3', vol:.15 },
+  { label:'잿빛 천국',       bars:[['F4','A4','C5','F5'],['Bb3','D4','F4','Bb4'],['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4']], interval:135, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'금단의 화원',     bars:[['D4','F4','A4','D5'],['G3','Bb3','D4','G4'],['Bb3','D4','F4','Bb4'],['F3','A3','C4','F4']], interval:128, wave:'square',   bassShift:'3', vol:.15 },
+  { label:'잿불 우물',       bars:[['F3','A3','C4','F4'],['C4','Eb4','G4','C5'],['G3','Bb3','D4','G4'],['Bb3','D4','F4','Bb4']], interval:122, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'심연의 첨탑',     bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','Bb3','D4','G4'],['Bb3','D4','F4','Bb4']], interval:118, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'봉인된 지옥문',   bars:[['Eb3','G3','Bb3','Eb4'],['Ab3','C4','Eb4','Ab4'],['Bb3','D4','F4','Bb4'],['Eb4','G4','Bb4','Eb5']], interval:115, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'악마의 계약 광장',bars:[['F3','Ab3','C4','F4'],['Bb3','D4','F4','Bb4'],['G3','Bb3','D4','G4'],['Eb3','G3','Bb3','Eb4']], interval:112, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'구원의 다리',     bars:[['G4','B4','D5','G5'],['F4','A4','C5','F5'],['Bb3','D4','F4','Bb4'],['G3','Bb3','D4','G4']], interval:118, wave:'square',   bassShift:'3', vol:.15 },
+  { label:'마지막 심판',     bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:108, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'지옥문의 군주',   bars:[['D3','F3','Ab3','D4'],['Eb3','F#3','Bb3','Eb4'],['D3','Ab3','D4','Ab3'],['C#3','E3','G3','Bb3']], interval:96,  wave:'sawtooth', bassShift:'3', vol:.18 },
 ];
 // Title / chapter-select BGM — calm, hopeful arcade loop in C major.
 // Slightly louder than chapter packs so the menu feels alive the moment audio unlocks.
@@ -3370,19 +3402,27 @@ function drawTitlePigeonFrame(){
   // head fits with headroom AND legs/feet stay inside the canvas.
   const scale = Math.min(cssW, cssH) / 150;
   const cy = cssH * 0.55;
-  // v12.10 Phase 2 — 동료 비둘기가 해금되어 있으면 타이틀 화면에 가족이 같이 노출.
-  // 가운데 남편 + 좌측 아내 + 우측 아기. 화면 중앙 정렬을 유지하기 위해 가족 단위 폭에 맞게
-  // 그룹 중심을 cx로 두고 좌우로 오프셋. 동료가 한쪽만 해금된 경우에도 자연스럽게 균형.
+  // v12.11 Phase 2 hotfix — 동료가 너무 작아 보였던 문제 픽스. 타이틀 화면에서만 동료를
+  // 1.6배 크게 그린다. drawCompanion은 ctx 변환 위에서 호출하면 그대로 곱연산 적용됨.
   const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
   const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
-  // 동료는 0.65 스케일 + 위치 보정. 그룹 폭 ≈ 130px @ scale=1.
-  const offsetX = scale * 56;   // 가족 간격
+  const offsetX = scale * 70;
   drawPigeon(ctx2, cx, cy, scale, 1, state.time * 1.4, false, 1, fakePlayer);
+  // v12.11 hotfix — 1.6 → 2.0. 사용자 피드백 "너무 작다" 추가 반영.
+  const compScale = 2.0;
   if(wifeOk){
-    drawCompanion(ctx2, { x: cx - offsetX, y: cy + scale*8, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
+    ctx2.save();
+    ctx2.translate(cx - offsetX, cy + scale*4);
+    ctx2.scale(compScale, compScale);
+    drawCompanion(ctx2, { x:0, y:0, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
+    ctx2.restore();
   }
   if(childOk){
-    drawCompanion(ctx2, { x: cx + offsetX, y: cy + scale*14, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+    ctx2.save();
+    ctx2.translate(cx + offsetX, cy + scale*10);
+    ctx2.scale(compScale, compScale);
+    drawCompanion(ctx2, { x:0, y:0, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+    ctx2.restore();
   }
 }
 
@@ -4334,12 +4374,15 @@ const ULT_DAMAGE_PCT = 0.12;   // 12% of boss max HP per cast — 2 casts ≈ 24
 // CHAPTER_TIME_CAP: hard ceiling on a single chapter's playtime — early chapters cap at 10 min,
 // later chapters cap at 15 min so the gauntlet of ch11-50 has more breathing room.
 const WAVES_PER_CHAPTER = 3;
-const MAX_CHAPTERS = 100;
-// v12 expedition system — chapters split into three campaigns ending in unique cinematics.
+const MAX_CHAPTERS = 130;
+// v12 expedition system — chapters split into four campaigns ending in unique cinematics.
+// v12.11 — 원정 Ⅳ 추가: 지옥 원정. 억울하게 지옥에 끌려간 조류·조류 친화 동물들을
+// 구해내며 함께 싸우는 스토리. 원정 Ⅲ 끝(ch100) 클리어 시 해금.
 const EXPEDITIONS = [
-  { id:1, name:'원정 Ⅰ — 지구 정복', subtitle:'도시부터 지옥, 우주, 차원 너머까지 인류 영토 정복', range:[1,50],   theme:'earth' },
-  { id:2, name:'원정 Ⅱ — 비둘기 행성 정복', subtitle:'비둘기 별을 점령하고 가족을 이룬다', range:[51,70],  theme:'pigeon_planet' },
-  { id:3, name:'원정 Ⅲ — 우주 정복', subtitle:'우주 자체를 손에 넣는 마지막 원정', range:[71,100], theme:'cosmos' },
+  { id:1, name:'원정 Ⅰ — 지구 정복',         subtitle:'도시부터 지옥, 우주, 차원 너머까지 인류 영토 정복', range:[1,50],    theme:'earth' },
+  { id:2, name:'원정 Ⅱ — 비둘기 행성 정복',  subtitle:'비둘기 별을 점령하고 가족을 이룬다',               range:[51,70],   theme:'pigeon_planet' },
+  { id:3, name:'원정 Ⅲ — 우주 정복',         subtitle:'우주 자체를 손에 넣는 마지막 원정',                 range:[71,100],  theme:'cosmos' },
+  { id:4, name:'원정 Ⅳ — 지옥 구출 원정',    subtitle:'억울하게 지옥에 간 친구들을 구하러',                range:[101,130], theme:'hellfire_rescue' },
 ];
 function expeditionFor(c){
   for(const e of EXPEDITIONS){ if(c >= e.range[0] && c <= e.range[1]) return e; }
@@ -4365,11 +4408,10 @@ function chapterWaveTimes(c){
     each = 200;  cap = 1020;  // 3:20 waves → 10 min waves + 7 min boss = 17 min cap
   } else if(c <= 70){
     each = 140;  cap = 900;   // 원정 Ⅱ — 2:20 waves → 7분 + 8분 보스 = 15분 cap
-                              // 사용자 요청: 51부터 웨이브 시간 너무 길었음 → 200→140 단축, cap 18:20→15분
-  } else {
+  } else if(c <= 100){
     each = 170;  cap = 1200;  // 원정 Ⅲ — 2:50 waves → 8:30 + 11:30 보스 = 20분 cap
-                              // 사용자 요청: 캡 20분 이하. 기존 25분→20분, 웨이브 220→170s.
-                              // 보스 HP를 chapterMult 곡선에서 상향했기 때문에 보스 여유 시간은 충분.
+  } else {
+    each = 170;  cap = 1200;  // 원정 Ⅳ — 동일 ceiling (20분). 지옥 원정도 캡 20분 이내 유지.
   }
   return [each, each*2, each*3, cap];
 }
@@ -4425,7 +4467,15 @@ const CHAPTER_NAMES = [
   '시리우스 별','베텔게우스','적색거성','행성상 성운','백색왜성',
   '중성자별','펄사 폭풍','퀘이사','웜홀 경계','다중우주 입구',
   '평행 차원','시간의 강','우주 도서관','기원의 문','신성 의회',
-  '빅뱅 직전','우주 끝자락','무한 회랑','절대자의 방','우주의 주재자'
+  '빅뱅 직전','우주 끝자락','무한 회랑','절대자의 방','우주의 주재자',
+  // === 원정 Ⅳ — 지옥 구출 원정 (101-130) ===
+  // 5챕터 단위로 보스 변종 + 동료 구출 이벤트 묶음.
+  '지옥문 통과','검은 강 나루터','심판의 광장','죄수의 골목','사냥꾼의 숲',           // 101-105 hell_houndmaster + 첫 동료 (참새 구출)
+  '용암 분지','화염 협곡','잿빛 다리','심판자 신전','불의 광장',                        // 106-110 flame_overlord + 까치 구출
+  '뼈의 평원','해골 회랑','죽음의 시계탑','순장의 문','뼛가루 사막',                   // 111-115 bone_archon + 부엉이 구출
+  '그림자 대성당','검은 의회','거짓의 회랑','심판의 옥좌','그림자 전당',               // 116-120 shadow_inquisitor + 앵무새 구출
+  '천사의 추락','잿빛 천국','금단의 화원','잿불 우물','심연의 첨탑',                   // 121-125 infernal_seraph + 다람쥐 구출
+  '봉인된 지옥문','악마의 계약 광장','구원의 다리','마지막 심판','지옥문의 군주'      // 126-130 hellgate_sovereign (최종)
 ];
 const CHAPTER_COLORS = [
   '#FFE066','#FFD43B','#FFA94D','#FF922B','#FF6B6B',
@@ -4450,7 +4500,14 @@ const CHAPTER_COLORS = [
   '#F8F9FA','#FF8787','#E03131','#E599F7','#FFFFFF',
   '#22B8CF','#FFE066','#9775FA','#5C7CFA','#7048E8',
   '#7950F2','#A5D8FF','#FFD43B','#E599F7','#FFFFFF',
-  '#FF6B6B','#FFA94D','#7950F2','#FFE066','#FFFFFF'
+  '#FF6B6B','#FFA94D','#7950F2','#FFE066','#FFFFFF',
+  // === 원정 Ⅳ (101-130): hellfire rescue — deep crimson, charcoal, ember orange ===
+  '#FA5252','#C92A2A','#E03131','#FF6B6B','#7A1818',
+  '#FF6B00','#FA5252','#FFA94D','#C92A2A','#FF8C00',
+  '#868E96','#495057','#212529','#5A0F0F','#7A1818',
+  '#3B0764','#5F3DC4','#7048E8','#9775FA','#5F3DC4',
+  '#F8F9FA','#FFD43B','#FFA94D','#FF6B00','#212529',
+  '#C92A2A','#E03131','#FFFFFF','#FA5252','#FFE066'
 ];
 function chapterName(c){ return CHAPTER_NAMES[Math.min(c-1, CHAPTER_NAMES.length-1)]; }
 function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.length-1)]; }
@@ -4465,10 +4522,11 @@ function chapterMult(){
   //   20..30  : exp 1.060/1.035 on top of ch20                   (ch30 → 8.97 / 2.92)
   //   30..40  : exp 1.045/1.025 on top of ch30                   (ch40 → 13.93 / 3.74)
   //   40..50  : exp 1.025/1.015 on top of ch40                   (ch50 → 17.83 / 4.34)
-  //   50..70  : exp 1.016/1.011 on top of ch50  (원정 Ⅱ)         (ch70 → ~24.5 / ~5.40)
-  //   70..100 : exp 1.014/1.011 on top of ch70  (원정 Ⅲ)         (ch100 → ~37.2 / ~7.51) —
-  //   사용자 요청: ch51-100 S 풀세트도 어렵게 + 캡 단축(15/20분). 캡 안에서 클리어 가능 범위 내
-  //   에서만 상향. v12.10 simulation 검증 — ch100 fresh-S 풀빌드 ≈ 11-15분 (보스 ~9-13분).
+  //   50..70   : exp 1.016/1.011 on top of ch50  (원정 Ⅱ)         (ch70  → ~24.5 / ~5.40)
+  //   70..100  : exp 1.014/1.011 on top of ch70  (원정 Ⅲ)         (ch100 → ~37.2 / ~7.51)
+  //   100..130 : exp 1.012/1.010 on top of ch100 (원정 Ⅳ 지옥)    (ch130 → ~53.4 / ~10.10)
+  //   v12.11 — 지옥 원정은 ch100보다 명확히 어려움이 누적되어야 하지만 캡 20분 안에서
+  //   클리어 가능해야 함. fresh-S 풀빌드 헤드룸 타이트하게 잡힘.
   const HP_CH10  = 1 + 9*0.20;
   const DMG_CH10 = 1 + 9*0.06;
   const HP_CH20  = HP_CH10  * Math.pow(1.060, 10);
@@ -4481,20 +4539,24 @@ function chapterMult(){
   const DMG_CH50 = DMG_CH40 * Math.pow(1.015, 10);
   const HP_CH70  = HP_CH50  * Math.pow(1.016, 20);
   const DMG_CH70 = DMG_CH50 * Math.pow(1.011, 20);
-  const hp = c <= 10 ? 1 + (c-1)*0.20
-          : c <= 20 ? HP_CH10  * Math.pow(1.060, c-10)
-          : c <= 30 ? HP_CH20  * Math.pow(1.060, c-20)
-          : c <= 40 ? HP_CH30  * Math.pow(1.045, c-30)
-          : c <= 50 ? HP_CH40  * Math.pow(1.025, c-40)
-          : c <= 70 ? HP_CH50  * Math.pow(1.016, c-50)
-          :           HP_CH70  * Math.pow(1.014, c-70);
-  const dmg = c <= 10 ? 1 + (c-1)*0.06
-            : c <= 20 ? DMG_CH10 * Math.pow(1.030, c-10)
-            : c <= 30 ? DMG_CH20 * Math.pow(1.035, c-20)
-            : c <= 40 ? DMG_CH30 * Math.pow(1.025, c-30)
-            : c <= 50 ? DMG_CH40 * Math.pow(1.015, c-40)
-            : c <= 70 ? DMG_CH50 * Math.pow(1.011, c-50)
-            :           DMG_CH70 * Math.pow(1.011, c-70);
+  const HP_CH100 = HP_CH70  * Math.pow(1.014, 30);
+  const DMG_CH100= DMG_CH70 * Math.pow(1.011, 30);
+  const hp = c <= 10  ? 1 + (c-1)*0.20
+          : c <= 20  ? HP_CH10  * Math.pow(1.060, c-10)
+          : c <= 30  ? HP_CH20  * Math.pow(1.060, c-20)
+          : c <= 40  ? HP_CH30  * Math.pow(1.045, c-30)
+          : c <= 50  ? HP_CH40  * Math.pow(1.025, c-40)
+          : c <= 70  ? HP_CH50  * Math.pow(1.016, c-50)
+          : c <= 100 ? HP_CH70  * Math.pow(1.014, c-70)
+          :            HP_CH100 * Math.pow(1.012, c-100);
+  const dmg = c <= 10  ? 1 + (c-1)*0.06
+            : c <= 20  ? DMG_CH10 * Math.pow(1.030, c-10)
+            : c <= 30  ? DMG_CH20 * Math.pow(1.035, c-20)
+            : c <= 40  ? DMG_CH30 * Math.pow(1.025, c-30)
+            : c <= 50  ? DMG_CH40 * Math.pow(1.015, c-40)
+            : c <= 70  ? DMG_CH50 * Math.pow(1.011, c-50)
+            : c <= 100 ? DMG_CH70 * Math.pow(1.011, c-70)
+            :            DMG_CH100* Math.pow(1.010, c-100);
   const speed = 1 + Math.min(0.95, (c-1)*0.028);
   return {
     hp,
@@ -5573,7 +5635,7 @@ function drawWifePigeon(ctx, c){
   const blink = ((t + 0.7) % 3.4) < 0.12;
   ctx.save();
   ctx.translate(c.x, c.y);
-  ctx.scale(0.65, 0.65);
+  ctx.scale(0.85, 0.85);  // v12.11 hotfix — 0.78→0.85. 사용자 피드백으로 추가 확대 (눈/부리 비례 안 맞아 보임).
   // Shadow
   ctx.fillStyle = 'rgba(0,0,0,.55)';
   ctx.beginPath(); ctx.ellipse(0, 52, 30, 5, 0, 0, Math.PI*2); ctx.fill();
@@ -5615,63 +5677,55 @@ function drawWifePigeon(ctx, c){
   ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 0.8; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(-19, 7); ctx.lineTo(-15, 13); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(19, 7);  ctx.lineTo(15, 13);  ctx.stroke();
-  // Head
+  // Head — husband와 동일 16r로 환원해 눈/부리 비례 자연스럽게.
   ctx.fillStyle = '#E8A8B6';
-  ctx.beginPath(); ctx.arc(0, -22, 15, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -22, 16, 0, Math.PI*2); ctx.fill();
   // Head highlight
   ctx.fillStyle = '#FFD8DD';
   ctx.globalAlpha = 0.7;
-  ctx.beginPath(); ctx.arc(-4, -26, 5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-4, -26, 6, 0, Math.PI*2); ctx.fill();
   ctx.globalAlpha = 1;
-  // Beak (forward-pointing, smaller + cuter than husband's)
+  // Beak — husband와 같은 비례로 길게(돌출) 그려 눈/부리 사이가 어색하지 않게.
+  // 사용자 피드백 "눈이랑 부리가 너무 작고 서로 멀어서 이상함" 반영.
   ctx.fillStyle = '#FFA500';
   ctx.beginPath();
-  ctx.moveTo(11, -19); ctx.lineTo(15, -16); ctx.lineTo(11, -13);
+  ctx.moveTo(-2, -19); ctx.lineTo(15, -16); ctx.lineTo(-2, -13);
   ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#FFC87A';
   ctx.beginPath();
-  ctx.moveTo(11, -17.5); ctx.lineTo(13.5, -16); ctx.lineTo(11, -14.5);
+  ctx.moveTo(-2, -18); ctx.lineTo(11, -15.5); ctx.lineTo(-2, -14);
   ctx.closePath(); ctx.fill();
-  // === EYES — both eyes, rounded cute style ===
+  // === EYE — husband 동일 좌표(-4,-26) + 살짝 큰 눈 ===
   if(blink){
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-9, -24); ctx.lineTo(-3, -24); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(3, -24);  ctx.lineTo(9, -24);  ctx.stroke();
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
   } else {
-    // Sclera (white)
+    // Sclera
     ctx.fillStyle = '#FFF';
-    ctx.beginPath(); ctx.ellipse(-6, -24, 3.0, 3.6, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(6,  -24, 3.0, 3.6, 0, 0, Math.PI*2); ctx.fill();
-    // Pupil — large round, slightly upper inside (cute look)
+    ctx.beginPath(); ctx.ellipse(-4, -26, 3.6, 4.0, 0, 0, Math.PI*2); ctx.fill();
+    // Pupil — bigger and central
     ctx.fillStyle = '#3B2235';
-    ctx.beginPath(); ctx.arc(-6, -24, 1.9, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(6,  -24, 1.9, 0, Math.PI*2); ctx.fill();
-    // Highlight (sparkle)
+    ctx.beginPath(); ctx.arc(-4, -26, 2.4, 0, Math.PI*2); ctx.fill();
+    // Highlight
     ctx.fillStyle = '#FFF';
-    ctx.beginPath(); ctx.arc(-5.4, -25, 0.8, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(6.6,  -25, 0.8, 0, Math.PI*2); ctx.fill();
-    // Lower lash dots
+    ctx.beginPath(); ctx.arc(-3, -27, 1.0, 0, Math.PI*2); ctx.fill();
+    // Lower lash dot
     ctx.fillStyle = '#FFE6F0';
-    ctx.beginPath(); ctx.arc(-6, -22, 0.5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(6,  -22, 0.5, 0, Math.PI*2); ctx.fill();
-    // Upper eyelashes — short, upward curve
-    ctx.strokeStyle = '#3B2235'; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-8, -27); ctx.quadraticCurveTo(-9, -29, -8.3, -30); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-5, -27.5); ctx.quadraticCurveTo(-5, -30, -4.6, -31); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(8, -27); ctx.quadraticCurveTo(9, -29, 8.3, -30); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(5, -27.5); ctx.quadraticCurveTo(5, -30, 4.6, -31); ctx.stroke();
+    ctx.beginPath(); ctx.arc(-4, -23, 0.6, 0, Math.PI*2); ctx.fill();
+    // Upper eyelashes — three short upward curves anchored above sclera
+    ctx.strokeStyle = '#3B2235'; ctx.lineWidth = 1.0; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-7, -29); ctx.quadraticCurveTo(-8, -31, -7.5, -32.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-4, -30);   ctx.quadraticCurveTo(-4, -32, -3.6, -33.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-1, -29);   ctx.quadraticCurveTo(0, -31, -0.5, -32.5); ctx.stroke();
   }
-  // Soft arched eyebrows
-  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  // Soft arched eyebrow above the eye
+  ctx.strokeStyle = '#A0606E'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(-9, -29); ctx.quadraticCurveTo(-6, -30.5, -3, -29);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(3, -29); ctx.quadraticCurveTo(6, -30.5, 9, -29);
+  ctx.moveTo(-8, -31); ctx.quadraticCurveTo(-4, -33, 0, -31);
   ctx.stroke();
   // Lipstick — small dot under beak (subtle feminine cue)
   ctx.fillStyle = '#D63384';
-  ctx.beginPath(); ctx.arc(8, -11, 1.0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(7, -10, 1.0, 0, Math.PI*2); ctx.fill();
   // Hair tufts — three small curls at top of head
   ctx.strokeStyle = '#C97585'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(-5, -36); ctx.quadraticCurveTo(-7, -40, -3, -42); ctx.stroke();
@@ -5856,6 +5910,10 @@ const ENEMY_DEFS = {
   // 원정 Ⅲ — 우주 enemies (ch71+)
   void_drone:  { speed:165, hp:60,  dmg:18, size:0.9, score:6,  xp:6,  color:'#9775FA' },     // fast swarm
   star_eye:    { speed:55,  hp:160, dmg:28, size:1.4, score:14, xp:13, color:'#E599F7' },     // ranged sniper
+  // 원정 Ⅳ — 지옥 enemies (ch101+). v12.11.
+  imp:         { speed:140, hp:75,  dmg:22, size:1.0, score:7,  xp:7,  color:'#C92A2A' },     // 빨간 작은 악마, 빠른 군집
+  soul_husk:   { speed:60,  hp:240, dmg:32, size:1.6, score:18, xp:16, color:'#495057' },     // 회색 영혼 껍질, 탱키
+  hellhound:   { speed:170, hp:120, dmg:30, size:1.3, score:11, xp:11, color:'#FF6B00' },     // 불꽃 사냥개, 빠르고 거친 압박
   boss:   { speed: 70,  hp: 500, dmg: 25, size:2.4, score:100,xp:40, color:'#222' }
 };
 
@@ -5897,9 +5955,9 @@ function spawnEnemy(kind){
     walkPhase: Math.random()*Math.PI*2,
     collideRadius: 18*def.size,
     attackCd: 0,
-    // v12.10 — pigeon_warrior, star_eye도 ranged. 코드 코멘트는 "ranged"로 표기되었으나
-    // 실제 플래그가 빠져 근접 추격으로 동작했던 버그 수정.
-    ranged: kind==='crow' || kind==='sniper' || kind==='pigeon_warrior' || kind==='star_eye',
+    // v12.10 — pigeon_warrior, star_eye도 ranged.
+    // v12.11 — soul_husk(영혼 껍질)도 ranged. imp/hellhound는 근접 추격.
+    ranged: kind==='crow' || kind==='sniper' || kind==='pigeon_warrior' || kind==='star_eye' || kind==='soul_husk',
     rangedCd: 1.5+Math.random(),
   };
   // Kind-specific flags
@@ -5912,6 +5970,7 @@ function spawnEnemy(kind){
   else if(kind==='leviathan'){ e.tendrilCd = 4 + Math.random()*1.2; e.tendrilTelegraph = 0; }
   else if(kind==='pigeon_warrior'){ e.rangedCd = 2.4 + Math.random()*0.6; }   // v12.10 — 깃털 발사
   else if(kind==='star_eye'){ e.rangedCd = 2.0 + Math.random()*0.5; e.sniperScope=0; }  // v12.10 — 별빛 광선
+  else if(kind==='soul_husk'){ e.rangedCd = 2.6 + Math.random()*0.6; }                  // v12.11 — 영혼 화살
   state.enemies.push(e);
   return e;
 }
@@ -5951,8 +6010,22 @@ const BOSS_VARIANTS = {
   cosmic_arbiter:  { hpMult:23.0, dmgMult:1.70, sizeMult:1.20, label:'우주의 심판자' },       // 86-90
   void_titan:      { hpMult:24.0, dmgMult:1.75, sizeMult:1.25, label:'보이드 타이탄' },        // 91-95
   omega:           { hpMult:25.0, dmgMult:1.85, sizeMult:1.32, label:'오메가 — 우주의 주재자' }, // 96-100 (최종)
+  // === 원정 Ⅳ — 지옥 구출 원정 (companions: 가족 + 구출된 조류 친구들). 5챕터 간격. ===
+  hell_houndmaster:    { hpMult:26.0, dmgMult:1.70, sizeMult:1.20, label:'사냥개의 주인' },      // 101-105
+  flame_overlord:      { hpMult:27.0, dmgMult:1.75, sizeMult:1.22, label:'화염 군주' },           // 106-110
+  bone_archon:         { hpMult:28.0, dmgMult:1.80, sizeMult:1.24, label:'해골 대천사' },         // 111-115
+  shadow_inquisitor:   { hpMult:29.0, dmgMult:1.85, sizeMult:1.22, label:'그림자 심판관' },       // 116-120
+  infernal_seraph:     { hpMult:30.0, dmgMult:1.90, sizeMult:1.26, label:'잿불의 천사' },         // 121-125
+  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.00, sizeMult:1.35, label:'지옥문의 군주' },       // 126-130 (게임 최종)
 };
 function bossVariantForChapter(c){
+  // 원정 Ⅳ — 지옥 구출 원정 (5챕터 간격)
+  if(c >= 126) return 'hellgate_sovereign';
+  if(c >= 121) return 'infernal_seraph';
+  if(c >= 116) return 'shadow_inquisitor';
+  if(c >= 111) return 'bone_archon';
+  if(c >= 106) return 'flame_overlord';
+  if(c >= 101) return 'hell_houndmaster';
   // 원정 Ⅲ — 우주 정복 (5챕터 간격으로 변종 변경)
   if(c >= 96) return 'omega';
   if(c >= 91) return 'void_titan';
@@ -6082,7 +6155,15 @@ function waveEnemyPool(wave){
   if(c>=85) pool.push('star_eye','star_eye','void_drone');
   if(c>=90) pool.push('star_eye','star_eye','void_drone','void_drone');
   if(c>=95) pool.push('void_drone','star_eye','star_eye','star_eye');
-  if(c>=100) pool.push('star_eye','star_eye','void_drone','void_drone'); // omega chapter
+  if(c>=100) pool.push('star_eye','star_eye','void_drone','void_drone');
+  // === 원정 Ⅳ — 지옥 구출 (ch101+) ===
+  if(c>=101) pool.push('imp','imp','imp');
+  if(c>=105) pool.push('imp','hellhound');
+  if(c>=110) pool.push('hellhound','soul_husk');
+  if(c>=115) pool.push('soul_husk','soul_husk','imp');
+  if(c>=120) pool.push('hellhound','soul_husk','imp','imp');
+  if(c>=125) pool.push('soul_husk','hellhound','hellhound');
+  if(c>=130) pool.push('soul_husk','soul_husk','hellhound','imp'); // hellgate_sovereign chapter
   return pool;
 }
 // Backwards-compat shim for any code path still calling stageEnemyPool().
@@ -6680,6 +6761,10 @@ function onBossDefeated(){
     state.victoryExpeditionId = expeditionFor(state.chapter).id;
     sfxVictory();
     renderVictory(state.chapter >= MAX_CHAPTERS);
+    // v12.11 — 시네마틱 진입 시 HUD 숨김. 사용자 보고 "시네마틱 캡처들에 의미없는 노란 UI
+    // 반복" → 좌상단 invBar/chapterPanel/timerPanel/statsPanel이 시네마틱 위에 그대로
+    // 노출되어 있던 버그 수정.
+    document.getElementById('hud').classList.add('hidden');
     document.getElementById('victory').classList.remove('hidden');
     return;
   }
@@ -7940,11 +8025,10 @@ function updateInvBar(){
 // the tier index back through the early biomes — each cycle shifts the chapter palette via
 // (state.chapter-1)%5 indexing within the tier so the look is similar but not identical.
 function chapterTier(ch){
-  // v12 phase 3 — expedition-aware tier mapping. 원정 Ⅰ uses the original 6 visual tiers cycled
-  // via modulo (ch1-50). 원정 Ⅱ (ch51-70) gets new tier 6 (Pigeon Planet). 원정 Ⅲ (ch71-100)
-  // gets new tier 7 (Cosmos). drawArenaFloor / drawSkyline / glow color all branch on these.
-  if(ch >= 71) return 7;
-  if(ch >= 51) return 6;
+  // v12.11 — 원정 Ⅳ (ch101-130) gets new tier 8 (Hellfire Rescue).
+  if(ch >= 101) return 8;
+  if(ch >= 71)  return 7;
+  if(ch >= 51)  return 6;
   return Math.min(5, Math.floor(((ch-1) % 30)/5));
 }
 function themeId(){
@@ -8057,6 +8141,33 @@ function drawSkyline(stageHue, themeIdx){
       ctx.beginPath(); ctx.ellipse(fx-6, fy, 5, 2, 0.3, 0, Math.PI*2); ctx.fill();
       ctx.globalAlpha = 1;
     }
+  } else if(tier===8){
+    // v12.11 — 원정 Ⅳ Hellfire Rescue: rising embers + crimson rain + cinder snow
+    for(let i=0;i<48;i++){
+      const px = (i*71 + Math.sin(t*1.2+i)*22) % W;
+      const py = (i*23 - t*70) % (H+40);
+      const pyy = py<0 ? py+H+40 : py;
+      ctx.fillStyle = i%3===0 ? 'rgba(255,107,107,.85)' :
+                      i%3===1 ? 'rgba(255,140,0,.85)'  :
+                                 'rgba(255,200,80,.7)';
+      ctx.beginPath(); ctx.arc(px, pyy, 1.6 + (i%3)*0.5, 0, Math.PI*2); ctx.fill();
+    }
+    // Falling cinders (gray flecks)
+    for(let i=0;i<28;i++){
+      const px = (i*53 + t*6) % W;
+      const py = (i*41 + t*38) % (H+30);
+      ctx.fillStyle = 'rgba(60,40,40,.6)';
+      ctx.fillRect(px, py, 2, 1.4);
+    }
+    // Occasional sparks
+    for(let i=0;i<14;i++){
+      const px = (i*97 + t*32) % W;
+      const py = (i*61 + Math.sin(t*2+i)*8) % H;
+      ctx.globalAlpha = 0.6 + Math.abs(Math.sin(t*4+i))*0.4;
+      ctx.fillStyle = '#FFE066';
+      ctx.fillRect(px, py, 1.5, 1.5);
+    }
+    ctx.globalAlpha = 1;
   } else {
     // 원정 Ⅲ — Cosmos: dense starfield + occasional comet streak + cosmic dust drift
     for(let i=0;i<140;i++){
@@ -8114,6 +8225,7 @@ function drawSkyline(stageHue, themeIdx){
     'rgba(255,107,107,.18)', // 5 hell
     'rgba(255,180,216,.22)', // 6 pigeon planet — warm pink
     'rgba(151,117,250,.20)', // 7 cosmos — deep violet
+    'rgba(255,107,107,.22)', // 8 hellfire rescue — crimson glow
   ][tier];
   const gg = ctx.createRadialGradient(W/2, H/2, 60, W/2, H/2, Math.max(W,H)*0.45);
   gg.addColorStop(0, glowCol);
@@ -8151,6 +8263,7 @@ function drawArenaFloor(camX, camY, themeIdx, stageHue){
     ['#2A0808','#250B05','#1F1A1A'], // 5 Hell: charred earth
     ['#E8B8C0','#F0CCAA','#FFD8DD'], // 6 원정 Ⅱ Pigeon Planet: peach/rose stone
     ['#0F0A28','#1A0F36','#0A0828'], // 7 원정 Ⅲ Cosmos: deep void
+    ['#2A0808','#3A1010','#1F0A0A'], // 8 원정 Ⅳ Hellfire: blackened + crimson scorch + ash floor
   ][tier][themeIdx];
   ctx.save();
   ctx.fillStyle = groundCol;
@@ -8300,7 +8413,55 @@ function drawTileProps(tx, ty, tile, tier, themeIdx, hue){
     if(propType < 14){ drawStarFragment(jx, jy, h); }
     else if(propType < 22){ drawPlanetRing(jx, jy, h); }
     else if(propType < 30){ drawVoidRune(jx, jy, h, rot); }
+  } else if(tier === 8){
+    // ░ 원정 Ⅳ — Hellfire Rescue — broken cages (구해야 할 친구들 흔적), lava cracks, hellfire braziers
+    if(propType < 14){ drawBrokenCage(jx, jy, h); }
+    else if(propType < 22){ drawLavaCrack(jx, jy, tile, h); }
+    else if(propType < 30){ drawHellfireBrazier(jx, jy, h); }
+    else if(propType < 36){ drawSkullMark(jx, jy, h); }
   }
+}
+
+// v12.11 — 원정 Ⅳ 지옥 props
+function drawBrokenCage(x, y, h){
+  propShadow(x, y+5, 14, 4);
+  // Bent iron bars (broken cage suggesting an escaped friend)
+  ctx.strokeStyle = '#3A2828'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  for(let i=-2; i<=2; i++){
+    const tilt = (i + (h>>>(i+8) & 3)) * 0.15;
+    ctx.beginPath();
+    ctx.moveTo(x + i*4, y - 8);
+    ctx.lineTo(x + i*4 + tilt*6, y + 6);
+    ctx.stroke();
+  }
+  // Bottom ring
+  ctx.strokeStyle = '#5A1A04'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.ellipse(x, y+6, 9, 2.4, 0, 0, Math.PI*2); ctx.stroke();
+  // Single feather left behind (구출의 흔적)
+  ctx.fillStyle = '#FFE066';
+  ctx.beginPath(); ctx.ellipse(x+5, y+1, 2.2, 0.9, 0.6, 0, Math.PI*2); ctx.fill();
+}
+function drawHellfireBrazier(x, y, h){
+  propShadow(x, y+5, 12, 3);
+  // Bowl
+  ctx.fillStyle = '#3A1010';
+  ctx.beginPath(); ctx.ellipse(x, y, 9, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#1A0808';
+  ctx.beginPath(); ctx.ellipse(x, y-1, 7, 2.2, 0, 0, Math.PI*2); ctx.fill();
+  // Flame core (varies by hash for static look)
+  const flickerH = 4 + (h % 4);
+  ctx.fillStyle = '#FF6B00';
+  ctx.beginPath();
+  ctx.moveTo(x-4, y-1);
+  ctx.quadraticCurveTo(x-2, y-flickerH, x, y-flickerH-2);
+  ctx.quadraticCurveTo(x+2, y-flickerH, x+4, y-1);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#FFD43B';
+  ctx.beginPath();
+  ctx.moveTo(x-2, y-1);
+  ctx.quadraticCurveTo(x-1, y-flickerH+1, x, y-flickerH);
+  ctx.quadraticCurveTo(x+1, y-flickerH+1, x+2, y-1);
+  ctx.closePath(); ctx.fill();
 }
 
 // v12 phase 3 — props for 원정 Ⅱ (Pigeon Planet)
@@ -8836,6 +8997,11 @@ function drawVictoryScene(){
     sky.addColorStop(0, 'rgba(2,1,10,.95)');
     sky.addColorStop(0.5, 'rgba(20,8,60,.75)');
     sky.addColorStop(1, 'rgba(60,30,140,.45)');
+  } else if(expId === 4){
+    // v12.11 — 원정 Ⅳ — hellfire rescue: blood crimson + ash sky
+    sky.addColorStop(0, 'rgba(20,5,5,.9)');
+    sky.addColorStop(0.5, 'rgba(120,20,20,.55)');
+    sky.addColorStop(1, 'rgba(255,140,40,.35)');
   } else {
     // 원정 Ⅰ — original cosmic violet
     sky.addColorStop(0, 'rgba(10,2,30,.85)');
@@ -8901,6 +9067,8 @@ function drawVictoryScene(){
     drawVictoryPigeonPlanet(earthCx, earthCy, earthR, t);
   } else if(expId === 3){
     drawVictoryCosmicSingularity(earthCx, earthCy, earthR, t);
+  } else if(expId === 4){
+    drawVictoryHellgate(earthCx, earthCy, earthR, t);
   } else {
     drawVictoryEarth(earthCx, earthCy, earthR, t);
   }
@@ -8964,12 +9132,16 @@ function drawVictoryScene(){
   // Earth emoji to the left of the text — drawn separately so the text outline doesn't
   // wrap the emoji and create a weird halo around it.
   ctx.font = `900 ${fs}px sans-serif`;
-  // v12 Phase 5 — headline + emoji vary per expedition.
-  const heroEmoji = expId === 3 ? '🌌' : expId === 2 ? '🪐' : '🌍';
-  const text = expId === 3 ? '전 우주 정복!' :
+  // v12 Phase 5 / v12.11 — headline + emoji vary per expedition.
+  const heroEmoji = expId === 4 ? '🔥' :
+                    expId === 3 ? '🌌' :
+                    expId === 2 ? '🪐' : '🌍';
+  const text = expId === 4 ? '지옥 구출 완료!' :
+               expId === 3 ? '전 우주 정복!' :
                expId === 2 ? '비둘기 행성 정복!' :
                               '전 세계 정복!';
-  const heroShadowCol = expId === 3 ? 'rgba(151,117,250,0.85)' :
+  const heroShadowCol = expId === 4 ? 'rgba(255,107,107,0.9)' :
+                        expId === 3 ? 'rgba(151,117,250,0.85)' :
                         expId === 2 ? 'rgba(255,180,216,0.85)' :
                                        'rgba(116,192,252,0.65)';
   const textW = ctx.measureText(text).width;
@@ -9194,6 +9366,66 @@ function drawVictoryCosmicSingularity(cx, cy, r, t){
   // Inner accretion disk shimmer
   ctx.fillStyle = 'rgba(255,224,102,0.35)';
   ctx.beginPath(); ctx.ellipse(cx, cy, r*0.55, r*0.18, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+// v12.11 — 원정 Ⅳ centerpiece: 봉인된 지옥문이 부서지고 새벽이 비치는 모습.
+function drawVictoryHellgate(cx, cy, r, t){
+  ctx.save();
+  // Crimson halo
+  const glow = ctx.createRadialGradient(cx, cy, r*0.6, cx, cy, r*1.6);
+  glow.addColorStop(0, 'rgba(255,107,107,0.55)');
+  glow.addColorStop(0.5, 'rgba(255,140,40,0.35)');
+  glow.addColorStop(1, 'rgba(255,140,40,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(cx, cy, r*1.6, 0, Math.PI*2); ctx.fill();
+  // Cracked gate disc — dark with crimson cracks
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  grad.addColorStop(0, '#3A1010');
+  grad.addColorStop(0.6, '#1A0808');
+  grad.addColorStop(1, '#0A0404');
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  // Lava cracks radiating from center (animated breathing)
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
+  const breath = 1 + Math.sin(t*1.2)*0.05;
+  ctx.strokeStyle = '#FF6B00';
+  ctx.lineWidth = 2.4;
+  for(let i=0;i<7;i++){
+    const a = i * (Math.PI*2/7) + t*0.15;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a)*r*0.15, cy + Math.sin(a)*r*0.15);
+    const midA = a + 0.3;
+    ctx.lineTo(cx + Math.cos(midA)*r*0.55*breath, cy + Math.sin(midA)*r*0.55*breath);
+    const endA = a + 0.6;
+    ctx.lineTo(cx + Math.cos(endA)*r*0.95, cy + Math.sin(endA)*r*0.95);
+    ctx.stroke();
+  }
+  // Glowing core
+  ctx.fillStyle = '#FFD43B';
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.18 * breath, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.08, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+  // Dawn beams escaping the cracked gate (rescue motif)
+  ctx.strokeStyle = 'rgba(255,224,102,0.7)';
+  ctx.lineWidth = 2.2;
+  for(let i=0;i<5;i++){
+    const a = -Math.PI/2 + (i-2)*0.18;
+    const beamLen = r*1.8;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(a)*beamLen, cy + Math.sin(a)*beamLen);
+    ctx.stroke();
+  }
+  // Embers floating up from the gate
+  for(let i=0;i<8;i++){
+    const ex = cx + Math.cos(i*0.7 + t*0.5) * r*0.6;
+    const ey = cy + Math.sin(i*0.5 + t*0.7) * r*0.4 - r*0.2;
+    ctx.fillStyle = i%2 ? '#FFE066' : '#FF8C00';
+    ctx.beginPath(); ctx.arc(ex, ey, 2 + Math.sin(t*3+i)*0.6, 0, Math.PI*2); ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -9909,8 +10141,8 @@ document.getElementById('csBackBtn').addEventListener('click', ()=>{
 });
 document.getElementById('csTabFocus').addEventListener('click', ()=> setChapterSelectMode('focus'));
 document.getElementById('csTabAll').addEventListener('click', ()=> setChapterSelectMode('all'));
-// v12.5 — expedition tab handlers
-for(const expId of [1,2,3]){
+// v12.5/v12.11 — expedition tab handlers (1-4)
+for(const expId of [1,2,3,4]){
   const btn = document.getElementById('csExpTab'+expId);
   if(btn) btn.addEventListener('click', () => setChapterExpeditionTab(expId));
 }
@@ -9983,7 +10215,7 @@ function openChapterSelect(){
   document.getElementById('title').classList.add('hidden');
   // v12.5 — default to the player's current expedition tab on open.
   state.csExpedition = defaultExpeditionTab();
-  for(const eid of [1,2,3]){
+  for(const eid of [1,2,3,4]){
     const b = document.getElementById('csExpTab'+eid);
     if(b) b.classList.toggle('on', eid === state.csExpedition);
   }
@@ -10005,6 +10237,7 @@ function renderCinematicReplayRow(){
   if(cleared >= 50)  buttons.push({ ch:50,  label:'🌍 원정 Ⅰ 엔딩', color:'#74C0FC' });
   if(cleared >= 70)  buttons.push({ ch:70,  label:'🪐 원정 Ⅱ 엔딩', color:'#FFB4D8' });
   if(cleared >= 100) buttons.push({ ch:100, label:'🌌 원정 Ⅲ 엔딩', color:'#9775FA' });
+  if(cleared >= 130) buttons.push({ ch:130, label:'🔥 원정 Ⅳ 엔딩 (최종)', color:'#FF6B6B' });
   if(buttons.length === 0){ row.style.display = 'none'; row.innerHTML = ''; return; }
   row.style.display = 'flex';
   row.innerHTML = buttons.map(b =>
@@ -10026,6 +10259,9 @@ function replayCinematic(ch){
   if(typeof _victory !== 'undefined'){ _victory.bowEnemies = null; _victory.fireworks = []; _victory.confetti = []; }
   renderVictory(ch >= MAX_CHAPTERS);
   document.getElementById('chapterSelect').classList.add('hidden');
+  // v12.11 — 시네마틱 다시보기에서도 HUD 숨김 (HUD가 hidden 상태에서 진입했더라도
+  // 호환성을 위해 명시적으로 add).
+  document.getElementById('hud').classList.add('hidden');
   document.getElementById('victory').classList.remove('hidden');
   sfxVictory();
 }
@@ -11098,53 +11334,61 @@ function renderChapterFocus(){
   }
 }
 
-// v12.5 — expedition-locked unlock check. 원정 Ⅱ requires ch50 cleared, 원정 Ⅲ requires ch70.
+// v12.11 — expedition-locked unlock check. 원정 Ⅱ:ch50, Ⅲ:ch70, Ⅳ:ch100 클리어 시 해금.
 function isExpeditionUnlocked(expId){
   const cleared = progress.clearedChapter || 0;
   if(expId === 1) return true;
   if(expId === 2) return cleared >= 50;
   if(expId === 3) return cleared >= 70;
+  if(expId === 4) return cleared >= 100;
   return false;
 }
-// Default expedition tab is the player's current frontier — the one with the next un-cleared chapter.
 function defaultExpeditionTab(){
   const cleared = progress.clearedChapter || 0;
-  if(cleared >= 70) return 3;
-  if(cleared >= 50) return 2;
+  if(cleared >= 100) return 4;
+  if(cleared >= 70)  return 3;
+  if(cleared >= 50)  return 2;
   return 1;
 }
-// Active expedition tab in chapter select. Persists across re-renders within a session.
 if(typeof state.csExpedition === 'undefined') state.csExpedition = 1;
 
 function setChapterExpeditionTab(expId){
   if(!isExpeditionUnlocked(expId)){
+    const labels = ['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'];
+    const subs = {
+      2: '원정 Ⅰ(ch50)을 먼저 정복하세요',
+      3: '원정 Ⅱ(ch70)을 먼저 정복하세요',
+      4: '원정 Ⅲ(ch100)을 먼저 정복하세요',
+    };
     state.toastBanner = {
-      text:`🔒 원정 ${['','Ⅰ','Ⅱ','Ⅲ'][expId]} 잠금`,
-      sub: expId===2 ? '원정 Ⅰ(ch50)을 먼저 정복하세요' : '원정 Ⅱ(ch70)을 먼저 정복하세요',
+      text:`🔒 원정 ${labels[expId]} 잠금`,
+      sub: subs[expId] || '잠긴 원정',
       t:2.0, maxT:2.0, tone:'warn'
     };
     return;
   }
   state.csExpedition = expId;
-  // Toggle visual on
-  for(const eid of [1,2,3]){
+  for(const eid of [1,2,3,4]){
     const b = document.getElementById('csExpTab'+eid);
     if(b) b.classList.toggle('on', eid === expId);
   }
-  // Re-render whatever view is currently showing
   renderChapterFocus();
   renderChapterGrid();
 }
 
-// Apply the locked-state classes to expedition tabs based on progress.
 function refreshExpeditionTabs(){
-  for(const eid of [1,2,3]){
+  const lockHints = {
+    2: '원정 Ⅰ(ch50) 클리어 시 해금',
+    3: '원정 Ⅱ(ch70) 클리어 시 해금',
+    4: '원정 Ⅲ(ch100) 클리어 시 해금',
+  };
+  for(const eid of [1,2,3,4]){
     const b = document.getElementById('csExpTab'+eid);
     if(!b) continue;
     const unlocked = isExpeditionUnlocked(eid);
     b.classList.toggle('locked-tab', !unlocked);
     b.style.opacity = unlocked ? '1' : '.45';
-    b.title = unlocked ? '' : (eid===2 ? '원정 Ⅰ(ch50) 클리어 시 해금' : '원정 Ⅱ(ch70) 클리어 시 해금');
+    b.title = unlocked ? '' : (lockHints[eid] || '잠김');
   }
 }
 
@@ -11184,6 +11428,8 @@ function backToTitle(){
   document.getElementById('chapterSelect').classList.add('hidden');
   document.getElementById('shopScreen').classList.add('hidden');
   document.getElementById('title').classList.remove('hidden');
+  // v12.11 — 시네마틱 다시보기 후 홈으로 갔을 때 victory 모달이 남아있는 케이스 명시 처리.
+  document.getElementById('victory').classList.add('hidden');
   updateTitleCoinDisplay();
   if(audioCtx) bgmStart();
 }
@@ -11296,8 +11542,9 @@ function renderVictory(finalEnding){
   if(nextBtn){
     if(isExpEnd && !isFinal){
       nextBtn.style.display = '';
-      nextBtn.textContent = state.chapter === 50 ? '🪐 원정 Ⅱ — 비둘기 행성으로 ▶' :
-                            state.chapter === 70 ? '🌌 원정 Ⅲ — 우주 정복으로 ▶' :
+      nextBtn.textContent = state.chapter === 50  ? '🪐 원정 Ⅱ — 비둘기 행성으로 ▶' :
+                            state.chapter === 70  ? '🌌 원정 Ⅲ — 우주 정복으로 ▶' :
+                            state.chapter === 100 ? '🔥 원정 Ⅳ — 지옥 구출로 ▶' :
                                                     '▶ 다음 원정 시작';
     } else {
       nextBtn.style.display = 'none';
@@ -11306,27 +11553,35 @@ function renderVictory(finalEnding){
   const h2 = document.querySelector('#victory .card h2');
   const sub = document.querySelector('#victory .card .sub');
   if(isFinal){
-    h2.textContent = '🌌 전 우주 정복! 비둘기 신화 완성';
-    if(sub) sub.textContent = '100개 챕터를 모두 정복하고 우주의 주재자가 된 비둘기의 전설.';
+    // v12.11 — 게임의 진짜 최종 엔딩은 ch130 (원정 Ⅳ 끝). ch100은 더이상 final이 아님.
+    h2.textContent = '🔥 지옥 구출 완료! 비둘기 신화의 완성';
+    if(sub) sub.textContent = '130개 챕터를 모두 정복하고 지옥의 친구들까지 구해낸 비둘기 가족의 전설.';
   } else if(isExpEnd && exp.id === 1){
     h2.textContent = '🌍 원정 Ⅰ 완료 — 지구 정복!';
     if(sub) sub.textContent = '50개 챕터의 모든 적을 무찌르고 인류 영토를 정복했습니다. 다음 원정은 비둘기 행성으로.';
   } else if(isExpEnd && exp.id === 2){
     h2.textContent = '🪐 원정 Ⅱ 완료 — 비둘기 행성 정복!';
     if(sub) sub.textContent = '비둘기 황제를 쓰러뜨리고 행성을 손에 넣었습니다. 마누라와 아이가 함께 다음 원정을 떠납니다.';
+  } else if(isExpEnd && exp.id === 3){
+    h2.textContent = '🌌 원정 Ⅲ 완료 — 전 우주 정복!';
+    if(sub) sub.textContent = '오메가를 쓰러뜨리고 우주의 주재자가 되었습니다. 그러나 지옥에서 친구들이 구원을 기다리고 있습니다.';
   } else {
     h2.textContent = '🏆 한계돌파 성공!';
     if(sub) sub.textContent = '여기까지의 전설이 기록되었습니다.';
   }
+  // v12.11 — 시네마틱 다시보기 시 state.player가 null일 수 있어 가드 추가.
+  // 진짜 클리어 직후엔 player가 살아있어 정상 값, 다시보기 시엔 0/0 표시.
+  const pl = state.player || {};
+  const expColor = exp.id===1?'#FFE066':exp.id===2?'#FF8787':exp.id===3?'#9775FA':'#FF6B6B';
   document.getElementById('vStats').innerHTML = `
-    <div class="statline"><span>원정</span><b style="color:${exp.id===1?'#FFE066':exp.id===2?'#FF8787':'#9775FA'};">${exp.name}</b></div>
+    <div class="statline"><span>원정</span><b style="color:${expColor};">${exp.name}</b></div>
     <div class="statline"><span>정복 챕터</span><b>${state.chapter} · ${chapterName(state.chapter)}</b></div>
-    <div class="statline"><span>최종 레벨</span><b>${state.player.level}</b></div>
-    <div class="statline"><span>처치 수</span><b>${state.kills}</b></div>
-    <div class="statline"><span>점수</span><b>${state.score}</b></div>
-    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time)}초</b></div>
+    <div class="statline"><span>최종 레벨</span><b>${pl.level || '-'}</b></div>
+    <div class="statline"><span>처치 수</span><b>${state.kills || 0}</b></div>
+    <div class="statline"><span>점수</span><b>${state.score || 0}</b></div>
+    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time || 0)}초</b></div>
     <div class="statline" style="color:#FFD43B;"><span>🪙 보유 코인</span><b>${(progress.coins||0).toLocaleString()}</b></div>
-    <div class="statline"><span>최고 기록</span><b>챕터 ${progress.highChapter||state.chapter} · ${progress.highScore||state.score}점</b></div>`;
+    <div class="statline"><span>최고 기록</span><b>챕터 ${progress.highChapter||state.chapter} · ${progress.highScore||state.score||0}점</b></div>`;
 }
 
 // Prevent page scroll on mobile
