@@ -274,6 +274,14 @@
     #victory .card{max-height:min(70vh, 520px);padding:12px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);}
     #victory .card h2{font-size:18px;}
   }
+  /* v12.31 — 좁은 viewport(모바일/소형 윈도우)에서 stat 값이 우측에서 잘리는 문제.
+     statline 자체에 wrap 허용 + 값 컬럼은 길면 다음 줄로. (real mobile inner=390, headless inner~474). */
+  @media (max-width:640px){
+    #victory .card .statline{flex-wrap:wrap !important;row-gap:2px;font-size:11px;}
+    #victory .card .statline > span{flex:0 0 auto;}
+    #victory .card .statline > b{flex:1 1 auto;text-align:right;min-width:0;word-break:keep-all;overflow-wrap:anywhere;white-space:normal !important;}
+    #victory .card #vStats{overflow-x:hidden;}
+  }
 
   /* Chapter select */
   #chapterSelect{background:radial-gradient(ellipse at 50% 30%, rgba(60,28,12,.96), rgba(18,3,0,.96) 70%, rgba(5,0,0,.98) 100%);flex-direction:column;gap:10px;padding:calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 10px);overflow-y:auto;align-items:stretch;justify-content:flex-start;}
@@ -1053,18 +1061,29 @@
   </div>
 
   <!-- v12.11 — 원정 Ⅳ 진입 시네마틱 오프닝. ch101 첫 진입 시 표시 (1회성).
-       지옥 구출 원정 컨셉을 짧은 캡션으로 노출. -->
-  <div id="hellPrologueModal" class="modal hidden">
+       지옥 구출 원정 컨셉을 짧은 캡션으로 노출.
+       v12.31 — 2단계 시네마틱: 팝업 → 풀스크린. 팝업은 텍스트+소형 캔버스로 가벼운 안내,
+       풀스크린(#hellOpeningCinematic) 은 3초 reveal + 친구들 5종 + 회전하는 지옥문. -->
+  <div id="hellPrologueModal" class="modal hidden" style="z-index:1050;">
     <div class="card" style="max-width:420px;text-align:center;background:linear-gradient(180deg,rgba(40,8,8,.96),rgba(15,2,2,.98));border-color:#FF6B6B;">
       <h2 style="color:#FF6B6B;text-shadow:0 0 18px rgba(255,107,107,.85);">🔥 원정 Ⅳ — 지옥 구출 원정</h2>
       <canvas id="hellPrologueCanvas" width="360" height="180" style="display:block;margin:10px auto;background:radial-gradient(circle at 50% 60%, rgba(255,107,107,.4) 0%, rgba(20,5,5,.95) 70%);border-radius:12px;border:2px solid #C92A2A;"></canvas>
       <div style="font-size:13px;color:#FFE066;font-weight:700;line-height:1.6;margin:6px 0 14px;">
         우주의 끝에 다다른 그날, 비둘기 가족은 깨달았다.<br>
         <span style="color:#FFB4D8;">"우리가 정복한 모든 별의 친구들이 지옥에서 울고 있다…"</span><br>
-        <span style="color:#A5D8FF;">억울하게 끌려간 친구들을 구하러,<br>가족은 마지막 원정을 떠난다.</span>
+        <span style="color:#A5D8FF;">억울하게 끌려간 친구들을 구하러,<br>가족은 또다시 원정을 떠난다.</span>
       </div>
       <button class="btn" id="hellPrologueCloseBtn" style="width:100%;background:linear-gradient(180deg,#FF6B6B,#7A0F0F);">▶ 지옥문 통과</button>
     </div>
+  </div>
+
+  <!-- v12.31 — 풀스크린 시네마틱 오프닝. 회전하는 지옥문 + 갇힌 5종 친구 + 3초 후 구출 버튼.
+       지옥 프롤로그 팝업의 '지옥문 통과' 버튼 클릭 시 표시.
+       v12.31 hotfix — canvas 가 max-width / max-height 동시 적용 시 비율 깨짐.
+       aspect-ratio 명시 + height:auto 로 16:9 비율 유지. -->
+  <div id="hellOpeningCinematic" class="overlay hidden" style="background:#000;z-index:1100;flex-direction:column;gap:24px;padding:24px;">
+    <canvas id="hellOpeningCanvas" width="640" height="360" style="width:min(92vw, 113.7vh);height:auto;aspect-ratio:16/9;background:radial-gradient(circle at 50% 55%, rgba(120,20,20,.5) 0%, rgba(10,2,2,1) 75%);border-radius:14px;border:3px solid #7A0F0F;box-shadow:0 0 40px rgba(255,107,0,.45);"></canvas>
+    <button class="btn" id="hellOpeningRescueBtn" style="opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .6s ease-out, transform .6s ease-out;background:linear-gradient(180deg,#FFD43B 0%,#FF6B6B 50%,#C92A2A 100%);border-color:#FFF9DB;min-width:280px;font-size:18px;">🚨 친구들을 구출하러 가기</button>
   </div>
 
   <!-- Game over -->
@@ -1515,12 +1534,82 @@ const BOSS_BGM_PACK = {
   ],
   interval:68, wave:'sawtooth', bassShift:'3', vol:.18, isBoss:true
 };
+// v12.31 — 지옥 프롤로그 시네마틱 전용 BGM. ch101 '지옥문 통과' 톤 + 더 어둡고 무거운 느낌.
+//   minor / diminished + 낮은 sawtooth lead. 시네마틱 임팩트 위해 vol 살짝 ↑.
+const HELL_PROLOGUE_BGM_PACK = {
+  label:'지옥문 시네마틱',
+  bars:[
+    ['D3','F3','Ab3','D4'],   // D dim — 불길한 시작
+    ['Eb3','G3','Bb3','Eb4'], // 반음 위 — 긴장
+    ['F3','Ab3','C4','F4'],   // F minor
+    ['Bb3','Db4','F4','Bb4'], // Bb minor — 깊은 어둠
+  ],
+  interval:128, wave:'sawtooth', bassShift:'3', vol:.16
+};
 function currentBgmPack(){
+  // v12.31 — 시네마틱/팝업 등 일시적 override. state.bgmOverride 가 set 되면 우선 사용.
+  if(state.bgmOverride) return state.bgmOverride;
   if(state.scene === 'title' || state.scene === 'chapterSelect' || state.scene === 'shop') return TITLE_BGM_PACK;
   // While the chapter boss is alive, swap to the urgent boss riff.
   if(state.scene === 'playing' && state.bossSpawned && state.bossAlive) return BOSS_BGM_PACK;
   const idx = Math.min(Math.max(0, state.chapter - 1), BGM_CHAPTER_PACKS.length - 1);
   return BGM_CHAPTER_PACKS[idx];
+}
+// v12.31 — 지옥문 여는 효과음. 무거운 sub-bass + 삐걱이는 sawtooth 슬라이드 + 잿불 noise.
+//   지옥문 통과 임팩트를 위해 강하게.
+function sfxHellGateOpen(){
+  if(!audioCtx || muted) return;
+  // Layer 1 — 깊은 sub-bass 충격 (40Hz → 90Hz, 0.6s).
+  const subO = audioCtx.createOscillator(), subG = audioCtx.createGain();
+  subO.type = 'sine';
+  subO.frequency.setValueAtTime(40, audioCtx.currentTime);
+  subO.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.6);
+  subG.gain.value = 0;
+  subG.gain.linearRampToValueAtTime(0.55, audioCtx.currentTime + 0.05);
+  subG.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
+  subO.connect(subG); subG.connect(masterGain);
+  subO.start(); subO.stop(audioCtx.currentTime + 0.75);
+  // Layer 2 — 삐걱이는 문 — sawtooth 100→260Hz 슬라이드 (1.0s, 끼익).
+  setTimeout(() => {
+    if(!audioCtx || muted) return;
+    const crO = audioCtx.createOscillator(), crG = audioCtx.createGain();
+    crO.type = 'sawtooth';
+    crO.frequency.setValueAtTime(100, audioCtx.currentTime);
+    crO.frequency.exponentialRampToValueAtTime(260, audioCtx.currentTime + 1.0);
+    crG.gain.value = 0;
+    crG.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 0.08);
+    crG.gain.linearRampToValueAtTime(0.10, audioCtx.currentTime + 0.6);
+    crG.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.05);
+    crO.connect(crG); crG.connect(masterGain);
+    crO.start(); crO.stop(audioCtx.currentTime + 1.1);
+  }, 80);
+  // Layer 3 — 잿불 noise burst (0.5s).
+  setTimeout(() => noise(0.5, 0.18), 120);
+  // Layer 4 — 후속 충격 — 90→45Hz 다운슬라이드 (열린 후 깊은 울림).
+  setTimeout(() => {
+    if(!audioCtx || muted) return;
+    const tO = audioCtx.createOscillator(), tG = audioCtx.createGain();
+    tO.type = 'sine';
+    tO.frequency.setValueAtTime(90, audioCtx.currentTime);
+    tO.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime + 0.8);
+    tG.gain.value = 0;
+    tG.gain.linearRampToValueAtTime(0.40, audioCtx.currentTime + 0.05);
+    tG.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.85);
+    tO.connect(tG); tG.connect(masterGain);
+    tO.start(); tO.stop(audioCtx.currentTime + 0.9);
+  }, 600);
+  // Layer 5 — 마지막 종소리 (낮은 종, 200Hz, 1.2s decay).
+  setTimeout(() => {
+    if(!audioCtx || muted) return;
+    const bO = audioCtx.createOscillator(), bG = audioCtx.createGain();
+    bO.type = 'triangle';
+    bO.frequency.value = 200;
+    bG.gain.value = 0;
+    bG.gain.linearRampToValueAtTime(0.20, audioCtx.currentTime + 0.02);
+    bG.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+    bO.connect(bG); bG.connect(masterGain);
+    bO.start(); bO.stop(audioCtx.currentTime + 1.25);
+  }, 900);
 }
 function bgmNote(name, dur, vol, wave){
   if(!audioCtx||muted) return;
@@ -6029,6 +6118,97 @@ const COMPANION_COSTUMES = {
           ctx.beginPath(); ctx.arc(i*5, -34, 1.3, 0, Math.PI*2); ctx.fill();
         }
       } },
+    // === v12.31 — wife head 추가 4종 (총 8종). 사용자 요청 "머리장식 가짓수 2배". ===
+    // v12.31 hotfix — 종전엔 y=-28 ~ -32 영역에 그려져 눈(y=-26)/눈썹(y=-31) 위로
+    // 떨어져 얼굴을 가리고 깨져 보였음. 기존 crown/tiara 처럼 y=-33 ~ -45 (머리 위쪽)
+    // 으로 일괄 이동 + 모양도 또렷하게 재작성.
+    { id:'flower_crown', name:'꽃관', cost:1500, icon:'🌷', slot:'head', dmgBoost:1.04,
+      draw:(ctx)=>{
+        // 머리 위 화관 — 5개 꽃을 또렷한 5-petal 모양으로
+        const petals = [
+          {x:-11,y:-37,c:'#FFB4D8'},
+          {x:-6, y:-41,c:'#FFE066'},
+          {x: 0, y:-43,c:'#FFB4D8'},
+          {x: 6, y:-41,c:'#74C0FC'},
+          {x:11, y:-37,c:'#FFB4D8'}
+        ];
+        for(const p of petals){
+          ctx.fillStyle = p.c;
+          for(let k=0;k<5;k++){
+            const a = (k/5)*Math.PI*2 - Math.PI/2;
+            ctx.beginPath(); ctx.arc(p.x + Math.cos(a)*1.7, p.y + Math.sin(a)*1.7, 1.7, 0, Math.PI*2); ctx.fill();
+          }
+          ctx.fillStyle = '#FFE066';
+          ctx.beginPath(); ctx.arc(p.x, p.y, 1.0, 0, Math.PI*2); ctx.fill();
+        }
+        // 잎
+        ctx.fillStyle = '#69DB7C';
+        ctx.beginPath(); ctx.ellipse(-9, -35, 2.4, 1.1, 0.6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(9,  -35, 2.4, 1.1, -0.6, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'ribbon_band', name:'리본 머리띠', cost:2200, icon:'🎀', slot:'head', dmgBoost:1.05,
+      draw:(ctx)=>{
+        // 머리 정수리에 둥근 띠 (curve 따라 휘어진 직선 stroke)
+        ctx.strokeStyle = '#74C0FC'; ctx.lineWidth = 3.0; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-12, -34); ctx.quadraticCurveTo(0, -39, 12, -34);
+        ctx.stroke();
+        ctx.strokeStyle = '#1864AB'; ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(-12, -34); ctx.quadraticCurveTo(0, -39, 12, -34);
+        ctx.stroke();
+        // 우측 리본 (loop 두 개 + knot)
+        ctx.fillStyle = '#5C7CFA';
+        ctx.beginPath(); ctx.moveTo(11, -36); ctx.lineTo(16, -40); ctx.lineTo(16, -34); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(11, -36); ctx.lineTo(16, -32); ctx.lineTo(16, -38); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#1864AB';
+        ctx.beginPath(); ctx.arc(11, -36, 1.4, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'sun_hat', name:'썬햇', cost:3500, icon:'👒', slot:'head', dmgBoost:1.06,
+      draw:(ctx)=>{
+        // 챙 (머리 위쪽 — 머리 정수리 살짝 위)
+        ctx.fillStyle = '#F4C97A';
+        ctx.beginPath(); ctx.ellipse(0, -36, 20, 4, 0, 0, Math.PI*2); ctx.fill();
+        // 챙 그림자 라인
+        ctx.fillStyle = '#C9A05B';
+        ctx.beginPath(); ctx.ellipse(0, -35, 20, 3, 0, 0, Math.PI*2); ctx.fill();
+        // 모자 본체 (챙 위에 올라간 둥근 컵)
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath();
+        ctx.moveTo(-9, -36); ctx.quadraticCurveTo(-10, -45, 0, -46);
+        ctx.quadraticCurveTo(10, -45, 9, -36);
+        ctx.closePath(); ctx.fill();
+        // 리본 띠
+        ctx.fillStyle = '#FA5252';
+        ctx.fillRect(-9.5, -39, 19, 2.5);
+      } },
+    { id:'star_clip', name:'별 머리핀', cost:1800, icon:'⭐', slot:'head', dmgBoost:1.04,
+      draw:(ctx)=>{
+        // 좌측 큰 별 (머리 위쪽)
+        ctx.fillStyle = '#FFE066';
+        ctx.shadowColor = 'rgba(255,224,102,0.7)'; ctx.shadowBlur = 6;
+        const sx = -8, sy = -38, sr = 3.6;
+        ctx.beginPath();
+        for(let k=0;k<5;k++){
+          const a1 = -Math.PI/2 + k*Math.PI*2/5;
+          const a2 = a1 + Math.PI/5;
+          ctx.lineTo(sx + Math.cos(a1)*sr, sy + Math.sin(a1)*sr);
+          ctx.lineTo(sx + Math.cos(a2)*sr*0.4, sy + Math.sin(a2)*sr*0.4);
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+        // 우측 작은 별
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath();
+        const sx2 = 6, sy2 = -36, sr2 = 2.4;
+        for(let k=0;k<5;k++){
+          const a1 = -Math.PI/2 + k*Math.PI*2/5;
+          const a2 = a1 + Math.PI/5;
+          ctx.lineTo(sx2 + Math.cos(a1)*sr2, sy2 + Math.sin(a1)*sr2);
+          ctx.lineTo(sx2 + Math.cos(a2)*sr2*0.4, sy2 + Math.sin(a2)*sr2*0.4);
+        }
+        ctx.closePath(); ctx.fill();
+      } },
     // === BODY slot — v12.10 Phase 2 NEW. 사용자 요청: "효과없는 옷도 추가". ===
     // 모두 cost 있지만 dmgBoost 1.0 (cosmetic only). companion costume system은 같은 kind 안에서
     // 단일 equipped만 허용하므로 "head"와 "body"를 구분하기 위해 slot 필드 추가.
@@ -6198,6 +6378,172 @@ const COMPANION_COSTUMES = {
         ctx.lineTo(22, 32); ctx.quadraticCurveTo(26, 18, 22, 0);
         ctx.stroke();
       } },
+    // === v12.31 — wife body 추가 7종 (총 14종). 사용자 요청 "코스튬 가짓수 2배". ===
+    { id:'polka_dress', name:'도트 원피스', cost:2200, icon:'⚪', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(-18, 0); ctx.quadraticCurveTo(-22, 18, -20, 32);
+        ctx.lineTo(20, 32); ctx.quadraticCurveTo(22, 18, 18, 0);
+        ctx.quadraticCurveTo(9, -3, 0, -3); ctx.quadraticCurveTo(-9, -3, -18, 0);
+        ctx.closePath(); ctx.fill();
+        // 빨간 도트 패턴
+        ctx.fillStyle = '#FA5252';
+        const dots = [[-12,6],[-3,4],[8,7],[14,12],[-15,16],[-6,18],[5,20],[12,24],[-10,26]];
+        for(const [dx,dy] of dots){ ctx.beginPath(); ctx.arc(dx, dy, 1.4, 0, Math.PI*2); ctx.fill(); }
+        // 허리띠
+        ctx.fillStyle = '#FA5252';
+        ctx.fillRect(-19, 14, 38, 2.5);
+      } },
+    { id:'sailor_dress', name:'세일러 원피스', cost:3000, icon:'⚓', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 본체 (네이비)
+        ctx.fillStyle = '#1864AB';
+        ctx.beginPath();
+        ctx.moveTo(-18, 0); ctx.quadraticCurveTo(-22, 18, -20, 32);
+        ctx.lineTo(20, 32); ctx.quadraticCurveTo(22, 18, 18, 0);
+        ctx.quadraticCurveTo(9, -3, 0, -3); ctx.quadraticCurveTo(-9, -3, -18, 0);
+        ctx.closePath(); ctx.fill();
+        // 흰색 세일러 카라
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(-12, -2); ctx.lineTo(-3, 8); ctx.lineTo(0, 4); ctx.lineTo(3, 8); ctx.lineTo(12, -2);
+        ctx.lineTo(15, 0); ctx.lineTo(0, 12); ctx.lineTo(-15, 0); ctx.closePath(); ctx.fill();
+        // 카라 빨간 줄
+        ctx.strokeStyle = '#FA5252'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(-13, -1); ctx.lineTo(-2, 7); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(13, -1); ctx.lineTo(2, 7); ctx.stroke();
+        // 빨간 리본
+        ctx.fillStyle = '#FA5252';
+        ctx.fillRect(-2, 9, 4, 5);
+        // 흰색 띠
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-19, 18, 38, 2);
+      } },
+    { id:'winter_coat', name:'겨울 코트', cost:4000, icon:'🧥', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 빨간 푸퍼 코트 본체
+        ctx.fillStyle = '#C92A2A';
+        ctx.beginPath();
+        ctx.moveTo(-21, 0); ctx.quadraticCurveTo(-25, 18, -23, 32);
+        ctx.lineTo(23, 32); ctx.quadraticCurveTo(25, 18, 21, 0);
+        ctx.quadraticCurveTo(10, -3, 0, -3); ctx.quadraticCurveTo(-10, -3, -21, 0);
+        ctx.closePath(); ctx.fill();
+        // 푸퍼 라인 (가로)
+        ctx.strokeStyle = '#7A1818'; ctx.lineWidth = 1;
+        for(let y=4;y<=28;y+=6){
+          ctx.beginPath(); ctx.moveTo(-22, y); ctx.lineTo(22, y); ctx.stroke();
+        }
+        // 모피 트림
+        ctx.fillStyle = '#F8F9FA';
+        ctx.beginPath(); ctx.ellipse(0, 0, 16, 3, 0, 0, Math.PI*2); ctx.fill();
+        // 단추
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath(); ctx.arc(0, 12, 1.4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 22, 1.4, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'princess_dress', name:'공주 드레스', cost:6000, icon:'👸', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 보라/금 공주 가운
+        ctx.fillStyle = '#7048E8';
+        ctx.beginPath();
+        ctx.moveTo(-15, 0); ctx.quadraticCurveTo(-25, 16, -24, 32);
+        ctx.lineTo(24, 32); ctx.quadraticCurveTo(25, 16, 15, 0);
+        ctx.quadraticCurveTo(8, -3, 0, -3); ctx.quadraticCurveTo(-8, -3, -15, 0);
+        ctx.closePath(); ctx.fill();
+        // 금 트림
+        ctx.fillStyle = '#FFD43B';
+        ctx.fillRect(-23, 30, 46, 2);
+        // 가슴 보석
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath();
+        for(let k=0;k<5;k++){
+          const a1 = -Math.PI/2 + k*Math.PI*2/5;
+          const a2 = a1 + Math.PI/5;
+          ctx.lineTo(0 + Math.cos(a1)*3.5, 6 + Math.sin(a1)*3.5);
+          ctx.lineTo(0 + Math.cos(a2)*1.4, 6 + Math.sin(a2)*1.4);
+        }
+        ctx.closePath(); ctx.fill();
+        // 허리 글리터
+        ctx.fillStyle = '#FFE066';
+        for(let i=-3;i<=3;i++){ ctx.beginPath(); ctx.arc(i*4.2, 14, 0.7, 0, Math.PI*2); ctx.fill(); }
+      } },
+    { id:'fairy_dress', name:'요정 드레스', cost:5500, icon:'🧚', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 초록 잎 드레스
+        ctx.fillStyle = '#69DB7C';
+        ctx.beginPath();
+        ctx.moveTo(-16, 2); ctx.quadraticCurveTo(-22, 18, -19, 32);
+        ctx.lineTo(19, 32); ctx.quadraticCurveTo(22, 18, 16, 2);
+        ctx.quadraticCurveTo(8, -2, 0, -2); ctx.quadraticCurveTo(-8, -2, -16, 2);
+        ctx.closePath(); ctx.fill();
+        // 잎사귀 디테일 — 들쭉날쭉 hem
+        ctx.fillStyle = '#2F9E44';
+        for(let i=-4;i<=4;i++){
+          const x = i*4.5;
+          ctx.beginPath();
+          ctx.moveTo(x-2, 32); ctx.lineTo(x, 36); ctx.lineTo(x+2, 32); ctx.closePath(); ctx.fill();
+        }
+        // 가슴 꽃
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath(); ctx.arc(0, 6, 2, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#FFB4D8';
+        for(let k=0;k<6;k++){
+          const a = (k/6)*Math.PI*2;
+          ctx.beginPath(); ctx.arc(Math.cos(a)*3, 6 + Math.sin(a)*3, 1.4, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath(); ctx.arc(0, 6, 1.2, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'cyber_jacket', name:'사이버 자켓', cost:7000, icon:'🤖', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 검정 본체
+        ctx.fillStyle = '#1A1626';
+        ctx.beginPath();
+        ctx.moveTo(-20, 0); ctx.quadraticCurveTo(-24, 18, -22, 32);
+        ctx.lineTo(22, 32); ctx.quadraticCurveTo(24, 18, 20, 0);
+        ctx.quadraticCurveTo(10, -3, 0, -3); ctx.quadraticCurveTo(-10, -3, -20, 0);
+        ctx.closePath(); ctx.fill();
+        // 청록 네온 라인 (수직)
+        ctx.strokeStyle = '#22B8CF'; ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#22B8CF'; ctx.shadowBlur = 6;
+        ctx.beginPath(); ctx.moveTo(-12, 2); ctx.lineTo(-12, 30); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(12, 2); ctx.lineTo(12, 30); ctx.stroke();
+        // 핑크 네온 가로 (가슴)
+        ctx.strokeStyle = '#FF6B9D';
+        ctx.beginPath(); ctx.moveTo(-15, 12); ctx.lineTo(15, 12); ctx.stroke();
+        ctx.shadowBlur = 0;
+        // 가슴 회로 패턴
+        ctx.fillStyle = '#22B8CF';
+        ctx.fillRect(-3, 5, 6, 2);
+        ctx.fillRect(-1, 7, 2, 4);
+      } },
+    { id:'pink_pajamas', name:'분홍 잠옷', cost:1800, icon:'🌙', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 분홍 잠옷
+        ctx.fillStyle = '#FFD8DD';
+        ctx.beginPath();
+        ctx.moveTo(-19, 0); ctx.quadraticCurveTo(-23, 18, -21, 32);
+        ctx.lineTo(21, 32); ctx.quadraticCurveTo(23, 18, 19, 0);
+        ctx.quadraticCurveTo(9, -3, 0, -3); ctx.quadraticCurveTo(-9, -3, -19, 0);
+        ctx.closePath(); ctx.fill();
+        // 별 패턴
+        ctx.fillStyle = '#FFFFFF';
+        const stars = [[-12,4],[8,8],[-5,16],[14,18],[-15,22],[5,26]];
+        for(const [sx,sy] of stars){
+          ctx.beginPath();
+          for(let k=0;k<5;k++){
+            const a1 = -Math.PI/2 + k*Math.PI*2/5;
+            const a2 = a1 + Math.PI/5;
+            ctx.lineTo(sx + Math.cos(a1)*1.6, sy + Math.sin(a1)*1.6);
+            ctx.lineTo(sx + Math.cos(a2)*0.7, sy + Math.sin(a2)*0.7);
+          }
+          ctx.closePath(); ctx.fill();
+        }
+        // 허리 리본
+        ctx.fillStyle = '#FA80B0';
+        ctx.fillRect(-19, 14, 38, 1.8);
+      } },
   ],
   child: [
     { id:'pacifier', name:'기본 (머리털)', cost:0,     icon:'👶', slot:'head',
@@ -6242,6 +6588,54 @@ const COMPANION_COSTUMES = {
         ctx.closePath(); ctx.fill();
         ctx.fillStyle = '#FA5252';
         ctx.beginPath(); ctx.arc(0,-21, 1, 0, Math.PI*2); ctx.fill();
+      } },
+    // === v12.31 — child head 추가 4종 (총 8종). ===
+    { id:'headband', name:'노랑 머리띠', cost:1200, icon:'💛', slot:'head', dmgBoost:1.04,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#FFD43B';
+        ctx.fillRect(-9, -18, 18, 2.5);
+        ctx.fillStyle = '#FA5252';
+        ctx.beginPath(); ctx.arc(7, -17, 1.6, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'star_helmet', name:'별 헬멧', cost:2500, icon:'⛑️', slot:'head', dmgBoost:1.06,
+      draw:(ctx)=>{
+        // 파란 헬멧
+        ctx.fillStyle = '#74C0FC';
+        ctx.beginPath(); ctx.arc(0, -14, 11, Math.PI, Math.PI*2); ctx.fill();
+        // 별 패치
+        ctx.fillStyle = '#FFE066';
+        ctx.shadowColor = 'rgba(255,224,102,0.7)'; ctx.shadowBlur = 4;
+        ctx.beginPath();
+        for(let k=0;k<5;k++){
+          const a1 = -Math.PI/2 + k*Math.PI*2/5;
+          const a2 = a1 + Math.PI/5;
+          ctx.lineTo(0 + Math.cos(a1)*3, -16 + Math.sin(a1)*3);
+          ctx.lineTo(0 + Math.cos(a2)*1.2, -16 + Math.sin(a2)*1.2);
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+      } },
+    { id:'fluff_ears', name:'토끼 귀', cost:3000, icon:'🐰', slot:'head', dmgBoost:1.07,
+      draw:(ctx)=>{
+        // 분홍 토끼 귀 두 개
+        ctx.fillStyle = '#FFE3F2';
+        ctx.beginPath(); ctx.ellipse(-6, -23, 2.8, 7, -0.2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(6, -23, 2.8, 7, 0.2, 0, Math.PI*2); ctx.fill();
+        // 핑크 안쪽
+        ctx.fillStyle = '#FFB4D8';
+        ctx.beginPath(); ctx.ellipse(-6, -23, 1.4, 5, -0.2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(6, -23, 1.4, 5, 0.2, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'flower_pin', name:'꽃 머리핀', cost:1500, icon:'🌼', slot:'head', dmgBoost:1.04,
+      draw:(ctx)=>{
+        // 좌측 분홍 꽃
+        ctx.fillStyle = '#FFB4D8';
+        for(let k=0;k<6;k++){
+          const a = (k/6)*Math.PI*2;
+          ctx.beginPath(); ctx.arc(-7 + Math.cos(a)*2, -17 + Math.sin(a)*2, 1.6, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath(); ctx.arc(-7, -17, 1.0, 0, Math.PI*2); ctx.fill();
       } },
     // === v12.12 — child 신규 옷류 (몸통 슬롯, dmgBoost 1.0). 사용자 요청 "옷이 부족" ===
     { id:'overall',   name:'멜빵 오버롤', cost:1000, icon:'👶', slot:'body', dmgBoost:1.0,
@@ -6373,6 +6767,153 @@ const COMPANION_COSTUMES = {
         // 배 흰색 (lighter belly)
         ctx.fillStyle = '#FFF9DB';
         ctx.beginPath(); ctx.ellipse(0, 11, 5, 5, 0, 0, Math.PI*2); ctx.fill();
+      } },
+    // === v12.31 — child body 추가 7종 (총 14종). ===
+    { id:'bear_onesie', name:'곰 우주복', cost:2500, icon:'🐻', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#A87545';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 배 (흰색 푹신)
+        ctx.fillStyle = '#FFF9DB';
+        ctx.beginPath(); ctx.ellipse(0, 9, 6, 6, 0, 0, Math.PI*2); ctx.fill();
+        // 작은 곰 발자국
+        ctx.fillStyle = '#7A5230';
+        ctx.beginPath(); ctx.arc(-2, 9, 0.6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(2, 9, 0.6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 11, 0.7, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'star_pajamas', name:'별 잠옷', cost:1500, icon:'✨', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 어두운 남색 본체
+        ctx.fillStyle = '#1A0F36';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 별 흩뿌림
+        ctx.fillStyle = '#FFE066';
+        const stars = [[-6,2],[5,4],[-3,8],[7,9],[-7,12],[2,15]];
+        for(const [sx,sy] of stars){
+          ctx.beginPath();
+          for(let k=0;k<5;k++){
+            const a1 = -Math.PI/2 + k*Math.PI*2/5;
+            const a2 = a1 + Math.PI/5;
+            ctx.lineTo(sx + Math.cos(a1)*1.4, sy + Math.sin(a1)*1.4);
+            ctx.lineTo(sx + Math.cos(a2)*0.6, sy + Math.sin(a2)*0.6);
+          }
+          ctx.closePath(); ctx.fill();
+        }
+      } },
+    { id:'sailor_baby', name:'아기 세일러', cost:2200, icon:'⚓', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 네이비 카라
+        ctx.fillStyle = '#1864AB';
+        ctx.beginPath();
+        ctx.moveTo(-9, -2); ctx.lineTo(-2, 4); ctx.lineTo(0, 2); ctx.lineTo(2, 4); ctx.lineTo(9, -2);
+        ctx.lineTo(11, 0); ctx.lineTo(0, 7); ctx.lineTo(-11, 0); ctx.closePath(); ctx.fill();
+        // 빨간 리본
+        ctx.fillStyle = '#FA5252';
+        ctx.fillRect(-1.5, 5, 3, 3.5);
+        // 네이비 가로 줄
+        ctx.strokeStyle = '#1864AB'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-10, 12); ctx.lineTo(10, 12); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-10, 16); ctx.lineTo(10, 16); ctx.stroke();
+      } },
+    { id:'polka_baby', name:'분홍 도트', cost:1300, icon:'🩷', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        ctx.fillStyle = '#FFB4D8';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 흰 도트
+        ctx.fillStyle = '#FFFFFF';
+        const dots = [[-5,3],[4,5],[-3,10],[6,11],[-7,14],[2,16]];
+        for(const [dx,dy] of dots){ ctx.beginPath(); ctx.arc(dx, dy, 1.2, 0, Math.PI*2); ctx.fill(); }
+        // 가슴 리본
+        ctx.fillStyle = '#FA80B0';
+        ctx.beginPath();
+        ctx.moveTo(-3, 1); ctx.lineTo(-1, 3); ctx.lineTo(-3, 5); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(3, 1); ctx.lineTo(1, 3); ctx.lineTo(3, 5); ctx.closePath(); ctx.fill();
+      } },
+    { id:'mini_tux', name:'아기 턱시도', cost:3500, icon:'🤵', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 검은 자켓
+        ctx.fillStyle = '#1A1626';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 흰 셔츠 (가슴 V)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(-3, -2); ctx.lineTo(0, 12); ctx.lineTo(3, -2); ctx.closePath(); ctx.fill();
+        // 검정 나비넥타이
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.moveTo(-3.5, 0); ctx.lineTo(-1, -1); ctx.lineTo(-1, 3); ctx.lineTo(-3.5, 4); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(3.5, 0); ctx.lineTo(1, -1); ctx.lineTo(1, 3); ctx.lineTo(3.5, 4); ctx.closePath(); ctx.fill();
+        // 단추
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath(); ctx.arc(0, 8, 0.7, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 12, 0.7, 0, Math.PI*2); ctx.fill();
+      } },
+    { id:'flower_baby_dress', name:'꽃 드레스', cost:2800, icon:'🌸', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 옅은 노란 드레스
+        ctx.fillStyle = '#FFF3BF';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-13, 9, -11, 18);
+        ctx.lineTo(11, 18); ctx.quadraticCurveTo(13, 9, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 가슴 큰 분홍 꽃
+        ctx.fillStyle = '#FFB4D8';
+        for(let k=0;k<6;k++){
+          const a = (k/6)*Math.PI*2;
+          ctx.beginPath(); ctx.arc(0 + Math.cos(a)*2.4, 6 + Math.sin(a)*2.4, 1.5, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath(); ctx.arc(0, 6, 1.2, 0, Math.PI*2); ctx.fill();
+        // hem 작은 꽃
+        ctx.fillStyle = '#FA80B0';
+        for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.arc(i*4, 16, 0.9, 0, Math.PI*2); ctx.fill(); }
+      } },
+    { id:'tiger_onesie', name:'호랑이 우주복', cost:4000, icon:'🐯', slot:'body', dmgBoost:1.0,
+      draw:(ctx)=>{
+        // 주황 본체
+        ctx.fillStyle = '#FFA94D';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 검정 줄무늬
+        ctx.strokeStyle = '#000'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-10, 2); ctx.lineTo(-6, 4); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(10, 3); ctx.lineTo(5, 5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-10, 10); ctx.lineTo(-4, 12); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(10, 10); ctx.lineTo(4, 12); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-9, 16); ctx.lineTo(-3, 17); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(9, 16); ctx.lineTo(3, 17); ctx.stroke();
+        // 배 (흰색)
+        ctx.fillStyle = '#FFF9DB';
+        ctx.beginPath(); ctx.ellipse(0, 9, 4, 5, 0, 0, Math.PI*2); ctx.fill();
       } },
   ],
 };
@@ -6790,11 +7331,15 @@ function drawChildPigeon(ctx, c){
   ctx.fillStyle = 'rgba(0,0,0,.4)';
   ctx.beginPath(); ctx.ellipse(0, 18, 12, 3, 0, 0, Math.PI*2); ctx.fill();
   // Tiny body
+  // v12.31 — 사용자 피드백 "아기 비둘기 색이 하늘색이었는데 하얀색으로 바뀜".
+  // 종전 흰색(#FFF) 배 하이라이트가 alpha 0.4 라 작은 몸에 거의 풀로 깔려 sky-blue 가
+  // 거의 안 보였음. 하이라이트를 옅은 하늘 톤(#E7F2FF) + alpha 0.22 로 줄여 본체
+  // sky-blue tint 가 명확히 드러나도록 정정.
   ctx.fillStyle = c.tint;
   ctx.beginPath(); ctx.ellipse(0, 6, 13, 11, 0, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#FFF';
-  ctx.globalAlpha = 0.4;
-  ctx.beginPath(); ctx.ellipse(0, 9, 8, 7, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#E7F2FF';
+  ctx.globalAlpha = 0.22;
+  ctx.beginPath(); ctx.ellipse(0, 11, 6, 4.5, 0, 0, Math.PI*2); ctx.fill();
   ctx.globalAlpha = 1;
   // Big head (baby proportions — head bigger relative to body)
   ctx.fillStyle = c.tint;
@@ -11385,12 +11930,33 @@ document.addEventListener('click', e => {
 document.getElementById('gachaSingleBtn').addEventListener('click', ()=> doGachaPull(1));
 document.getElementById('gachaTenBtn').addEventListener('click', ()=> doGachaPull(10));
 document.getElementById('cmmContinueBtn').addEventListener('click', continueAfterCompanionMeet);
-// v12.11 — hell prologue 닫기. 1회성 플래그를 progress에 저장.
+// v12.11 — hell prologue 닫기.
+// v12.31 — 2단계 시네마틱: 팝업 → 풀스크린. 팝업의 '지옥문 통과' 클릭 → 풀스크린 시네마틱.
 document.getElementById('hellPrologueCloseBtn').addEventListener('click', () => {
   document.getElementById('hellPrologueModal').classList.add('hidden');
   if(state._hellRaf){ cancelAnimationFrame(state._hellRaf); state._hellRaf = 0; }
+  // 풀스크린 시네마틱 오프닝 진입.
+  showHellOpeningCinematic();
+});
+// v12.31 — 풀스크린 시네마틱 의 '친구들을 구출하러 가기' 클릭 → 원정 Ⅳ 챕터 선택.
+document.getElementById('hellOpeningRescueBtn').addEventListener('click', () => {
+  document.getElementById('hellOpeningCinematic').classList.add('hidden');
+  if(state._hellOpeningRaf){ cancelAnimationFrame(state._hellOpeningRaf); state._hellOpeningRaf = 0; }
   progress.hellPrologueSeen = true;
   saveProgress();
+  // BGM override 해제 → bgmStart 가 chapterSelect TITLE_BGM_PACK 로 자동 전환.
+  state.bgmOverride = null;
+  // HUD 정리 (게임 진행 중이었던 경우).
+  if(state.scene === 'playing'){
+    document.getElementById('hud').classList.add('hidden');
+  }
+  // victory 모달도 정리.
+  const vm = document.getElementById('victory');
+  vm.classList.add('hidden'); vm.classList.remove('v-replay');
+  state._cinematicReplayMode = false;
+  // 원정 Ⅳ 챕터 선택 진입. openChapterSelect 가 BGM 도 알맞게 다시 시작.
+  openChapterSelect();
+  setChapterExpeditionTab(4);
 });
 document.getElementById('combineBtn').addEventListener('click', () => {
   // v12.12 — 합성 시 미리보기 다이얼로그를 먼저 열어 oldest-first로 소비될 3장을 사전 노출.
@@ -11520,7 +12086,13 @@ document.getElementById('vBackBtn').addEventListener('click', ()=>{
   document.getElementById('chapterSelect').classList.remove('hidden');
 });
 // v12.10 — 다음 원정 직진 버튼. 현재 시네마틱이 표시 중인 챕터 + 1로 게임 시작.
-document.getElementById('vNextExpBtn').addEventListener('click', ()=>{
+// v12.31 — ch100 끝(hell-entry 모드)에선 startGame 대신 검은 레이어 + 지옥 프롤로그 팝업.
+//   victory 모달은 그대로 두고(검은 레이어 역할도 겸함) 그 위에 hellPrologueModal 띄움.
+document.getElementById('vNextExpBtn').addEventListener('click', (e)=>{
+  if(e.currentTarget.dataset.hellEntry === '1'){
+    showHellPrologue();
+    return;
+  }
   document.getElementById('victory').classList.add('hidden');
   const c = state.chapter || 50;
   startGame(Math.min(MAX_CHAPTERS, c + 1));
@@ -13041,56 +13613,202 @@ function startGame(startChapter){
   }
 }
 
+// v12.31 — 사용자 요청 4건 반영:
+//   1) 시네마틱에 갇힌 5종 친구 (참새/까치/부엉이/앵무새/다람쥐) 시각화 + 슬픈 모습 + 눈물.
+//   2) 지옥문이 영상처럼 회전 (slow CW 외곽 + 빠른 CCW 내곽) — 몰입도.
+//   3) 버튼은 3초 동안 숨김 → fade-in. 시네마틱 컷씬 효과.
+//   4) 버튼 클릭 시 원정 Ⅳ 챕터 선택으로 이동 (showHellPrologue close handler).
+const HELL_PROLOGUE_REVEAL_AT = 3.0;
+function drawSadFriend(ctx, kind, x, y, t){
+  // 슬픈 친구 silhouette ~16×18. 살짝 흔들림 + 흘러내리는 눈물.
+  // v12.31 — body 크기 키워 (5→7) 360×180 캔버스에서 또렷이 인식되도록.
+  const sway = Math.sin(t*1.4 + kind.charCodeAt(0)) * 0.5;
+  ctx.save();
+  ctx.translate(sway, 0);
+  if(kind === 'sparrow'){
+    ctx.fillStyle = '#A87545';
+    ctx.beginPath(); ctx.ellipse(x, y, 7, 5.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x-1.5, y-4.5, 4.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath(); ctx.ellipse(x, y+1.5, 3, 2.3, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFA500';
+    ctx.beginPath(); ctx.moveTo(x-5, y-4); ctx.lineTo(x-7.5, y-3); ctx.lineTo(x-5, y-2.6); ctx.closePath(); ctx.fill();
+  } else if(kind === 'magpie'){
+    ctx.fillStyle = '#1A1A1A';
+    ctx.beginPath(); ctx.ellipse(x, y, 7, 5.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x-1.5, y-4.5, 4.2, 0, Math.PI*2); ctx.fill();
+    // 긴 꼬리
+    ctx.beginPath(); ctx.moveTo(x+4, y-1); ctx.lineTo(x+11, y+3); ctx.lineTo(x+4, y+3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath(); ctx.ellipse(x, y+1.5, 2.7, 2.2, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFA500';
+    ctx.beginPath(); ctx.moveTo(x-5, y-4); ctx.lineTo(x-7, y-3.5); ctx.lineTo(x-5, y-2.6); ctx.closePath(); ctx.fill();
+  } else if(kind === 'owl'){
+    ctx.fillStyle = '#7A5230';
+    ctx.beginPath(); ctx.ellipse(x, y+1, 7, 5.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y-4, 5, 0, Math.PI*2); ctx.fill();
+    // ear tufts
+    ctx.beginPath(); ctx.moveTo(x-4, y-7); ctx.lineTo(x-3, y-10); ctx.lineTo(x-2, y-7); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x+4, y-7); ctx.lineTo(x+3, y-10); ctx.lineTo(x+2, y-7); ctx.closePath(); ctx.fill();
+    // 큰 눈 — 감은 슬픈 곡선
+    ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(x-2.2, y-4, 1.8, 0.2, Math.PI - 0.2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x+2.2, y-4, 1.8, 0.2, Math.PI - 0.2); ctx.stroke();
+    // beak
+    ctx.fillStyle = '#FFA500';
+    ctx.beginPath(); ctx.moveTo(x-1.5, y-2); ctx.lineTo(x+1.5, y-2); ctx.lineTo(x, y-0.2); ctx.closePath(); ctx.fill();
+  } else if(kind === 'parrot'){
+    ctx.fillStyle = '#2F9E44';
+    ctx.beginPath(); ctx.ellipse(x, y, 7, 5.5, 0, 0, Math.PI*2); ctx.fill();
+    // 빨간 머리
+    ctx.fillStyle = '#FA5252';
+    ctx.beginPath(); ctx.arc(x-1.5, y-4.5, 4.2, 0, Math.PI*2); ctx.fill();
+    // 노란 가슴
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath(); ctx.ellipse(x, y+1.5, 2.7, 2.2, 0, 0, Math.PI*2); ctx.fill();
+    // 파란 꼬리
+    ctx.fillStyle = '#74C0FC';
+    ctx.beginPath(); ctx.moveTo(x+4, y-1); ctx.lineTo(x+10, y+1.5); ctx.lineTo(x+4, y+3); ctx.closePath(); ctx.fill();
+    // 곡선 부리
+    ctx.fillStyle = '#FFD43B';
+    ctx.beginPath();
+    ctx.moveTo(x-5, y-5); ctx.quadraticCurveTo(x-8, y-3.5, x-5.5, y-2);
+    ctx.lineTo(x-4, y-3.5); ctx.closePath(); ctx.fill();
+  } else if(kind === 'squirrel'){
+    // 큰 꼬리 먼저 (몸 뒤)
+    ctx.fillStyle = '#7A4A1E';
+    ctx.beginPath(); ctx.ellipse(x+8, y-3, 4, 6.5, 0.4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#A0522D';
+    ctx.beginPath(); ctx.ellipse(x, y, 7, 5.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x-1.5, y-4.5, 4.2, 0, Math.PI*2); ctx.fill();
+    // 작은 귀
+    ctx.beginPath(); ctx.arc(x-3.5, y-7.5, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+0.5, y-7.5, 1.5, 0, Math.PI*2); ctx.fill();
+    // 노란 배
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath(); ctx.ellipse(x, y+1.5, 2.7, 2.2, 0, 0, Math.PI*2); ctx.fill();
+    // 까만 코
+    ctx.fillStyle = '#1A1A1A';
+    ctx.beginPath(); ctx.arc(x-5, y-3.5, 0.9, 0, Math.PI*2); ctx.fill();
+  }
+  // 눈 — 감은 슬픈 슬릿 (owl 제외)
+  if(kind !== 'owl'){
+    ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 1.0; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x-4, y-4.5); ctx.lineTo(x-1.5, y-4.5); ctx.stroke();
+  }
+  // 흘러내리는 눈물 — 시간에 따라 떨어지며 fade
+  const tearPhase = ((t * 0.7) + (kind.charCodeAt(0) % 5) * 0.2) % 1;
+  const tearY = tearPhase * 12;
+  ctx.fillStyle = `rgba(116,192,252,${0.95 * (1 - tearPhase)})`;
+  ctx.beginPath(); ctx.ellipse(x-3, y-2.5 + tearY, 1.0, 1.8, 0, 0, Math.PI*2); ctx.fill();
+  // owl 은 두 번째 눈에서도 눈물
+  if(kind === 'owl'){
+    const tearPhase2 = ((t * 0.7) + 0.4) % 1;
+    const tearY2 = tearPhase2 * 12;
+    ctx.fillStyle = `rgba(116,192,252,${0.95 * (1 - tearPhase2)})`;
+    ctx.beginPath(); ctx.ellipse(x+2.2, y-2.5 + tearY2, 1.0, 1.8, 0, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+// drawHellGateScene — 회전하는 지옥문 + 갇힌 5종 친구 그리기 (canvas 크기 무관 자동 scaling).
+// showHellPrologue (팝업 — 360x180) 와 showHellOpeningCinematic (풀스크린 — 640x360) 양쪽에서 사용.
+function drawHellGateScene(ctx2, W, H, t){
+  ctx2.clearRect(0, 0, W, H);
+  const scale = W/360;  // 기준 크기 360 기준
+  // Backdrop
+  const grad = ctx2.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#1A0808');
+  grad.addColorStop(1, '#3A1010');
+  ctx2.fillStyle = grad;
+  ctx2.fillRect(0, 0, W, H);
+  // Falling embers
+  const emberCount = Math.round(28 * scale);
+  for(let i=0;i<emberCount;i++){
+    const px = (i*47*scale + t*60*scale) % W;
+    const py = (i*23*scale + t*120*scale) % (H+30) - 10;
+    ctx2.fillStyle = i%2 ? '#FF6B6B' : '#FFA94D';
+    ctx2.fillRect(px, py, 1.4*scale, 1.4*scale);
+  }
+  const cx = W/2, cy = H*0.50;
+  // ── 회전하는 지옥문 ──
+  const gateR = 50 * scale;
+  ctx2.fillStyle = '#0A0404';
+  ctx2.beginPath(); ctx2.arc(cx, cy, gateR, 0, Math.PI*2); ctx2.fill();
+  ctx2.strokeStyle = '#7A0F0F'; ctx2.lineWidth = 3*scale;
+  ctx2.beginPath(); ctx2.arc(cx, cy, gateR-2*scale, 0, Math.PI*2); ctx2.stroke();
+  // CW 회전 6갈래 균열
+  ctx2.save();
+  ctx2.translate(cx, cy);
+  ctx2.rotate(t * 0.55);
+  ctx2.strokeStyle = '#FF6B00'; ctx2.lineWidth = 2.6*scale; ctx2.lineCap = 'round';
+  ctx2.shadowColor = '#FF6B00'; ctx2.shadowBlur = 6*scale;
+  for(let i=0;i<6;i++){
+    const a = i * Math.PI*2/6;
+    ctx2.beginPath();
+    ctx2.moveTo(0, 0);
+    ctx2.lineTo(Math.cos(a)*46*scale, Math.sin(a)*46*scale);
+    ctx2.stroke();
+  }
+  ctx2.shadowBlur = 0;
+  ctx2.fillStyle = '#FFD43B';
+  for(let i=0;i<6;i++){
+    const a = i * Math.PI*2/6;
+    ctx2.beginPath(); ctx2.arc(Math.cos(a)*46*scale, Math.sin(a)*46*scale, 2.4*scale, 0, Math.PI*2); ctx2.fill();
+  }
+  ctx2.restore();
+  // CCW 빠른 회전 내부 호
+  ctx2.save();
+  ctx2.translate(cx, cy);
+  ctx2.rotate(-t * 1.0);
+  ctx2.strokeStyle = '#C92A2A'; ctx2.lineWidth = 1.5*scale; ctx2.lineCap = 'round';
+  for(let i=0;i<3;i++){
+    const a1 = i * Math.PI*2/3;
+    const a2 = a1 + Math.PI*2/3 - 0.4;
+    ctx2.beginPath(); ctx2.arc(0, 0, 30*scale, a1, a2); ctx2.stroke();
+  }
+  ctx2.restore();
+  // 코어 맥동
+  const corePulse = (7 + Math.sin(t*3)*1.6 + Math.min(t*0.5, 3)) * scale;
+  ctx2.fillStyle = '#FFD43B';
+  ctx2.shadowColor = '#FFD43B'; ctx2.shadowBlur = 12*scale;
+  ctx2.beginPath(); ctx2.arc(cx, cy, corePulse, 0, Math.PI*2); ctx2.fill();
+  ctx2.shadowBlur = 0;
+  ctx2.fillStyle = '#FFF3BF';
+  ctx2.beginPath(); ctx2.arc(cx, cy, corePulse*0.55, 0, Math.PI*2); ctx2.fill();
+  // ── 갇힌 5종 친구 + 철창 ──
+  // drawSadFriend 는 좌표를 받지만 내부 사이즈는 고정 — 큰 캔버스에서도 작은 친구만 그림.
+  // scale 적용 위해 ctx 전체 scale 임시 변환.
+  ctx2.save();
+  ctx2.scale(scale, scale);
+  const Wb = 360, Hb = H/scale, cyB = Hb*0.50, cxB = Wb/2;
+  drawSadFriend(ctx2, 'sparrow',  46,  cyB - 6, t);
+  drawSadFriend(ctx2, 'magpie',   46,  cyB + 12, t);
+  drawSadFriend(ctx2, 'owl',      Wb-46, cyB - 6, t);
+  drawSadFriend(ctx2, 'parrot',   Wb-46, cyB + 12, t);
+  drawSadFriend(ctx2, 'squirrel', cxB,   Hb - 14, t);
+  // 철창
+  ctx2.strokeStyle = '#3A2828'; ctx2.lineWidth = 2; ctx2.shadowColor = 'rgba(0,0,0,.4)'; ctx2.shadowBlur = 2;
+  for(let i=0; i<3; i++){
+    ctx2.beginPath(); ctx2.moveTo(36 + i*14, cyB - 22); ctx2.lineTo(36 + i*14, cyB + 22); ctx2.stroke();
+    ctx2.beginPath(); ctx2.moveTo(Wb-50 + i*12, cyB - 22); ctx2.lineTo(Wb-50 + i*12, cyB + 22); ctx2.stroke();
+    ctx2.beginPath(); ctx2.moveTo(cxB - 12 + i*12, Hb - 28); ctx2.lineTo(cxB - 12 + i*12, Hb - 4); ctx2.stroke();
+  }
+  ctx2.shadowBlur = 0;
+  ctx2.restore();
+}
 function showHellPrologue(){
+  // v12.31 — 팝업은 가벼운 안내. 회전 캔버스만 표시, 버튼은 즉시 활성.
+  // state.time 은 victory scene 에선 정지 → performance.now() 로 자체 타이머.
   const cv = document.getElementById('hellPrologueCanvas');
   const ctx2 = cv.getContext('2d');
-  const tStart = state.time;
+  const tStart = performance.now() / 1000;
+  const btn = document.getElementById('hellPrologueCloseBtn');
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+  btn.style.transform = '';
   function frame(){
-    const t = state.time - tStart;
-    const W = cv.width, H = cv.height;
-    ctx2.clearRect(0, 0, W, H);
-    // Backdrop: dark with crimson sheen
-    const grad = ctx2.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#1A0808');
-    grad.addColorStop(1, '#3A1010');
-    ctx2.fillStyle = grad;
-    ctx2.fillRect(0, 0, W, H);
-    // Falling embers
-    for(let i=0;i<24;i++){
-      const px = (i*47 + t*60) % W;
-      const py = (i*23 + t*120) % (H+30) - 10;
-      ctx2.fillStyle = i%2 ? '#FF6B6B' : '#FFA94D';
-      ctx2.fillRect(px, py, 1.4, 1.4);
-    }
-    // Hellgate silhouette (cracked door with crimson cracks)
-    const cx = W/2, cy = H*0.55;
-    ctx2.fillStyle = '#0A0404';
-    ctx2.beginPath(); ctx2.arc(cx, cy, 50, 0, Math.PI*2); ctx2.fill();
-    ctx2.strokeStyle = '#FF6B00'; ctx2.lineWidth = 2;
-    for(let i=0;i<6;i++){
-      const a = i * Math.PI*2/6 + Math.sin(t*1.2)*0.05;
-      ctx2.beginPath();
-      ctx2.moveTo(cx, cy);
-      ctx2.lineTo(cx + Math.cos(a)*46, cy + Math.sin(a)*46);
-      ctx2.stroke();
-    }
-    ctx2.fillStyle = '#FFD43B';
-    ctx2.beginPath(); ctx2.arc(cx, cy, 8 + Math.sin(t*3)*1.2, 0, Math.PI*2); ctx2.fill();
-    // Tiny silhouettes of friends behind bars (left side)
-    ctx2.fillStyle = '#7A5230';
-    ctx2.beginPath(); ctx2.ellipse(40, cy + 10, 6, 4, 0, 0, Math.PI*2); ctx2.fill();
-    ctx2.fillStyle = '#1A1A1A';
-    ctx2.beginPath(); ctx2.ellipse(60, cy - 14, 6, 4, 0, 0, Math.PI*2); ctx2.fill();
-    ctx2.fillStyle = '#2F9E44';
-    ctx2.beginPath(); ctx2.ellipse(W-50, cy - 12, 6, 4, 0, 0, Math.PI*2); ctx2.fill();
-    ctx2.fillStyle = '#A0522D';
-    ctx2.beginPath(); ctx2.ellipse(W-34, cy + 12, 6, 4, 0, 0, Math.PI*2); ctx2.fill();
-    // Bars over silhouettes
-    ctx2.strokeStyle = '#3A2828'; ctx2.lineWidth = 2;
-    for(let i=0; i<3; i++){
-      ctx2.beginPath(); ctx2.moveTo(35 + i*15, cy - 22); ctx2.lineTo(35 + i*15, cy + 18); ctx2.stroke();
-      ctx2.beginPath(); ctx2.moveTo(W-50 + i*12, cy - 22); ctx2.lineTo(W-50 + i*12, cy + 18); ctx2.stroke();
-    }
+    const t = performance.now() / 1000 - tStart;
+    drawHellGateScene(ctx2, cv.width, cv.height, t);
   }
   frame();
   if(state._hellRaf) cancelAnimationFrame(state._hellRaf);
@@ -13101,6 +13819,59 @@ function showHellPrologue(){
   }
   state._hellRaf = requestAnimationFrame(loop);
   document.getElementById('hellPrologueModal').classList.remove('hidden');
+}
+// v12.31 — 풀스크린 시네마틱 오프닝 (지옥문 통과 버튼 클릭 시).
+// 회전하는 지옥문 + 갇힌 친구들 + 3초 reveal 후 "친구들을 구출하러 가기" 버튼.
+// + 지옥 BGM (sawtooth, 어두운 minor) + 지옥문 여는 SFX (sub-bass + 삐걱 slide + 종).
+function showHellOpeningCinematic(){
+  // state.time 은 victory scene 에선 정지 → performance.now() 로 자체 타이머.
+  const cv = document.getElementById('hellOpeningCanvas');
+  const ctx2 = cv.getContext('2d');
+  const tStart = performance.now() / 1000;
+  const btn = document.getElementById('hellOpeningRescueBtn');
+  // 버튼 초기 숨김
+  btn.classList.remove('revealed');
+  btn.style.opacity = '0';
+  btn.style.transform = 'translateY(8px)';
+  btn.style.pointerEvents = 'none';
+  let revealed = false;
+  // BGM 전환 — 지옥 시네마틱 톤.
+  initAudio();
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  state.bgmOverride = HELL_PROLOGUE_BGM_PACK;
+  bgmStart();
+  // 문 여는 효과음 — 시네마틱 시작 직후 임팩트.
+  sfxHellGateOpen();
+  function frame(){
+    const t = performance.now() / 1000 - tStart;
+    drawHellGateScene(ctx2, cv.width, cv.height, t);
+    // 3초 경과 시 버튼 fade-in
+    if(!revealed && t >= HELL_PROLOGUE_REVEAL_AT){
+      revealed = true;
+      btn.style.opacity = '1';
+      btn.style.transform = 'translateY(0)';
+      btn.style.pointerEvents = 'auto';
+    }
+    // 버튼 노출 전 카운트다운 힌트 — 상단 중앙, 작은 폰트로 (하단/하단 cage 와 안 겹치게)
+    if(t < HELL_PROLOGUE_REVEAL_AT){
+      const W = cv.width, H = cv.height;
+      const alpha = 0.55 + 0.45*Math.abs(Math.sin(t*2));
+      ctx2.fillStyle = `rgba(255,224,102,${alpha})`;
+      const fontSize = 10*(W/360);
+      ctx2.font = `bold ${fontSize}px sans-serif`;
+      ctx2.textAlign = 'center';
+      ctx2.fillText('지옥문이 열린다…', W/2, fontSize + 8);
+    }
+  }
+  frame();
+  if(state._hellOpeningRaf) cancelAnimationFrame(state._hellOpeningRaf);
+  function loop(){
+    if(document.getElementById('hellOpeningCinematic').classList.contains('hidden')) return;
+    frame();
+    state._hellOpeningRaf = requestAnimationFrame(loop);
+  }
+  state._hellOpeningRaf = requestAnimationFrame(loop);
+  document.getElementById('hellOpeningCinematic').classList.remove('hidden');
 }
 function backToTitle(){
   bgmStop();
@@ -13220,17 +13991,32 @@ function renderVictory(finalEnding){
   const isFinal = state.chapter >= MAX_CHAPTERS;
   // v12.10 — show "다음 원정 시작" CTA only at ch50 / ch70 expedition ends, not on ch100.
   const nextBtn = document.getElementById('vNextExpBtn');
+  const againBtn = document.getElementById('vAgainBtn');
+  const homeBtn = document.getElementById('vHomeBtn');
+  // v12.31 — ch100 (원정 3 끝) 전용: 단일 '✓ 확인' 버튼 → 검은 레이어 + 지옥 프롤로그 팝업.
+  const isHellEntry = state.chapter === 100 && !state._cinematicReplayMode;
   if(nextBtn){
-    if(isExpEnd && !isFinal){
+    if(isHellEntry){
+      nextBtn.style.display = '';
+      nextBtn.textContent = '✓ 확인';
+      nextBtn.style.background = 'linear-gradient(180deg,#FFD43B 0%,#FF6B6B 50%,#C92A2A 100%)';
+      nextBtn.dataset.hellEntry = '1';
+    } else if(isExpEnd && !isFinal){
       nextBtn.style.display = '';
       nextBtn.textContent = state.chapter === 50  ? '🪐 원정 Ⅱ — 비둘기 행성으로 ▶' :
                             state.chapter === 70  ? '🌌 원정 Ⅲ — 우주 정복으로 ▶' :
-                            state.chapter === 100 ? '🔥 원정 Ⅳ — 지옥 구출로 ▶' :
                                                     '▶ 다음 원정 시작';
+      nextBtn.style.background = '';
+      delete nextBtn.dataset.hellEntry;
     } else {
       nextBtn.style.display = 'none';
+      nextBtn.style.background = '';
+      delete nextBtn.dataset.hellEntry;
     }
   }
+  // ch100 진입 시 [처음부터 다시] / [홈으로] 숨김 — 단일 [확인] 으로 통합.
+  if(againBtn) againBtn.style.display = isHellEntry ? 'none' : '';
+  if(homeBtn)  homeBtn.style.display  = isHellEntry ? 'none' : '';
   const h2 = document.querySelector('#victory .card h2');
   const sub = document.querySelector('#victory .card .sub');
   if(isFinal){
@@ -13245,7 +14031,8 @@ function renderVictory(finalEnding){
     if(sub) sub.textContent = '비둘기 황제를 쓰러뜨리고 행성을 손에 넣었습니다. 아내와 아이가 함께 다음 원정을 떠납니다.';
   } else if(isExpEnd && exp.id === 3){
     h2.textContent = '🌌 원정 Ⅲ 완료 — 전 우주 정복!';
-    if(sub) sub.textContent = '오메가를 쓰러뜨리고 우주의 주재자가 되었습니다. 그러나 지옥에서 친구들이 구원을 기다리고 있습니다.';
+    // v12.31 — 사용자 요청 "구원을 기다리고 있습니다" 문구 제거.
+    if(sub) sub.textContent = '오메가를 쓰러뜨리고 우주의 주재자가 되었습니다.';
   } else {
     h2.textContent = '🏆 한계돌파 성공!';
     if(sub) sub.textContent = '여기까지의 전설이 기록되었습니다.';
@@ -13304,6 +14091,52 @@ applyTitleSkin();
 // Hunger badge — refresh on load and every 30s so the state visibly updates while the player idles.
 updateTitleHungerBadge();
 setInterval(updateTitleHungerBadge, 30000);
+
+// v12.31 — 시네마틱 캡쳐용 데모 모드. ?demo=victory100 URL 로 진입 시 타이틀 스킵하고
+// 즉시 ch100 victory 시네마틱으로 진입. ?demo=hellPopup / ?demo=hellOpening 도 가능.
+// 로컬 캡쳐 디버깅 전용 (production 트래픽엔 영향 없음 — query param 없으면 noop).
+(function demoMode(){
+  const p = new URLSearchParams(location.search);
+  const m = p.get('demo');
+  if(!m) return;
+  // 가족 동료 잠금 해제 (cinematic 가시화).
+  if(!progress.companionUnlocks) progress.companionUnlocks = {};
+  progress.companionUnlocks.wife = true;
+  progress.companionUnlocks.child = true;
+  if(m === 'victory100'){
+    setTimeout(() => {
+      state.chapter = 100;
+      state.victoryExpeditionId = 3;
+      state.scene = 'victory';
+      document.getElementById('title').classList.add('hidden');
+      document.getElementById('hud').classList.add('hidden');
+      renderVictory(false);
+      document.getElementById('victory').classList.remove('hidden');
+    }, 100);
+  } else if(m === 'hellPopup'){
+    setTimeout(() => {
+      state.chapter = 100;
+      state.victoryExpeditionId = 3;
+      state.scene = 'victory';
+      document.getElementById('title').classList.add('hidden');
+      document.getElementById('hud').classList.add('hidden');
+      renderVictory(false);
+      document.getElementById('victory').classList.remove('hidden');
+      showHellPrologue();
+    }, 100);
+  } else if(m === 'hellOpening'){
+    setTimeout(() => {
+      state.chapter = 100;
+      state.victoryExpeditionId = 3;
+      state.scene = 'victory';
+      document.getElementById('title').classList.add('hidden');
+      document.getElementById('hud').classList.add('hidden');
+      renderVictory(false);
+      document.getElementById('victory').classList.remove('hidden');
+      showHellOpeningCinematic();
+    }, 100);
+  }
+})();
 
 // Toggle body.modal-open whenever any .modal becomes visible/hidden. We use this class to
 // hide the fixed back button while a popup is up — without it Chrome paints the back button
