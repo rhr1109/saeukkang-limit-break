@@ -432,6 +432,8 @@
   .costume-section{max-width:680px;width:100%;margin:0 auto 8px;}
   .costume-section h3{margin:8px 6px 6px;color:#FFE066;font-size:14px;letter-spacing:.5px;}
   /* Grade pill colors — used in equip slot grade label and gacha reveal card grade chip. */
+  /* v12.34 — SS 등급 (천국). 흰빛+금빛 + glow shimmer. */
+  .cos-grade-SS{background:linear-gradient(135deg,#FFFFFF 0%,#FFE066 50%,#FFD43B 100%);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.6);box-shadow:0 0 8px rgba(255,224,102,.65);}
   .cos-grade-S{background:linear-gradient(180deg,#FFE066,#E67700);color:#5A1A04;text-shadow:0 1px 0 rgba(255,255,255,.4);}
   .cos-grade-A{background:linear-gradient(180deg,#E599F7,#7048E8);color:#fff;}
   .cos-grade-B{background:linear-gradient(180deg,#74C0FC,#1864AB);color:#fff;}
@@ -866,6 +868,9 @@
       <button class="cs-tab" id="csExpTab2" type="button" data-exp="2">🪐 원정 Ⅱ</button>
       <button class="cs-tab" id="csExpTab3" type="button" data-exp="3">🌌 원정 Ⅲ</button>
       <button class="cs-tab" id="csExpTab4" type="button" data-exp="4">🔥 원정 Ⅳ</button>
+      <!-- v12.34 — 원정 Ⅴ/Ⅵ 천국 추가. -->
+      <button class="cs-tab" id="csExpTab5" type="button" data-exp="5">🌟 원정 Ⅴ</button>
+      <button class="cs-tab" id="csExpTab6" type="button" data-exp="6">🪽 원정 Ⅵ</button>
     </div>
     <!-- v12.10 — 원정 끝 챕터(50/70/100)를 클리어한 사용자가 시네마틱 엔딩을 다시 볼 수 있는 영역.
          클리어된 원정 끝마다 버튼이 노출됨. -->
@@ -4740,7 +4745,8 @@ const ULT_DAMAGE_PCT = 0.12;   // 12% of boss max HP per cast — 2 casts ≈ 24
 // 15분을 넘기지 말라" 반영. 가장 긴 캡(원정 Ⅳ ch101~) = 900초 = 정확히 15분. Ch41-50도 900초로
 // 단축 (이전 1020 → 900). 모든 챕터가 15분 이내에 캡 강제 처치.
 const WAVES_PER_CHAPTER = 3;
-const MAX_CHAPTERS = 130;
+// v12.34 — 원정 Ⅴ(천국 1층천 ch131-160) + 원정 Ⅵ(천국 2층천 ch161-200) 추가.
+const MAX_CHAPTERS = 200;
 // v12 expedition system — chapters split into four campaigns ending in unique cinematics.
 // v12.11 — 원정 Ⅳ 추가: 지옥 원정. 억울하게 지옥에 끌려간 조류·조류 친화 동물들을
 // 구해내며 함께 싸우는 스토리. 원정 Ⅲ 끝(ch100) 클리어 시 해금.
@@ -4749,6 +4755,10 @@ const EXPEDITIONS = [
   { id:2, name:'원정 Ⅱ — 비둘기 행성 정복',  subtitle:'비둘기 별을 점령하고 가족을 이룬다',               range:[51,70],   theme:'pigeon_planet' },
   { id:3, name:'원정 Ⅲ — 우주 정복',         subtitle:'우주 자체를 손에 넣는 마지막 원정',                 range:[71,100],  theme:'cosmos' },
   { id:4, name:'원정 Ⅳ — 지옥 구출 원정',    subtitle:'억울하게 지옥에 간 친구들을 구하러',                range:[101,130], theme:'hellfire_rescue' },
+  // v12.34 — 천국 원정. 지옥에서 친구를 모두 구출한 비둘기 가족이 천국의 인정을 받아 1층천부터 탐방.
+  { id:5, name:'원정 Ⅴ — 천국 1층천 탐방',   subtitle:'구원의 보답으로 천국이 문을 연다 — 빛의 정원·구름 회랑·천사의 도서관', range:[131,160], theme:'heaven_first' },
+  // 1층천을 정복(?)한 가족이 더 깊은 2층천으로. 대천사·세라핌·창공의 주인을 만난다.
+  { id:6, name:'원정 Ⅵ — 천국 2층천 정복',   subtitle:'더 높은 하늘로 — 대천사 회랑·세라핌의 옥좌·창공의 끝',           range:[161,200], theme:'heaven_second' },
 ];
 function expeditionFor(c){
   for(const e of EXPEDITIONS){ if(c >= e.range[0] && c <= e.range[1]) return e; }
@@ -4776,8 +4786,12 @@ function chapterWaveTimes(c){
     each = 110;  cap = 720;   // 원정 Ⅱ — v12.13 단축. 1:50 waves → 5:30 + 6:30 보스 = 12분 cap
   } else if(c <= 100){
     each = 130;  cap = 720;   // 원정 Ⅲ — v12.13 단축. 2:10 waves → 6:30 + 5:30 보스 = 12분 cap
-  } else {
+  } else if(c <= 130){
     each = 150;  cap = 900;   // 원정 Ⅳ — 지옥 15분 cap. 사용자 한도 준수.
+  } else if(c <= 160){
+    each = 160;  cap = 900;   // v12.34 — 원정 Ⅴ 천국 1층천. 2:40 waves → 8:00 + 7:00 = 15분 cap.
+  } else {
+    each = 175;  cap = 900;   // v12.34 — 원정 Ⅵ 천국 2층천. 2:55 waves → 8:45 + 6:15 = 15분 cap.
   }
   return [each, each*2, each*3, cap];
 }
@@ -4841,7 +4855,23 @@ const CHAPTER_NAMES = [
   '뼈의 평원','해골 회랑','죽음의 시계탑','순장의 문','뼛가루 사막',                   // 111-115 bone_archon + 부엉이 구출
   '그림자 대성당','검은 의회','거짓의 회랑','심판의 옥좌','그림자 전당',               // 116-120 shadow_inquisitor + 앵무새 구출
   '천사의 추락','잿빛 천국','금단의 화원','잿불 우물','심연의 첨탑',                   // 121-125 infernal_seraph + 다람쥐 구출
-  '봉인된 지옥문','악마의 계약 광장','구원의 다리','마지막 심판','지옥문의 군주'      // 126-130 hellgate_sovereign (최종)
+  '봉인된 지옥문','악마의 계약 광장','구원의 다리','마지막 심판','지옥문의 군주',     // 126-130 hellgate_sovereign
+  // === 원정 Ⅴ — 천국 1층천 탐방 (131-160). 5챕터 단위 보스 변종. ===
+  '구름 입구','빛의 다리','수호 천사 정원','거룩한 분수대','별빛 회랑',                // 131-135 cherub_warden
+  '천사 합창단','연꽃 호수','은빛 첨탑','평화의 들판','달빛 정원',                      // 136-140 angelic_chorus
+  '대천사 도서관','금빛 회의장','진리의 거울방','약속의 신전','새벽의 광장',            // 141-145 throne_scholar
+  '구름의 군대','수호자의 성벽','은총의 강','빛의 폭포','약속의 봉우리',                // 146-150 dominion_general
+  '천국 검문소','경이의 문','첫 번째 시험관','여명의 옥좌','1층천의 수호자',            // 151-155 first_heaven_guardian
+  '경계의 문','두 하늘 사이의 다리','천공의 검문','승천의 광장','1층천의 군주',         // 156-160 first_heaven_sovereign (원정 Ⅴ 끝)
+  // === 원정 Ⅵ — 천국 2층천 정복 (161-200). 5챕터 단위 보스 변종. ===
+  '2층천 입구','광휘의 회랑','반사의 회당','은총의 광장','거룩한 강',                  // 161-165 power_seraph
+  '천사 합창의 정점','금빛 옥좌','경이의 회의장','승리의 노래','시간 너머의 빛',       // 166-170 virtue_choir
+  '대천사의 회랑','맹세의 신전','심판의 회의장','약속의 옥좌','거룩한 별자리',         // 171-175 archangel_council
+  '세라핌의 정원','불꽃의 회랑','거룩한 화염',' 새벽의 신전','승화의 옥좌',             // 176-180 seraph_flame
+  '오필의 광장','진리의 강','회의의 문','지혜의 정원','명백함의 첨탑',                  // 181-185 ophanim_wheel
+  '미가엘 검문소','대천사의 검','거룩한 전장','빛의 군대','마지막 시험',                // 186-190 michael_blade
+  '가브리엘 회랑','선포의 첨탑','천공의 문','약속의 강','신성의 들판',                  // 191-195 gabriel_horn
+  '창공의 끝','별이 태어나는 곳','마지막 회의장','신성의 광장','창공의 주인'            // 196-200 sky_sovereign (게임 최종)
 ];
 const CHAPTER_COLORS = [
   '#FFE066','#FFD43B','#FFA94D','#FF922B','#FF6B6B',
@@ -4873,7 +4903,23 @@ const CHAPTER_COLORS = [
   '#868E96','#495057','#212529','#5A0F0F','#7A1818',
   '#3B0764','#5F3DC4','#7048E8','#9775FA','#5F3DC4',
   '#F8F9FA','#FFD43B','#FFA94D','#FF6B00','#212529',
-  '#C92A2A','#E03131','#FFFFFF','#FA5252','#FFE066'
+  '#C92A2A','#E03131','#FFFFFF','#FA5252','#FFE066',
+  // === 원정 Ⅴ — 천국 1층천 (131-160): 부드러운 흰빛/금빛/하늘색 ===
+  '#F8F9FA','#FFE066','#A5D8FF','#FFFFFF','#FFF3BF',
+  '#E7F5FF','#74C0FC','#FFE066','#F8F9FA','#A5D8FF',
+  '#FFFFFF','#FFE066','#FFD43B','#A5D8FF','#FFE3D0',
+  '#E7F5FF','#A5D8FF','#74C0FC','#FFFFFF','#FFE066',
+  '#F8F9FA','#FFE066','#FFD43B','#FFFFFF','#74C0FC',
+  '#A5D8FF','#FFFFFF','#FFE066','#FFD43B','#FFFFFF',
+  // === 원정 Ⅵ — 천국 2층천 (161-200): 깊은 황금/오로라/창공 ===
+  '#FFE066','#FFD43B','#A5D8FF','#74C0FC','#FFFFFF',
+  '#FFE066','#FFD43B','#9775FA','#A5D8FF','#FFFFFF',
+  '#E599F7','#9775FA','#FFE066','#FFFFFF','#74C0FC',
+  '#FFA94D','#FFD43B','#FF6B6B','#FFE066','#FFFFFF',
+  '#A5D8FF','#74C0FC','#FFE066','#FFD43B','#FFFFFF',
+  '#FFD43B','#FFE066','#A5D8FF','#FFFFFF','#74C0FC',
+  '#FFE066','#FFD43B','#A5D8FF','#FFFFFF','#9775FA',
+  '#FFFFFF','#FFE066','#9775FA','#A5D8FF','#FFD43B'
 ];
 function chapterName(c){ return CHAPTER_NAMES[Math.min(c-1, CHAPTER_NAMES.length-1)]; }
 function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.length-1)]; }
@@ -5194,9 +5240,10 @@ const TITLE_SKINS = [
       // Sky → field gradient
       'linear-gradient(180deg, #FFE066 0%, #FAB005 40%, #5A3A04 80%, #1a0a00 100%)'
     ].join(',') },
-  // === v12.14 — 원정 클리어 보상 스킨. price 0이지만 expeditionUnlock 조건이 있어
-  // 해당 원정 끝 챕터를 클리어해야 자동 ownedSkins에 추가됨. 코인으로 구매 불가. ===
-  { id:'sky_emperor', name:'🌅 하늘의 황제 (원정 Ⅰ 보상)', price: 0, expeditionUnlock: 1,
+  // === v12.14 → v12.34 — 원정 보상 스킨. expeditionUnlock 으로 구매 자격을 해금만 하고,
+  // 실제 소유는 코인 결제 필요 (사용자 피드백 "원정 클리어할때마다 무료로 사용할 수 있게 해놨는데
+  // 그게 아니라 엄연히 그 스킨들도 해금 후 돈 내고 사야하는거야"). 단계별 상승 가격 책정. ===
+  { id:'sky_emperor', name:'🌅 하늘의 황제 (원정 Ⅰ 보상)', price: 8000, expeditionUnlock: 1,
     grad:[
       // 떠 있는 왕관 후광
       'radial-gradient(circle 100px at 50% 22%, rgba(255,243,191,.85) 0%, rgba(255,224,102,.6) 35%, transparent 75%)',
@@ -5212,7 +5259,7 @@ const TITLE_SKINS = [
       // 노을 → 지평선 → 도시 silhouette
       'linear-gradient(180deg, #FFE3A6 0%, #FFA94D 30%, #E03131 60%, #5A1A04 90%, #18030A 100%)'
     ].join(',') },
-  { id:'pigeon_palace', name:'🪐 비둘기 궁전 (원정 Ⅱ 보상)', price: 0, expeditionUnlock: 2,
+  { id:'pigeon_palace', name:'🪐 비둘기 궁전 (원정 Ⅱ 보상)', price: 18000, expeditionUnlock: 2,
     grad:[
       // 떨어지는 깃털
       'radial-gradient(ellipse 5px 2px at 18% 22%, rgba(255,224,102,.65) 0%, transparent 80%)',
@@ -5228,7 +5275,7 @@ const TITLE_SKINS = [
       // 핑크 새벽 sky
       'linear-gradient(180deg, #FFE3F2 0%, #FFB4D8 25%, #FA80B0 55%, #5A1A3F 85%, #1A0510 100%)'
     ].join(',') },
-  { id:'cosmic_throne', name:'🌌 우주의 옥좌 (원정 Ⅲ 보상)', price: 0, expeditionUnlock: 3,
+  { id:'cosmic_throne', name:'🌌 우주의 옥좌 (원정 Ⅲ 보상)', price: 35000, expeditionUnlock: 3,
     grad:[
       // 별밭 (조밀)
       'radial-gradient(circle at 8% 14%, rgba(255,255,255,.85) 0%, transparent 0.4%)',
@@ -5247,7 +5294,7 @@ const TITLE_SKINS = [
       // 우주 베이스
       'linear-gradient(180deg, #0a0030 0%, #1a0050 30%, #2a0080 60%, #050015 100%)'
     ].join(',') },
-  { id:'hellgate_redeemer', name:'🔥 지옥문의 구원자 (원정 Ⅳ 보상)', price: 0, expeditionUnlock: 4,
+  { id:'hellgate_redeemer', name:'🔥 지옥문의 구원자 (원정 Ⅳ 보상)', price: 60000, expeditionUnlock: 4,
     grad:[
       // 떨어지는 잿불
       'radial-gradient(circle at 14% 18%, rgba(255,107,107,.7) 0%, transparent 1%)',
@@ -5265,23 +5312,46 @@ const TITLE_SKINS = [
       // 지옥 base — 어둠 + 크림슨 + ash
       'linear-gradient(180deg, #1A0505 0%, #5A1010 25%, #C92A2A 55%, #FF6B00 75%, #2A0808 95%, #050000 100%)'
     ].join(',') },
+  // v12.34 — 천국 1층천 보상 스킨 (ch160 클리어). 흰빛 cloud + 황금 후광.
+  { id:'heaven_first_garden', name:'🌟 천국 1층천 정원 (원정 Ⅴ 보상)', price: 90000, expeditionUnlock: 5,
+    grad:[
+      // 떠다니는 황금 별
+      'radial-gradient(circle at 14% 22%, rgba(255,224,102,.85) 0%, transparent 1%)',
+      'radial-gradient(circle at 32% 44%, rgba(255,255,255,.85) 0%, transparent 0.8%)',
+      'radial-gradient(circle at 56% 18%, rgba(255,224,102,.7) 0%, transparent 0.9%)',
+      'radial-gradient(circle at 74% 38%, rgba(255,255,255,.8) 0%, transparent 0.7%)',
+      'radial-gradient(circle at 88% 56%, rgba(255,224,102,.75) 0%, transparent 0.8%)',
+      // 큰 흰빛 구름 (중앙 분수대)
+      'radial-gradient(circle 80px at 50% 60%, rgba(255,255,255,.85) 0%, rgba(255,243,191,.55) 50%, transparent 80%)',
+      // 황금 후광 ring
+      'radial-gradient(ellipse 50% 14% at 50% 60%, transparent 55%, rgba(255,212,59,.55) 62%, transparent 72%)',
+      // 부드러운 광선
+      'linear-gradient(190deg, rgba(255,243,191,.35) 0%, rgba(255,224,102,.20) 50%, transparent 80%)',
+      // 천국 base — 흰빛 → 하늘색 → 깊은 청
+      'linear-gradient(180deg, #FFFFFF 0%, #FFF9DB 18%, #FFE066 38%, #A5D8FF 60%, #74C0FC 80%, #1864AB 100%)'
+    ].join(',') },
+  // v12.34 — 천국 2층천 보상 스킨 (ch200 최종 클리어). 오로라 + 광휘.
+  { id:'heaven_second_apex', name:'🪽 천국 2층천 창공 (원정 Ⅵ 보상)', price: 150000, expeditionUnlock: 6,
+    grad:[
+      // 별빛 (적은 수, 크게)
+      'radial-gradient(circle at 18% 14%, rgba(255,255,255,.85) 0%, transparent 1%)',
+      'radial-gradient(circle at 42% 38%, rgba(255,224,102,.85) 0%, transparent 1%)',
+      'radial-gradient(circle at 68% 22%, rgba(229,153,247,.85) 0%, transparent 1%)',
+      'radial-gradient(circle at 86% 48%, rgba(255,255,255,.85) 0%, transparent 1%)',
+      // 오로라 띠 (회전 conic)
+      'conic-gradient(from 30deg at 50% 60%, rgba(255,224,102,.45) 0deg, rgba(151,117,250,.45) 80deg, rgba(165,216,255,.4) 160deg, rgba(255,224,102,.45) 240deg, rgba(255,180,216,.4) 320deg, rgba(255,224,102,.45) 360deg)',
+      // 거룩한 코어 (중앙 광휘)
+      'radial-gradient(circle 100px at 50% 58%, rgba(255,255,255,.95) 0%, rgba(255,224,102,.7) 35%, rgba(255,167,38,.5) 65%, transparent 90%)',
+      // 신성한 ring (이중)
+      'radial-gradient(ellipse 60% 16% at 50% 60%, transparent 55%, rgba(255,212,59,.7) 62%, transparent 72%)',
+      // 창공 base — 황금 → 보라 apex
+      'linear-gradient(180deg, #FFE066 0%, #FFA94D 25%, #E599F7 55%, #9775FA 75%, #5F3DC4 90%, #1A0033 100%)'
+    ].join(',') },
 ];
 const TITLE_SKINS_BY_ID = Object.fromEntries(TITLE_SKINS.map(s => [s.id, s]));
-// v12.14 — 원정 보상 스킨 마이그레이션. 이미 원정 끝 챕터 클리어한 사용자에게 자동 추가.
-(function migrateExpeditionRewardSkins(){
-  const expEndCh = { 1:50, 2:70, 3:100, 4:130 };
-  const cleared = progress.clearedChapter || 0;
-  let changed = false;
-  for(const s of TITLE_SKINS){
-    if(s.expeditionUnlock && cleared >= expEndCh[s.expeditionUnlock]){
-      if(!progress.ownedSkins.includes(s.id)){
-        progress.ownedSkins.push(s.id);
-        changed = true;
-      }
-    }
-  }
-  if(changed){ try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }catch(e){} }
-})();
+// v12.14 → v12.34 — 원정 보상 스킨은 더 이상 무료 자동 지급 X. 클리어 시 구매 자격(unlock)만
+// 부여되고, 코인으로 직접 구매해야 ownedSkins 에 추가됨.
+// (기존에 자동 지급 받은 사용자는 그대로 유지 — regression 방지. 신규/미보유 자에게만 가격 적용.)
 
 function applyTitleSkin(){
   const skinId = progress.skin || 'default';
@@ -5293,6 +5363,8 @@ function applyTitleSkin(){
 // ---------- Costume / gacha system ----------
 // Grades — rarer = stronger multiplier on the slot's base stat package.
 const COSTUME_GRADES = {
+  // v12.34 — SS 등급 추가. 천국 코스튬 전용 (ch131 해금). S 보다 30% 강한 보너스.
+  SS:{ mult: 1.30, label:'SS', color:'#FFFFFF', glow:'#FFE066', borderClass:'cos-grade-SS' },
   S: { mult: 1.00, label:'S', color:'#FFE066', glow:'#FFF3BF', borderClass:'cos-grade-S' },
   A: { mult: 0.65, label:'A', color:'#BE4BDB', glow:'#E599F7', borderClass:'cos-grade-A' },
   B: { mult: 0.40, label:'B', color:'#339AF0', glow:'#A5D8FF', borderClass:'cos-grade-B' },
@@ -5347,6 +5419,10 @@ const COSTUME_DEFS = [
   { id:'h_galaxy_helm',slot:'head',   name:'은하 헬멧',        icon:'🌌', expedition:3 },
   { id:'b_void_robe',  slot:'body',   name:'보이드 로브',      icon:'⚫', expedition:3 },
   { id:'w_star_blade', slot:'weapon', name:'별의 검',          icon:'⭐', expedition:3 },
+  // ─── v12.34 원정 Ⅴ/Ⅵ — 천국 (ch131 해금, SS 전용 자동 지급). 일반 가챠/드롭 풀에서는 제외. ───
+  { id:'h_seraph_halo',slot:'head',   name:'세라핌 후광',      icon:'😇', expedition:5, ssOnly:true },
+  { id:'b_holy_robe',  slot:'body',   name:'거룩한 로브',      icon:'🪽', expedition:5, ssOnly:true },
+  { id:'w_celestial_blade',slot:'weapon', name:'천공의 검',    icon:'⚜️', expedition:5, ssOnly:true },
 ];
 const COSTUME_DEFS_BY_ID = Object.fromEntries(COSTUME_DEFS.map(d=>[d.id,d]));
 const COSTUME_DEFS_BY_SLOT = { head:[], body:[], weapon:[] };
@@ -5419,15 +5495,30 @@ function awardCostume(grade, slotFilter){
   // Pick a random definition. v12 phase 3 — gate by expedition: 원정 Ⅱ costumes drop only after
   // ch50 cleared, 원정 Ⅲ only after ch70 cleared. Outside player's reached expedition tier the
   // costume is filtered out so they're not awarded prematurely.
+  // v12.34 — ssOnly costume(천국 SS 전용)은 random pool 에서 제외 (ch131 자동 지급 전용).
   const cleared = progress.clearedChapter || 0;
   const maxExp = cleared >= 70 ? 3 : cleared >= 50 ? 2 : 1;
-  const fullPool = slotFilter ? COSTUME_DEFS_BY_SLOT[slotFilter] : COSTUME_DEFS;
+  const fullPool = (slotFilter ? COSTUME_DEFS_BY_SLOT[slotFilter] : COSTUME_DEFS).filter(d => !d.ssOnly);
   const pool = fullPool.filter(d => (d.expedition||1) <= maxExp);
   const def = pool[Math.floor(Math.random()*pool.length)] || fullPool[0];
   const item = { uid:newCostumeUid(), defId:def.id, grade };
   progress.costumes.push(item);
   saveProgress();
   return item;
+}
+// v12.34 — 천국 SS 코스튬 일괄 자동 지급 (ch131 클리어 시 1회). 이미 보유 시 noop.
+function grantHeavenSSCostumes(){
+  const HEAVEN_IDS = ['h_seraph_halo','b_holy_robe','w_celestial_blade'];
+  let granted = 0;
+  for(const id of HEAVEN_IDS){
+    const owned = progress.costumes.some(c => c.defId === id && c.grade === 'SS');
+    if(!owned){
+      progress.costumes.push({ uid:newCostumeUid(), defId:id, grade:'SS' });
+      granted++;
+    }
+  }
+  if(granted > 0) saveProgress();
+  return granted;
 }
 
 // v12 phase 2 — costume combining. 3 unequipped same-grade costumes → 1 random next-grade.
@@ -5604,6 +5695,11 @@ const SHOP_BRANCHES = [
         apply:(p,l)=>{ p.regenPerSec = (p.regenPerSec||0) + 1*l; } },
       { id:'bulwark', icon:'🏰', name:'대장벽',         desc:'피해 감소 +6%',           max:3,  cost:l=>5000+l*3500, req:'regen',  reqLvl:2, reqClearedCh:130,
         apply:(p,l)=>{ p.damageReduction = (p.damageReduction||0) + 0.06*l; } },
+      // v12.34 — 7단계 (ch160), 8단계 (ch200) 천국 신규 노드.
+      { id:'celestial_grace', icon:'🪽', name:'천국의 은총', desc:'최대 HP +10%',          max:3,  cost:l=>9000+l*6000, req:'bulwark', reqLvl:2, reqClearedCh:160,
+        apply:(p,l)=>{ p.maxHp = Math.round(p.maxHp * Math.pow(1.10, l)); p.hp = p.maxHp; } },
+      { id:'sky_blessing',    icon:'☁️', name:'창공의 축복', desc:'피해 감소 +5% + 매 초 HP +2', max:2, cost:l=>16000+l*9000, req:'celestial_grace', reqLvl:2, reqClearedCh:200,
+        apply:(p,l)=>{ p.damageReduction = (p.damageReduction||0) + 0.05*l; p.regenPerSec = (p.regenPerSec||0) + 2*l; } },
     ]
   },
   {
@@ -5622,6 +5718,11 @@ const SHOP_BRANCHES = [
         apply:(p,l)=>{ p.critMult = (p.critMult||2.0) + 0.3*l; } },
       { id:'apex',     icon:'🌋', name:'정점의 분노',  desc:'시작 공격력 ×1.10',    max:3,  cost:l=>5500+l*3800,  req:'critmult',reqLvl:2, reqClearedCh:130,
         apply:(p,l)=>{ p.damage *= Math.pow(1.10, l); } },
+      // v12.34 — 7단계 (ch160), 8단계 (ch200) 천국 신규 노드.
+      { id:'seraph_strike',   icon:'⚜️', name:'세라핌의 일격',    desc:'시작 공격력 ×1.12 + 관통 +1', max:3, cost:l=>10000+l*7000, req:'apex', reqLvl:2, reqClearedCh:160,
+        apply:(p,l)=>{ p.damage *= Math.pow(1.12, l); p.pierce = (p.pierce||0) + l; } },
+      { id:'creator_wrath',   icon:'🌟', name:'창조주의 분노',    desc:'공격력 ×1.20 + 치명타 배율 +0.4', max:2, cost:l=>20000+l*12000, req:'seraph_strike', reqLvl:2, reqClearedCh:200,
+        apply:(p,l)=>{ p.damage *= Math.pow(1.20, l); p.critMult = (p.critMult||2.0) + 0.4*l; } },
     ]
   },
   {
@@ -5640,6 +5741,11 @@ const SHOP_BRANCHES = [
         apply:(p,l)=>{ p.coinMult = (p.coinMult||1) * Math.pow(1.15, l); } },
       { id:'alacrity',  icon:'🌪️', name:'질풍의 가호', desc:'이동·연사 +5%',  max:3, cost:l=>5000+l*3500,  req:'coingreed',reqLvl:2, reqClearedCh:130,
         apply:(p,l)=>{ p.speed *= Math.pow(1.05, l); p.fireRate *= Math.pow(1.05, l); } },
+      // v12.34 — 7단계 (ch160), 8단계 (ch200) 천국 신규 노드.
+      { id:'angel_wings',  icon:'🪽', name:'천사의 날개',    desc:'이동 +6% + 탄속 +6%',           max:3, cost:l=>9500+l*6500,  req:'alacrity', reqLvl:2, reqClearedCh:160,
+        apply:(p,l)=>{ p.speed *= Math.pow(1.06, l); p.projSpeed *= Math.pow(1.06, l); } },
+      { id:'sky_anointed', icon:'✨', name:'창공의 인장',    desc:'치명타 +6% + 코인 ×1.20',        max:2, cost:l=>18000+l*10000, req:'angel_wings', reqLvl:2, reqClearedCh:200,
+        apply:(p,l)=>{ p.crit = Math.min(0.95, p.crit + 0.06*l); p.coinMult = (p.coinMult||1) * Math.pow(1.20, l); } },
     ]
   },
 ];
@@ -6690,6 +6796,56 @@ const COMPANION_COSTUMES = {
         ctx.fillStyle = '#FA80B0';
         ctx.fillRect(-19, 14, 38, 1.8);
       } },
+    // === v12.34 — 천국 SS 코스튬 (ch131 자동 해금). 부위별 1개씩. ===
+    { id:'heaven_halo', name:'천국 후광', cost:0, icon:'😇', slot:'head', dmgBoost:1.20,
+      autoUnlockClearedCh: 131,
+      draw:(ctx)=>{
+        // 머리 위 빛나는 후광 + 황금 별
+        ctx.save();
+        // 후광
+        ctx.strokeStyle = '#FFE066'; ctx.lineWidth = 2.2;
+        ctx.shadowColor = 'rgba(255,224,102,0.85)'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.ellipse(0, -42, 13, 4, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        // 안쪽 흰빛
+        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(0, -42, 11, 3, 0, 0, Math.PI*2); ctx.stroke();
+        // 작은 별 6개 회전
+        const t = state.time;
+        for(let i=0;i<6;i++){
+          const a = (i/6)*Math.PI*2 + t*1.2;
+          const sx = Math.cos(a)*16, sy = -42 + Math.sin(a)*4;
+          ctx.fillStyle = i%2 ? '#FFE066' : '#FFFFFF';
+          ctx.beginPath(); ctx.arc(sx, sy, 1.3, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      } },
+    { id:'heaven_robe', name:'천국 의복', cost:0, icon:'🪽', slot:'body', dmgBoost:1.18,
+      autoUnlockClearedCh: 131,
+      draw:(ctx)=>{
+        ctx.save();
+        // 흰빛 본체
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(-19, 0); ctx.quadraticCurveTo(-22, 12, -19, 28);
+        ctx.lineTo(19, 28); ctx.quadraticCurveTo(22, 12, 19, 0);
+        ctx.quadraticCurveTo(9, -3, 0, -3); ctx.quadraticCurveTo(-9, -3, -19, 0);
+        ctx.closePath(); ctx.fill();
+        // 황금 띠
+        ctx.fillStyle = '#FFE066';
+        ctx.fillRect(-19, 12, 38, 2.4);
+        // 가슴 십자가 빛
+        ctx.fillStyle = '#FFD43B';
+        ctx.shadowColor = 'rgba(255,224,102,0.9)'; ctx.shadowBlur = 6;
+        ctx.fillRect(-1, 4, 2, 12);
+        ctx.fillRect(-5, 8, 10, 2);
+        ctx.shadowBlur = 0;
+        // 후방 깃털 날개 시그니처
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath(); ctx.ellipse(-22, 10, 5, 13, -0.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(22, 10, 5, 13, 0.5, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      } },
   ],
   child: [
     { id:'pacifier', name:'기본 (머리털)', cost:0,     icon:'👶', slot:'head',
@@ -7061,6 +7217,50 @@ const COMPANION_COSTUMES = {
         ctx.fillStyle = '#FFF9DB';
         ctx.beginPath(); ctx.ellipse(0, 9, 4, 5, 0, 0, Math.PI*2); ctx.fill();
       } },
+    // === v12.34 — 아기 천국 SS 코스튬 (ch131 자동 해금). 부위별 1개씩. ===
+    { id:'mini_halo', name:'아기 후광', cost:0, icon:'😇', slot:'head', dmgBoost:1.18,
+      autoUnlockClearedCh: 131,
+      draw:(ctx)=>{
+        ctx.save();
+        // 작은 후광
+        ctx.strokeStyle = '#FFE066'; ctx.lineWidth = 1.6;
+        ctx.shadowColor = 'rgba(255,224,102,0.85)'; ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.ellipse(0, -25, 9, 2.6, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        // 머리털 한 가닥
+        ctx.strokeStyle = '#74C0FC'; ctx.lineWidth = 2.0; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(2, -22, 0, -25); ctx.stroke();
+        // 작은 별 4개
+        const t = state.time;
+        for(let i=0;i<4;i++){
+          const a = (i/4)*Math.PI*2 + t*1.2;
+          const sx = Math.cos(a)*11, sy = -25 + Math.sin(a)*2.5;
+          ctx.fillStyle = '#FFE066';
+          ctx.beginPath(); ctx.arc(sx, sy, 0.9, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      } },
+    { id:'mini_robe', name:'아기 천국복', cost:0, icon:'🪽', slot:'body', dmgBoost:1.16,
+      autoUnlockClearedCh: 131,
+      draw:(ctx)=>{
+        ctx.save();
+        // 흰빛 옷
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        // 황금 가로 띠
+        ctx.fillStyle = '#FFE066';
+        ctx.fillRect(-10, 8, 20, 1.8);
+        // 가슴 빛
+        ctx.fillStyle = '#FFD43B';
+        ctx.shadowColor = 'rgba(255,224,102,0.9)'; ctx.shadowBlur = 4;
+        ctx.beginPath(); ctx.arc(0, 4, 1.6, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      } },
   ],
 };
 
@@ -7102,6 +7302,18 @@ const RESCUED_SET_DEFS = [
     setBonus:1.05,
     costPerPiece:2500,
   },
+  // v12.34 — 천국 세트 (ch131 자동 해금, cost:0). SS 등급에 준하는 친구 보너스.
+  {
+    id:'heavenAscension',
+    name:'천국 승천 의장',
+    icon:'🪽',
+    accent:'#FFE066',
+    description:'천국의 인정을 받아 친구들에게 새겨진 광휘 — 가장 강력한 동료 세트',
+    perPieceBoost:1.025,    // 각 +2.5%
+    setBonus:1.06,          // 풀세트 ×1.06 → 합산 ~×1.193 (+19.3%)
+    costPerPiece:0,         // ch131 자동 지급 (구매 불필요)
+    autoUnlockClearedCh: 131,
+  },
 ];
 // 각 세트의 친구별 코스튬 외형 (단순 컬러 오버레이) — 친구의 작은 사이즈에 어울리게 컴팩트.
 function _makeRescuedSetCostume(setId, kind, name, accent, secondary){
@@ -7133,31 +7345,36 @@ function _makeRescuedSetCostume(setId, kind, name, accent, secondary){
     }
   };
 }
-// Ash brigade: 잿불 (오렌지/금)
+// Ash brigade: 잿불 (오렌지/금) / Heaven: 흰빛+금 (v12.34)
 COMPANION_COSTUMES.sparrow = [
   _makeRescuedSetCostume('ashBrigade',     'sparrow', '잿불 망토',   '#FF6B35', '#FFE066'),
   _makeRescuedSetCostume('salvationChoir', 'sparrow', '천상 망토',   '#FFE066', '#FFFFFF'),
   _makeRescuedSetCostume('abyssalPact',    'sparrow', '심연 망토',   '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','sparrow', '천국 승천복', '#FFFFFF', '#FFE066'),
 ];
 COMPANION_COSTUMES.magpie = [
   _makeRescuedSetCostume('ashBrigade',     'magpie',  '잿불 흉갑',   '#FF6B35', '#FFE066'),
   _makeRescuedSetCostume('salvationChoir', 'magpie',  '천상 옷자락', '#FFE066', '#FFFFFF'),
   _makeRescuedSetCostume('abyssalPact',    'magpie',  '심연 갑옷',   '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','magpie',  '천국 승천복', '#FFFFFF', '#FFE066'),
 ];
 COMPANION_COSTUMES.owl = [
   _makeRescuedSetCostume('ashBrigade',     'owl',     '잿불 두건',   '#FF6B35', '#FFE066'),
   _makeRescuedSetCostume('salvationChoir', 'owl',     '천상 두건',   '#FFE066', '#FFFFFF'),
   _makeRescuedSetCostume('abyssalPact',    'owl',     '심연 망토',   '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','owl',     '천국 승천복', '#FFFFFF', '#FFE066'),
 ];
 COMPANION_COSTUMES.parrot = [
   _makeRescuedSetCostume('ashBrigade',     'parrot',  '잿불 어깨갑', '#FF6B35', '#FFE066'),
   _makeRescuedSetCostume('salvationChoir', 'parrot',  '천상 깃옷',   '#FFE066', '#FFFFFF'),
   _makeRescuedSetCostume('abyssalPact',    'parrot',  '심연 깃옷',   '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','parrot',  '천국 승천복', '#FFFFFF', '#FFE066'),
 ];
 COMPANION_COSTUMES.squirrel = [
   _makeRescuedSetCostume('ashBrigade',     'squirrel','잿불 띠',     '#FF6B35', '#FFE066'),
   _makeRescuedSetCostume('salvationChoir', 'squirrel','천상 띠',     '#FFE066', '#FFFFFF'),
   _makeRescuedSetCostume('abyssalPact',    'squirrel','심연 띠',     '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','squirrel','천국 승천복', '#FFFFFF', '#FFE066'),
 ];
 // 5명 모두 같은 setId 의 코스튬을 입었을 때 active. 한 명이라도 다른 세트면 보너스 0.
 function getActiveRescuedSetId(){
@@ -7304,6 +7521,40 @@ function grantDefaultCompanionCostume(kind){
     return starter;
   }
   return null;
+}
+// v12.34 — 천국 SS 코스튬 일괄 자동 해금 (ch131 클리어 시).
+//   아내/아기: heaven_halo, heaven_robe / mini_halo, mini_robe (head + body 각 1개)
+//   5종 친구: heavenAscension 세트 (5명 동일 setId, body slot, setBonus 1.06×)
+// 사용자: "친구 5종의 천국 코스튬은 세트로 만들면 되는거 알지? 같이 세트로 구매되게 해야해."
+// → setId 통일된 한 세트 일괄 unlock + 자동 장착 (수동 5번 클릭 회피).
+function grantHeavenCompanionCostumes(){
+  if(!progress.companionCostumes) progress.companionCostumes = {};
+  const adds = {
+    wife:    ['heaven_halo','heaven_robe'],
+    child:   ['mini_halo','mini_robe'],
+    sparrow: ['heavenAscension_sparrow'],
+    magpie:  ['heavenAscension_magpie'],
+    owl:     ['heavenAscension_owl'],
+    parrot:  ['heavenAscension_parrot'],
+    squirrel:['heavenAscension_squirrel'],
+  };
+  for(const k of Object.keys(adds)){
+    if(!progress.companionCostumes[k]) progress.companionCostumes[k] = { unlocked:[], equipped:{head:null, body:null} };
+    const slot = progress.companionCostumes[k];
+    if(!slot.unlocked) slot.unlocked = [];
+    _normalizeCompanionEquipped(slot, k);
+    for(const id of adds[k]){
+      if(!slot.unlocked.includes(id)) slot.unlocked.push(id);
+      // 자동 장착 — 친구는 모두 같은 setId 로 동시 장착되어 setBonus 즉시 발효.
+      const list = COMPANION_COSTUMES[k] || [];
+      const def = list.find(c => c.id === id);
+      if(def){
+        const ssl = def.slot || 'head';
+        slot.equipped[ssl] = id;
+      }
+    }
+  }
+  saveProgress();
 }
 function buyCompanionCostume(kind, costumeId){
   const list = COMPANION_COSTUMES[kind];
@@ -7770,7 +8021,23 @@ const BOSS_VARIANTS = {
   bone_archon:         { hpMult:28.0, dmgMult:2.40, sizeMult:1.24, label:'해골 대천사',    baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:0.3 },          // 111-115
   shadow_inquisitor:   { hpMult:29.0, dmgMult:2.45, sizeMult:1.22, label:'그림자 심판관',  baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:1.5 },          // 116-120
   infernal_seraph:     { hpMult:30.0, dmgMult:2.50, sizeMult:1.26, label:'잿불의 천사',    baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:30,  saturate:1.1 },          // 121-125
-  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.65, sizeMult:1.35, label:'지옥문의 군주',  baseStyle:'void',    baseBehavior:'void',    hueShift:340, saturate:1.4 },          // 126-130 (게임 최종)
+  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.65, sizeMult:1.35, label:'지옥문의 군주',  baseStyle:'void',    baseBehavior:'void',    hueShift:340, saturate:1.4 },          // 126-130
+  // === v12.34 — 원정 Ⅴ — 천국 1층천 (ch131-160). 빛/금/하늘색 톤. dmgMult 단조증가. ===
+  cherub_warden:           { hpMult:34.0, dmgMult:2.75, sizeMult:1.20, label:'케루빔 수문장',     baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:50,  saturate:0.85 },   // 131-135
+  angelic_chorus:          { hpMult:36.0, dmgMult:2.85, sizeMult:1.22, label:'천사 합창단장',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:55,  saturate:0.6 },    // 136-140
+  throne_scholar:          { hpMult:38.0, dmgMult:2.95, sizeMult:1.24, label:'옥좌의 학자',       baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:45,  saturate:0.75 },   // 141-145
+  dominion_general:        { hpMult:40.0, dmgMult:3.05, sizeMult:1.26, label:'주권의 사령관',     baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:45,  saturate:0.8 },    // 146-150
+  first_heaven_guardian:   { hpMult:42.0, dmgMult:3.15, sizeMult:1.28, label:'1층천 수호자',      baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:55,  saturate:0.7 },    // 151-155
+  first_heaven_sovereign:  { hpMult:44.0, dmgMult:3.30, sizeMult:1.32, label:'1층천의 군주',      baseStyle:'void',      baseBehavior:'void',      hueShift:60,  saturate:0.9 },    // 156-160 (원정 Ⅴ 끝)
+  // === v12.34 — 원정 Ⅵ — 천국 2층천 (ch161-200). 더 깊은 광휘·오로라·창공. dmgMult 단조증가. ===
+  power_seraph:            { hpMult:46.0, dmgMult:3.40, sizeMult:1.30, label:'권능 세라핌',        baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:35,  saturate:1.1 },    // 161-165
+  virtue_choir:            { hpMult:48.0, dmgMult:3.50, sizeMult:1.32, label:'권능의 합창',        baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.0 },    // 166-170
+  archangel_council:       { hpMult:50.0, dmgMult:3.60, sizeMult:1.34, label:'대천사 의장',        baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:50,  saturate:1.0 },    // 171-175
+  seraph_flame:            { hpMult:52.0, dmgMult:3.70, sizeMult:1.36, label:'세라핌의 불꽃',      baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:25,  saturate:1.2 },    // 176-180
+  ophanim_wheel:           { hpMult:54.0, dmgMult:3.80, sizeMult:1.36, label:'오필의 바퀴',        baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:55,  saturate:1.0 },    // 181-185
+  michael_blade:           { hpMult:56.0, dmgMult:3.90, sizeMult:1.38, label:'미가엘의 검',        baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:45,  saturate:1.2 },    // 186-190
+  gabriel_horn:            { hpMult:58.0, dmgMult:4.00, sizeMult:1.38, label:'가브리엘의 나팔',    baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.1 },    // 191-195
+  sky_sovereign:           { hpMult:62.0, dmgMult:4.20, sizeMult:1.45, label:'창공의 주인',        baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.1 },    // 196-200 (게임 최종)
 };
 function bossBaseStyleFor(variant){
   const v = BOSS_VARIANTS[variant];
@@ -7787,6 +8054,22 @@ function bossFilterFor(variant){
   return `hue-rotate(${v.hueShift}deg) saturate(${sat})`;
 }
 function bossVariantForChapter(c){
+  // v12.34 — 원정 Ⅵ 천국 2층천 (5챕터 간격)
+  if(c >= 196) return 'sky_sovereign';
+  if(c >= 191) return 'gabriel_horn';
+  if(c >= 186) return 'michael_blade';
+  if(c >= 181) return 'ophanim_wheel';
+  if(c >= 176) return 'seraph_flame';
+  if(c >= 171) return 'archangel_council';
+  if(c >= 166) return 'virtue_choir';
+  if(c >= 161) return 'power_seraph';
+  // v12.34 — 원정 Ⅴ 천국 1층천 (5챕터 간격)
+  if(c >= 156) return 'first_heaven_sovereign';
+  if(c >= 151) return 'first_heaven_guardian';
+  if(c >= 146) return 'dominion_general';
+  if(c >= 141) return 'throne_scholar';
+  if(c >= 136) return 'angelic_chorus';
+  if(c >= 131) return 'cherub_warden';
   // 원정 Ⅳ — 지옥 구출 원정 (5챕터 간격)
   if(c >= 126) return 'hellgate_sovereign';
   if(c >= 121) return 'infernal_seraph';
@@ -8574,6 +8857,19 @@ function onBossDefeated(){
     progress.companionUnlocks.squirrel = true;
     state.newCompanion = { kind:'squirrel', label:'다람쥐 친구', sub:'심연의 첨탑에서 구출 🐿' };
   }
+  // v12.34 — ch131(원정 Ⅴ 첫 챕터) 클리어 시 천국 SS 코스튬 일괄 자동 지급. 한 번만 발생.
+  if(state.chapter === 131 && !progress.heavenCostumesGranted){
+    const granted = grantHeavenSSCostumes();
+    grantHeavenCompanionCostumes();
+    progress.heavenCostumesGranted = true;
+    if(granted > 0){
+      state.toastBanner = {
+        text:'🪽 천국 SS 코스튬 해금!',
+        sub:'남편·아내·아기·5종 친구 모두 천국 의상 획득. 시작화면 → 코스튬에서 장착.',
+        t:5.0, maxT:5.0, tone:'critical'
+      };
+    }
+  }
   // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
   // v12.21 → v12.22 → v12.23 — v12.22 대비 ×1.75 (원본 대비 ~1/3).
   awardCoins(21 + state.chapter * 5);
@@ -8590,16 +8886,15 @@ function onBossDefeated(){
   if(state.chapter >= MAX_CHAPTERS || isExpeditionEnd(state.chapter)){
     state.scene='victory';
     state.victoryExpeditionId = expeditionFor(state.chapter).id;
-    // v12.14 — 원정 보상 스킨 자동 해금. 이미 보유면 noop.
+    // v12.34 — 원정 보상 스킨은 더 이상 자동 지급 X. 구매 자격만 해금되고 코인 결제 필요.
+    // 사용자: "원정 클리어할때마다 무료로 사용할 수 있게 해놨는데 그게 아니라 해금 후 돈 내고 사야".
     const rewardSkin = TITLE_SKINS.find(s => s.expeditionUnlock === state.victoryExpeditionId);
     if(rewardSkin && !progress.ownedSkins.includes(rewardSkin.id)){
-      progress.ownedSkins.push(rewardSkin.id);
-      saveProgress();
-      // 시네마틱 위에 살짝 떠있는 보상 토스트 (HUD가 hidden이라 토스트만 보임)
+      // 시네마틱 위에 "구매 자격 해금" 안내 토스트 (자동 지급 아님).
       state.toastBanner = {
-        text:`🎁 보상 스킨 해금: ${rewardSkin.name}`,
-        sub:'타이틀 → 상점 → 배경 스킨에서 적용 가능',
-        t:3.5, maxT:3.5, tone:'critical'
+        text:`🛒 보상 스킨 구매 자격 해금: ${rewardSkin.name}`,
+        sub:`타이틀 → 상점 → 배경 스킨에서 ${(rewardSkin.price||0).toLocaleString()}🪙로 구매 가능`,
+        t:4.0, maxT:4.0, tone:'critical'
       };
     }
     sfxVictory();
@@ -9946,6 +10241,9 @@ function updateInvBar(){
 // the tier index back through the early biomes — each cycle shifts the chapter palette via
 // (state.chapter-1)%5 indexing within the tier so the look is similar but not identical.
 function chapterTier(ch){
+  // v12.34 — 원정 Ⅴ (ch131-160) tier 9, 원정 Ⅵ (ch161-200) tier 10. 천국 테마.
+  if(ch >= 161) return 10;
+  if(ch >= 131) return 9;
   // v12.11 — 원정 Ⅳ (ch101-130) gets new tier 8 (Hellfire Rescue).
   if(ch >= 101) return 8;
   if(ch >= 71)  return 7;
@@ -10931,6 +11229,16 @@ function drawVictoryScene(){
     sky.addColorStop(0, 'rgba(20,5,5,.9)');
     sky.addColorStop(0.5, 'rgba(120,20,20,.55)');
     sky.addColorStop(1, 'rgba(255,140,40,.35)');
+  } else if(expId === 5){
+    // v12.34 — 원정 Ⅴ — heaven 1st floor: white-gold dawn over soft sky-blue
+    sky.addColorStop(0, 'rgba(255,255,255,.35)');
+    sky.addColorStop(0.5, 'rgba(255,224,102,.45)');
+    sky.addColorStop(1, 'rgba(165,216,255,.55)');
+  } else if(expId === 6){
+    // v12.34 — 원정 Ⅵ — heaven 2nd floor: deeper aurora gold + violet apex
+    sky.addColorStop(0, 'rgba(255,224,102,.50)');
+    sky.addColorStop(0.5, 'rgba(255,212,59,.55)');
+    sky.addColorStop(1, 'rgba(151,117,250,.55)');
   } else {
     // 원정 Ⅰ — original cosmic violet
     sky.addColorStop(0, 'rgba(10,2,30,.85)');
@@ -11008,6 +11316,10 @@ function drawVictoryScene(){
     drawVictoryCosmicSingularity(earthCx, earthCy, earthR, t);
   } else if(expId === 4){
     drawVictoryHellgate(earthCx, earthCy, earthR, t);
+  } else if(expId === 5){
+    drawVictoryHeavenFirst(earthCx, earthCy, earthR, t);
+  } else if(expId === 6){
+    drawVictoryHeavenSecond(earthCx, earthCy, earthR, t);
   } else {
     drawVictoryEarth(earthCx, earthCy, earthR, t);
   }
@@ -11048,7 +11360,7 @@ function drawVictoryScene(){
     drawCompanion(ctx, { x: pigCx + childDx, y: surfaceY(childDx) - 18, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
   }
   if(showFamilyOn() && expId >= 4){
-    // 원정 Ⅳ: 남편 + 아내 + 아기 + 5종 구출 친구. 가족은 안쪽, 친구는 양옆 바깥에 넓게 분산.
+    // 원정 Ⅳ/Ⅴ/Ⅵ: 남편 + 아내 + 아기 + 5종 구출 친구. 가족은 안쪽, 친구는 양옆 바깥에 넓게 분산.
     const wifeDx = -42 * pigScale;
     drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
     const childDx = 40 * pigScale;
@@ -11069,9 +11381,19 @@ function drawVictoryScene(){
     }
   }
 
-  // ── Crown floating above pigeon ── (compact distance so it stays under the headline)
-  const crownY = Math.max(sceneTop + 30, pigCy - 60*pigScale);
-  drawFloatingCrown(pigCx, crownY, pigScale, t);
+  // ── Crown floating above pigeon ──
+  // v12.34 — 사용자 피드백 "남편 비둘기 왕관 위치가 깨지는데". globe 확대(v12.33) 후 pigScale
+  //   이 0.75 floor 로 줄어 floating crown 의 자연 위치(pigCy - 60*pigScale) 가 headline 영역
+  //   으로 침범 → Math.max clamp 가 crown 을 pigeon 머리 위로 끌어내려 충돌. 추가로 player 가
+  //   머리 costume(h_crown 등)을 장착했을 때 floating crown 과 시각적으로 중첩됨.
+  //   해결: 머리 costume 이 이미 있으면 skip (중복 회피). 없을 때만 안전한 위치에 draw.
+  const hasHeadCostume = !!(fakePlayer.costumes && fakePlayer.costumes.head);
+  if(!hasHeadCostume){
+    const naturalY = pigCy - 65 * pigScale;
+    const safeAbovePigeon = pigCy - 32 * pigScale - 14;
+    const crownY = Math.max(sceneTop + 18, Math.min(safeAbovePigeon, naturalY));
+    drawFloatingCrown(pigCx, crownY, pigScale, t);
+  }
 
   // ── Fireworks ──
   spawnVictoryFireworks(t);
@@ -11105,14 +11427,20 @@ function drawVictoryScene(){
   // wrap the emoji and create a weird halo around it.
   ctx.font = `900 ${fs}px sans-serif`;
   // v12 Phase 5 / v12.11 — headline + emoji vary per expedition.
-  const heroEmoji = expId === 4 ? '🔥' :
+  const heroEmoji = expId === 6 ? '🪽' :
+                    expId === 5 ? '🌟' :
+                    expId === 4 ? '🔥' :
                     expId === 3 ? '🌌' :
                     expId === 2 ? '🪐' : '🌍';
-  const text = expId === 4 ? '지옥 구출 완료!' :
+  const text = expId === 6 ? '창공의 끝! 신화 완성' :
+               expId === 5 ? '천국 1층천 도달!' :
+               expId === 4 ? '지옥 구출 완료!' :
                expId === 3 ? '전 우주 정복!' :
                expId === 2 ? '비둘기 행성 정복!' :
                               '전 세계 정복!';
-  const heroShadowCol = expId === 4 ? 'rgba(255,107,107,0.9)' :
+  const heroShadowCol = expId === 6 ? 'rgba(255,224,102,0.9)' :
+                        expId === 5 ? 'rgba(255,224,102,0.7)' :
+                        expId === 4 ? 'rgba(255,107,107,0.9)' :
                         expId === 3 ? 'rgba(151,117,250,0.85)' :
                         expId === 2 ? 'rgba(255,180,216,0.85)' :
                                        'rgba(116,192,252,0.65)';
@@ -11418,6 +11746,117 @@ function drawVictoryHellgate(cx, cy, r, t){
   ctx.restore();
 }
 
+// v12.34 — 원정 Ⅴ centerpiece: 천국 1층천 — 빛 구름 위 거룩한 분수대(중심)와 회전하는 후광 ring.
+function drawVictoryHeavenFirst(cx, cy, r, t){
+  ctx.save();
+  // Soft outer halo (흰빛+금빛)
+  const halo = ctx.createRadialGradient(cx, cy, r*0.9, cx, cy, r*1.7);
+  halo.addColorStop(0, 'rgba(255,255,255,0.7)');
+  halo.addColorStop(0.5, 'rgba(255,224,102,0.45)');
+  halo.addColorStop(1, 'rgba(165,216,255,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy, r*1.7, 0, Math.PI*2); ctx.fill();
+  // Cloud body — fluffy white-gold sphere
+  const body = ctx.createRadialGradient(cx - r*0.3, cy - r*0.35, r*0.2, cx, cy, r);
+  body.addColorStop(0, '#FFFFFF');
+  body.addColorStop(0.5, '#FFF9DB');
+  body.addColorStop(0.85, '#FFE066');
+  body.addColorStop(1, '#FFD43B');
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  // Cloud puffs around the rim
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
+  for(let i=0;i<6;i++){
+    const a = i*(Math.PI*2/6) + t*0.1;
+    const cxx = cx + Math.cos(a)*r*0.85;
+    const cyy = cy + Math.sin(a)*r*0.85;
+    ctx.fillStyle = `rgba(255,255,255,${0.6 - i*0.05})`;
+    ctx.beginPath(); ctx.ellipse(cxx, cyy, r*0.25, r*0.18, a, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  // Tilted golden halo ring (rotates)
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(0.3);
+  ctx.strokeStyle = 'rgba(255,212,59,0.85)'; ctx.lineWidth = 3.0;
+  ctx.shadowColor = 'rgba(255,224,102,0.7)'; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.ellipse(0, 0, r*1.30, r*0.32, 0, 0, Math.PI*2); ctx.stroke();
+  ctx.shadowBlur = 0;
+  // Sparkles along ring
+  for(let i=0;i<14;i++){
+    const a = i*(Math.PI*2/14) + t*0.6;
+    const fx = Math.cos(a)*r*1.30, fy = Math.sin(a)*r*0.32;
+    ctx.fillStyle = i%2 ? '#FFFFFF' : '#FFE066';
+    ctx.beginPath(); ctx.arc(fx, fy, 2.4, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  // Center cross-light (광휘)
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = 2;
+  for(let i=0;i<6;i++){
+    const a = i*(Math.PI*2/6) + t*0.2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(a)*r*0.55, cy + Math.sin(a)*r*0.55);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// v12.34 — 원정 Ⅵ centerpiece: 천국 2층천 — 광휘 + 오로라 + 별 회전 (final).
+function drawVictoryHeavenSecond(cx, cy, r, t){
+  ctx.save();
+  // Outer aurora halo
+  const halo = ctx.createRadialGradient(cx, cy, r*0.8, cx, cy, r*1.9);
+  halo.addColorStop(0, 'rgba(255,224,102,0.75)');
+  halo.addColorStop(0.45, 'rgba(151,117,250,0.45)');
+  halo.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy, r*1.9, 0, Math.PI*2); ctx.fill();
+  // Body — radiant golden core
+  const body = ctx.createRadialGradient(cx - r*0.25, cy - r*0.3, r*0.15, cx, cy, r);
+  body.addColorStop(0, '#FFFFFF');
+  body.addColorStop(0.4, '#FFE066');
+  body.addColorStop(0.75, '#FFA94D');
+  body.addColorStop(1, '#9775FA');
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  // Surface shimmer dots
+  for(let i=0;i<26;i++){
+    const ang = (i*107 + t*20) % 360 * Math.PI/180;
+    const rd = ((i%6) + 1) * r/8;
+    const px = cx + Math.cos(ang)*rd;
+    const py = cy + Math.sin(ang)*rd*0.85;
+    if(Math.hypot(px-cx, py-cy) > r*0.95) continue;
+    ctx.fillStyle = i%3===0 ? '#FFFFFF' : i%3===1 ? '#FFE066' : '#A5D8FF';
+    ctx.globalAlpha = 0.55 + 0.4*Math.abs(Math.sin(t*2+i));
+    ctx.beginPath(); ctx.arc(px, py, i%5===0 ? 2.2 : 1.2, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // Inner halo ring (double ring — apex of celestial hierarchy)
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.strokeStyle = 'rgba(255,212,59,0.95)'; ctx.lineWidth = 3.5;
+  ctx.shadowColor = 'rgba(255,224,102,0.85)'; ctx.shadowBlur = 16;
+  ctx.beginPath(); ctx.ellipse(0, 0, r*1.40, r*0.36, 0, 0, Math.PI*2); ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.ellipse(0, 0, r*1.55, r*0.42, 0, 0, Math.PI*2); ctx.stroke();
+  // Cross beams
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 1.2;
+  for(let i=0;i<8;i++){
+    const a = i*(Math.PI*2/8) + t*0.3;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a)*r*1.7, Math.sin(a)*r*1.7);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.restore();
+}
+
 function drawVictoryEarth(cx, cy, r, t){
   ctx.save();
   // Outer glow
@@ -11649,6 +12088,22 @@ function render(){
       ['#1A0A0A','#3A1010','#FFA94D','#0E0000','#000000'],
       ['#3D0E1A','#7A1830','#FA5252','#150004','#000000'],
       ['#2B0808','#1A0808','#FFD43B','#0A0000','#000000'],
+    ],
+    // v12.34 — Tier 9: 원정 Ⅴ Heaven First Floor (Ch 131-160). 부드러운 흰빛/금빛/하늘색.
+    [
+      ['#FFFFFF','#FFE066','#A5D8FF','#74C0FC','#1864AB'],
+      ['#FFF9DB','#FFE066','#FFFFFF','#74C0FC','#1971C2'],
+      ['#E7F5FF','#A5D8FF','#FFFFFF','#FFE066','#1971C2'],
+      ['#FFFFFF','#FFD43B','#FFE066','#A5D8FF','#1864AB'],
+      ['#FFE3D0','#FFE066','#FFFFFF','#74C0FC','#0B3A6B'],
+    ],
+    // v12.34 — Tier 10: 원정 Ⅵ Heaven Second Floor (Ch 161-200). 더 깊은 광휘 + 오로라 + 창공.
+    [
+      ['#FFE066','#FFD43B','#FFA94D','#9775FA','#3B0764'],
+      ['#FFFFFF','#FFE066','#9775FA','#5F3DC4','#1A0033'],
+      ['#E599F7','#9775FA','#FFE066','#FFFFFF','#3B0764'],
+      ['#FFA94D','#FFD43B','#FF6B6B','#9775FA','#3B0764'],
+      ['#A5D8FF','#74C0FC','#FFE066','#9775FA','#1A0033'],
     ],
   ];
   const tier = chapterTier(state.chapter);
@@ -12213,7 +12668,8 @@ document.getElementById('csBackBtn').addEventListener('click', ()=>{
 document.getElementById('csTabFocus').addEventListener('click', ()=> setChapterSelectMode('focus'));
 document.getElementById('csTabAll').addEventListener('click', ()=> setChapterSelectMode('all'));
 // v12.5/v12.11 — expedition tab handlers (1-4)
-for(const expId of [1,2,3,4]){
+// v12.34 — 원정 Ⅴ/Ⅵ 추가.
+for(const expId of [1,2,3,4,5,6]){
   const btn = document.getElementById('csExpTab'+expId);
   if(btn) btn.addEventListener('click', () => setChapterExpeditionTab(expId));
 }
@@ -12343,7 +12799,10 @@ function renderCinematicReplayRow(){
   if(cleared >= 100) buttons.push({ kind:'end', ch:100, label:'🌌 원정 Ⅲ 엔딩', color:'#9775FA' });
   // v12.13 — 사용자 피드백 "오프닝이 안 보인다" → 다시보기 가능. ch100 클리어 후 노출.
   if(cleared >= 100) buttons.push({ kind:'hell',          label:'🔥 원정 Ⅳ 오프닝', color:'#FFA94D' });
-  if(cleared >= 130) buttons.push({ kind:'end', ch:130, label:'🔥 원정 Ⅳ 엔딩 (최종)', color:'#FF6B6B' });
+  if(cleared >= 130) buttons.push({ kind:'end', ch:130, label:'🔥 원정 Ⅳ 엔딩', color:'#FF6B6B' });
+  // v12.34 — 원정 Ⅴ/Ⅵ (천국) 추가.
+  if(cleared >= 160) buttons.push({ kind:'end', ch:160, label:'🌟 원정 Ⅴ 엔딩', color:'#A5D8FF' });
+  if(cleared >= 200) buttons.push({ kind:'end', ch:200, label:'🪽 원정 Ⅵ 엔딩 (최종)', color:'#FFE066' });
   if(buttons.length === 0){ row.style.display = 'none'; row.innerHTML = ''; return; }
   row.style.display = 'flex';
   row.innerHTML = buttons.map((b, i) =>
@@ -13388,7 +13847,7 @@ function renderSkinShop(){
   // Sort by price ascending so cheaper skins appear first; equal-price ties keep declaration order.
   const sortedSkins = TITLE_SKINS.slice().sort((a, b) => (a.price || 0) - (b.price || 0));
   // v12.14 — 원정 보상 스킨은 expedition 끝 챕터 클리어로만 해금. price 0 이지만 코인 구매 불가.
-  const expEndCh = { 1:50, 2:70, 3:100, 4:130 };
+  const expEndCh = { 1:50, 2:70, 3:100, 4:130, 5:160, 6:200 };
   for(const skin of sortedSkins){
     const owned = (progress.ownedSkins||[]).includes(skin.id);
     const equipped = progress.skin === skin.id;
@@ -13409,8 +13868,8 @@ function renderSkinShop(){
     } else if(owned){
       actionHtml = `<button class="skin-action equip" type="button">장착</button>`;
     } else if(expRequired && !expCleared){
-      // 원정 보상 — 잠금 상태
-      actionHtml = `<button class="skin-action poor" type="button">🔒 원정 ${['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'][expRequired]} 클리어 필요</button>`;
+      // 원정 보상 — 클리어 전. 클리어 시 구매 자격 해금 (자동 지급 X).
+      actionHtml = `<button class="skin-action poor" type="button">🔒 원정 ${['','Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ'][expRequired]} 클리어 필요</button>`;
     } else if(canAfford){
       actionHtml = `<button class="skin-action" type="button">🪙 ${skin.price.toLocaleString()}</button>`;
     } else {
@@ -13426,9 +13885,9 @@ function renderSkinShop(){
     card.addEventListener('click', () => {
       if(expRequired && !expCleared && !owned){
         state.toastBanner = {
-          text:`🔒 원정 ${['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'][expRequired]} 보상 스킨`,
-          sub:`ch${expEndCh[expRequired]} 클리어 시 자동 해금`,
-          t:2.5, maxT:2.5, tone:'warn'
+          text:`🔒 원정 ${['','Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ'][expRequired]} 보상 스킨`,
+          sub:`ch${expEndCh[expRequired]} 클리어 시 구매 자격 해금 (코인 ${(skin.price||0).toLocaleString()}🪙 별도 결제)`,
+          t:3.0, maxT:3.0, tone:'warn'
         };
         return;
       }
@@ -13684,17 +14143,22 @@ function renderChapterFocus(){
   }
 }
 
-// v12.11 — expedition-locked unlock check. 원정 Ⅱ:ch50, Ⅲ:ch70, Ⅳ:ch100 클리어 시 해금.
+// v12.11 / v12.34 — expedition-locked unlock check.
+//   Ⅰ: always, Ⅱ:ch50, Ⅲ:ch70, Ⅳ:ch100, Ⅴ:ch130, Ⅵ:ch160 클리어 시 해금.
 function isExpeditionUnlocked(expId){
   const cleared = progress.clearedChapter || 0;
   if(expId === 1) return true;
   if(expId === 2) return cleared >= 50;
   if(expId === 3) return cleared >= 70;
   if(expId === 4) return cleared >= 100;
+  if(expId === 5) return cleared >= 130;
+  if(expId === 6) return cleared >= 160;
   return false;
 }
 function defaultExpeditionTab(){
   const cleared = progress.clearedChapter || 0;
+  if(cleared >= 160) return 6;
+  if(cleared >= 130) return 5;
   if(cleared >= 100) return 4;
   if(cleared >= 70)  return 3;
   if(cleared >= 50)  return 2;
@@ -13704,11 +14168,13 @@ if(typeof state.csExpedition === 'undefined') state.csExpedition = 1;
 
 function setChapterExpeditionTab(expId){
   if(!isExpeditionUnlocked(expId)){
-    const labels = ['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'];
+    const labels = ['','Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ'];
     const subs = {
       2: '원정 Ⅰ(ch50)을 먼저 정복하세요',
       3: '원정 Ⅱ(ch70)을 먼저 정복하세요',
       4: '원정 Ⅲ(ch100)을 먼저 정복하세요',
+      5: '원정 Ⅳ(ch130)을 먼저 정복하세요',
+      6: '원정 Ⅴ(ch160)을 먼저 정복하세요',
     };
     state.toastBanner = {
       text:`🔒 원정 ${labels[expId]} 잠금`,
@@ -13718,7 +14184,7 @@ function setChapterExpeditionTab(expId){
     return;
   }
   state.csExpedition = expId;
-  for(const eid of [1,2,3,4]){
+  for(const eid of [1,2,3,4,5,6]){
     const b = document.getElementById('csExpTab'+eid);
     if(b) b.classList.toggle('on', eid === expId);
   }
@@ -13731,8 +14197,10 @@ function refreshExpeditionTabs(){
     2: '원정 Ⅰ(ch50) 클리어 시 해금',
     3: '원정 Ⅱ(ch70) 클리어 시 해금',
     4: '원정 Ⅲ(ch100) 클리어 시 해금',
+    5: '원정 Ⅳ(ch130) 클리어 시 해금',
+    6: '원정 Ⅴ(ch160) 클리어 시 해금',
   };
-  for(const eid of [1,2,3,4]){
+  for(const eid of [1,2,3,4,5,6]){
     const b = document.getElementById('csExpTab'+eid);
     if(!b) continue;
     const unlocked = isExpeditionUnlocked(eid);
@@ -14182,8 +14650,11 @@ function renderVictory(finalEnding){
       nextBtn.dataset.toChapterSelect = '1';
     } else if(isExpEnd){
       nextBtn.style.display = '';
+      // v12.34 — 원정 Ⅴ/Ⅵ(천국) 추가. ch130 → 원정 Ⅴ, ch160 → 원정 Ⅵ.
       nextBtn.textContent = state.chapter === 50  ? '🪐 원정 Ⅱ — 비둘기 행성으로 ▶' :
                             state.chapter === 70  ? '🌌 원정 Ⅲ — 우주 정복으로 ▶' :
+                            state.chapter === 130 ? '🌟 원정 Ⅴ — 천국 1층천으로 ▶' :
+                            state.chapter === 160 ? '🪽 원정 Ⅵ — 천국 2층천으로 ▶' :
                                                     '▶ 다음 원정 시작';
       nextBtn.style.background = '';
       delete nextBtn.dataset.hellEntry;
@@ -14199,9 +14670,9 @@ function renderVictory(finalEnding){
   const h2 = document.querySelector('#victory .card h2');
   const sub = document.querySelector('#victory .card .sub');
   if(isFinal){
-    // v12.11 — 게임의 진짜 최종 엔딩은 ch130 (원정 Ⅳ 끝). ch100은 더이상 final이 아님.
-    h2.textContent = '🔥 지옥 구출 완료! 비둘기 신화의 완성';
-    if(sub) sub.textContent = '130개 챕터를 모두 정복하고 지옥의 친구들까지 구해낸 비둘기 가족의 전설.';
+    // v12.34 — 진짜 최종 엔딩은 ch200 (원정 Ⅵ 끝). ch130 은 원정 Ⅴ 진입을 위한 중간 끝.
+    h2.textContent = '🪽 창공의 끝! 비둘기 신화의 완성';
+    if(sub) sub.textContent = '200개 챕터를 모두 정복하고 천국의 1·2층천까지 가족·동료가 함께 도달한 신화.';
   } else if(isExpEnd && exp.id === 1){
     h2.textContent = '🌍 원정 Ⅰ 완료 — 지구 정복!';
     if(sub) sub.textContent = '50개 챕터의 모든 적을 무찌르고 인류 영토를 정복했습니다. 다음 원정은 비둘기 행성으로.';
@@ -14212,6 +14683,15 @@ function renderVictory(finalEnding){
     h2.textContent = '🌌 원정 Ⅲ 완료 — 전 우주 정복!';
     // v12.31 — 사용자 요청 "구원을 기다리고 있습니다" 문구 제거.
     if(sub) sub.textContent = '오메가를 쓰러뜨리고 우주의 주재자가 되었습니다.';
+  } else if(isExpEnd && exp.id === 4){
+    h2.textContent = '🔥 원정 Ⅳ 완료 — 지옥 구출!';
+    if(sub) sub.textContent = '지옥의 친구들을 모두 구해낸 가족 — 천국이 그 보답으로 1층천의 문을 엽니다.';
+  } else if(isExpEnd && exp.id === 5){
+    h2.textContent = '🌟 원정 Ⅴ 완료 — 천국 1층천 탐방!';
+    if(sub) sub.textContent = '1층천의 군주를 만나 인사를 나누고, 더 깊은 2층천으로 향하는 문이 열립니다.';
+  } else if(isExpEnd && exp.id === 6){
+    h2.textContent = '🪽 원정 Ⅵ 완료 — 창공의 주인!';
+    if(sub) sub.textContent = '2층천의 끝, 창공의 주인까지 만난 비둘기 가족 — 가장 높은 하늘에 도달했습니다.';
   } else {
     h2.textContent = '🏆 한계돌파 성공!';
     if(sub) sub.textContent = '여기까지의 전설이 기록되었습니다.';
@@ -14219,7 +14699,7 @@ function renderVictory(finalEnding){
   // v12.11 — 시네마틱 다시보기 시 state.player가 null일 수 있어 가드 추가.
   // 진짜 클리어 직후엔 player가 살아있어 정상 값, 다시보기 시엔 0/0 표시.
   const pl = state.player || {};
-  const expColor = exp.id===1?'#FFE066':exp.id===2?'#FF8787':exp.id===3?'#9775FA':'#FF6B6B';
+  const expColor = exp.id===1?'#FFE066':exp.id===2?'#FF8787':exp.id===3?'#9775FA':exp.id===4?'#FF6B6B':exp.id===5?'#A5D8FF':'#FFE066';
   document.getElementById('vStats').innerHTML = `
     <div class="statline"><span>원정</span><b style="color:${expColor};">${exp.name}</b></div>
     <div class="statline"><span>정복 챕터</span><b>${state.chapter} · ${chapterName(state.chapter)}</b></div>
