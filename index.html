@@ -7735,7 +7735,16 @@ function rollItemDrop(e){
   }
   let total = 0; for(const k in mix) total += mix[k];
   let rr = Math.random()*total;
-  for(const k in mix){ rr -= mix[k]; if(rr<=0){ spawnItem(e.x, e.y, k); return; } }
+  for(const k in mix){
+    rr -= mix[k];
+    if(rr<=0){
+      // v12.24 — 사용자 피드백 "체력회복 너무 많음". heal 이 선택된 경우만 50% 확률로 스킵
+      // → heal 절대 드롭 빈도만 1/2, 다른 아이템(bomb/golden/coin/magnet) 절대 빈도는 그대로.
+      if(k === 'heal' && Math.random() < 0.5) return;
+      spawnItem(e.x, e.y, k);
+      return;
+    }
+  }
 }
 function spawnItem(x, y, kind){
   const a = Math.random()*Math.PI*2;
