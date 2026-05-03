@@ -2,14 +2,14 @@
 
 > 이 문서는 게임의 현재 사양을 기록한다. 기능이 바뀌면 변경이력에 한 줄을 추가하지 말고 이 문서의 해당 섹션을 직접 수정한다.
 >
-> **현재 빌드 버전: v12.34a** (천국 확장 — 원정 Ⅴ/Ⅵ 추가, MAX_CHAPTERS 200, SS등급 천국 코스튬, 7-8단계 스킬, 원정 보상 스킨 가격 책정, 70 신규 BGM pack + 천국 보스 SFX + tier 9/10 배경 props. 자세한 변경은 STATUS.md 참조.)
+> **현재 빌드 버전: v12.36b** — 난이도 검수 후 chm.hp/dmg 곡선 ch130 이후 평탄화(×1.0008/ch) + boss base HP ch200 clamp + ch201+ hpMult 범위 축소 + ch101/115/131/161/181/201/221/241/251/271/286/296 chapter-gated 신규 카드 12종 추가. 부모 4명 단안 통일 + 개성 분리(콧수염/모노클/큰수염/보넷), 조상 차별화(다빈치 곱슬+펜 / 아리스토 풍성수염+두루마리), 카테고리별 설정 토글 5세트(아내·아기·친구5종·부모·조상 각자 [👁 보이기][✨ 효과]), 부모 코스튬 측면별 분리 구매(남편 부모 / 아내 부모 각자), 부모 인게임 세로 2단 배치(남편 뒤). 이전 v12.35: 원정 Ⅶ·Ⅷ 추가(MAX_CHAPTERS 300), 천국 3층천 침범 + 아마겟돈(악의 세력 침공, 가족·창조주 동맹), SSS 코스튬(가족 자동 무료/동료 유료), 풀세트 시너지 ×1.40 dmg + holyBossBonus +35%, 천상의 새우깡 스킨(Ch300 자동 무료) + 영구 글로우 눈, tier 11/12 BG + 100 신규 BGM. 자세한 변경은 STATUS.md 참조.
 
 ## 1. 개요
 
 - **타이틀:** 새우깡으로 한계돌파
 - **장르:** 2D 탑다운 로그라이크 불릿 헤븐 (Survivors-like)
 - **플랫폼:** HTML5 단일 파일 (`index.html`), PC & 모바일 대응 (`?m=1`로 모바일 강제)
-- **핵심 판타지:** 근육질 비둘기가 새우깡을 마구 투척하며 **6개의 원정·총 200개 챕터**를 돌파한다 — 코스튬으로 꾸미고 가족(아내·아기 비둘기)을 만나 함께 지구·비둘기 행성·우주를 정복하고, 지옥에 갇힌 친구들을 구출한 뒤 천국 1·2층천까지 도달하는 신화적 여정.
+- **핵심 판타지:** 근육질 비둘기가 새우깡을 마구 투척하며 **8개의 원정·총 300개 챕터**를 돌파한다 — 코스튬으로 꾸미고 가족(아내·아기 비둘기)을 만나 함께 지구·비둘기 행성·우주를 정복하고, 지옥에 갇힌 친구들을 구출한 뒤 천국 1·2·3층천까지 침범한다. 침범에 노여워한 창조주와 결국 아마겟돈 전쟁을 치르고 승리, **천상의 새우깡**을 받아 인정받는 신화적 여정.
 
 ## 2. 핵심 루프
 
@@ -20,9 +20,9 @@
 5. 챕터 클리어 → 챕터 선택 화면으로 복귀, 다음 챕터가 hero 카드로 노출
 6. 원정 끝(ch50/ch70/ch100/ch130/ch160/ch200) 보스 격파 시 → **원정별 고유 시네마틱**. ch200(원정 Ⅵ 끝)이 게임의 최종 엔딩.
 
-## 2-1. 원정 시스템 (v12.34 — 6 원정)
+## 2-1. 원정 시스템 (v12.35 — 8 원정)
 
-200개 챕터를 6단계 원정으로 나누어 각 단계의 끝에 고유 클라이맥스를 둔다. 진척도에 따라 다음 원정 탭이 잠금 해제된다.
+300개 챕터를 8단계 원정으로 나누어 각 단계의 끝에 고유 클라이맥스를 둔다. 진척도에 따라 다음 원정 탭이 잠금 해제된다.
 
 | 원정 | 이름 | 챕터 | 테마 | 동료 합류 | 잠금 해제 조건 |
 | --- | --- | --- | --- | --- | --- |
@@ -30,8 +30,10 @@
 | Ⅱ | 🪐 비둘기 행성 정복 | 51–70 | Pigeon Planet — 깃털 평원·둥지 마을·황금 둥지·행성 코어·황제의 옥좌 | **아내 비둘기** (ch51 클리어 시) · **아기 비둘기** (ch60 클리어 시) | ch50 클리어 |
 | Ⅲ | 🌌 우주 정복 | 71–100 | Cosmos — 행성·항성·웜홀·다중우주·기원의 문·우주의 주재자 | (가족 동행) | ch70 클리어 |
 | Ⅳ | 🔥 지옥 구출 원정 | 101–130 | Hellfire Rescue — 지옥문·검은 강·뼈의 평원·그림자 대성당·잿빛 천국·지옥문의 군주 | **🐦 참새**(ch105) · **🪶 까치**(ch110) · **🦉 부엉이**(ch115) · **🦜 앵무새**(ch120) · **🐿 다람쥐**(ch125) | ch100 클리어 |
-| Ⅴ | 🌟 천국 1층천 탐방 | 131–160 | Heaven First Floor — 빛의 정원·구름 회랑·천사 합창단·대천사 도서관·1층천의 군주 | (가족 + 5종 친구 동행) — **ch131 클리어 시 SS등급 천국 코스튬 일괄 자동 지급** | ch130 클리어 |
-| Ⅵ | 🪽 천국 2층천 정복 | 161–200 | Heaven Second Floor — 광휘의 회랑·세라핌의 정원·미가엘 검문소·창공의 끝·창공의 주인 | (전원 동행, 게임 최종) | ch160 클리어 |
+| Ⅴ | 🌟 천국 1층천 탐방 | 131–160 | Heaven First Floor — 빛의 정원·구름 회랑·천사 합창단·대천사 도서관·1층천의 군주 | (가족 + 5종 친구 동행) — **ch131 클리어 시 가족 SS 코스튬 자동 무료 지급, 친구 5종 천국 세트는 유료 일괄** | ch130 클리어 |
+| Ⅵ | 🪽 천국 2층천 시험 | 161–200 | Heaven Second Floor — 광휘의 회랑·세라핌의 정원·미가엘 검문소·창공의 끝·창공의 주인. 천국이 가족의 야심을 시험하는 톤. | (전원 동행) | ch160 클리어 |
+| Ⅶ | ⚜️ 천국 3층천 침범 | 201–250 | Heaven Third Floor — 신성 자색·황금·창조주의 영역. 가족이 침범하며 창조주가 노여워한다. | **🪽 남편의 부모님**(ch205, pair) · **🪽 아내의 부모님**(ch210, pair). 디폴트 천사옷, 벗기 가능. 3종 추가 세트는 유료 일괄. | ch200 클리어 |
+| Ⅷ | 🌟 아마겟돈 | 251–300 | Armageddon — 황금·적금·신성 전쟁터. ch271+ 신성 전쟁 본격, ch290+ 컨트롤 강요, ch300 창조주의 호명 (게임 최종). | **📐 구구나르도 다 둘치**(ch255, 발명가) · **📜 비리스토둘레스**(ch260, 철학자). 직업별 코스튬 다종 개별 구매. ch251 SSS 아마겟돈 가족 자동 / 친구·부모·조상 유료. | ch250 클리어 |
 
 `EXPEDITIONS` 배열과 `expeditionFor(c)` / `isExpeditionEnd(c)`가 챕터 → 원정 매핑·끝 챕터 판정을 담당한다. 챕터 선택 화면 상단에 6개 탭(`🌍 Ⅰ / 🪐 Ⅱ / 🌌 Ⅲ / 🔥 Ⅳ / 🌟 Ⅴ / 🪽 Ⅵ`)이 있고, 잠긴 탭은 opacity 0.45 + 자물쇠 토스트로 안내된다. `defaultExpeditionTab()`이 플레이어의 현재 프론티어 원정으로 자동 이동한다.
 
@@ -52,9 +54,29 @@
 | 181-185 | ophanim_wheel | 오필의 바퀴 | leviathan (hue 55, sat 1.0) |
 | 186-190 | michael_blade | 미가엘의 검 | tyrant (hue 45, sat 1.2) |
 | 191-195 | gabriel_horn | 가브리엘의 나팔 | phantom (hue 50, sat 1.1) |
-| 196-200 | sky_sovereign | 창공의 주인 | void (hue 55, sat 1.1) — **게임 최종 보스** |
+| 196-200 | sky_sovereign | 창공의 주인 | void (hue 55, sat 1.1) — 원정 Ⅵ 끝 |
+| 201-205 | covenant_warden | 성약의 검문관 | tyrant (hue 55) — 침범 시작 |
+| 206-210 | archon_blade | 대권의 검 | phoenix (hue 45) |
+| 211-215 | throne_judicator | 옥좌의 심판자 | phantom (hue 50) |
+| 216-220 | nameless_oracle | 이름 잃은 신탁 | phantom (hue 60) |
+| 221-225 | wrath_legion | 분노의 군단 | leviathan (hue 25) |
+| 226-230 | grace_marshal | 은총의 사령관 | tyrant (hue 50) |
+| 231-235 | sanctum_examiner | 성소의 시험관 | phoenix (hue 50) |
+| 236-240 | third_heaven_warden | 3층천 검문관 | void (hue 55) |
+| 241-245 | herald_archon | 기수의 대권 | phoenix (hue 35) |
+| 246-250 | third_heaven_sovereign | 3층천의 군주 | void (hue 55) — 원정 Ⅶ 끝 |
+| 251-255 | dominion_marshal | 주권의 사령관 | tyrant (hue 50) — 아마겟돈 시작 |
+| 256-260 | vanguard_seraph | 전위의 세라핌 | phoenix (hue 30) |
+| 261-265 | sanctified_warden | 성화의 검문 | phantom (hue 50) |
+| 266-270 | dawnstrike_lance | 새벽의 창 | leviathan (hue 35) |
+| 271-275 | armageddon_vanguard | 아마겟돈 전위대 | tyrant (hue 25) — 신성 전쟁 본격 |
+| 276-280 | fallen_choir | 타락한 합창단 | phantom (hue 0) |
+| 281-285 | sanctum_marshal | 성전의 마샬 | phoenix (hue 30) |
+| 286-290 | truthbearer_legion | 진리의 군단장 | leviathan (hue 50) |
+| 291-295 | final_arbiter | 최종 시험관 | void (hue 55) — **컨트롤 강요** |
+| 296-300 | creator_voice | 창조주의 호명 | void (hue 50) — **게임 최종 보스 (천상의 새우깡)** |
 
-hpMult 34.0(ch131) → 62.0(ch200), dmgMult 2.75 → 4.20 으로 단조증가. 원정 Ⅳ 끝(hellgate_sovereign 32.0/2.65) 대비 sky_sovereign 은 hp 1.94×, dmg 1.59× 더 강력.
+hpMult 단조증가: 34.0(ch131) → 62.0(ch200) → 84.0(ch246-250 third_heaven_sovereign) → 175.0(ch300 creator_voice). dmgMult 2.75 → 4.20 → 5.40 → 8.00. ch290+ 절대 난이도는 SSS 풀세트 (×1.40 dmg + ×1.30 maxHp + holyBossBonus +35%, +1 projCount, +1 pierce) 기준 아슬아슬한 클리어선으로 캘리브레이션.
 
 ## 3. 게임 상태 & 씬 흐름
 
@@ -1023,3 +1045,78 @@ saeukkang-limit-break/
 - **동료 dual-slot** — 현재 단일 equipped로 머리·옷 동시 장착 불가. 사용자가 동시 장착 원하면 Phase 4에서 head/body 슬롯 분리 + UI/progress 마이그레이션 (Phase 4 후보)
 - **원정 4 — 지옥 원정** (Phase 3) — 챕터 101~?, 새 동료(구출된 친구들), 티어 8 배경, 보스 변종 5챕터, 시네마틱 오프닝 전환
 - **원정 4 상점** (Phase 3) — 동료/코스튬 게이팅
+
+
+## 11. v12.35 — 원정 Ⅶ·Ⅷ 추가 (2026-05-03)
+
+### 11.1 부모 비둘기 (원정 Ⅶ Ch205, Ch210 합류)
+
+- **husbandParents** (Ch205 클리어 시 합류): pair 단위 entity, 좌측 시아버지(푸른 톤) + 우측 시어머니(분홍 톤).
+- **wifeParents** (Ch210 클리어 시 합류): pair 단위 entity, 좌측 장인(초록 톤) + 우측 장모(살구 톤).
+- 디자인: drawWifePigeon 베이스. 사이즈 = 남편-아내 평균(scale 0.62 pair). 아내와 비슷한 silhouette + 흰 머리털(노년 표시).
+- 인게임 위치: 가족(남편·아내·아기) 뒤(=oy 더 위쪽). 가족 위치는 그대로, 부모만 backCompanions 배열로 prepend 하여 가족보다 먼저 그려져 뒤에 위치.
+- 코스튬 시스템: 5종 세트(`PARENTS_SET_DEFS`). 디폴트 천사(angelDefault, 무료 자동) + 궁중(royalCourt 6k) + 별빛(starlitDawn 9k) + 천계 원로(celestialElder 11k) + 아마겟돈(armageddonElder 22k Ch251 해금). pair 단위 일괄 구매 (`buyParentsSet`) + 부분 효과(1pair 45% / 2pair 85% setBonus).
+- 데미지 기여: damageMult 0.40 / fireRate 1.1 / projCount 1. 아내(0.45)와 친구(0.20-0.32) 사이.
+
+### 11.2 조상 비둘기 (원정 Ⅷ Ch255, Ch260 합류)
+
+- **gugunardo** (구구나르도 다 둘치, Ch255 합류): 비둘기 가문 발명가 조상. 레오나르도 다빈치를 비둘기 패러디한 캐릭터.
+- **bristotodul** (비리스토둘레스, Ch260 합류): 비둘기 가문 철학자 조상. 아리스토텔레스를 비둘기 패러디.
+- 디자인: drawWifePigeon 베이스 단일. 사이즈 = 아내와 동일(scale 0.85). 흰 수염(현인 표시) + 흰 머리털.
+- 인게임 위치: 가족과 부모 사이 (ox ±60, oy 살짝 위). 부모처럼 backCompanions 배열로 prepend.
+- 코스튬: 개별 구매 (`buyCompanionCostume`).
+  - gugunardo: inventor(디폴트 무료), painter(1.5k), engineer(2k), inventorRoyal(2.8k), gugunardo_armageddon(SSS, Ch251 해금, 13k 유료).
+  - bristotodul: scholar(디폴트 무료), orator(1.5k), poet(1.8k), sage(2.4k), bristotodul_armageddon(SSS, Ch251 해금, 13k 유료).
+- 데미지 기여: damageMult 0.50/0.48 / fireRate 1.4/1.2.
+
+### 11.3 SSS 등급 아마겟돈 코스튬 (Ch251 해금)
+
+- COSTUME_GRADES.SSS mult = 1.62 (SS 1.30 보다 25% 강함).
+- **남편 SSS** (Ch251 자동 무료): h_armageddon_crown(머리), b_armageddon_aegis(몸), w_armageddon_cracker(무기 — 새우깡 형태에 십자가 새겨진 성전 디자인).
+- **아내·아기 SSS** (Ch251 자동 무료): wife_armageddon_halo/robe + mini_armageddon_halo/robe.
+- **친구 5종 SSS** (Ch251 해금, 유료): armageddonHostSet 세트 일괄(4k×5=20k 코인).
+- **부모 SSS** (Ch251 해금, 유료): armageddonElder 세트 일괄(11k×2=22k 코인).
+- **조상 SSS** (Ch251 해금, 유료, 개별): gugunardo_armageddon 13k + bristotodul_armageddon 13k.
+- 부분 세트 시너지 (1/2/3 pc):
+  - SSS dmg ×1.08 / 1.20 / **1.40** + maxHp ×1.06 / 1.14 / **1.30**
+  - holyBossBonus +8% / +18% / **+35%** (보스 추가 데미지 vs ch201+ 신성/아마겟돈 보스)
+  - 풀세트 전용: regen +0.5/s, projCount +1, pierce +1
+- 동료 친구·부모 partial set bonus 캡: 5pc=90% / 2pair=85% (절대 100% 도달 X — 풀세트와 부분 차별화).
+
+### 11.4 글로우 눈 영구 + 천상의 새우깡 스킨 (Ch300 클리어)
+
+- progress.armageddonVictory = true, progress.eyesGlowPermanent = true.
+- getPigeonHungerState() 가 항상 'glow' 반환 → 시작화면·인게임·시네마틱 모두 남편 비둘기 눈 광휘 ring + cyan iris + violet pupil + 회전 별빛.
+- ownedSkins 에 'celestial_cracker' 추가 (price 0, 자동 무료 해금). 황금+적금+흰빛 신성 새우깡 디자인.
+
+### 11.5 시네마틱 엔딩 Ⅶ·Ⅷ
+
+- **drawVictoryHeavenThird (expId 7, Ch250)**: 자색 sphere + 황금 균열(창조주 빛이 새어나옴) + 회전 후광 ring + 옥좌 표식. 헤드라인 "천국 3층천 침범 완료!".
+- **drawVictoryArmageddon (expId 8, Ch300)**: 황금 sphere + 적금 광선 12개(창조주의 손길) + 중앙 "천상의 새우깡" (큰 새우깡 형태, 십자가 새김) + 표면 별. 헤드라인 "천상의 새우깡 — 창조주의 인정!". 게임 최종.
+- 글로브 위 파티원 배치: 가족(중앙) + 친구 5종(외곽 양옆) + 부모 pair(±100px earthR×0.55) + 조상(±65px earthR×0.32, 가족-부모 사이).
+
+### 11.6 tier 11 / tier 12 배경
+
+- **tier 11 (Ch201-250 천국 3층천)**: 자색 안개 구름 + 황금 sparkle + 창조주의 진노 번개. groundCol \[자색,금,순백\]. drawTileProps: drawHeavenPillar / drawDivineCrystal / drawGoldRibbon / drawFeather.
+- **tier 12 (Ch251-300 아마겟돈)**: 황금 광휘 광선 8방향 + 떨어지는 적금/흰 깃털 + 별빛 십자 + 거대한 별(창조주의 시선). groundCol \[금,적금,순백\]. drawArmageddonCross / drawGoldenBanner / drawDivineCrystal / drawFeather.
+- TIER_HUES tier 11/12 추가 (5 sub-hues each).
+- title BG skin: heaven_third_throne (220k, Ch250 보상) + celestial_cracker (Ch300 자동 무료).
+
+### 11.7 BGM·몹 풀
+
+- BGM_CHAPTER_PACKS 100 신규 entry (ch201-300). 자색·황금 주조; ch271+ 90-110ms; ch290+ 80-100ms; ch300 "천상의 새우깡" 72ms — finale.
+- waveEnemyPool: ch201+ void_drone/star_eye/soul_husk/tank/tyrant 혼합 (천계 권속 톤). ch251+ 천계 + 타락 천사 + 지옥 잔당 혼합.
+- 보스: BOSS_VARIANTS 20 신규 (ch201-300, 5챕터마다 변종 변경). hpMult 64.0→175.0, dmgMult 4.30→8.00.
+
+### 11.8 난이도 캘리브레이션 (ch290+)
+
+- chapterMult ch290+: HP_CH289 × 1.030^(c-289), DMG_CH289 × 1.025^(c-289). ch300 = ~1.385× HP / ~1.312× dmg vs ch289.
+- SSS 풀세트(+40% dmg + +35% holyBoss + +30% maxHp + projCount/pierce/regen)로 아슬아슬한 클리어선.
+- SSS 풀세트 없이도 클리어는 가능 (부분 세트 시너지로 헤드룸 확보). 단 컨트롤은 더 까다로움.
+- 코인 보상 ch201+ 곡선 완만화: 21 + min(ch,200)×5 + (ch-200)×3.5. ch300 ≈ 1370 코인. SSS 풀세트(70k+)는 ~50 챕터 farming 필요.
+
+### 11.9 챕터 클리어 시 안내 팝업
+
+- 5종 친구 첫 합류(Ch105 sparrow), 부모 첫 합류(Ch205 husbandParents), 조상 첫 합류(Ch255 gugunardo) 시 `showSetIntroModal` 트리거.
+- 같은 세트 멤버 모두를 하나의 화면에 미리보기 + 합류 일정 + 시스템 설명 (일괄 구매·풀세트 시너지·부분 효과).
+

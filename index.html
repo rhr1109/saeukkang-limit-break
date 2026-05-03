@@ -177,6 +177,34 @@
   .set-toggle::after{content:'';position:absolute;left:1px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.5);transition:left .18s ease-out;}
   .set-toggle.on{background:linear-gradient(180deg,#51CF66,#2F9E44);border-color:#FFE066;}
   .set-toggle.on::after{left:25px;}
+  /* v12.36 — 카테고리별 미니 토글. 한 행에 [👁 보이기][✨ 효과] 두 개 표시. */
+  .set-toggle.set-mini{width:38px;height:22px;}
+  .set-toggle.set-mini::after{width:16px;height:16px;}
+  .set-toggle.set-mini.on::after{left:18px;}
+  .set-toggle.set-mini.disabled{opacity:.4;pointer-events:none;}
+  /* v12.36b — 섹션 제목 + 컬럼 헤더 통합 행.
+     사용자 명시: 다른 소제목(.set-section-title margin:14px 4px 6px) 과 텍스트 시작점 동일,
+     우측 아이콘 컬럼은 set-row 내 우측 토글과 동일 위치. */
+  .set-cat-header{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 12px 6px 4px;   /* 좌 4px = section-title 와 동일 시작점, 우 12px = set-row 와 동일 */
+    margin-top:6px;
+    border-top:1px dashed rgba(255,212,59,.28);
+  }
+  .set-cat-header-title{
+    flex:1;
+    font-size:11px;             /* section-title 와 동일 크기 */
+    font-weight:900;
+    color:#FFE066;
+    text-transform:uppercase;
+    letter-spacing:1.2px;       /* section-title 와 동일 */
+    opacity:.85;
+  }
+  .set-cat-header-col{flex:0 0 auto;width:46px;text-align:center;line-height:1.0;display:flex;flex-direction:column;align-items:center;gap:1px;}
+  .set-cat-header-col .ic-em{font-size:14px;opacity:.85;}
+  .set-cat-header-col .lbl-tx{font-size:9.5px;font-weight:700;color:#FFE066;}
+  /* 카테고리 행은 마지막 두 셀(보이기/효과)이 컬럼 헤더와 정확히 정렬 */
+  .set-cat-row .set-cat-cell{flex:0 0 auto;width:46px;display:flex;justify-content:center;align-items:center;}
   /* While a non-playing scene is up (gameover / victory / chapter cleared / level up overlay),
      hide the in-game HUD entirely so the modal owns the screen. The pause modal stays an
      exception because the surrounding HUD is meaningful context for "resume". */
@@ -807,6 +835,8 @@
           <button class="cs-tab" type="button" data-char="wife"   style="border-color:#FFB4D8;display:none;">💗 아내</button>
           <button class="cs-tab" type="button" data-char="child"  style="border-color:#A5D8FF;display:none;">👶 아기</button>
           <button class="cs-tab" type="button" data-char="rescued" style="border-color:#FFA94D;display:none;">🐦 구출 친구 세트 (Ch125)</button>
+          <button class="cs-tab" type="button" data-char="parents" style="border-color:#FFD43B;display:none;">🪽 부모 세트 (Ch210)</button>
+          <button class="cs-tab" type="button" data-char="ancestors" style="border-color:#9775FA;display:none;">📜 조상 (Ch260)</button>
         </div>
         <!-- 남편 코스튬 도감 -->
         <div id="playerCostumeBlock">
@@ -847,6 +877,24 @@
             친구 화력에만 영향 — 챕터 난이도엔 미미 (~+1.5~3% 풀파티 DPS).
           </div>
           <div id="rescuedSetGrid" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+        <!-- v12.35 — 부모 세트 (Ch210 클리어 시 활성). 일괄 구매만, 한 세트 = pair × 2. -->
+        <div id="parentsCostumeBlock" style="display:none;">
+          <h3 style="display:flex;align-items:center;gap:8px;color:#FFD43B;">🪽 부모 세트 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅶ Ch210 까지 진행 시 활성 — 일괄 구매</span></h3>
+          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;">
+            남편 부모님 + 아내 부모님 (총 4마리) 이 같은 세트의 코스튬을 입으면 세트 보너스 발동.
+            기본 천사 디폴트는 무료, 다른 세트는 코인 결제. 부분 착용도 부분 효과 (1pair 45%, 2pair 85%).
+          </div>
+          <div id="parentsSetGrid" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+        <!-- v12.35 — 조상 코스튬 (Ch260 클리어 시 활성). 개별 비둘기 마다 직업 코스튬 다종. -->
+        <div id="ancestorsCostumeBlock" style="display:none;">
+          <h3 style="display:flex;align-items:center;gap:8px;color:#9775FA;">📜 조상 비둘기 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅷ Ch260 까지 진행 시 활성 — 개별 구매</span></h3>
+          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;">
+            구구나르도 다 둘치 (발명가) · 비리스토둘레스 (철학자). 각 조상마다 직업 코스튬을 따로 살 수 있음.
+            기본 디폴트(발명가복/철학자복)은 무료. 직업 코스튬은 개별 코인 결제.
+          </div>
+          <div id="ancestorsCostumeGrid" style="display:flex;flex-direction:column;gap:10px;"></div>
         </div>
       </div>
       <!-- 호환성을 위해 placeholder는 남기되 비활성화 (renderCompanionCostumeSection은 새 그리드로 직접 그린다) -->
@@ -941,16 +989,73 @@
       </div>
 
       <div id="setFamilyBlock" style="display:none;">
-        <div class="set-section-title">비둘기 가족 · 동료</div>
+        <div class="set-section-title">비둘기 가족 · 동료 (전체)</div>
         <div class="set-row" id="setShowFamilyRow">
           <div class="ic">👁</div>
-          <div class="lbl">보이기<span class="desc">시작화면 · 게임 · 시네마틱에서 표시</span></div>
+          <div class="lbl">전체 보이기<span class="desc">시작화면 · 게임 · 시네마틱 — 마스터 토글 (OFF 면 모두 OFF)</span></div>
           <button type="button" class="set-toggle" id="setShowFamilyToggle" aria-label="가족·동료 보이기 토글"></button>
         </div>
         <div class="set-row" id="setFamilyFxRow">
           <div class="ic">✨</div>
-          <div class="lbl">효과<span class="desc">자동 사격 · 공격력 기여 · 사격음 (OFF 시 가족·동료 데미지 0 · 보이기 OFF 면 자동 비활성)</span></div>
+          <div class="lbl">전체 효과<span class="desc">자동 사격 · 공격력 기여 · 사격음 (OFF 시 모든 동료 데미지 0)</span></div>
           <button type="button" class="set-toggle" id="setFamilyFxToggle" aria-label="가족·동료 효과 토글"></button>
+        </div>
+        <!-- v12.36 — 카테고리별 토글. 합류 후에만 행 노출. 각 행에 [👁 보이기][✨ 효과] 두 토글. -->
+        <!-- v12.36b — 섹션 제목 + 컬럼 헤더를 한 행에 통합 (떠 있는 라벨 회피) -->
+        <div class="set-cat-header">
+          <div class="set-cat-header-title">카테고리별 설정</div>
+          <div class="set-cat-header-col"><span class="ic-em">👁</span><span class="lbl-tx">보이기</span></div>
+          <div class="set-cat-header-col"><span class="ic-em">✨</span><span class="lbl-tx">효과</span></div>
+        </div>
+        <div class="set-row set-cat-row" id="setRowWife" style="display:none;">
+          <div class="ic">💗</div>
+          <div class="lbl">아내 비둘기<span class="desc">Ch51 합류</span></div>
+          <div class="set-cat-cell" title="보이기">
+            <button type="button" class="set-toggle set-mini" data-cat="Wife" data-kind="show" aria-label="아내 보이기"></button>
+          </div>
+          <div class="set-cat-cell" title="효과">
+            <button type="button" class="set-toggle set-mini" data-cat="Wife" data-kind="fx" aria-label="아내 효과"></button>
+          </div>
+        </div>
+        <div class="set-row set-cat-row" id="setRowChild" style="display:none;">
+          <div class="ic">👶</div>
+          <div class="lbl">아기 비둘기<span class="desc">Ch60 합류</span></div>
+          <div class="set-cat-cell" title="보이기">
+            <button type="button" class="set-toggle set-mini" data-cat="Child" data-kind="show" aria-label="아기 보이기"></button>
+          </div>
+          <div class="set-cat-cell" title="효과">
+            <button type="button" class="set-toggle set-mini" data-cat="Child" data-kind="fx" aria-label="아기 효과"></button>
+          </div>
+        </div>
+        <div class="set-row set-cat-row" id="setRowFriends" style="display:none;">
+          <div class="ic">🐦</div>
+          <div class="lbl">구출 친구 5종<span class="desc">참새·까치·부엉이·앵무새·다람쥐 (Ch125)</span></div>
+          <div class="set-cat-cell" title="보이기">
+            <button type="button" class="set-toggle set-mini" data-cat="Friends" data-kind="show" aria-label="친구 5종 보이기"></button>
+          </div>
+          <div class="set-cat-cell" title="효과">
+            <button type="button" class="set-toggle set-mini" data-cat="Friends" data-kind="fx" aria-label="친구 5종 효과"></button>
+          </div>
+        </div>
+        <div class="set-row set-cat-row" id="setRowParents" style="display:none;">
+          <div class="ic">🪽</div>
+          <div class="lbl">부모 비둘기<span class="desc">남편·아내 부모 pair 4마리 (Ch210)</span></div>
+          <div class="set-cat-cell" title="보이기">
+            <button type="button" class="set-toggle set-mini" data-cat="Parents" data-kind="show" aria-label="부모 보이기"></button>
+          </div>
+          <div class="set-cat-cell" title="효과">
+            <button type="button" class="set-toggle set-mini" data-cat="Parents" data-kind="fx" aria-label="부모 효과"></button>
+          </div>
+        </div>
+        <div class="set-row set-cat-row" id="setRowAncestors" style="display:none;">
+          <div class="ic">📜</div>
+          <div class="lbl">조상 비둘기<span class="desc">구구나르도 · 비리스토둘레스 (Ch260)</span></div>
+          <div class="set-cat-cell" title="보이기">
+            <button type="button" class="set-toggle set-mini" data-cat="Ancestors" data-kind="show" aria-label="조상 보이기"></button>
+          </div>
+          <div class="set-cat-cell" title="효과">
+            <button type="button" class="set-toggle set-mini" data-cat="Ancestors" data-kind="fx" aria-label="조상 효과"></button>
+          </div>
         </div>
       </div>
 
@@ -965,6 +1070,17 @@
       <canvas id="cmmCanvas" width="220" height="260" style="display:block;margin:12px auto;background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.4) 0%, rgba(20,8,40,.85) 70%);border-radius:12px;border:2px solid #FFB4D8;"></canvas>
       <div id="cmmStory" style="font-size:13px;color:#FFE066;font-weight:700;margin:6px 0 14px;line-height:1.5;"></div>
       <button class="btn small" id="cmmContinueBtn" style="width:100%;background:linear-gradient(180deg,#FFB4D8,#D63384);">▶ 함께 다음 원정으로</button>
+    </div>
+  </div>
+
+  <!-- v12.35 — 세트 파티원 미리보기 안내 팝업. 첫 멤버 합류 시 같은 세트의 미래 멤버들과 시스템 안내. -->
+  <div id="setIntroModal" class="modal hidden">
+    <div class="card" style="max-width:440px;text-align:center;">
+      <h2 id="simTitle" style="color:#FFE066;text-shadow:0 0 16px rgba(255,224,102,.85);">🐦 세트 파티원 시스템</h2>
+      <div class="sub" id="simSub" style="font-size:13px;">앞으로 합류할 동료 미리보기</div>
+      <div id="simPreview" style="display:flex;justify-content:space-around;gap:6px;background:rgba(0,0,0,.3);border-radius:10px;padding:10px 6px;margin:10px 0;"></div>
+      <div id="simStory" style="font-size:12px;color:#FFF9DB;font-weight:700;margin:6px 0 12px;line-height:1.55;"></div>
+      <button class="btn small" id="simContinueBtn" style="width:100%;background:linear-gradient(180deg,#FFE066,#F76707);color:#5A1A04;">알겠어요!</button>
     </div>
   </div>
 
@@ -1683,6 +1799,113 @@ const BGM_CHAPTER_PACKS = [
   { label:'마지막 회의장',      bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:100, wave:'sawtooth', bassShift:'3', vol:.19 },
   { label:'신성의 광장',        bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:100, wave:'sawtooth', bassShift:'3', vol:.19 },
   { label:'창공의 주인',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:92,  wave:'sawtooth', bassShift:'3', vol:.20 },
+  // === v12.35 — 원정 Ⅶ — 천국 3층천 침범 (201-250). 자색·금빛·창조주의 침묵.
+  //   square/sine 혼합. 100-160ms — 신성한 톤이지만 침범의 긴장이 깔려있음. ===
+  { label:'3층천 경계의 빗장',     bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E5','G#5','B5','E5'],['D5','F#5','A5','D5']], interval:160, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'금단의 입구',          bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['Bb4','D5','F5','Bb5'],['F5','A5','C5','F5']], interval:155, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'첫 번째 침범',         bars:[['Bb4','D5','F5','Bb5'],['F4','A4','C5','F5'],['Eb5','G5','Bb5','Eb5'],['Bb4','D5','F5','Bb5']], interval:148, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'신성의 결계',          bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['G5','B5','D5','G5']], interval:152, wave:'sine',     bassShift:'3', vol:.15 },
+  { label:'부모의 첫 합류',       bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:155, wave:'triangle', bassShift:'3', vol:.16 },
+  { label:'권속의 회랑',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['G4','B4','D5','G5'],['F5','A5','C5','F5']], interval:145, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'거룩한 사자단',        bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:140, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'왕좌의 경비',          bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:138, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'경계 너머',            bars:[['Eb5','G5','Bb5','Eb5'],['Bb4','D5','F5','Bb5'],['F4','A4','C5','F5'],['Eb5','G5','Bb5','Eb5']], interval:142, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'부모의 두 번째 합류',  bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['C5','E5','G5','C5']], interval:148, wave:'triangle', bassShift:'3', vol:.16 },
+  { label:'시간의 정원',          bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['Bb3','D4','F4','Bb4'],['F4','A4','C5','F5']], interval:158, wave:'sine',     bassShift:'3', vol:.14 },
+  { label:'광휘의 폭포',          bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:140, wave:'triangle', bassShift:'3', vol:.16 },
+  { label:'심판의 새벽',          bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['Bb4','D5','F5','Bb5'],['F5','A5','C5','F5']], interval:135, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'거짓의 거울',          bars:[['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5']], interval:130, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'진실의 옥좌',          bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:128, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'신성의 도서관',        bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:135, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'금단의 책',            bars:[['Bb4','D5','F5','Bb5'],['F4','A4','C5','F5'],['Eb4','G4','Bb4','Eb5'],['Bb4','D5','F5','Bb5']], interval:130, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'이름 잃은 천사',       bars:[['F4','Ab4','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:128, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'잊혀진 회랑',          bars:[['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5']], interval:135, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'계시의 첨탑',          bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:120, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'회개의 다리',          bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E5','G#5','B5','E5'],['D5','F#5','A5','D5']], interval:128, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'경고의 광장',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:122, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'분노의 회의장',        bars:[['G4','Bb4','D5','G5'],['Eb4','G4','Bb4','Eb5'],['F4','Ab4','C5','F5'],['Bb4','D5','F5','Bb5']], interval:118, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'거룩한 군대',          bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:115, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'창조의 측근',          bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['Bb4','D5','F5','Bb5'],['F5','A5','C5','F5']], interval:118, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'권능의 문',            bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['A5','C#5','E5','A5'],['G5','B5','D5','G5']], interval:120, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'진리의 칼날',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:115, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'구원의 회랑',          bars:[['C5','E5','G5','C5'],['F4','A4','C5','F5'],['G4','B4','D5','G5'],['C5','E5','G5','C5']], interval:122, wave:'triangle', bassShift:'3', vol:.16 },
+  { label:'은총의 거울',          bars:[['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5']], interval:118, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'권좌의 시종',          bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:113, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'거룩한 산',            bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['D5','F#5','A5','D5'],['G5','B5','D5','G5']], interval:118, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'신성한 강',            bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['Bb3','D4','F4','Bb4'],['F4','A4','C5','F5']], interval:140, wave:'sine',     bassShift:'3', vol:.14 },
+  { label:'천계의 등대',          bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['G5','B5','D5','G5']], interval:115, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'창조의 정원',          bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:115, wave:'triangle', bassShift:'3', vol:.16 },
+  { label:'선의 시험관',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:110, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'경계의 거울',          bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E5','G#5','B5','E5'],['D5','F#5','A5','D5']], interval:115, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'심연의 빛',            bars:[['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5']], interval:118, wave:'sine',     bassShift:'3', vol:.15 },
+  { label:'시간의 문',            bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:110, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'마지막 경고',          bars:[['G4','Bb4','D5','G5'],['Eb4','G4','Bb4','Eb5'],['F4','Ab4','C5','F5'],['Bb4','D5','F5','Bb5']], interval:108, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'3층천의 검문관',       bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:105, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'경계 너머의 안개',     bars:[['F4','A4','C5','F5'],['Bb3','D4','F4','Bb4'],['Eb4','G4','Bb4','Eb5'],['F4','A4','C5','F5']], interval:130, wave:'sine',     bassShift:'3', vol:.15 },
+  { label:'금단의 옥좌',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:108, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'시간 이전',            bars:[['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5']], interval:115, wave:'sine',     bassShift:'3', vol:.16 },
+  { label:'창조의 회의장',        bars:[['G5','B5','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:108, wave:'square',   bassShift:'3', vol:.18 },
+  { label:'3층천의 기수',         bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:105, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'신성의 마지막 다리',   bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:105, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'창조주의 그림자',      bars:[['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5']], interval:108, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'노여움의 옥좌',        bars:[['F5','Ab5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','Ab5','C5','F5']], interval:102, wave:'sawtooth', bassShift:'3', vol:.20 },
+  { label:'금기의 침묵',          bars:[['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5']], interval:115, wave:'sine',     bassShift:'3', vol:.16 },
+  { label:'3층천의 군주',         bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:96,  wave:'sawtooth', bassShift:'3', vol:.20 },
+  // === v12.35 — 원정 Ⅷ — 아마겟돈 (251-300). 신성 전쟁 — sawtooth/square epic + finale.
+  //   ch251 시작 90-130ms. ch271+ 아마겟돈 본진 90-110ms. ch290+ 80-100ms 컨트롤 강요.
+  //   ch300 (창조주의 호명) 80ms — 게임 최종. ===
+  { label:'아마겟돈 전야',         bars:[['C5','E5','G5','C5'],['G4','B4','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:128, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'심판의 새벽',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['G4','B4','D5','G5'],['F5','A5','C5','F5']], interval:122, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'거룩한 전쟁터',        bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['G5','B5','D5','G5']], interval:118, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'첫 번째 진군',         bars:[['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5']], interval:115, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'조상의 첫 합류',       bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:120, wave:'square',   bassShift:'3', vol:.18 },
+  { label:'천계 군단의 진격',     bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:115, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'신앙의 화살',          bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['A5','C#5','E5','A5'],['G5','B5','D5','G5']], interval:110, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'은총의 방패벽',        bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:115, wave:'square',   bassShift:'3', vol:.18 },
+  { label:'거룩한 정찰',          bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E5','G#5','B5','E5'],['D5','F#5','A5','D5']], interval:118, wave:'square',   bassShift:'3', vol:.18 },
+  { label:'조상의 두 번째 합류',  bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:115, wave:'square',   bassShift:'3', vol:.19 },
+  { label:'맹세의 들판',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['G4','B4','D5','G5'],['F5','A5','C5','F5']], interval:110, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'승리의 첫 새벽',       bars:[['G5','B5','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:108, wave:'sawtooth', bassShift:'3', vol:.20 },
+  { label:'광휘의 진영',          bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:105, wave:'square',   bassShift:'3', vol:.19 },
+  { label:'거룩한 야영지',        bars:[['Eb5','G5','Bb5','Eb5'],['Bb4','D5','F5','Bb5'],['F4','A4','C5','F5'],['Eb5','G5','Bb5','Eb5']], interval:108, wave:'sine',     bassShift:'3', vol:.16 },
+  { label:'경고의 첨탑',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:105, wave:'sawtooth', bassShift:'3', vol:.20 },
+  { label:'심판의 사자',          bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:108, wave:'sawtooth', bassShift:'3', vol:.20 },
+  { label:'금빛 진영',            bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:103, wave:'sawtooth', bassShift:'3', vol:.20 },
+  { label:'새벽의 화살비',        bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:100, wave:'sawtooth', bassShift:'3', vol:.20 },
+  { label:'신성의 회랑',          bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['C5','E5','G5','C5']], interval:108, wave:'square',   bassShift:'3', vol:.19 },
+  { label:'마지막 보급선',        bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['G4','B4','D5','G5'],['F4','A4','C5','F5']], interval:118, wave:'triangle', bassShift:'3', vol:.16 },
+  { label:'아마겟돈 본진',        bars:[['G5','B5','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:100, wave:'sawtooth', bassShift:'3', vol:.21 },
+  { label:'신성 전쟁의 광장',     bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:98,  wave:'sawtooth', bassShift:'3', vol:.21 },
+  { label:'권능의 충돌',          bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:96,  wave:'sawtooth', bassShift:'3', vol:.21 },
+  { label:'거룩한 충격파',        bars:[['G4','Bb4','D5','G5'],['Eb4','G4','Bb4','Eb5'],['F4','Ab4','C5','F5'],['Bb4','D5','F5','Bb5']], interval:95,  wave:'sawtooth', bassShift:'3', vol:.22 },
+  { label:'대천사의 진군',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:96,  wave:'sawtooth', bassShift:'3', vol:.22 },
+  { label:'검은 천사의 진격',     bars:[['F5','Ab5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','Ab5','C5','F5']], interval:95,  wave:'sawtooth', bassShift:'3', vol:.22 },
+  { label:'거짓 신의 함성',       bars:[['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5']], interval:94,  wave:'sawtooth', bassShift:'3', vol:.22 },
+  { label:'선과 악의 평선',       bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:96,  wave:'sawtooth', bassShift:'3', vol:.22 },
+  { label:'진실의 진군',          bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['G5','B5','D5','G5']], interval:92,  wave:'sawtooth', bassShift:'3', vol:.22 },
+  { label:'심판의 진영',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:90,  wave:'sawtooth', bassShift:'3', vol:.23 },
+  { label:'대천사의 진격',        bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:92,  wave:'sawtooth', bassShift:'3', vol:.23 },
+  { label:'거룩한 회랑의 검',     bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:90,  wave:'sawtooth', bassShift:'3', vol:.23 },
+  { label:'심판의 검문소',        bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:88,  wave:'sawtooth', bassShift:'3', vol:.23 },
+  { label:'마지막 진영',          bars:[['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5']], interval:90,  wave:'sawtooth', bassShift:'3', vol:.23 },
+  { label:'대천사 의장',          bars:[['G5','B5','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:86,  wave:'sawtooth', bassShift:'3', vol:.24 },
+  { label:'권좌의 깃발',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:88,  wave:'sawtooth', bassShift:'3', vol:.24 },
+  { label:'거룩한 외침',          bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:86,  wave:'sawtooth', bassShift:'3', vol:.24 },
+  { label:'진리의 화살',          bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E5','G#5','B5','E5'],['D5','F#5','A5','D5']], interval:84,  wave:'sawtooth', bassShift:'3', vol:.24 },
+  { label:'심판의 마지막 회랑',   bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['Bb4','D5','F5','Bb5'],['F5','A5','C5','F5']], interval:84,  wave:'sawtooth', bassShift:'3', vol:.24 },
+  { label:'승리의 새벽',          bars:[['G5','B5','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:82,  wave:'sawtooth', bassShift:'3', vol:.24 },
+  // ch291-295 — 컨트롤 강요. tempo 거의 일정하게 유지(80-86ms)되 dissonant 전환.
+  { label:'극한의 시험',          bars:[['F5','Ab5','C5','F5'],['Bb4','Db5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','Ab5','C5','F5']], interval:84,  wave:'sawtooth', bassShift:'3', vol:.25 },
+  { label:'진군의 정점',          bars:[['Eb5','G5','Bb5','Eb5'],['Ab4','C5','Eb5','Ab5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5']], interval:82,  wave:'sawtooth', bassShift:'3', vol:.25 },
+  { label:'심판의 칼날',          bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:82,  wave:'sawtooth', bassShift:'3', vol:.25 },
+  { label:'신성의 폭풍',          bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:80,  wave:'sawtooth', bassShift:'3', vol:.25 },
+  { label:'마지막 시험관',        bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:80,  wave:'sawtooth', bassShift:'3', vol:.25 },
+  // ch296-300 — 게임 최종. 창조주의 호명 — 가장 빠르고 가장 거룩한 anthemic finale.
+  { label:'천상의 옥좌 앞',       bars:[['G5','B5','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:80,  wave:'square',   bassShift:'3', vol:.26 },
+  { label:'창조주의 호명',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:78,  wave:'sawtooth', bassShift:'3', vol:.26 },
+  { label:'신성의 회의장',        bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:78,  wave:'sawtooth', bassShift:'3', vol:.27 },
+  { label:'마지막 한 발자국',     bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:76,  wave:'sawtooth', bassShift:'3', vol:.27 },
+  { label:'천상의 새우깡',        bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:72,  wave:'sawtooth', bassShift:'3', vol:.28 },
 ];
 // Title / chapter-select BGM — calm, hopeful arcade loop in C major.
 // Slightly louder than chapter packs so the menu feels alive the moment audio unlocks.
@@ -1979,8 +2202,42 @@ function openSettingsModal(){
     // 효과 행 disabled 처리 — 보이기 OFF 면 효과도 자동 OFF.
     const fxRow = document.getElementById('setFamilyFxRow');
     if(fxRow) fxRow.classList.toggle('disabled', !showFamilyOn());
+    // v12.36 — 카테고리별 행 가시성 + 미니 토글 동기화.
+    _syncCategoryToggleRows();
   }
   modal.classList.remove('hidden');
+}
+// v12.36 — 카테고리별 토글 동기화. 각 카테고리 합류 시 행 노출 + on/off 비주얼 + disabled.
+function _syncCategoryToggleRows(){
+  const s = progress.settings || {};
+  const cu = progress.companionUnlocks || {};
+  const cats = [
+    { id:'Wife',      rowId:'setRowWife',      visible: !!cu.wife },
+    { id:'Child',     rowId:'setRowChild',     visible: !!cu.child },
+    { id:'Friends',   rowId:'setRowFriends',   visible: ['sparrow','magpie','owl','parrot','squirrel'].some(k => cu[k]) },
+    { id:'Parents',   rowId:'setRowParents',   visible: !!(cu.husbandParents || cu.wifeParents) },
+    { id:'Ancestors', rowId:'setRowAncestors', visible: !!(cu.gugunardo || cu.bristotodul) },
+  ];
+  for(const c of cats){
+    const row = document.getElementById(c.rowId);
+    if(row) row.style.display = c.visible ? '' : 'none';
+    if(!c.visible) continue;
+    // 보이기 토글 (마스터 OFF 면 카테고리 토글도 disabled)
+    const showBtn = document.querySelector(`.set-toggle[data-cat="${c.id}"][data-kind="show"]`);
+    if(showBtn){
+      const v = s['show' + c.id] !== false;
+      showBtn.classList.toggle('on', v);
+      showBtn.classList.toggle('disabled', !showFamilyOn());
+    }
+    // 효과 토글 (보이기 OFF 또는 마스터 효과 OFF 면 disabled)
+    const fxBtn = document.querySelector(`.set-toggle[data-cat="${c.id}"][data-kind="fx"]`);
+    if(fxBtn){
+      const v = s['fx' + c.id] !== false;
+      fxBtn.classList.toggle('on', v);
+      const enabled = showFamilyOn() && (s['show' + c.id] !== false) && familyFxPref();
+      fxBtn.classList.toggle('disabled', !enabled);
+    }
+  }
 }
 function closeSettingsModal(){
   const modal = document.getElementById('settingsModal');
@@ -2023,6 +2280,26 @@ document.getElementById('setFamilyFxToggle').addEventListener('click', ()=>{
   progress.settings.familyFx = next;
   saveProgress();
   _setToggleVisual('setFamilyFxToggle', next);
+  _syncCategoryToggleRows();
+});
+// 마스터 보이기 토글 → 카테고리 행 disabled 동기화도 함께 갱신.
+document.getElementById('setShowFamilyToggle').addEventListener('click', ()=>{
+  // 위 핸들러가 이미 설정/저장 처리. 카테고리 행 갱신만 추가.
+  _syncCategoryToggleRows();
+});
+// v12.36 — 카테고리별 미니 토글 (delegate 로 한번에 처리).
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.set-toggle.set-mini[data-cat]');
+  if(!btn) return;
+  if(btn.classList.contains('disabled')) return;
+  const cat = btn.dataset.cat;
+  const kind = btn.dataset.kind;   // 'show' or 'fx'
+  if(!progress.settings) progress.settings = {};
+  const key = (kind === 'show' ? 'show' : 'fx') + cat;
+  const cur = progress.settings[key] !== false;
+  progress.settings[key] = !cur;
+  saveProgress();
+  _syncCategoryToggleRows();
 });
 // 부팅 시 indicator 동기화는 progress const 가 초기화된 이후에 (아래 helpers 정의 시점) 실행.
 
@@ -2912,6 +3189,68 @@ function drawCostumeHeadOverlay(ctx, px, py, scale, eq){
       ctx.beginPath(); ctx.arc(0, 0, 1.5, 0, Math.PI*2); ctx.fill();
       ctx.restore();
     }
+  } else if(def.id === 'h_seraph_halo'){
+    // v12.34 — SS 천국 — 3 ring + 12 sparkles + dual feathered wings + pulsing aura.
+    const t2 = state.time, pulse = 0.55 + 0.45*Math.sin(t2*2);
+    ctx.shadowColor = `rgba(255,224,102,${pulse})`; ctx.shadowBlur = 18;
+    ctx.strokeStyle = '#FFE066'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.ellipse(0, -24, 19, 6, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.ellipse(0, -24, 14, 4.4, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,212,59,0.85)'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.ellipse(0, -24, 23, 7.4, 0, 0, Math.PI*2); ctx.stroke();
+    for(let i=0;i<12;i++){
+      const a = (i/12)*Math.PI*2 + t2*1.2;
+      ctx.fillStyle = i%2 ? '#FFFFFF' : '#FFE066';
+      ctx.beginPath(); ctx.arc(Math.cos(a)*19, -24 + Math.sin(a)*6, 1.6, 0, Math.PI*2); ctx.fill();
+    }
+    // Larger wings
+    ctx.fillStyle = 'rgba(255,255,255,0.93)';
+    ctx.beginPath(); ctx.ellipse(-19, -28, 9, 6.5, -0.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse( 19, -28, 9, 6.5,  0.5, 0, Math.PI*2); ctx.fill();
+  } else if(def.id === 'h_armageddon_crown'){
+    // v12.35 — SSS 아마겟돈 성관: 황금 왕관 + 빛나는 십자 + 적금 광휘. 가장 강력한 머리장식.
+    const t2 = state.time, pulse = 0.6 + 0.4*Math.sin(t2*2);
+    // 외곽 광휘 ring (적금)
+    ctx.shadowColor = `rgba(255,107,107,${pulse})`; ctx.shadowBlur = 22;
+    ctx.strokeStyle = '#FF6B6B'; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.ellipse(0, -26, 26, 8, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.shadowBlur = 0;
+    // 황금 왕관 본체
+    ctx.fillStyle = '#FFD43B';
+    ctx.beginPath();
+    ctx.moveTo(-14, -16); ctx.lineTo(-10, -23);
+    ctx.lineTo(-6, -16);  ctx.lineTo(-2, -25);
+    ctx.lineTo(2, -25);   ctx.lineTo(6, -16);
+    ctx.lineTo(10, -23);  ctx.lineTo(14, -16);
+    ctx.closePath(); ctx.fill();
+    // 왕관 보석들
+    ctx.fillStyle = '#FA5252';
+    ctx.beginPath(); ctx.arc(0, -19, 2.0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath(); ctx.arc(-8, -19, 1.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 8, -19, 1.2, 0, Math.PI*2); ctx.fill();
+    // 왕관 위 빛나는 십자
+    ctx.shadowColor = 'rgba(255,255,255,0.95)'; ctx.shadowBlur = 8;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(-1, -32, 2, 7);
+    ctx.fillRect(-3, -29, 6, 1.6);
+    ctx.shadowBlur = 0;
+    // 회전 별 16개 (아마겟돈 광휘)
+    for(let i=0;i<16;i++){
+      const a = (i/16)*Math.PI*2 + t2*1.0;
+      const sx = Math.cos(a)*22, sy = -26 + Math.sin(a)*7;
+      ctx.fillStyle = i%3===0 ? '#FF6B6B' : i%3===1 ? '#FFE066' : '#FFFFFF';
+      ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI*2); ctx.fill();
+    }
+    // 더 큰 광휘 날개 (천계 군주)
+    ctx.fillStyle = 'rgba(255,243,191,0.95)';
+    ctx.beginPath(); ctx.ellipse(-22, -30, 10, 7, -0.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse( 22, -30, 10, 7,  0.5, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#FFD43B'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(-30, -32); ctx.lineTo(-14, -29); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( 30, -32); ctx.lineTo( 14, -29); ctx.stroke();
   } else {
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -3417,6 +3756,61 @@ function drawCostumeBodyOverlay(ctx, px, py, scale, eq){
       }
       ctx.restore();
     }
+  } else if(def.id === 'b_holy_robe'){
+    // v12.34 — SS 천국 거룩한 로브: 흰 로브 + 황금 띠 + 가슴 십자가 + 등 깃털.
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(-26, -2); ctx.quadraticCurveTo(-30, 14, -25, 32);
+    ctx.lineTo(25, 32); ctx.quadraticCurveTo(30, 14, 26, -2);
+    ctx.quadraticCurveTo(13, -6, 0, -6); ctx.quadraticCurveTo(-13, -6, -26, -2);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#FFE066';
+    ctx.fillRect(-26, 14, 52, 3.4);
+    ctx.fillStyle = '#FFD43B';
+    ctx.shadowColor = 'rgba(255,224,102,0.9)'; ctx.shadowBlur = 8;
+    ctx.fillRect(-1.4, 0, 2.8, 18);
+    ctx.fillRect(-7, 6, 14, 2.8);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath(); ctx.ellipse(-30, 12, 7, 16, -0.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse( 30, 12, 7, 16,  0.5, 0, Math.PI*2); ctx.fill();
+  } else if(def.id === 'b_armageddon_aegis'){
+    // v12.35 — SSS 아마겟돈 광휘 갑주: 황금 본체 + 적금 가슴 십자 + 어깨 견장 + 거대 깃털 날개.
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath();
+    ctx.moveTo(-26, -2); ctx.quadraticCurveTo(-30, 14, -25, 32);
+    ctx.lineTo(25, 32); ctx.quadraticCurveTo(30, 14, 26, -2);
+    ctx.quadraticCurveTo(13, -6, 0, -6); ctx.quadraticCurveTo(-13, -6, -26, -2);
+    ctx.closePath(); ctx.fill();
+    // 적금 띠
+    ctx.fillStyle = '#FF6B6B';
+    ctx.fillRect(-26, 14, 52, 3.6);
+    // 가슴 십자가 (큼지막)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowColor = 'rgba(255,255,255,0.95)'; ctx.shadowBlur = 12;
+    ctx.fillRect(-1.8, -4, 3.6, 24);
+    ctx.fillRect(-9, 4, 18, 3.4);
+    ctx.shadowBlur = 0;
+    // 어깨 견장 (광휘)
+    ctx.fillStyle = '#FFD43B';
+    ctx.beginPath(); ctx.arc(-25, 0, 4.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 25, 0, 4.4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath(); ctx.arc(-25, 0, 1.8, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 25, 0, 1.8, 0, Math.PI*2); ctx.fill();
+    // 등 거대 깃털 날개
+    ctx.fillStyle = 'rgba(255,243,191,0.94)';
+    ctx.beginPath(); ctx.ellipse(-34, 12, 9, 21, -0.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse( 34, 12, 9, 21,  0.5, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#FFD43B'; ctx.lineWidth = 0.9;
+    for(let i=0;i<3;i++){
+      ctx.beginPath(); ctx.moveTo(-42, 4 + i*6); ctx.lineTo(-26, 6 + i*6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo( 42, 4 + i*6); ctx.lineTo( 26, 6 + i*6); ctx.stroke();
+    }
+    // 등에 광휘 펄스
+    const pulseB = 0.5 + 0.5*Math.sin(state.time*2.4);
+    ctx.fillStyle = `rgba(255,212,59,${pulseB*0.5})`;
+    ctx.beginPath(); ctx.arc(0, 14, 22, 0, Math.PI*2); ctx.fill();
   } else {
     // Fallback emoji rendering — uses a translucent backing inside the silhouette
     ctx.fillStyle = g.color;
@@ -3826,8 +4220,9 @@ function drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, includeFamily){
   const cy = cssH * 0.55;
   drawPigeon(ctx2, cx, cy, husbandScale, 1, state.time * 1.4, false, 1, fakePlayer);
   if(!includeFamily) return;
-  const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife;
-  const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
+  // v12.36 — 카테고리별 보이기 토글 반영. 합류 + 카테고리 ON 모두 충족해야 그림.
+  const wifeOk = progress.companionUnlocks && progress.companionUnlocks.wife && companionVisible('wife');
+  const childOk = progress.companionUnlocks && progress.companionUnlocks.child && companionVisible('child');
   if(!wifeOk && !childOk) return;
   // v12.18 — 사용자 피드백 "스킨 미리보기에서 아내가 남편보다 큼" 수정. 이전엔 compScale 이
   // 고정 1.5 라 작은 canvas (baseScale<1) 에서 husband 0.85× 보다 wife 가 시각적으로 더
@@ -4869,9 +5264,10 @@ const ULT_DAMAGE_PCT = 0.12;   // 12% of boss max HP per cast — 2 casts ≈ 24
 // 15분을 넘기지 말라" 반영. 가장 긴 캡(원정 Ⅳ ch101~) = 900초 = 정확히 15분. Ch41-50도 900초로
 // 단축 (이전 1020 → 900). 모든 챕터가 15분 이내에 캡 강제 처치.
 const WAVES_PER_CHAPTER = 3;
-// v12.34 — 원정 Ⅴ(천국 1층천 ch131-160) + 원정 Ⅵ(천국 2층천 ch161-200) 추가.
-const MAX_CHAPTERS = 200;
-// v12 expedition system — chapters split into four campaigns ending in unique cinematics.
+// v12.35 — 원정 Ⅶ(천국 3층천 ch201-250) + 원정 Ⅷ(아마겟돈 ch251-300) 추가.
+//   3층천부터는 비둘기 가족의 침범에 창조주가 노여워하지만, 결국 아마겟돈 전쟁 승리 후 인정.
+const MAX_CHAPTERS = 300;
+// v12 expedition system — chapters split into eight campaigns ending in unique cinematics.
 // v12.11 — 원정 Ⅳ 추가: 지옥 원정. 억울하게 지옥에 끌려간 조류·조류 친화 동물들을
 // 구해내며 함께 싸우는 스토리. 원정 Ⅲ 끝(ch100) 클리어 시 해금.
 const EXPEDITIONS = [
@@ -4881,8 +5277,13 @@ const EXPEDITIONS = [
   { id:4, name:'원정 Ⅳ — 지옥 구출 원정',    subtitle:'억울하게 지옥에 간 친구들을 구하러',                range:[101,130], theme:'hellfire_rescue' },
   // v12.34 — 천국 원정. 지옥에서 친구를 모두 구출한 비둘기 가족이 천국의 인정을 받아 1층천부터 탐방.
   { id:5, name:'원정 Ⅴ — 천국 1층천 탐방',   subtitle:'구원의 보답으로 천국이 문을 연다 — 빛의 정원·구름 회랑·천사의 도서관', range:[131,160], theme:'heaven_first' },
-  // 1층천을 정복(?)한 가족이 더 깊은 2층천으로. 대천사·세라핌·창공의 주인을 만난다.
-  { id:6, name:'원정 Ⅵ — 천국 2층천 정복',   subtitle:'더 높은 하늘로 — 대천사 회랑·세라핌의 옥좌·창공의 끝',           range:[161,200], theme:'heaven_second' },
+  // v12.35 — 2층천은 더 이상 "정복"이 아니다. 천국이 가족의 야망을 경계하며 시험대에 올린다.
+  { id:6, name:'원정 Ⅵ — 천국 2층천 시험',   subtitle:'더 높은 하늘이 가족의 야심을 시험한다 — 대천사 회랑·세라핌의 옥좌·창공의 끝', range:[161,200], theme:'heaven_second' },
+  // v12.35 — 3층천은 창조주의 영역. 가족이 이를 침범하며 부모 비둘기까지 합류해 천계 본격 진입.
+  { id:7, name:'원정 Ⅶ — 천국 3층천 침범',   subtitle:'창조주의 영역에 발을 들인 가족 — 부모 비둘기 합류, 신과 한 발자국씩 가까워진다', range:[201,250], theme:'heaven_third' },
+  // v12.35 — 아마겟돈 원정. 악의 세력이 천국 침공 → 가족 + 창조주 한편 으로 함께 악과 대항.
+  //   조상 비둘기 합류 + 신성 전쟁 승리 후 창조주가 천상의 새우깡을 내려준다.
+  { id:8, name:'원정 Ⅷ — 아마겟돈',          subtitle:'악의 세력이 천국을 침공 — 창조주와 함께 악과 싸워 승리하고 천상의 새우깡을 받는다', range:[251,300], theme:'armageddon' },
 ];
 function expeditionFor(c){
   for(const e of EXPEDITIONS){ if(c >= e.range[0] && c <= e.range[1]) return e; }
@@ -4914,8 +5315,15 @@ function chapterWaveTimes(c){
     each = 150;  cap = 900;   // 원정 Ⅳ — 지옥 15분 cap. 사용자 한도 준수.
   } else if(c <= 160){
     each = 160;  cap = 900;   // v12.34 — 원정 Ⅴ 천국 1층천. 2:40 waves → 8:00 + 7:00 = 15분 cap.
-  } else {
+  } else if(c <= 200){
     each = 175;  cap = 900;   // v12.34 — 원정 Ⅵ 천국 2층천. 2:55 waves → 8:45 + 6:15 = 15분 cap.
+  } else if(c <= 250){
+    each = 180;  cap = 900;   // v12.35 — 원정 Ⅶ 천국 3층천 침범. 3:00 waves → 9:00 + 6:00 = 15분 cap.
+  } else if(c <= 289){
+    each = 185;  cap = 900;   // v12.35 — 원정 Ⅷ 아마겟돈 전반(ch251-289). 3:05 waves → 9:15 + 5:45 = 15분 cap.
+  } else {
+    // v12.35 — 아마겟돈 후반(ch290-300). 컨트롤 강요 구간. wave 짧고 보스 페이즈 길게.
+    each = 165;  cap = 900;   // 2:45 waves → 8:15 + 6:45 보스 = 15분 cap. 보스 패턴 다단계 강제.
   }
   return [each, each*2, each*3, cap];
 }
@@ -4987,15 +5395,41 @@ const CHAPTER_NAMES = [
   '구름의 군대','수호자의 성벽','은총의 강','빛의 폭포','약속의 봉우리',                // 146-150 dominion_general
   '천국 검문소','경이의 문','첫 번째 시험관','여명의 옥좌','1층천의 수호자',            // 151-155 first_heaven_guardian
   '경계의 문','두 하늘 사이의 다리','천공의 검문','승천의 광장','1층천의 군주',         // 156-160 first_heaven_sovereign (원정 Ⅴ 끝)
-  // === 원정 Ⅵ — 천국 2층천 정복 (161-200). 5챕터 단위 보스 변종. ===
-  '2층천 입구','광휘의 회랑','반사의 회당','은총의 광장','거룩한 강',                  // 161-165 power_seraph
-  '천사 합창의 정점','금빛 옥좌','경이의 회의장','승리의 노래','시간 너머의 빛',       // 166-170 virtue_choir
+  // === 원정 Ⅵ — 천국 2층천 시험 (161-200). 5챕터 단위 보스 변종. ===
+  // v12.35 — "정복" 컨셉 폐기. 2층천이 가족의 야심을 시험대에 올리는 톤으로 챕터명 정리.
+  '2층천 경계','광휘의 회랑','시험의 다리','정결의 광장','거룩한 강',                  // 161-165 power_seraph
+  '천사 합창의 시험','금빛 옥좌의 문답','경이의 회의장','지혜의 노래','시간 너머의 빛',// 166-170 virtue_choir
   '대천사의 회랑','맹세의 신전','심판의 회의장','약속의 옥좌','거룩한 별자리',         // 171-175 archangel_council
-  '세라핌의 정원','불꽃의 회랑','거룩한 화염',' 새벽의 신전','승화의 옥좌',             // 176-180 seraph_flame
+  '세라핌의 정원','불꽃의 회랑','거룩한 화염','새벽의 신전','승화의 옥좌',              // 176-180 seraph_flame
   '오필의 광장','진리의 강','회의의 문','지혜의 정원','명백함의 첨탑',                  // 181-185 ophanim_wheel
   '미가엘 검문소','대천사의 검','거룩한 전장','빛의 군대','마지막 시험',                // 186-190 michael_blade
   '가브리엘 회랑','선포의 첨탑','천공의 문','약속의 강','신성의 들판',                  // 191-195 gabriel_horn
-  '창공의 끝','별이 태어나는 곳','마지막 회의장','신성의 광장','창공의 주인'            // 196-200 sky_sovereign (게임 최종)
+  '창공의 끝','별이 태어나는 곳','마지막 회의장','신성의 광장','창공의 주인',           // 196-200 sky_sovereign
+  // === v12.35 원정 Ⅶ — 천국 3층천 침범 (201-250). 창조주의 영역, 부모 비둘기 합류. ===
+  // 부모 합류: 205 남편 부모 / 210 아내 부모. 창조주 직속 권속이 가족을 막아선다.
+  '3층천 경계의 빗장','금단의 입구','첫 번째 침범','신성의 결계','부모의 첫 합류',       // 201-205 covenant_warden + 남편 부모 합류
+  '권속의 회랑','거룩한 사자단','왕좌의 경비','경계 너머','부모의 두 번째 합류',         // 206-210 archon_blade + 아내 부모 합류
+  '시간의 정원','광휘의 폭포','심판의 새벽','거짓의 거울','진실의 옥좌',                  // 211-215 throne_judicator
+  '신성의 도서관','금단의 책','이름 잃은 천사','잊혀진 회랑','계시의 첨탑',                // 216-220 nameless_oracle
+  '회개의 다리','경고의 광장','분노의 회의장','거룩한 군대','창조의 측근',                 // 221-225 wrath_legion
+  '권능의 문','진리의 칼날','구원의 회랑','은총의 거울','권좌의 시종',                    // 226-230 grace_marshal
+  '거룩한 산','신성한 강','천계의 등대','창조의 정원','선의 시험관',                       // 231-235 sanctum_examiner
+  '경계의 거울','심연의 빛','시간의 문','마지막 경고','3층천의 검문관',                    // 236-240 third_heaven_warden
+  '경계 너머의 안개','금단의 옥좌','시간 이전','창조의 회의장','3층천의 기수',              // 241-245 herald_archon
+  '신성의 마지막 다리','창조주의 그림자','노여움의 옥좌','금기의 침묵','3층천의 군주',      // 246-250 third_heaven_sovereign (원정 Ⅶ 끝)
+  // === v12.35 원정 Ⅷ — 아마겟돈 (251-300). 악의 세력 침공 + 창조주와 함께 격퇴. ===
+  // 컨셉: 가족이 3층천을 침범하던 사이 악의 세력이 천국을 침공. 창조주가 가족을 부르고 함께 싸운다.
+  // 251: SSS 아마겟돈 코스튬 일괄 해금. 255 구구나르도 / 260 비리스토둘레스 합류.
+  '천국에 닥친 어둠','악의 그림자','경보의 종소리','첫 번째 결집','조상의 첫 합류',           // 251-255 fallen_vanguard + 구구나르도 합류
+  '창조주의 호명','연합 진영의 결성','첫 진군','악의 척후 격파','조상의 두 번째 합류',         // 256-260 dread_legion + 비리스토둘레스 합류
+  '맹세의 들판','첫 새벽 — 천국 수호','광휘의 진영','거룩한 야영지','경고의 첨탑',             // 261-265 ravager_warden
+  '진군의 사자','금빛 진영','새벽의 화살비','신성의 회랑','마지막 보급선',                    // 266-270 nightlance_marshal
+  '아마겟돈 본진','신성 전쟁의 광장','권능의 충돌','거룩한 충격파','악의 군주 첫 격돌',         // 271-275 armageddon_invader
+  '검은 천사의 진격','거짓 신의 함성','선과 악의 평선','진실의 진군','악의 진영 돌파',         // 276-280 fallen_choir
+  '연합군의 진격','거룩한 회랑의 검','심판의 검문소','마지막 진영','연합 의장',                // 281-285 sanctum_marshal (이제 동맹측)
+  '권좌의 깃발','거룩한 외침','진리의 화살','악의 회랑 돌파','승리의 새벽',                   // 286-290 truthbearer_legion (동맹측)
+  '극한의 시험','진군의 정점','심판의 칼날','신성의 폭풍','악의 정점 격파',                   // 291-295 dread_apex (ch290+ 컨트롤 강요)
+  '천상의 옥좌 앞 — 창조주와 어깨를 나란히','악의 군주 직전','신성의 회의장','마지막 한 발자국','천상의 새우깡' // 296-300 dread_sovereign (게임 최종 — 악의 군주)
 ];
 const CHAPTER_COLORS = [
   '#FFE066','#FFD43B','#FFA94D','#FF922B','#FF6B6B',
@@ -5043,7 +5477,29 @@ const CHAPTER_COLORS = [
   '#A5D8FF','#74C0FC','#FFE066','#FFD43B','#FFFFFF',
   '#FFD43B','#FFE066','#A5D8FF','#FFFFFF','#74C0FC',
   '#FFE066','#FFD43B','#A5D8FF','#FFFFFF','#9775FA',
-  '#FFFFFF','#FFE066','#9775FA','#A5D8FF','#FFD43B'
+  '#FFFFFF','#FFE066','#9775FA','#A5D8FF','#FFD43B',
+  // === v12.35 원정 Ⅶ — 천국 3층천 (201-250): 신성 자색/금빛/순백 — 창조주의 위엄 ===
+  '#F3D9FF','#E5B0FF','#FFE066','#FFFFFF','#FFD43B',
+  '#FFFFFF','#E599F7','#9775FA','#FFE066','#FFFFFF',
+  '#FFD43B','#A5D8FF','#FFFFFF','#E5B0FF','#FFE066',
+  '#FFFFFF','#FFD43B','#9775FA','#FFE066','#FFFFFF',
+  '#A5D8FF','#FFE066','#9775FA','#E599F7','#FFFFFF',
+  '#FFD43B','#FFFFFF','#FFE066','#9775FA','#A5D8FF',
+  '#FFFFFF','#FFE066','#9775FA','#E599F7','#FFD43B',
+  '#9775FA','#FFE066','#FFFFFF','#A5D8FF','#FFD43B',
+  '#FFE066','#9775FA','#FFFFFF','#FFD43B','#E5B0FF',
+  '#9775FA','#FFE066','#FFFFFF','#FFD43B','#FFFFFF',
+  // === v12.35 원정 Ⅷ — 아마겟돈 (251-300): 신성 황금/적금/순백 — 거룩한 전쟁 ===
+  '#FFD43B','#FFE066','#FF6B6B','#FFFFFF','#FFD43B',
+  '#FFE066','#FFA94D','#FFFFFF','#FFD43B','#FFE066',
+  '#FFA94D','#FFD43B','#FFE066','#FFFFFF','#FF6B6B',
+  '#FFD43B','#FFE066','#FFFFFF','#FFA94D','#FF6B6B',
+  '#FFFFFF','#FFD43B','#FFE066','#FF6B6B','#FFFFFF',
+  '#FFD43B','#FFA94D','#FFE066','#FF6B6B','#FFFFFF',
+  '#FFE066','#FFD43B','#FFFFFF','#FFA94D','#FFE066',
+  '#FFD43B','#FFFFFF','#FFE066','#FFA94D','#FFFFFF',
+  '#FFD43B','#FFE066','#FFFFFF','#FFA94D','#FFD43B',
+  '#FFFFFF','#FFE066','#FFD43B','#FFA94D','#FFFFFF'
 ];
 function chapterName(c){ return CHAPTER_NAMES[Math.min(c-1, CHAPTER_NAMES.length-1)]; }
 function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.length-1)]; }
@@ -5077,6 +5533,20 @@ function chapterMult(){
   const DMG_CH70 = DMG_CH50 * Math.pow(1.014, 20);
   const HP_CH100 = HP_CH70  * Math.pow(1.020, 30);
   const DMG_CH100= DMG_CH70 * Math.pow(1.013, 30);
+  // v12.35 → v12.36b — 사용자 검수 명령 후 곡선 평탄화. 사용자 명시: "ch130 이후 모든 난이도 검수".
+  //   기존 ch101+ 1.014/1.011 가 ch200+ 보스 HP 수십 억으로 폭발 → 클리어 불가 (선재 이슈).
+  //   ch130 까지는 sim-tuned 유지. 그 이후 chm.hp 사실상 동결 (×1.0008/ch ~매우 느림).
+  //   ch290+ 만 살짝 가팔라짐(×1.005/ch).
+  //   결과: chm.hp ch300 ≈ 86 (vs 기존 156 → 절반).
+  //   추가로 spawnBoss 의 base 공식 c^1.45 도 c<=200 으로 clamp 하여 ch200+ 보스 base HP 일정.
+  //   신규 chapter-gated 카드(ch101-300) 가 player DPS ×3-15 누적 보강 → ch300 SSS 풀세트로
+  //   보스 ~10분 클리어선, 컨트롤 안 하면 시간 부족. 부분 SSS / SS only 도 클리어 가능.
+  const HP_CH130  = HP_CH100 * Math.pow(1.014, 30);   // 기존 sim-tuned 유지
+  const DMG_CH130 = DMG_CH100* Math.pow(1.011, 30);
+  const HP_CH200  = HP_CH130 * Math.pow(1.0008, 70);
+  const DMG_CH200 = DMG_CH130* Math.pow(1.0008, 70);
+  const HP_CH289  = HP_CH200 * Math.pow(1.0008, 89);
+  const DMG_CH289 = DMG_CH200* Math.pow(1.0008, 89);
   const hp = c <= 10  ? 1 + (c-1)*0.20
           : c <= 20  ? HP_CH10  * Math.pow(1.060, c-10)
           : c <= 30  ? HP_CH20  * Math.pow(1.060, c-20)
@@ -5084,7 +5554,10 @@ function chapterMult(){
           : c <= 50  ? HP_CH40  * Math.pow(1.025, c-40)
           : c <= 70  ? HP_CH50  * Math.pow(1.022, c-50)
           : c <= 100 ? HP_CH70  * Math.pow(1.020, c-70)
-          :            HP_CH100 * Math.pow(1.014, c-100);
+          : c <= 130 ? HP_CH100 * Math.pow(1.014, c-100)   // 지옥 (sim-tuned)
+          : c <= 200 ? HP_CH130 * Math.pow(1.0008, c-130)  // 천국 1·2층천 (사실상 평탄)
+          : c <= 289 ? HP_CH200 * Math.pow(1.0008, c-200)  // 3층천+아마겟돈 전반 (사실상 평탄)
+          :            HP_CH289 * Math.pow(1.025, c-289);  // ch290+ 컨트롤 강요 (1.025/ch → ch300 1.31× ramp)
   const dmg = c <= 10  ? 1 + (c-1)*0.06
             : c <= 20  ? DMG_CH10 * Math.pow(1.030, c-10)
             : c <= 30  ? DMG_CH20 * Math.pow(1.035, c-20)
@@ -5092,7 +5565,10 @@ function chapterMult(){
             : c <= 50  ? DMG_CH40 * Math.pow(1.015, c-40)
             : c <= 70  ? DMG_CH50 * Math.pow(1.014, c-50)
             : c <= 100 ? DMG_CH70 * Math.pow(1.013, c-70)
-            :            DMG_CH100* Math.pow(1.011, c-100);
+            : c <= 130 ? DMG_CH100* Math.pow(1.011, c-100)
+            : c <= 200 ? DMG_CH130* Math.pow(1.0008, c-130)
+            : c <= 289 ? DMG_CH200* Math.pow(1.0008, c-200)
+            :            DMG_CH289* Math.pow(1.020, c-289);
   const speed = 1 + Math.min(0.95, (c-1)*0.028);
   return {
     hp,
@@ -5156,23 +5632,50 @@ const progress = (()=>{
     companionUnlocks: {
       wife:false, child:false,
       sparrow:false, magpie:false, owl:false, parrot:false, squirrel:false,
+      // v12.35 — 원정 Ⅶ 부모 합류 (ch205 husbandParents, ch210 wifeParents). pair 단위 unlock.
+      husbandParents:false, wifeParents:false,
+      // v12.35 — 원정 Ⅷ 조상 합류 (ch255 구구나르도 다 둘치, ch260 비리스토둘레스). 개별 unlock.
+      // 다빈치/아리스토텔레스를 비둘기 가문 컨셉으로 희화화한 패러디 이름.
+      gugunardo:false, bristotodul:false,
     },
     // companion costumes — v12.18: wife/child + 구출 친구 5종도 슬롯 init.
     // equipped 는 {head,body} 객체. 이전 string 포맷은 _normalizeCompanionEquipped 가 자동 마이그레이션.
+    // v12.35 — husbandParents/wifeParents 는 angel 디폴트(천사옷) 입고 합류, 벗기 가능.
+    //          gugunardo(구구나르도 다 둘치) / bristotodul(비리스토둘레스) 는 각자 디폴트
+    //          (발명가복 / 철학자복) 입고 합류, 벗기 가능 + 직업 코스튬 다종.
     companionCostumes: {
-      wife:     { unlocked:['bow'],      equipped:{head:'bow',      body:null} },
-      child:    { unlocked:['pacifier'], equipped:{head:'pacifier', body:null} },
-      sparrow:  { unlocked:[],           equipped:{head:null, body:null} },
-      magpie:   { unlocked:[],           equipped:{head:null, body:null} },
-      owl:      { unlocked:[],           equipped:{head:null, body:null} },
-      parrot:   { unlocked:[],           equipped:{head:null, body:null} },
-      squirrel: { unlocked:[],           equipped:{head:null, body:null} },
+      wife:           { unlocked:['bow'],      equipped:{head:'bow',      body:null} },
+      child:          { unlocked:['pacifier'], equipped:{head:'pacifier', body:null} },
+      sparrow:        { unlocked:[],           equipped:{head:null, body:null} },
+      magpie:         { unlocked:[],           equipped:{head:null, body:null} },
+      owl:            { unlocked:[],           equipped:{head:null, body:null} },
+      parrot:         { unlocked:[],           equipped:{head:null, body:null} },
+      squirrel:       { unlocked:[],           equipped:{head:null, body:null} },
+      husbandParents: { unlocked:['angel'],    equipped:{head:'angel',    body:null} },
+      wifeParents:    { unlocked:['angel'],    equipped:{head:'angel',    body:null} },
+      gugunardo:      { unlocked:['inventor'], equipped:{head:'inventor', body:null} },
+      bristotodul:    { unlocked:['scholar'],  equipped:{head:'scholar',  body:null} },
     },
     // v12.32 — 통합 설정. muted 는 기존 runtime 변수에서 옮겨와 영구 저장.
     // showFamily/familyFx 는 ch51 아내 합류 이후에만 UI 노출 (기본 ON).
-    settings: { muted:false, showFamily:true, familyFx:true },
+    // v12.36 — 카테고리별 토글로 분리 (사용자 명시: 아내/아기/친구5종/부모/조상 각각 ON/OFF).
+    //   showFamily/familyFx 는 backwards-compat 용 — 모든 카테고리 일괄 마스터 토글로 유지.
+    settings: {
+      muted:false,
+      showFamily:true, familyFx:true,
+      // 카테고리별
+      showWife:true,      fxWife:true,
+      showChild:true,     fxChild:true,
+      showFriends:true,   fxFriends:true,
+      showParents:true,   fxParents:true,
+      showAncestors:true, fxAncestors:true,
+    },
   };
-  const cuDefault = {wife:false, child:false, sparrow:false, magpie:false, owl:false, parrot:false, squirrel:false};
+  const cuDefault = {
+    wife:false, child:false,
+    sparrow:false, magpie:false, owl:false, parrot:false, squirrel:false,
+    husbandParents:false, wifeParents:false, gugunardo:false, bristotodul:false,
+  };
   const merged = Object.assign(base, saved || {}, {
     shop: Object.assign({}, base.shop, (saved&&saved.shop)||{}),
     equipped: Object.assign({}, base.equipped, (saved&&saved.equipped)||{}),
@@ -5190,12 +5693,29 @@ const progress = (()=>{
       for(const k of ['sparrow','magpie','owl','parrot','squirrel']){
         out[k] = Object.assign({ unlocked:[], equipped:{head:null, body:null} }, sv[k] || {});
       }
+      // v12.35 — 부모/조상. 디폴트(천사옷/발명가복/철학자복) 보유, 벗기 가능.
+      out.husbandParents = Object.assign({ unlocked:['angel'],    equipped:{head:'angel',    body:null} }, sv.husbandParents || {});
+      out.wifeParents    = Object.assign({ unlocked:['angel'],    equipped:{head:'angel',    body:null} }, sv.wifeParents    || {});
+      out.gugunardo      = Object.assign({ unlocked:['inventor'], equipped:{head:'inventor', body:null} }, sv.gugunardo      || {});
+      out.bristotodul    = Object.assign({ unlocked:['scholar'],  equipped:{head:'scholar',  body:null} }, sv.bristotodul    || {});
       // _normalizeCompanionEquipped 는 RESCUED_KINDS / COMPANION_COSTUMES 가 정의된 후에만 동작.
       // 여기선 데이터 형태만 보장하고, 실제 정규화는 첫 사용 시점에 lazy 처리.
       return out;
     })(),
-    // v12.32 — 통합 설정 머지. 구버전 progress 엔 settings 가 없을 수 있음.
-    settings: Object.assign({ muted:false, showFamily:true, familyFx:true }, (saved && saved.settings) || {}),
+    // v12.32 → v12.36 — 통합 설정 머지. 구버전 progress 엔 카테고리별 필드가 없을 수 있음.
+    //   누락 시 기본값 true (모두 ON). 마스터 showFamily/familyFx 는 backwards-compat.
+    settings: Object.assign({
+      muted:false,
+      showFamily:true, familyFx:true,
+      showWife:true,      fxWife:true,
+      showChild:true,     fxChild:true,
+      showFriends:true,   fxFriends:true,
+      showParents:true,   fxParents:true,
+      showAncestors:true, fxAncestors:true,
+    }, (saved && saved.settings) || {}),
+    // v12.35 — 원정 Ⅷ ch300 클리어 시 영구 설정. 남편 비둘기 눈 glow 유지 + 천상의 새우깡 스킨 해금.
+    eyesGlowPermanent: !!(saved && saved.eyesGlowPermanent),
+    armageddonVictory: !!(saved && saved.armageddonVictory),
   });
   // Sanity: drop equipped uids that no longer exist in inventory.
   for(const slot of ['head','body','weapon']){
@@ -5213,13 +5733,41 @@ function unlockedChapters(){ return Math.min(MAX_CHAPTERS, progress.clearedChapt
 
 // v12.32 — 통합 설정 helpers. progress.settings 는 위에서 default 로 보장됨.
 //   settingsMuted   : BGM/SFX 음소거. 기존 runtime `muted` 와 동기.
-//   showFamilyOn   : 비둘기 가족·동료 그리기 (시작화면, 게임, 시네마틱 모두).
-//   familyFxEffective: 자동 사격/사격음. 보이기 OFF 면 효과도 자동 OFF (사용자 직관).
+//   showFamilyOn   : 마스터 보이기 (모든 카테고리 일괄). 카테고리별은 companionVisible(kind).
+//   familyFxEffective: 마스터 효과. 카테고리별은 companionFxOn(kind).
 function settingsMuted(){ return !!(progress.settings && progress.settings.muted); }
 function showFamilyOn(){ return !progress.settings || progress.settings.showFamily !== false; }
 function familyFxPref(){ return !progress.settings || progress.settings.familyFx !== false; }
 function familyFxEffective(){ return showFamilyOn() && familyFxPref(); }
 function familyToggleAvailable(){ return !!(progress.companionUnlocks && progress.companionUnlocks.wife); }
+
+// v12.36 — 카테고리별 토글 helpers. kind → category mapping.
+//   wife/child 는 단독 카테고리. 5친구는 friends 일괄. 부모/조상은 각자 일괄.
+function _companionCategory(kind){
+  if(kind === 'wife')  return 'Wife';
+  if(kind === 'child') return 'Child';
+  if(['sparrow','magpie','owl','parrot','squirrel'].includes(kind)) return 'Friends';
+  if(['husbandParents','wifeParents'].includes(kind)) return 'Parents';
+  if(['gugunardo','bristotodul'].includes(kind)) return 'Ancestors';
+  return null;
+}
+// 동료 보이기 — 마스터(showFamily) AND 카테고리별 show* AND 해당 카테고리 합류 여부.
+function companionVisible(kind){
+  if(!showFamilyOn()) return false;
+  const cat = _companionCategory(kind);
+  if(!cat) return true;
+  const s = progress.settings || {};
+  return s['show' + cat] !== false;
+}
+// 동료 효과(자동 사격) — 마스터 AND 카테고리별 fx* AND 해당 카테고리 보이기.
+function companionFxOn(kind){
+  if(!familyFxEffective()) return false;   // 마스터 OFF 면 모두 OFF
+  if(!companionVisible(kind)) return false; // 카테고리 보이기 OFF 면 효과도 OFF
+  const cat = _companionCategory(kind);
+  if(!cat) return true;
+  const s = progress.settings || {};
+  return s['fx' + cat] !== false;
+}
 // 기존 runtime `muted` 변수에 영구 설정 반영. 여기서 한 번 동기화하면 이후 모든 audio 가드가 정상 동작.
 muted = settingsMuted();
 // HUD/시작화면 ⚙ 버튼의 mute dot indicator 도 부팅 시 동기화.
@@ -5471,6 +6019,41 @@ const TITLE_SKINS = [
       // 창공 base — 황금 → 보라 apex
       'linear-gradient(180deg, #FFE066 0%, #FFA94D 25%, #E599F7 55%, #9775FA 75%, #5F3DC4 90%, #1A0033 100%)'
     ].join(',') },
+  // v12.35 — 천국 3층천 보상 스킨 (ch250 클리어).
+  { id:'heaven_third_throne', name:'⚜️ 천국 3층천 옥좌 (원정 Ⅶ 보상)', price: 220000, expeditionUnlock: 7,
+    grad:[
+      // 신성 자색 별빛
+      'radial-gradient(circle at 22% 14%, rgba(229,176,255,.9) 0%, transparent 1%)',
+      'radial-gradient(circle at 50% 22%, rgba(255,224,102,.9) 0%, transparent 1%)',
+      'radial-gradient(circle at 78% 14%, rgba(255,255,255,.9) 0%, transparent 1%)',
+      // 자색 conic 광휘
+      'conic-gradient(from 90deg at 50% 60%, rgba(229,176,255,.55) 0deg, rgba(255,212,59,.55) 90deg, rgba(255,255,255,.55) 180deg, rgba(151,117,250,.55) 270deg, rgba(229,176,255,.55) 360deg)',
+      // 옥좌 코어
+      'radial-gradient(circle 110px at 50% 60%, rgba(255,255,255,.95) 0%, rgba(229,176,255,.75) 40%, rgba(151,117,250,.55) 70%, transparent 92%)',
+      // 광휘 ring
+      'radial-gradient(ellipse 65% 18% at 50% 60%, transparent 50%, rgba(255,212,59,.85) 60%, transparent 72%)',
+      // base 자색 → 황금 → 신성 흰빛
+      'linear-gradient(180deg, #E5B0FF 0%, #9775FA 30%, #FFE066 55%, #FFFFFF 78%, #FFD43B 95%)'
+    ].join(',') },
+  // v12.35 — 천상의 새우깡 스킨 (ch300 클리어 후 영구 무료 해금). 사용자 명시: "천상의 새우깡 스킨이 해금되도록".
+  // 다른 보상 스킨과 달리 별도 가격 없이 ch300 클리어 시 자동으로 ownedSkins 에 추가 (onBossDefeated).
+  { id:'celestial_cracker', name:'🌟 천상의 새우깡 (원정 Ⅷ 최종)', price: 0, expeditionUnlock: 8,
+    grad:[
+      // 십자 별빛
+      'radial-gradient(circle at 18% 14%, rgba(255,255,255,.95) 0%, transparent 1%)',
+      'radial-gradient(circle at 42% 22%, rgba(255,224,102,.95) 0%, transparent 1.2%)',
+      'radial-gradient(circle at 68% 14%, rgba(255,107,107,.85) 0%, transparent 1%)',
+      'radial-gradient(circle at 86% 30%, rgba(255,255,255,.95) 0%, transparent 1%)',
+      // 광휘 conic — 황금 + 적금 + 흰빛 (창조주의 빛)
+      'conic-gradient(from 60deg at 50% 60%, rgba(255,212,59,.65) 0deg, rgba(255,255,255,.65) 90deg, rgba(255,107,107,.55) 180deg, rgba(255,212,59,.65) 270deg, rgba(255,255,255,.65) 360deg)',
+      // 천상의 새우깡 코어 (둥근 광휘)
+      'radial-gradient(circle 130px at 50% 60%, rgba(255,255,255,1) 0%, rgba(255,224,102,.85) 30%, rgba(255,107,107,.55) 60%, transparent 90%)',
+      // 광휘 십자 (중앙 횡 + 종)
+      'linear-gradient(90deg, transparent 47%, rgba(255,255,255,.6) 49%, rgba(255,255,255,.6) 51%, transparent 53%)',
+      'linear-gradient(0deg, transparent 47%, rgba(255,255,255,.6) 49%, rgba(255,255,255,.6) 51%, transparent 53%)',
+      // base — 황금 + 적금 + 신성 흰빛
+      'linear-gradient(180deg, #FFE066 0%, #FFD43B 25%, #FFA94D 50%, #FF6B6B 70%, #FFFFFF 90%, #FFD43B 100%)'
+    ].join(',') },
 ];
 const TITLE_SKINS_BY_ID = Object.fromEntries(TITLE_SKINS.map(s => [s.id, s]));
 // v12.14 → v12.34 — 원정 보상 스킨은 더 이상 무료 자동 지급 X. 클리어 시 구매 자격(unlock)만
@@ -5487,8 +6070,11 @@ function applyTitleSkin(){
 // ---------- Costume / gacha system ----------
 // Grades — rarer = stronger multiplier on the slot's base stat package.
 const COSTUME_GRADES = {
-  // v12.34 — SS 등급 추가. 천국 코스튬 전용 (ch131 해금). S 보다 30% 강한 보너스.
-  SS:{ mult: 1.30, label:'SS', color:'#FFFFFF', glow:'#FFE066', borderClass:'cos-grade-SS' },
+  // v12.35 — SSS 등급 추가. 아마겟돈 코스튬 전용 (ch251 해금). SS 보다 25% 강한 보너스.
+  //   ch290+ 컨트롤 강요 구간 클리어 가능성을 고려한 단조증가. 풀세트 효과는 난이도별
+  //   chapterMult 곱연산이라 후반 보스 HP/dmg 폭증을 부분적으로 상쇄.
+  SSS:{ mult:1.62, label:'SSS', color:'#FFD43B', glow:'#FFFFFF', borderClass:'cos-grade-SS' },
+  SS: { mult: 1.30, label:'SS', color:'#FFFFFF', glow:'#FFE066', borderClass:'cos-grade-SS' },
   S: { mult: 1.00, label:'S', color:'#FFE066', glow:'#FFF3BF', borderClass:'cos-grade-S' },
   A: { mult: 0.65, label:'A', color:'#BE4BDB', glow:'#E599F7', borderClass:'cos-grade-A' },
   B: { mult: 0.40, label:'B', color:'#339AF0', glow:'#A5D8FF', borderClass:'cos-grade-B' },
@@ -5547,6 +6133,11 @@ const COSTUME_DEFS = [
   { id:'h_seraph_halo',slot:'head',   name:'세라핌 후광',      icon:'😇', expedition:5, ssOnly:true },
   { id:'b_holy_robe',  slot:'body',   name:'거룩한 로브',      icon:'🪽', expedition:5, ssOnly:true },
   { id:'w_celestial_blade',slot:'weapon', name:'천공의 검',    icon:'⚜️', expedition:5, ssOnly:true },
+  // ─── v12.35 원정 Ⅷ — 아마겟돈 (ch251 해금, SSS 전용 자동 지급). ───
+  // 사용자 명시: weapon 은 새우깡 비슷하지만 성스러운 아마겟돈 전쟁이 떠오르는 디자인.
+  { id:'h_armageddon_crown', slot:'head',   name:'아마겟돈 성관',           icon:'👑', expedition:8, sssOnly:true },
+  { id:'b_armageddon_aegis', slot:'body',   name:'아마겟돈 광휘 갑주',      icon:'🛡️', expedition:8, sssOnly:true },
+  { id:'w_armageddon_cracker', slot:'weapon', name:'성전의 새우깡',         icon:'⚔️', expedition:8, sssOnly:true },
 ];
 const COSTUME_DEFS_BY_ID = Object.fromEntries(COSTUME_DEFS.map(d=>[d.id,d]));
 const COSTUME_DEFS_BY_SLOT = { head:[], body:[], weapon:[] };
@@ -5570,29 +6161,94 @@ const GACHA_COST_SINGLE = 1500;
 const GACHA_COST_TEN    = 12000;
 // Effects per slot. Each grade scales these by COSTUME_GRADES[g].mult.
 // Stat lines are carefully picked so the head/body/weapon slots feel different rather than redundant.
+//
+// v12.35 — SS/SSS 등급별 고유 보너스 명세 (사용자 명시 "효과 기획 + 난이도 상정"):
+//   SS (heaven 전용): 기본 mult 1.30 + 슬롯별 고유 효과 (head: +1 projCount 1회, body: regen ×2, weapon: +1 projCount).
+//   SSS (armageddon 전용): 기본 mult 1.62 + 슬롯별 고유 효과 (head: 무적 시간 +25%, body: 데미지 반사 0.10×, weapon: +2 projCount + 관통 1).
+//   풀세트(SS 3pcs / SSS 3pcs) 보너스는 _applyCostumeSetSynergy 에서 별도 적용.
+//   ch290+ 곡선이 가팔라 이 효과 없으면 클리어 어려움 → 정상 난이도 균형.
 function applyCostumeEffect(p, eq){
   if(!eq) return;
   const def = COSTUME_DEFS_BY_ID[eq.defId];
   if(!def) return;
   const m = COSTUME_GRADES[eq.grade].mult;
+  const isSS  = eq.grade === 'SS';
+  const isSSS = eq.grade === 'SSS';
   if(def.slot === 'head'){
     // Head: +HP%, +magnet, +xp gain
     p.maxHp = Math.round(p.maxHp * (1 + 0.25*m));
     p.hp = p.maxHp;
     p.magnet *= 1 + 0.20*m;
     p.xpMult *= 1 + 0.12*m;
+    // v12.35 — SS head: 피격 무적 +0.10s. SSS head: +0.25s + 추가 1 projCount.
+    if(isSS)  p.invulBonus = (p.invulBonus || 0) + 0.10;
+    if(isSSS){ p.invulBonus = (p.invulBonus || 0) + 0.25; p.projCount += 1; }
   } else if(def.slot === 'body'){
     // Body: +flat HP, damage reduction, regen tick
     p.maxHp += Math.round(35 * m);
     p.hp = p.maxHp;
     p.damageReduction = (p.damageReduction || 0) + 0.12 * m;
     p.regenPerSec = (p.regenPerSec || 0) + 0.5 * m;
+    // v12.35 — SS body: regen ×2 + 추가 +5 maxHp 영구. SSS body: 데미지 반사 0.12 + regen ×3.
+    if(isSS){ p.regenPerSec = (p.regenPerSec || 0) * 2; p.maxHp += 5; p.hp = p.maxHp; }
+    if(isSSS){ p.damageReflect = (p.damageReflect || 0) + 0.12; p.regenPerSec = (p.regenPerSec || 0) * 3; }
   } else if(def.slot === 'weapon'){
     // Weapon: +damage, +fire rate, +projSpeed; S-grade adds a bonus projectile
     p.damage *= 1 + 0.30*m;
     p.fireRate *= 1 + 0.12*m;
     p.projSpeed *= 1 + 0.18*m;
     if(eq.grade === 'S') p.projCount += 1;
+    // v12.35 — SS weapon: +1 projCount + crit +5%. SSS weapon: +2 projCount + 관통 +1 + 성전 데미지 +20% (보스).
+    if(isSS){ p.projCount += 1; p.critChance = (p.critChance || 0) + 0.05; }
+    if(isSSS){ p.projCount += 2; p.pierce = (p.pierce || 0) + 1; p.holyBossBonus = (p.holyBossBonus || 0) + 0.20; }
+  }
+}
+
+// v12.35 — 부분 세트 시너지. 1pc/2pc/3pc 단계별 효과.
+// 사용자 명시 (재해석):
+//   "풀세트 안 입어도 클리어는 가능해야" + "풀세트 입어도 아슬아슬하게 클리어"
+//   → ch290+ 절대 난이도를 SSS 풀세트 기준으로 캘리브레이션. 풀세트 효과 = 파격적.
+//
+// 단계별 보너스:
+//   SS (천국 1~3pc)     : dmg ×1.05 / 1.10 / 1.18  + maxHp ×1.05 / 1.10 / 1.18
+//   SSS (아마겟돈 1~3pc): dmg ×1.08 / 1.20 / 1.40  + maxHp ×1.06 / 1.14 / 1.30
+//                        + holyBossBonus 1pc=+8%, 2pc=+18%, 3pc=+35% (파격적 보스 dmg 부스트)
+//                        + 3pc 풀세트 전용: regen +0.5/s, projCount +1, pierce +1
+// SS 풀세트는 ch200까지 정상 클리어, SSS 풀세트는 ch290-300 보스 클리어 가능선 보장.
+function _applyCostumeSetSynergy(p){
+  let ssCount = 0, sssCount = 0;
+  for(const slot of ['head','body','weapon']){
+    const uid = progress.equipped[slot];
+    if(!uid) continue;
+    const eq = progress.costumes.find(c => c.uid === uid);
+    if(!eq) continue;
+    if(eq.grade === 'SS') ssCount++;
+    else if(eq.grade === 'SSS') sssCount++;
+  }
+  if(ssCount > 0){
+    const stepDmg  = [1.05, 1.10, 1.18][Math.min(ssCount, 3) - 1];
+    const stepHp   = [1.05, 1.10, 1.18][Math.min(ssCount, 3) - 1];
+    p.damage *= stepDmg;
+    p.maxHp = Math.round(p.maxHp * stepHp);
+    p.hp = p.maxHp;
+    if(ssCount === 3){
+      p.holyBossBonus = (p.holyBossBonus || 0) + 0.08;
+    }
+  }
+  if(sssCount > 0){
+    const stepDmg = [1.08, 1.20, 1.40][Math.min(sssCount, 3) - 1];
+    const stepHp  = [1.06, 1.14, 1.30][Math.min(sssCount, 3) - 1];
+    p.damage *= stepDmg;
+    p.maxHp = Math.round(p.maxHp * stepHp);
+    p.hp = p.maxHp;
+    const stepHoly = [0.08, 0.18, 0.35][Math.min(sssCount, 3) - 1];
+    p.holyBossBonus = (p.holyBossBonus || 0) + stepHoly;
+    if(sssCount === 3){
+      p.regenPerSec = (p.regenPerSec || 0) + 0.5;
+      p.projCount += 1;
+      p.pierce = (p.pierce || 0) + 1;
+      p.armageddonSet = true;
+    }
   }
 }
 function applyEquippedCostumes(p){
@@ -5602,6 +6258,8 @@ function applyEquippedCostumes(p){
     const eq = progress.costumes.find(c => c.uid === uid);
     if(eq) applyCostumeEffect(p, eq);
   }
+  // v12.35 — 풀세트 시너지(SS 3pcs / SSS 3pcs).
+  _applyCostumeSetSynergy(p);
 }
 function buildPlayerCostumeRefs(){
   // Resolve equipped uids into the actual costume objects, used by drawPigeon to render overlays.
@@ -5620,9 +6278,10 @@ function awardCostume(grade, slotFilter){
   // ch50 cleared, 원정 Ⅲ only after ch70 cleared. Outside player's reached expedition tier the
   // costume is filtered out so they're not awarded prematurely.
   // v12.34 — ssOnly costume(천국 SS 전용)은 random pool 에서 제외 (ch131 자동 지급 전용).
+  // v12.35 — sssOnly(아마겟돈 SSS 전용)도 동일하게 제외 (ch251 자동 지급 전용).
   const cleared = progress.clearedChapter || 0;
   const maxExp = cleared >= 70 ? 3 : cleared >= 50 ? 2 : 1;
-  const fullPool = (slotFilter ? COSTUME_DEFS_BY_SLOT[slotFilter] : COSTUME_DEFS).filter(d => !d.ssOnly);
+  const fullPool = (slotFilter ? COSTUME_DEFS_BY_SLOT[slotFilter] : COSTUME_DEFS).filter(d => !d.ssOnly && !d.sssOnly);
   const pool = fullPool.filter(d => (d.expedition||1) <= maxExp);
   const def = pool[Math.floor(Math.random()*pool.length)] || fullPool[0];
   const item = { uid:newCostumeUid(), defId:def.id, grade };
@@ -5638,6 +6297,20 @@ function grantHeavenSSCostumes(){
     const owned = progress.costumes.some(c => c.defId === id && c.grade === 'SS');
     if(!owned){
       progress.costumes.push({ uid:newCostumeUid(), defId:id, grade:'SS' });
+      granted++;
+    }
+  }
+  if(granted > 0) saveProgress();
+  return granted;
+}
+// v12.35 — 아마겟돈 SSS 코스튬 일괄 자동 지급 (ch251 클리어 시 1회). 이미 보유 시 noop.
+function grantArmageddonSSSCostumes(){
+  const ARMA_IDS = ['h_armageddon_crown','b_armageddon_aegis','w_armageddon_cracker'];
+  let granted = 0;
+  for(const id of ARMA_IDS){
+    const owned = progress.costumes.some(c => c.defId === id && c.grade === 'SSS');
+    if(!owned){
+      progress.costumes.push({ uid:newCostumeUid(), defId:id, grade:'SSS' });
       granted++;
     }
   }
@@ -5730,6 +6403,9 @@ const FEEDS_BY_ID = Object.fromEntries(FEEDS.map(f => [f.id, f]));
 // never gets hungry/starving again — only boost states can apply on top of permanent normal.
 function getPigeonHungerState(){
   const now = Date.now();
+  // v12.35 — 사용자 명시: ch300 클리어(아마겟돈 승리) 후 남편 비둘기 눈은 영구 glow.
+  // feed boost 보다도 우선 — 어떤 상태든 영구 glow 우선 적용.
+  if(progress.eyesGlowPermanent) return 'glow';
   if(progress.feedBoostUntil > now){
     return progress.feedBoostStrength >= 2 ? 'glow' : 'boosted';
   }
@@ -6131,6 +6807,56 @@ function spawnCompanions(){
       });
     }
   }
+  // v12.35 — 원정 Ⅶ 부모 비둘기 (pair) + 원정 Ⅷ 조상 비둘기. 사용자 명시:
+  //   1) "남편·아내 평균 사이즈" → drawWifePigeon 베이스 (parents pair scale 0.62, ancestor 0.85).
+  //   2) "남편 비둘기 뒤" → c._back = true 플래그 → render loop 에서 player 보다 먼저 그림.
+  //   3) "겹치지 않게 분포" → ox 충분히 떨어뜨림 + oy 살짝 차등.
+  // 부모 pair internal scale 0.62, pair 폭(±30 internal × 0.62 = ±18.6 px world),
+  //   따라서 양쪽 부모 entity 사이에 최소 80px 간격 필요. ox: -110 / +110.
+  // 조상 단일 scale 0.85 (아내 사이즈), foot offset = 0.85 * 52 = 44.2.
+  //   양쪽 조상 사이 100px (ox -50 / +50), 부모 보다 안쪽이지만 oy 다르게 두어 겹침 회피.
+  const parentShadowOffset = 0.62 * 52;
+  const parentFootBase = playerFootOffset - parentShadowOffset;
+  // v12.35 — 사용자 명시: "옆이 아니라 뒤에 세모 모양". husbandParents pair 뒤쪽-위 (가장 뒤),
+  // wifeParents pair 그 앞 단(살짝 앞이지만 여전히 player 뒤). 두 pair 모두 player 와 같은 ox=0
+  // 라인이지만 oy 차등으로 계단식 → 4 마리가 자연스럽게 player 뒤 세로 2단 형성.
+  const parentDefs = [
+    { kind:'husbandParents', ox:0, oyAdj:-110, fireRate:1.1, damageMult:0.40, label:'남편 부모님', tint:'#A8B8D8' },
+    { kind:'wifeParents',    ox:0, oyAdj:-72,  fireRate:1.1, damageMult:0.40, label:'아내 부모님', tint:'#B8D0B8' },
+  ];
+  for(const def of parentDefs){
+    if(progress.companionUnlocks && progress.companionUnlocks[def.kind]){
+      const oy = parentFootBase + def.oyAdj;
+      state.companions.push({
+        kind:def.kind, label:def.label, tint:def.tint, accent:def.tint,
+        x: p.x + def.ox, y: p.y + oy, ox:def.ox, oy:oy,
+        reloadT: 0.6 + Math.random()*0.4, fireRate: def.fireRate,
+        damageMult: def.damageMult, projCount: 1,
+        phaseSeed: Math.random()*Math.PI*2,
+        _back: true,    // v12.35 — 남편 뒤에 그리기
+      });
+    }
+  }
+  // 조상 — 부모 보다 안쪽(가족과 부모 사이), oy 살짝 위로 차등 — 부모와 조상 겹침 회피.
+  const ancestorShadowOffset = 0.85 * 52;
+  const ancestorFootBase = playerFootOffset - ancestorShadowOffset;
+  const ancestorDefs = [
+    { kind:'gugunardo',   ox:-50, oyAdj:-30, fireRate:1.4, damageMult:0.50, label:'구구나르도',     tint:'#A8AAB6' },
+    { kind:'bristotodul', ox: 50, oyAdj:-30, fireRate:1.2, damageMult:0.48, label:'비리스토둘레스', tint:'#C8C0AC' },
+  ];
+  for(const def of ancestorDefs){
+    if(progress.companionUnlocks && progress.companionUnlocks[def.kind]){
+      const oy = ancestorFootBase + def.oyAdj;
+      state.companions.push({
+        kind:def.kind, label:def.label, tint:def.tint, accent:def.tint,
+        x: p.x + def.ox, y: p.y + oy, ox:def.ox, oy:oy,
+        reloadT: 0.5 + Math.random()*0.3, fireRate: def.fireRate,
+        damageMult: def.damageMult, projCount: 1,
+        phaseSeed: Math.random()*Math.PI*2,
+        _back: true,    // 남편 뒤에 그리기
+      });
+    }
+  }
 }
 
 function fireCompanionShrimp(c){
@@ -6179,10 +6905,10 @@ function updateCompanions(dt){
     c.reloadT -= dt;
     if(c.reloadT <= 0){
       c.reloadT = 1 / c.fireRate;
-      // v12.32 — 효과 OFF (또는 보이기 OFF → 효과도 자동 OFF) 시 사격 건너뛰기.
+      // v12.32 → v12.36 — 카테고리별 효과 OFF 시 사격 건너뛰기.
       // 사격이 곧 동료의 유일한 공격 메커니즘 → 효과 OFF = 데미지 기여 0.
       // 위치 갱신 + 피격 sync 는 그대로 → 보이기/효과 ON 재토글 시 즉시 자연스러움.
-      if(familyFxEffective()) fireCompanionShrimp(c);
+      if(companionFxOn(c.kind)) fireCompanionShrimp(c);
     }
   }
 }
@@ -6209,6 +6935,318 @@ function _drawCompanionInner(ctx, c){
   if(c.kind === 'owl')      return drawOwlFriend(ctx, c);
   if(c.kind === 'parrot')   return drawParrotFriend(ctx, c);
   if(c.kind === 'squirrel') return drawSquirrelFriend(ctx, c);
+  // v12.35 — 원정 Ⅶ 부모 (pair = 2 birds drawn together).
+  if(c.kind === 'husbandParents') return drawParentPair(ctx, c, 'husband');
+  if(c.kind === 'wifeParents')    return drawParentPair(ctx, c, 'wife');
+  // v12.35 — 원정 Ⅷ 조상.
+  if(c.kind === 'gugunardo')   return drawGugunardo(ctx, c);
+  if(c.kind === 'bristotodul') return drawBristotodul(ctx, c);
+}
+
+// v12.35 — 부모/조상 비둘기 — 아내 비둘기 silhouette을 베이스로 사용.
+// 사용자 명시: "아내 비둘기랑 비슷한 느낌으로 디자인. 몸집은 남편-아내 평균. 위치는 뒤".
+// 평균 스케일 = (husband ~ 1.0 + wife 0.85) / 2 ≈ 0.92. 페어는 두 마리 모두 그려야 하므로
+// 페어 단위 entity 의 internal scale 은 0.78 (한 마리 시 0.85), 두 마리는 ±28px 좌우 분포.
+function _drawElderPigeonInternal(ctx, opts){
+  // ctx 는 이미 translate + scale 된 좌표계. 아내 비둘기 본체와 비슷하지만 노년 깃털.
+  const t = state.time;
+  const breath = Math.sin(t*2.4 + (opts.phase||0)) * 0.8;
+  const blink = ((t + (opts.phase||0)) % 3.6) < 0.10;
+  const body = opts.body, belly = opts.belly, wing = opts.wing, beak = opts.beak;
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,.55)';
+  ctx.beginPath(); ctx.ellipse(0, 52, 28, 5, 0, 0, Math.PI*2); ctx.fill();
+  // Legs (orange, like wife/husband)
+  ctx.fillStyle = '#FFA500';
+  ctx.fillRect(-9, 34, 6, 18);
+  ctx.beginPath(); ctx.moveTo(-13, 50); ctx.lineTo(-1, 50); ctx.lineTo(-7, 56); ctx.closePath(); ctx.fill();
+  ctx.fillRect(3, 34, 6, 18);
+  ctx.beginPath(); ctx.moveTo(1, 50); ctx.lineTo(13, 50); ctx.lineTo(7, 56); ctx.closePath(); ctx.fill();
+  // Body
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.ellipse(0, 10, 25, 23 + breath*0.6, 0, 0, Math.PI*2); ctx.fill();
+  // Belly
+  ctx.fillStyle = belly;
+  ctx.beginPath(); ctx.ellipse(0, 14, 16, 14 + breath*0.5, 0, 0, Math.PI*2); ctx.fill();
+  // Wings (wife-style fan shape)
+  ctx.fillStyle = wing;
+  ctx.beginPath();
+  ctx.moveTo(-17, 0); ctx.quadraticCurveTo(-29, 8, -29, 22); ctx.lineTo(-19, 22);
+  ctx.quadraticCurveTo(-15, 10, -17, 0); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(17, 0); ctx.quadraticCurveTo(29, 8, 29, 22); ctx.lineTo(19, 22);
+  ctx.quadraticCurveTo(15, 10, 17, 0); ctx.closePath(); ctx.fill();
+  // Head
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.arc(0, -22, 15, 0, Math.PI*2); ctx.fill();
+  // Head highlight
+  ctx.fillStyle = belly; ctx.globalAlpha = 0.7;
+  ctx.beginPath(); ctx.arc(-4, -25, 5.5, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+  // Elder feature: 흰 머리털 (할아버지/할머니 표시) — opts.elder 가 true 일 때만.
+  if(opts.elder){
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2.0; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-3, -36); ctx.quadraticCurveTo(-1, -41, 2, -36); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(3, -37); ctx.quadraticCurveTo(5, -41, 7, -36); ctx.stroke();
+  }
+  // Beak (orange, husband 비례)
+  ctx.fillStyle = beak;
+  ctx.beginPath(); ctx.moveTo(-2, -19); ctx.lineTo(15, -16); ctx.lineTo(-2, -13);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#FFC87A';
+  ctx.beginPath(); ctx.moveTo(-2, -18); ctx.lineTo(11, -15.5); ctx.lineTo(-2, -14);
+  ctx.closePath(); ctx.fill();
+  // Eye — opts.noBaseEye 면 base eye 생략 (personality 가 자체 eye 그릴 때 이중 표시 방지).
+  if(!opts.noBaseEye){
+    if(blink){
+      ctx.strokeStyle='#000'; ctx.lineWidth=1.8; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(-7, -26); ctx.lineTo(-1, -26); ctx.stroke();
+    } else {
+      ctx.fillStyle='#000';
+      ctx.beginPath(); ctx.arc(-4, -26, 3, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(-3, -27, 1, 0, Math.PI*2); ctx.fill();
+    }
+    // 옅은 눈썹 (sage 느낌)
+    ctx.strokeStyle = '#777'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-8, -32); ctx.lineTo(-1, -32); ctx.stroke();
+  }
+}
+
+// 부모 pair — 두 마리 그림 (시아버지+시어머니 / 장인+장모). pair 단위 entity.
+// 사용자 명시: "각 부모 커플이 서로 닮으면 안 됨, 남편·아내보다 더 늙어 보이게".
+//   네 명 모두 다른 personality slot (대머리+콧수염 / 머리망 + 안경 / 큰 흰 수염 / 작은 보넷).
+function drawParentPair(ctx, c, side){
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.scale(0.62, 0.62);
+  const pair = side === 'husband'
+    ? [
+        { sx:-30, persona:'fatherInLaw',  phase:0,   body:'#A8B8D8', belly:'#D0DCEC', wing:'#7A91B8', beak:'#FFA500' },  // 시아버지 — 대머리 + 회색 콧수염
+        { sx: 30, persona:'motherInLaw',  phase:1.2, body:'#E8B8C8', belly:'#F4D8DE', wing:'#C078A0', beak:'#FFA500' },  // 시어머니 — 머리망 + 안경
+      ]
+    : [
+        { sx:-30, persona:'fatherOfWife', phase:0.6, body:'#B8D0B8', belly:'#D8E8D8', wing:'#7AA078', beak:'#FFA500' },  // 장인 — 큰 흰 수염
+        { sx: 30, persona:'motherOfWife', phase:1.8, body:'#F0C8B0', belly:'#F8E0D0', wing:'#D89880', beak:'#FFA500' },  // 장모 — 작은 보넷
+      ];
+  for(const p of pair){
+    ctx.save();
+    ctx.translate(p.sx, 0);
+    // motherInLaw 와 motherOfWife 는 personality 가 자체 eye 그림 (안경 / 감은 눈) →
+    // base eye 끄기 (noBaseEye:true) 해서 이중 눈 방지.
+    const noBase = (p.persona === 'motherInLaw' || p.persona === 'motherOfWife');
+    _drawElderPigeonInternal(ctx, { ...p, elder:false, noBaseEye: noBase });
+    _drawParentPersonality(ctx, p.persona);
+    ctx.restore();
+  }
+  // 코스튬 오버레이 — pair 단위. 두 마리 위 모두 적용.
+  const draws = getCompanionCostumeDraws(side === 'husband' ? 'husbandParents' : 'wifeParents');
+  for(const sx of [-30, 30]){
+    ctx.save();
+    ctx.translate(sx, 0);
+    for(const d of draws) d(ctx);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// v12.35 — 부모 4명 각자 개성. _drawElderPigeonInternal 좌표계 (head -22, body 10, scale 0.62 적용 전).
+function _drawParentPersonality(ctx, persona){
+  const t = state.time;
+  // 모두 공통: 늙어보이는 표시 (눈 아래 잔주름 1줄 + 눈썹 정리)
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 0.7;
+  ctx.beginPath(); ctx.moveTo(-7, -22); ctx.lineTo(-2, -22); ctx.stroke();
+  if(persona === 'fatherInLaw'){
+    // 시아버지 — 대머리(머리 위쪽 매끈, 옆머리 회색) + 큰 회색 콧수염
+    // 옆머리 (머리 옆쪽 짧은 회색)
+    ctx.fillStyle = '#888'; ctx.globalAlpha = 0.7;
+    ctx.beginPath(); ctx.arc(-12, -22, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 12, -22, 4, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+    // 콧수염 (부리 위쪽, 양옆으로 늘어짐)
+    ctx.strokeStyle = '#666'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-6, -16); ctx.quadraticCurveTo(-9, -14, -10, -10);
+    ctx.moveTo( 6, -16); ctx.quadraticCurveTo( 9, -14,  10, -10);
+    ctx.stroke();
+    // 진한 눈썹
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.moveTo(-9, -32); ctx.lineTo(-1, -32); ctx.stroke();
+  } else if(persona === 'motherInLaw'){
+    // 시어머니 — 분홍 머리망(둥근 hair bun) + 단안 외눈 안경 (모노클).
+    //   사용자 명시: 통일감 위해 단안 (남편·아내·아빠 비둘기와 일치).
+    ctx.fillStyle = '#C078A0';
+    ctx.beginPath(); ctx.arc(0, -38, 6, 0, Math.PI*2); ctx.fill();
+    // bun 디테일
+    ctx.fillStyle = '#A04880';
+    ctx.beginPath(); ctx.arc(-2, -38, 2, 0, Math.PI*2); ctx.fill();
+    // 머리띠 (가로띠)
+    ctx.fillStyle = '#FFE066';
+    ctx.fillRect(-9, -34, 18, 1.4);
+    // 단안 (base eye 대체) — 남편·아내처럼 좌측 한 개.
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(-4, -26, 2.4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-3.2, -27, 0.8, 0, Math.PI*2); ctx.fill();
+    // 모노클 (한쪽 눈 둘레만). v12.36b — 줄(끈)은 머리털처럼 보여서 제거 (사용자 피드백).
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(-4, -26, 4.6, 0, Math.PI*2); ctx.stroke();
+    // 부드러운 눈썹
+    ctx.strokeStyle = '#A04880'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-9, -32); ctx.lineTo(-1, -33); ctx.stroke();
+  } else if(persona === 'fatherOfWife'){
+    // 장인 — 큰 흰 수염 (가장 풍성)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(-8, -10);
+    ctx.quadraticCurveTo(-12, 0, -10, 14);
+    ctx.quadraticCurveTo(0, 18, 10, 14);
+    ctx.quadraticCurveTo(12, 0, 8, -10);
+    ctx.closePath(); ctx.fill();
+    // 수염 ridges
+    ctx.strokeStyle = 'rgba(170,170,170,0.5)'; ctx.lineWidth = 0.7;
+    for(let i=-2;i<=2;i++){
+      ctx.beginPath(); ctx.moveTo(i*2, -8); ctx.quadraticCurveTo(i*2.4, 4, i*1.2, 12); ctx.stroke();
+    }
+    // 머리 위 흰털
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath(); ctx.arc(-5, -36, 2.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(5, -36, 2.4, 0, Math.PI*2); ctx.fill();
+  } else if(persona === 'motherOfWife'){
+    // 장모 — 머리 윗부분만 덮는 작은 흰 보넷. v12.36b — 사용자 피드백 "보넷이 눈을 가렸다".
+    //   눈은 y=-26. 보넷 하단 y=-30 보다 위로 올려 눈 가리지 않음.
+    //   머리 중심 (0,-22), 반지름 15 → 머리 정수리만 덮음 (-30 ~ -41 범위).
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(-12, -30);
+    ctx.bezierCurveTo(-14, -38, -7, -42, 0, -42);
+    ctx.bezierCurveTo(7, -42, 14, -38, 12, -30);
+    // 보넷 하단 — 머리 윤곽 안쪽으로 살짝 굽어짐 (머리 위에 살짝 올려놓은 느낌)
+    ctx.bezierCurveTo(8, -29, -8, -29, -12, -30);
+    ctx.closePath();
+    ctx.fill();
+    // 보넷 모서리 라인 (분홍 분위기)
+    ctx.strokeStyle = '#F8C8B8'; ctx.lineWidth = 1.0; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-12, -30);
+    ctx.bezierCurveTo(-14, -38, -7, -42, 0, -42);
+    ctx.bezierCurveTo(7, -42, 14, -38, 12, -30);
+    ctx.stroke();
+    // 보넷 아래 짧은 리본 끈 (양옆으로 살짝 — 눈을 절대 가리지 않게 옆으로만)
+    ctx.strokeStyle = '#F8C8B8'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(-12, -30); ctx.quadraticCurveTo(-15, -27, -16, -23); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( 12, -30); ctx.quadraticCurveTo( 15, -27,  16, -23); ctx.stroke();
+    // 작은 분홍 꽃 (보넷 위, 정수리)
+    ctx.fillStyle = '#FFB4D8';
+    for(let i=0;i<5;i++){
+      const a = i*(Math.PI*2/5);
+      ctx.beginPath(); ctx.arc(Math.cos(a)*2.0, -36 + Math.sin(a)*2.0, 0.9, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle = '#FFE066';
+    ctx.beginPath(); ctx.arc(0, -36, 0.7, 0, Math.PI*2); ctx.fill();
+    // 단안 부드러운 감은 눈 (base eye 대체) — 미소 표현. 통일감 위해 좌측 한 개만.
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(-4, -26, 2.4, 0.2, Math.PI - 0.2, false); ctx.stroke();
+    // 부드러운 눈썹
+    ctx.strokeStyle = '#D89880'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-9, -32); ctx.lineTo(-1, -33); ctx.stroke();
+  }
+}
+
+// v12.35 — 구구나르도 다 둘치 — 르네상스 발명가/화가 비둘기. Da Vinci 패러디.
+//   특징: 따뜻한 cream/세피아 톤, 베레모 형태의 머리 곡선 + 곱슬 흰 수염 + 한쪽 깃에 깃털 펜.
+//   사용자 명시: "다빈치 같은 개성". 평범한 elder 가 아닌 르네상스 화가 풍.
+function drawGugunardo(ctx, c){
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.scale(0.85, 0.85);
+  // 발명가 베이스 — _drawElderPigeonInternal 의 비둘기 silhouette 위에 르네상스 디테일 추가.
+  _drawElderPigeonInternal(ctx, {
+    phase:0.4, elder:false,   // 일반 elder 흰털은 빼고, 곱슬 머리로 대체
+    body:'#C5B59A', belly:'#E5D5B5', wing:'#9A8C70', beak:'#FFA500',
+    noBaseEye:true,   // gugunardo 가 자체 큰 눈 그림
+  });
+  // 다빈치 풍 곱슬 흰 수염 (긴 수염 — 사상가 표시)
+  const t = state.time, beardWag = Math.sin(t*1.2)*0.8;
+  ctx.strokeStyle = '#FFF9DB'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+  // 큰 수염 (턱 아래 – 부리 아래쪽에서 가슴까지)
+  for(let i=-3;i<=3;i++){
+    ctx.beginPath();
+    ctx.moveTo(i*1.6, -10);
+    ctx.quadraticCurveTo(i*2.2 + beardWag, -2, i*1.4, 6);
+    ctx.stroke();
+  }
+  // 곱슬 머리 (르네상스 화가 — 옆머리 둥글게)
+  ctx.fillStyle = '#FFF9DB';
+  ctx.beginPath(); ctx.arc(-12, -28, 4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(12, -28, 4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-9, -33, 3.4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(9, -33, 3.4, 0, Math.PI*2); ctx.fill();
+  // 영리한 큰 눈 (덮어쓰기) — 천재 비둘기 풍
+  ctx.fillStyle='#000';
+  ctx.beginPath(); ctx.arc(-4, -26, 3.6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(-3, -27, 1.4, 0, Math.PI*2); ctx.fill();
+  // 한쪽 날개 끝에 깃털 펜 (창의성 표현)
+  ctx.strokeStyle = '#FFE066'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(24, 12); ctx.lineTo(32, -4); ctx.stroke();
+  ctx.fillStyle = '#FFE066';
+  ctx.beginPath(); ctx.ellipse(31, -2, 2.4, 1.0, 0.5, 0, Math.PI*2); ctx.fill();
+  // 코스튬 오버레이 — 단일.
+  const draws = getCompanionCostumeDraws('gugunardo');
+  for(const d of draws) d(ctx);
+  ctx.restore();
+}
+
+// v12.35 — 비리스토둘레스 — 고대 그리스 철학자 비둘기. Aristotle 패러디.
+//   특징: 흰빛/대리석 톤, 풍성한 흰 수염(매우 긴) + 월계관 silhouette + 한쪽 날개에 두루마리.
+//   사용자 명시: "아리스토텔레스 같은 개성". 사색적인 분위기.
+function drawBristotodul(ctx, c){
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.scale(0.85, 0.85);
+  _drawElderPigeonInternal(ctx, {
+    phase:1.6, elder:false,
+    body:'#E0DCCB', belly:'#F4F1E0', wing:'#B8B098', beak:'#FFA500',
+    noBaseEye:true,   // bristotodul 가 자체 사색하는 눈 그림
+  });
+  // 풍성한 흰 수염 (가장 긴 수염 — 아리스토텔레스 표시)
+  const t = state.time, beardWag = Math.sin(t*0.9)*1.0;
+  ctx.fillStyle = '#FFF9DB';
+  // 수염 silhouette (큰 sweep)
+  ctx.beginPath();
+  ctx.moveTo(-6, -10);
+  ctx.quadraticCurveTo(-10 + beardWag, 0, -8, 14);
+  ctx.quadraticCurveTo(0, 18, 8, 14);
+  ctx.quadraticCurveTo(10 + beardWag, 0, 6, -10);
+  ctx.closePath();
+  ctx.fill();
+  // 수염 ridges
+  ctx.strokeStyle = 'rgba(180,170,150,0.55)'; ctx.lineWidth = 0.8;
+  for(let i=-2;i<=2;i++){
+    ctx.beginPath(); ctx.moveTo(i*1.8, -8); ctx.quadraticCurveTo(i*2.4 + beardWag, 4, i*1.4, 12); ctx.stroke();
+  }
+  // 사색하는 눈 (반쯤 감김) — 부리 아래 ridge
+  ctx.fillStyle='#000';
+  ctx.beginPath(); ctx.arc(-4, -26, 2.4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(-3, -27, 0.9, 0, Math.PI*2); ctx.fill();
+  // 눈썹 묵직 (사상가)
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-9, -32); ctx.lineTo(-1, -32); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(2, -33); ctx.lineTo(8, -32); ctx.stroke();
+  // 월계관 silhouette (머리 위 — 디폴트 scholar costume 이 그려주지만 base 단계에서도 살짝)
+  ctx.strokeStyle = 'rgba(81,207,102,0.5)'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.ellipse(0, -34, 12, 3, 0, 0, Math.PI*2); ctx.stroke();
+  // 한쪽 날개에 두루마리 (사상가 도구)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(-26, 14, 4, 8);
+  ctx.strokeStyle = '#A98052'; ctx.lineWidth = 1.0;
+  ctx.beginPath(); ctx.moveTo(-26, 14); ctx.lineTo(-22, 14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-26, 22); ctx.lineTo(-22, 22); ctx.stroke();
+  const draws = getCompanionCostumeDraws('bristotodul');
+  for(const d of draws) d(ctx);
+  ctx.restore();
 }
 
 // ---------- v12.11 Phase 3b — 원정 Ⅳ 구출 친구들 ----------
@@ -6970,6 +8008,66 @@ const COMPANION_COSTUMES = {
         ctx.beginPath(); ctx.ellipse(22, 10, 5, 13, 0.5, 0, Math.PI*2); ctx.fill();
         ctx.restore();
       } },
+    // === v12.35 — 아내 아마겟돈 SSS 코스튬 (ch251 자동 해금). 부위별 1개씩. ===
+    { id:'wife_armageddon_halo', name:'아마겟돈 성관', cost:0, icon:'👑', slot:'head', dmgBoost:1.32,
+      autoUnlockClearedCh: 251,
+      draw:(ctx)=>{
+        ctx.save();
+        // 거대 후광 + 황금 + 적금 (성스러운 전쟁 톤)
+        ctx.strokeStyle = '#FFD43B'; ctx.lineWidth = 2.6;
+        ctx.shadowColor = 'rgba(255,212,59,0.95)'; ctx.shadowBlur = 14;
+        ctx.beginPath(); ctx.ellipse(0, -42, 16, 5, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        // 외곽 적금 ring
+        ctx.strokeStyle = 'rgba(255,107,107,0.7)'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.ellipse(0, -42, 19, 6, 0, 0, Math.PI*2); ctx.stroke();
+        // 머리 위 작은 십자
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-0.8, -50, 1.6, 6);
+        ctx.fillRect(-2.4, -47, 4.8, 1.4);
+        // 회전하는 별 8개
+        const t = state.time;
+        for(let i=0;i<8;i++){
+          const a = (i/8)*Math.PI*2 + t*1.0;
+          const sx = Math.cos(a)*18, sy = -42 + Math.sin(a)*5;
+          ctx.fillStyle = i%2 ? '#FFE066' : '#FFFFFF';
+          ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      } },
+    { id:'wife_armageddon_robe', name:'아마겟돈 광휘 갑주', cost:0, icon:'🛡️', slot:'body', dmgBoost:1.30,
+      autoUnlockClearedCh: 251,
+      draw:(ctx)=>{
+        ctx.save();
+        // 황금 갑주 본체 (heaven_robe 의 흰색을 황금으로 + 광휘 강화)
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath();
+        ctx.moveTo(-19, 0); ctx.quadraticCurveTo(-22, 12, -19, 28);
+        ctx.lineTo(19, 28); ctx.quadraticCurveTo(22, 12, 19, 0);
+        ctx.quadraticCurveTo(9, -3, 0, -3); ctx.quadraticCurveTo(-9, -3, -19, 0);
+        ctx.closePath(); ctx.fill();
+        // 적금 띠 (전쟁 톤)
+        ctx.fillStyle = '#FF6B6B';
+        ctx.fillRect(-19, 12, 38, 2.6);
+        // 가슴 큰 십자가 (성전)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(255,255,255,0.95)'; ctx.shadowBlur = 8;
+        ctx.fillRect(-1.4, 0, 2.8, 18);
+        ctx.fillRect(-7, 6, 14, 2.8);
+        ctx.shadowBlur = 0;
+        // 어깨 견장 (광휘)
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath(); ctx.arc(-19, 2, 3.2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(19, 2, 3.2, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath(); ctx.arc(-19, 2, 1.4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(19, 2, 1.4, 0, Math.PI*2); ctx.fill();
+        // 거대 깃털 날개
+        ctx.fillStyle = 'rgba(255,243,191,0.9)';
+        ctx.beginPath(); ctx.ellipse(-26, 10, 7, 17, -0.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(26, 10, 7, 17, 0.5, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      } },
   ],
   child: [
     { id:'pacifier', name:'기본 (머리털)', cost:0,     icon:'👶', slot:'head',
@@ -7385,6 +8483,54 @@ const COMPANION_COSTUMES = {
         ctx.shadowBlur = 0;
         ctx.restore();
       } },
+    // === v12.35 — 아기 아마겟돈 SSS 코스튬 (ch251 자동 해금). 부위별 1개씩. ===
+    { id:'mini_armageddon_halo', name:'아기 아마겟돈 성관', cost:0, icon:'👑', slot:'head', dmgBoost:1.28,
+      autoUnlockClearedCh: 251,
+      draw:(ctx)=>{
+        ctx.save();
+        ctx.strokeStyle = '#FFD43B'; ctx.lineWidth = 2.0;
+        ctx.shadowColor = 'rgba(255,212,59,0.95)'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.ellipse(0, -27, 11, 3.4, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,107,107,0.7)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(0, -27, 13, 4.2, 0, 0, Math.PI*2); ctx.stroke();
+        // 작은 십자
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-0.6, -33, 1.2, 4);
+        ctx.fillRect(-1.6, -31, 3.2, 1);
+        const t = state.time;
+        for(let i=0;i<5;i++){
+          const a = (i/5)*Math.PI*2 + t*1.4;
+          const sx = Math.cos(a)*13, sy = -27 + Math.sin(a)*3.5;
+          ctx.fillStyle = i%2 ? '#FFE066' : '#FFFFFF';
+          ctx.beginPath(); ctx.arc(sx, sy, 1.0, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      } },
+    { id:'mini_armageddon_robe', name:'아기 아마겟돈 갑주', cost:0, icon:'🛡️', slot:'body', dmgBoost:1.26,
+      autoUnlockClearedCh: 251,
+      draw:(ctx)=>{
+        ctx.save();
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath();
+        ctx.moveTo(-10, -2); ctx.quadraticCurveTo(-12, 8, -10, 18);
+        ctx.lineTo(10, 18); ctx.quadraticCurveTo(12, 8, 10, -2);
+        ctx.quadraticCurveTo(5, -3, 0, -3); ctx.quadraticCurveTo(-5, -3, -10, -2);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#FF6B6B';
+        ctx.fillRect(-10, 8, 20, 2.0);
+        // 십자
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(255,255,255,0.95)'; ctx.shadowBlur = 6;
+        ctx.fillRect(-0.9, 2, 1.8, 13);
+        ctx.fillRect(-4, 7, 8, 2);
+        ctx.shadowBlur = 0;
+        // 어깨 견장
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath(); ctx.arc(-10, 2, 2.0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(10, 2, 2.0, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      } },
   ],
 };
 
@@ -7426,7 +8572,8 @@ const RESCUED_SET_DEFS = [
     setBonus:1.05,
     costPerPiece:2500,
   },
-  // v12.34 — 천국 세트 (ch131 자동 해금, cost:0). SS 등급에 준하는 친구 보너스.
+  // v12.34 → v12.35 — 천국 세트. ch131 클리어 시 구매 자격만 해금, 코인 결제 필요.
+  // 사용자 명시: "다른 동료·부모·조상의 코스튬은 구매해야 한다."
   {
     id:'heavenAscension',
     name:'천국 승천 의장',
@@ -7434,9 +8581,19 @@ const RESCUED_SET_DEFS = [
     accent:'#FFE066',
     description:'천국의 인정을 받아 친구들에게 새겨진 광휘 — 가장 강력한 동료 세트',
     perPieceBoost:1.025,    // 각 +2.5%
-    setBonus:1.06,          // 풀세트 ×1.06 → 합산 ~×1.193 (+19.3%)
-    costPerPiece:0,         // ch131 자동 지급 (구매 불필요)
-    autoUnlockClearedCh: 131,
+    setBonus:1.06,          // 풀세트 ×1.06
+    costPerPiece:2000,      // 일괄 5종 = 10,000코인 (사용자 피드백: "그렇게 비쌀 필요 없다")
+  },
+  // v12.35 — 아마겟돈 세트. ch251 해금, 코인 결제. SSS 등급에 준하는 친구 보너스.
+  {
+    id:'armageddonHostSet',
+    name:'아마겟돈 천군 의장',
+    icon:'⚔️',
+    accent:'#FFD43B',
+    description:'성스러운 전쟁에 출진하는 친구들 — 황금 갑주 위 적금 십자',
+    perPieceBoost:1.04,     // 각 +4%
+    setBonus:1.09,          // 풀세트 ×1.09
+    costPerPiece:4000,      // 일괄 5종 = 20,000코인 (사용자: SSS 모두 풀세트 구매가 어렵도록)
   },
 ];
 // 각 세트의 친구별 코스튬 외형 (단순 컬러 오버레이) — 친구의 작은 사이즈에 어울리게 컴팩트.
@@ -7471,36 +8628,399 @@ function _makeRescuedSetCostume(setId, kind, name, accent, secondary){
 }
 // Ash brigade: 잿불 (오렌지/금) / Heaven: 흰빛+금 (v12.34)
 COMPANION_COSTUMES.sparrow = [
-  _makeRescuedSetCostume('ashBrigade',     'sparrow', '잿불 망토',   '#FF6B35', '#FFE066'),
-  _makeRescuedSetCostume('salvationChoir', 'sparrow', '천상 망토',   '#FFE066', '#FFFFFF'),
-  _makeRescuedSetCostume('abyssalPact',    'sparrow', '심연 망토',   '#7048E8', '#E599F7'),
-  _makeRescuedSetCostume('heavenAscension','sparrow', '천국 승천복', '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('ashBrigade',     'sparrow', '잿불 망토',     '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'sparrow', '천상 망토',     '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'sparrow', '심연 망토',     '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','sparrow', '천국 승천복',   '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('armageddonHostSet','sparrow','아마겟돈 천군복','#FFD43B','#FF6B6B'),
 ];
 COMPANION_COSTUMES.magpie = [
-  _makeRescuedSetCostume('ashBrigade',     'magpie',  '잿불 흉갑',   '#FF6B35', '#FFE066'),
-  _makeRescuedSetCostume('salvationChoir', 'magpie',  '천상 옷자락', '#FFE066', '#FFFFFF'),
-  _makeRescuedSetCostume('abyssalPact',    'magpie',  '심연 갑옷',   '#7048E8', '#E599F7'),
-  _makeRescuedSetCostume('heavenAscension','magpie',  '천국 승천복', '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('ashBrigade',     'magpie',  '잿불 흉갑',     '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'magpie',  '천상 옷자락',   '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'magpie',  '심연 갑옷',     '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','magpie',  '천국 승천복',   '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('armageddonHostSet','magpie','아마겟돈 천군복','#FFD43B','#FF6B6B'),
 ];
 COMPANION_COSTUMES.owl = [
-  _makeRescuedSetCostume('ashBrigade',     'owl',     '잿불 두건',   '#FF6B35', '#FFE066'),
-  _makeRescuedSetCostume('salvationChoir', 'owl',     '천상 두건',   '#FFE066', '#FFFFFF'),
-  _makeRescuedSetCostume('abyssalPact',    'owl',     '심연 망토',   '#7048E8', '#E599F7'),
-  _makeRescuedSetCostume('heavenAscension','owl',     '천국 승천복', '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('ashBrigade',     'owl',     '잿불 두건',     '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'owl',     '천상 두건',     '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'owl',     '심연 망토',     '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','owl',     '천국 승천복',   '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('armageddonHostSet','owl',  '아마겟돈 천군복','#FFD43B','#FF6B6B'),
 ];
 COMPANION_COSTUMES.parrot = [
-  _makeRescuedSetCostume('ashBrigade',     'parrot',  '잿불 어깨갑', '#FF6B35', '#FFE066'),
-  _makeRescuedSetCostume('salvationChoir', 'parrot',  '천상 깃옷',   '#FFE066', '#FFFFFF'),
-  _makeRescuedSetCostume('abyssalPact',    'parrot',  '심연 깃옷',   '#7048E8', '#E599F7'),
-  _makeRescuedSetCostume('heavenAscension','parrot',  '천국 승천복', '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('ashBrigade',     'parrot',  '잿불 어깨갑',   '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'parrot',  '천상 깃옷',     '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'parrot',  '심연 깃옷',     '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','parrot',  '천국 승천복',   '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('armageddonHostSet','parrot','아마겟돈 천군복','#FFD43B','#FF6B6B'),
 ];
 COMPANION_COSTUMES.squirrel = [
-  _makeRescuedSetCostume('ashBrigade',     'squirrel','잿불 띠',     '#FF6B35', '#FFE066'),
-  _makeRescuedSetCostume('salvationChoir', 'squirrel','천상 띠',     '#FFE066', '#FFFFFF'),
-  _makeRescuedSetCostume('abyssalPact',    'squirrel','심연 띠',     '#7048E8', '#E599F7'),
-  _makeRescuedSetCostume('heavenAscension','squirrel','천국 승천복', '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('ashBrigade',     'squirrel','잿불 띠',       '#FF6B35', '#FFE066'),
+  _makeRescuedSetCostume('salvationChoir', 'squirrel','천상 띠',       '#FFE066', '#FFFFFF'),
+  _makeRescuedSetCostume('abyssalPact',    'squirrel','심연 띠',       '#7048E8', '#E599F7'),
+  _makeRescuedSetCostume('heavenAscension','squirrel','천국 승천복',   '#FFFFFF', '#FFE066'),
+  _makeRescuedSetCostume('armageddonHostSet','squirrel','아마겟돈 천군복','#FFD43B','#FF6B6B'),
 ];
-// 5명 모두 같은 setId 의 코스튬을 입었을 때 active. 한 명이라도 다른 세트면 보너스 0.
+
+// === v12.35 — 원정 Ⅶ 부모 코스튬 시스템 (pair 단위) ===
+// 사용자 명령: 천사옷이 디폴트, 벗기 가능. 상점 3종 세트 — 선택 시 두 부모 pair (시아버지+시어머니,
+// 장인+장모) 모두 같은 코스튬으로 일괄 장착. 효과는 친구 세트와 같은 골격(perPiece + setBonus).
+const PARENTS_KINDS = ['husbandParents','wifeParents'];
+const PARENTS_SET_DEFS = [
+  { id:'angelDefault', name:'천사 디폴트',   icon:'🪽', accent:'#FFE066',
+    description:'천국에서 합류한 부모님이 입고 있는 디폴트 천사 옷. 자동 지급, 벗기 가능.',
+    perPieceBoost:1.02, setBonus:1.05, costPerPiece:0, autoUnlockClearedCh:205 },
+  { id:'royalCourt',   name:'궁중 의복',     icon:'👑', accent:'#FFD43B',
+    description:'천계 궁중에서 내려준 가문 의복 — 위엄 ↑',
+    perPieceBoost:1.025, setBonus:1.06, costPerPiece:3000 },   // pair 1세트 3,000 (총 6,000 일괄)
+  { id:'starlitDawn',  name:'별빛 새벽 의장', icon:'🌟', accent:'#A5D8FF',
+    description:'새벽의 별이 수놓인 흰 로브 — 부모님의 광휘',
+    perPieceBoost:1.03, setBonus:1.07, costPerPiece:4500 },    // 총 9,000 일괄
+  { id:'celestialElder', name:'천계 원로 의관', icon:'✨', accent:'#9775FA',
+    description:'천계 원로회의 정장 — 가장 권위 있는 부모 코스튬',
+    perPieceBoost:1.035, setBonus:1.08, costPerPiece:5500 },   // 총 11,000 일괄
+  // v12.35 — 아마겟돈 부모 세트. ch251 해금, 코인 결제 필요. SSS 등급에 준하는 보너스.
+  { id:'armageddonElder', name:'아마겟돈 원로 갑주', icon:'⚔️', accent:'#FFD43B',
+    description:'성스러운 전쟁에 출진하는 부모님 — 황금 + 적금 십자 갑주',
+    perPieceBoost:1.05, setBonus:1.10, costPerPiece:11000 },  // pair 1세트 11,000 (총 22,000 일괄)
+];
+function _makeParentsCostume(setId, kind, name, accent, secondary){
+  const setDef = PARENTS_SET_DEFS.find(s => s.id === setId);
+  return {
+    id: setId === 'angelDefault' ? 'angel' : (setId + '_' + kind),  // angel 디폴트는 'angel' 단일 id
+    name, icon:setDef.icon, cost:setDef.costPerPiece, slot:'body', setId,
+    dmgBoost:setDef.perPieceBoost,
+    draw:(ctx)=>{
+      // 부모 pair 의 _drawElderPigeonInternal 좌표계 안에서 그려짐. wife 비슷한 사이즈
+      // (스케일 적용 후 머리 중심 y=-22, 가슴 중앙 y=10, 발 y=52).
+      // 사용자: "코스튬도 디자인에 맞게 수정". 새 사이즈 기준으로 후광/망토/관 위치 재조정.
+      ctx.save();
+      // 망토 (가슴 위 ~ 허리 아래까지 큰 옷자락)
+      ctx.fillStyle = accent; ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(-18, -2);
+      ctx.quadraticCurveTo(-22, 14, -20, 32);
+      ctx.lineTo(20, 32);
+      ctx.quadraticCurveTo(22, 14, 18, -2);
+      ctx.quadraticCurveTo(9, -4, 0, -4);
+      ctx.quadraticCurveTo(-9, -4, -18, -2);
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+      // 가슴 엠블럼 (아내 사이즈에 맞게 살짝 큼)
+      ctx.fillStyle = secondary;
+      ctx.beginPath(); ctx.arc(0, 12, 3, 0, Math.PI*2); ctx.fill();
+      // 머리 위 장식 (set 별 차별화) — 머리 중심 y=-22, 위쪽 y=-37 정도
+      if(setId === 'angelDefault'){
+        // 천사 후광
+        ctx.strokeStyle = '#FFE066'; ctx.lineWidth = 2.0;
+        ctx.shadowColor = 'rgba(255,224,102,0.85)'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.ellipse(0, -38, 13, 3.6, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        // 어깨 깃털 (천사)
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath(); ctx.ellipse(-22, -2, 5, 10, -0.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse( 22, -2, 5, 10,  0.5, 0, Math.PI*2); ctx.fill();
+      } else if(setId === 'royalCourt'){
+        // 황금 왕관
+        ctx.fillStyle = '#FFD43B';
+        ctx.beginPath();
+        ctx.moveTo(-9, -32); ctx.lineTo(-6, -40);
+        ctx.lineTo(-3, -32); ctx.lineTo(0, -42);
+        ctx.lineTo(3, -32);  ctx.lineTo(6, -40);
+        ctx.lineTo(9, -32);
+        ctx.closePath(); ctx.fill();
+        // 왕관 보석
+        ctx.fillStyle = '#FA5252';
+        ctx.beginPath(); ctx.arc(0, -36, 1.6, 0, Math.PI*2); ctx.fill();
+      } else if(setId === 'starlitDawn'){
+        // 별빛 머리띠
+        ctx.fillStyle = '#A5D8FF';
+        ctx.beginPath(); ctx.ellipse(0, -34, 11, 2.4, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#FFE066';
+        for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.arc(i*4, -35, 1, 0, Math.PI*2); ctx.fill(); }
+      } else if(setId === 'celestialElder'){
+        // 보라 후광 + 별
+        ctx.strokeStyle = '#9775FA'; ctx.lineWidth = 2.0;
+        ctx.shadowColor = 'rgba(151,117,250,0.85)'; ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.ellipse(0, -38, 13, 3.6, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#FFE066';
+        ctx.beginPath(); ctx.arc(0, -40, 1.4, 0, Math.PI*2); ctx.fill();
+      } else if(setId === 'armageddonElder'){
+        // 황금 후광 + 가슴 큰 십자가 (아마겟돈)
+        ctx.strokeStyle = '#FFD43B'; ctx.lineWidth = 2.4;
+        ctx.shadowColor = 'rgba(255,212,59,0.95)'; ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.ellipse(0, -38, 14, 4, 0, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        // 가슴 큰 십자가
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(255,255,255,0.95)'; ctx.shadowBlur = 6;
+        ctx.fillRect(-1.2, 6, 2.4, 16);
+        ctx.fillRect(-6, 12, 12, 2.2);
+        ctx.shadowBlur = 0;
+      }
+      ctx.restore();
+    }
+  };
+}
+COMPANION_COSTUMES.husbandParents = [
+  _makeParentsCostume('angelDefault',     'husbandParents', '천사 디폴트',     '#FFFFFF', '#FFE066'),
+  _makeParentsCostume('royalCourt',       'husbandParents', '궁중 의복 (남편)','#FFD43B', '#FF6B6B'),
+  _makeParentsCostume('starlitDawn',      'husbandParents', '별빛 새벽 (남편)','#A5D8FF', '#FFE066'),
+  _makeParentsCostume('celestialElder',   'husbandParents', '천계 원로 (남편)','#9775FA', '#FFE066'),
+  _makeParentsCostume('armageddonElder',  'husbandParents', '아마겟돈 원로 (남편)','#FFD43B','#FF6B6B'),
+];
+COMPANION_COSTUMES.wifeParents = [
+  _makeParentsCostume('angelDefault',     'wifeParents',    '천사 디폴트',     '#FFFFFF', '#FFE066'),
+  _makeParentsCostume('royalCourt',       'wifeParents',    '궁중 의복 (아내)','#FFD43B', '#E599F7'),
+  _makeParentsCostume('starlitDawn',      'wifeParents',    '별빛 새벽 (아내)','#A5D8FF', '#E599F7'),
+  _makeParentsCostume('celestialElder',   'wifeParents',    '천계 원로 (아내)','#9775FA', '#E599F7'),
+  _makeParentsCostume('armageddonElder',  'wifeParents',    '아마겟돈 원로 (아내)','#FFD43B','#E599F7'),
+];
+function getActiveParentsSetId(){
+  if(!progress.companionCostumes) return null;
+  let activeSetId = null;
+  for(const k of PARENTS_KINDS){
+    const slot = progress.companionCostumes[k];
+    if(!slot) return null;
+    _normalizeCompanionEquipped(slot, k);
+    const eq = slot.equipped.body;
+    if(!eq) return null;
+    const def = (COMPANION_COSTUMES[k] || []).find(c => c.id === eq);
+    if(!def || !def.setId) return null;
+    if(activeSetId === null) activeSetId = def.setId;
+    else if(activeSetId !== def.setId) return null;
+  }
+  return activeSetId;
+}
+// v12.35 — 부모 부분 세트. 한 pair (husbandParents 또는 wifeParents) 만 입어도 50% partial.
+function getParentsSetBonus(){
+  if(!progress.companionCostumes) return 1.0;
+  const counts = {};
+  for(const k of PARENTS_KINDS){
+    const slot = progress.companionCostumes[k];
+    if(!slot) continue;
+    _normalizeCompanionEquipped(slot, k);
+    const eq = slot.equipped.body;
+    if(!eq) continue;
+    const def = (COMPANION_COSTUMES[k] || []).find(c => c.id === eq);
+    if(!def || !def.setId) continue;
+    counts[def.setId] = (counts[def.setId] || 0) + 1;
+  }
+  let bestId = null, bestCnt = 0;
+  for(const id in counts){
+    if(counts[id] > bestCnt){ bestId = id; bestCnt = counts[id]; }
+  }
+  if(!bestId || bestCnt < 1) return 1.0;
+  const def = PARENTS_SET_DEFS.find(s => s.id === bestId);
+  if(!def) return 1.0;
+  // v12.35 — partial fraction. 2pair 풀세트도 85% 캡.
+  // 1 pair=45%, 2 pair=85%.
+  const fracs = [0.45, 0.85];
+  const frac = fracs[Math.min(bestCnt, 2) - 1];
+  return 1 + (def.setBonus - 1) * frac;
+}
+// v12.36b — 부모 세트 측면(side) 분리 구매 — 사용자 명시:
+//   "남편 비둘기 부모와 아내 비둘기 부모 코스튬은 각각의 세트로 구매".
+//   side: 'husbandParents' or 'wifeParents' — 단일 측, 또는 'both' — 두 측 동시 (편의용).
+function _parentsSidesFor(side){
+  if(side === 'both') return PARENTS_KINDS;
+  return [side];
+}
+function buyParentsSet(setId, side='both'){
+  const setDef = PARENTS_SET_DEFS.find(s => s.id === setId);
+  if(!setDef) return { ok:false, reason:'세트를 찾을 수 없음' };
+  const sides = _parentsSidesFor(side);
+  for(const k of sides){
+    if(!progress.companionUnlocks || !progress.companionUnlocks[k]){
+      const label = k === 'husbandParents' ? '남편 부모님' : '아내 부모님';
+      return { ok:false, reason:`아직 ${label}이 합류하지 않음` };
+    }
+  }
+  let toBuy = 0;
+  for(const k of sides){
+    const slot = progress.companionCostumes[k] || { unlocked:[] };
+    const itemId = setId === 'angelDefault' ? 'angel' : (setId + '_' + k);
+    if(!slot.unlocked || !slot.unlocked.includes(itemId)) toBuy++;
+  }
+  const totalCost = toBuy * setDef.costPerPiece;
+  if((progress.coins||0) < totalCost) return { ok:false, reason:`코인 부족 (필요 ${totalCost.toLocaleString()})` };
+  progress.coins -= totalCost;
+  for(const k of sides){
+    if(!progress.companionCostumes[k]) progress.companionCostumes[k] = { unlocked:[], equipped:{head:null, body:null} };
+    const slot = progress.companionCostumes[k];
+    _normalizeCompanionEquipped(slot, k);
+    const itemId = setId === 'angelDefault' ? 'angel' : (setId + '_' + k);
+    if(!slot.unlocked.includes(itemId)) slot.unlocked.push(itemId);
+    slot.equipped.body = itemId;
+  }
+  saveProgress();
+  return { ok:true, def:setDef, cost:totalCost, side };
+}
+function unequipParentsSet(side='both'){
+  if(!progress.companionCostumes) return;
+  for(const k of _parentsSidesFor(side)){
+    const slot = progress.companionCostumes[k];
+    if(!slot) continue;
+    _normalizeCompanionEquipped(slot, k);
+    slot.equipped.body = null;
+  }
+  saveProgress();
+}
+function equipParentsSet(setId, side='both'){
+  if(!progress.companionCostumes) return false;
+  for(const k of _parentsSidesFor(side)){
+    const slot = progress.companionCostumes[k];
+    if(!slot) return false;
+    _normalizeCompanionEquipped(slot, k);
+    const itemId = setId === 'angelDefault' ? 'angel' : (setId + '_' + k);
+    if(!slot.unlocked || !slot.unlocked.includes(itemId)) return false;
+    slot.equipped.body = itemId;
+  }
+  saveProgress();
+  return true;
+}
+
+// === v12.35 — 원정 Ⅷ 조상 코스튬 시스템 (개별) ===
+// 구구나르도 / 비리스토둘레스. 디폴트 inventor / scholar 입고 합류, 벗기 가능. 각자 직업
+// 코스튬 다종을 보유 (장인성·창의성·예술성 등 다른 페르소나 표현). 단가 1500~3500.
+const ANCESTOR_KINDS = ['gugunardo','bristotodul'];
+function _drawCostumeBack(ctx, color, accent){
+  // 조상 동료 좌표계 (wife 와 동일 스케일 0.85). 머리 -22, 가슴 10, 발 52.
+  // 사용자: "디자인 변경에 따라 코스튬도 새로 그려야". wife 사이즈에 맞게 큰 망토.
+  ctx.save();
+  ctx.fillStyle = color; ctx.globalAlpha = 0.90;
+  ctx.beginPath();
+  ctx.moveTo(-18, -2);
+  ctx.quadraticCurveTo(-22, 14, -20, 32);
+  ctx.lineTo(20, 32);
+  ctx.quadraticCurveTo(22, 14, 18, -2);
+  ctx.quadraticCurveTo(9, -4, 0, -4);
+  ctx.quadraticCurveTo(-9, -4, -18, -2);
+  ctx.closePath(); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = accent;
+  ctx.beginPath(); ctx.arc(0, 12, 2.6, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+COMPANION_COSTUMES.gugunardo = [
+  // 디폴트 inventor — 베레모(머리) + 도제복(몸). 하나의 'inventor' id 로 합쳐 head 슬롯에 등록 → 디폴트 1개로 묶기.
+  { id:'inventor', name:'발명가 디폴트', icon:'📐', cost:0, slot:'body', dmgBoost:1.04,
+    autoUnlockClearedCh:255,
+    draw:(ctx)=>{
+      ctx.save();
+      // 적갈색 도제복
+      _drawCostumeBack(ctx, '#8B4513', '#FFE066');
+      // 베레모 (머리 위)
+      ctx.fillStyle = '#5A2D0C';
+      ctx.beginPath(); ctx.ellipse(0, -16, 9, 3.5, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#7A3D14';
+      ctx.beginPath(); ctx.ellipse(-2, -17.5, 6, 3, 0, 0, Math.PI*2); ctx.fill();
+      // 깃털 펜 (귀 옆)
+      ctx.strokeStyle = '#FFE066'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(-9, -16); ctx.stroke();
+      ctx.restore();
+    }},
+  { id:'painter', name:'화가복', icon:'🎨', cost:1500, slot:'body', dmgBoost:1.05,
+    draw:(ctx)=>{ ctx.save(); _drawCostumeBack(ctx, '#4263EB', '#FFFFFF');
+      // 팔레트
+      ctx.fillStyle = '#FFD43B'; ctx.beginPath(); ctx.arc(-9, 8, 2.8, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FA5252'; ctx.beginPath(); ctx.arc(-10, 6, 0.7, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#51CF66'; ctx.beginPath(); ctx.arc(-8, 9, 0.7, 0, Math.PI*2); ctx.fill();
+      ctx.restore(); }},
+  { id:'engineer', name:'기계공학자복', icon:'⚙️', cost:2000, slot:'body', dmgBoost:1.06,
+    draw:(ctx)=>{ ctx.save(); _drawCostumeBack(ctx, '#495057', '#FFA94D');
+      // 톱니바퀴
+      ctx.strokeStyle = '#FFA94D'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(8, 8, 2.4, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(8, 8, 0.8, 0, Math.PI*2); ctx.fill();
+      ctx.restore(); }},
+  { id:'inventorRoyal', name:'궁정 발명가', icon:'🛠️', cost:2800, slot:'body', dmgBoost:1.08,
+    draw:(ctx)=>{ ctx.save(); _drawCostumeBack(ctx, '#7048E8', '#FFD43B');
+      // 황금 견장
+      ctx.fillStyle = '#FFD43B';
+      ctx.beginPath(); ctx.arc(-7, 2, 1.6, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(7, 2, 1.6, 0, Math.PI*2); ctx.fill();
+      ctx.restore(); }},
+  // ch251 해금 SSS 아마겟돈 코스튬 — 조상 개별 (gugunardo 용). 유료 구매.
+  { id:'gugunardo_armageddon', name:'아마겟돈 발명가 (SSS)', icon:'⚒️', cost:13000, slot:'body', dmgBoost:1.18,
+    draw:(ctx)=>{ ctx.save();
+      // 광휘 갑옷
+      _drawCostumeBack(ctx, '#FFD43B', '#FF6B6B');
+      // 가슴 십자 빛
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.4;
+      ctx.shadowColor = 'rgba(255,224,102,0.9)'; ctx.shadowBlur = 6;
+      ctx.beginPath(); ctx.moveTo(0, 4); ctx.lineTo(0, 12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-3, 7); ctx.lineTo(3, 7); ctx.stroke();
+      ctx.shadowBlur = 0;
+      // 어깨 광휘 견장
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.arc(-8, 1, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(8, 1, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.restore(); }},
+];
+COMPANION_COSTUMES.bristotodul = [
+  { id:'scholar', name:'철학자 디폴트', icon:'📜', cost:0, slot:'body', dmgBoost:1.04,
+    autoUnlockClearedCh:260,
+    draw:(ctx)=>{
+      ctx.save();
+      // 흰 토가
+      _drawCostumeBack(ctx, '#F1F3F5', '#FFD43B');
+      // 월계관 (머리 위)
+      ctx.strokeStyle = '#51CF66'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.ellipse(0, -15, 7, 2.4, 0, 0, Math.PI*2); ctx.stroke();
+      // 잎사귀 점
+      ctx.fillStyle = '#37B24D';
+      for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.arc(i*2.5, -15, 0.8, 0, Math.PI*2); ctx.fill(); }
+      // 두루마리 (가슴 앞)
+      ctx.fillStyle = '#E0D4B5';
+      ctx.fillRect(-3, 4, 6, 2.4);
+      ctx.restore();
+    }},
+  { id:'orator', name:'연설가복', icon:'🗣️', cost:1500, slot:'body', dmgBoost:1.05,
+    draw:(ctx)=>{ ctx.save(); _drawCostumeBack(ctx, '#FFE066', '#FA5252');
+      // 한쪽 어깨 노출 토가 (대각선 띠)
+      ctx.strokeStyle = '#FA5252'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(-9, -1); ctx.lineTo(8, 12); ctx.stroke();
+      ctx.restore(); }},
+  { id:'poet', name:'시인복', icon:'📖', cost:1800, slot:'body', dmgBoost:1.05,
+    draw:(ctx)=>{ ctx.save(); _drawCostumeBack(ctx, '#9775FA', '#FFE066');
+      // 깃털 펜 (귀 옆)
+      ctx.strokeStyle = '#FFE066'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(6, -10); ctx.lineTo(11, -16); ctx.stroke();
+      // 책
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-3, 6, 6, 4);
+      ctx.restore(); }},
+  { id:'sage', name:'현자복', icon:'🌟', cost:2400, slot:'body', dmgBoost:1.07,
+    draw:(ctx)=>{ ctx.save(); _drawCostumeBack(ctx, '#1864AB', '#FFE066');
+      // 별 가득한 망토
+      ctx.fillStyle = '#FFE066';
+      for(let i=0;i<6;i++){
+        const ax = -8 + i*3.2, ay = 6 + (i%2)*4;
+        ctx.beginPath(); ctx.arc(ax, ay, 0.8, 0, Math.PI*2); ctx.fill();
+      }
+      // 머리 위 별
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.arc(0, -16, 1.4, 0, Math.PI*2); ctx.fill();
+      ctx.restore(); }},
+  // ch251 해금 SSS 아마겟돈 — 비리스토둘레스 용. 유료 구매.
+  { id:'bristotodul_armageddon', name:'아마겟돈 철학자 (SSS)', icon:'⚖️', cost:13000, slot:'body', dmgBoost:1.18,
+    draw:(ctx)=>{ ctx.save();
+      _drawCostumeBack(ctx, '#FFE066', '#9775FA');
+      // 가슴 천칭(심판) 표식
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.3;
+      ctx.shadowColor = 'rgba(255,224,102,0.9)'; ctx.shadowBlur = 6;
+      ctx.beginPath(); ctx.moveTo(-4, 6); ctx.lineTo(4, 6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, 4); ctx.lineTo(0, 11); ctx.stroke();
+      ctx.shadowBlur = 0;
+      // 머리 위 별빛 후광
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(0, -16, 7, 2.4, 0, 0, Math.PI*2); ctx.stroke();
+      ctx.restore(); }},
+];
+// v12.35 — 5명 풀세트 active id (전원 같은 setId). 부분 세트는 별도 helper 로 처리.
 function getActiveRescuedSetId(){
   if(!progress.companionCostumes) return null;
   let activeSetId = null;
@@ -7517,11 +9037,37 @@ function getActiveRescuedSetId(){
   }
   return activeSetId;
 }
+// v12.35 — 부분 세트 보너스. 같은 setId 를 입은 친구 수에 비례한 partial bonus.
+//   1pc: 20% / 2pc: 40% / 3pc: 60% / 4pc: 78% / 5pc: 90% (풀세트도 90% 캡 — 풀세트와 부분 차별화).
+//   사용자 명시: "파티원들도 천국 코스튬 입으면 부분 효과 적용" + "5pc 만 되어도 풀세트 100% 효과는 좀 아닌 듯".
 function getRescuedSetBonus(){
-  const id = getActiveRescuedSetId();
-  if(!id) return 1.0;
-  const def = RESCUED_SET_DEFS.find(s => s.id === id);
-  return def ? def.setBonus : 1.0;
+  if(!progress.companionCostumes) return 1.0;
+  // 가장 많이 착용된 setId 를 찾고 그 수만큼 비례 보너스.
+  const counts = {};
+  for(const k of RESCUED_KINDS){
+    const slot = progress.companionCostumes[k];
+    if(!slot) continue;
+    _normalizeCompanionEquipped(slot, k);
+    const eq = slot.equipped.body;
+    if(!eq) continue;
+    const def = (COMPANION_COSTUMES[k] || []).find(c => c.id === eq);
+    if(!def || !def.setId) continue;
+    counts[def.setId] = (counts[def.setId] || 0) + 1;
+  }
+  // 최다 setId
+  let bestId = null, bestCnt = 0;
+  for(const id in counts){
+    if(counts[id] > bestCnt){ bestId = id; bestCnt = counts[id]; }
+  }
+  if(!bestId || bestCnt < 1) return 1.0;
+  const def = RESCUED_SET_DEFS.find(s => s.id === bestId);
+  if(!def) return 1.0;
+  // v12.35 — partial fraction. 5pc 도 90% 캡 (풀세트와 부분의 차별화).
+  // 사용자 피드백: "5pc 만 되어도 풀세트 100% 효과는 좀 아닌 듯".
+  // 1pc=20%, 2pc=40%, 3pc=60%, 4pc=78%, 5pc=90%.
+  const fracs = [0.20, 0.40, 0.60, 0.78, 0.90];
+  const frac = fracs[Math.min(bestCnt, 5) - 1];
+  return 1 + (def.setBonus - 1) * frac;
 }
 // 일괄 구매 — 한 세트의 5 친구 코스튬을 모두 unlocked 에 추가하고, 같은 세트로 자동 장착.
 function buyRescuedSet(setId){
@@ -7652,15 +9198,12 @@ function grantDefaultCompanionCostume(kind){
 // 사용자: "친구 5종의 천국 코스튬은 세트로 만들면 되는거 알지? 같이 세트로 구매되게 해야해."
 // → setId 통일된 한 세트 일괄 unlock + 자동 장착 (수동 5번 클릭 회피).
 function grantHeavenCompanionCostumes(){
+  // v12.35 — 사용자 명시: 천국 코스튬은 남편/아내/아이만 무료. 친구 5종은 유료 구매.
+  // 친구 5종(heavenAscension)은 더 이상 자동 지급하지 않음. 상점에서 코인 결제로 해금.
   if(!progress.companionCostumes) progress.companionCostumes = {};
   const adds = {
     wife:    ['heaven_halo','heaven_robe'],
     child:   ['mini_halo','mini_robe'],
-    sparrow: ['heavenAscension_sparrow'],
-    magpie:  ['heavenAscension_magpie'],
-    owl:     ['heavenAscension_owl'],
-    parrot:  ['heavenAscension_parrot'],
-    squirrel:['heavenAscension_squirrel'],
   };
   for(const k of Object.keys(adds)){
     if(!progress.companionCostumes[k]) progress.companionCostumes[k] = { unlocked:[], equipped:{head:null, body:null} };
@@ -7670,6 +9213,36 @@ function grantHeavenCompanionCostumes(){
     for(const id of adds[k]){
       if(!slot.unlocked.includes(id)) slot.unlocked.push(id);
       // 자동 장착 — 친구는 모두 같은 setId 로 동시 장착되어 setBonus 즉시 발효.
+      const list = COMPANION_COSTUMES[k] || [];
+      const def = list.find(c => c.id === id);
+      if(def){
+        const ssl = def.slot || 'head';
+        slot.equipped[ssl] = id;
+      }
+    }
+  }
+  saveProgress();
+}
+// v12.35 — 아마겟돈 SSS 코스튬 일괄 자동 해금 (ch251 클리어 시).
+//   가족: wife_armageddon_halo/robe + mini_armageddon_halo/robe (각 head+body)
+//   5종 친구: armageddonHostSet 세트 (5명 동일 setId, body slot, setBonus 1.09×)
+//   부모: armageddonElder 세트 (2 pair 동일 setId, setBonus 1.10×)
+//   조상: gugunardo_armageddon, bristotodul_armageddon (개별 body slot, dmgBoost 1.18)
+function grantArmageddonCompanionCostumes(){
+  // v12.35 — 사용자 명시: 아마겟돈 코스튬도 남편/아내/아이만 무료. 친구·부모·조상은 유료.
+  // 자동 지급은 wife/child SSS 만 (가족은 무료). 나머지는 상점에서 구매.
+  if(!progress.companionCostumes) progress.companionCostumes = {};
+  const adds = {
+    wife:  ['wife_armageddon_halo','wife_armageddon_robe'],
+    child: ['mini_armageddon_halo','mini_armageddon_robe'],
+  };
+  for(const k of Object.keys(adds)){
+    if(!progress.companionCostumes[k]) progress.companionCostumes[k] = { unlocked:[], equipped:{head:null, body:null} };
+    const slot = progress.companionCostumes[k];
+    if(!slot.unlocked) slot.unlocked = [];
+    _normalizeCompanionEquipped(slot, k);
+    for(const id of adds[k]){
+      if(!slot.unlocked.includes(id)) slot.unlocked.push(id);
       const list = COMPANION_COSTUMES[k] || [];
       const def = list.find(c => c.id === id);
       if(def){
@@ -7723,6 +9296,10 @@ function getCompanionDmgBoost(kind){
   // 구출 친구 5종 세트 보너스 (모두 같은 setId 의 코스튬을 입고 있을 때만 적용).
   if(typeof RESCUED_KINDS !== 'undefined' && RESCUED_KINDS.includes(kind)){
     mult *= getRescuedSetBonus();
+  }
+  // v12.35 — 부모 pair 세트 보너스 (시아버지+시어머니, 장인+장모 모두 같은 setId 일 때만).
+  if(typeof PARENTS_KINDS !== 'undefined' && PARENTS_KINDS.includes(kind)){
+    mult *= getParentsSetBonus();
   }
   return mult;
 }
@@ -8161,7 +9738,33 @@ const BOSS_VARIANTS = {
   ophanim_wheel:           { hpMult:54.0, dmgMult:3.80, sizeMult:1.36, label:'오필의 바퀴',        baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:55,  saturate:1.0 },    // 181-185
   michael_blade:           { hpMult:56.0, dmgMult:3.90, sizeMult:1.38, label:'미가엘의 검',        baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:45,  saturate:1.2 },    // 186-190
   gabriel_horn:            { hpMult:58.0, dmgMult:4.00, sizeMult:1.38, label:'가브리엘의 나팔',    baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.1 },    // 191-195
-  sky_sovereign:           { hpMult:62.0, dmgMult:4.20, sizeMult:1.45, label:'창공의 주인',        baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.1 },    // 196-200 (게임 최종)
+  sky_sovereign:           { hpMult:62.0, dmgMult:4.20, sizeMult:1.45, label:'창공의 주인',        baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.1 },    // 196-200
+  // === v12.35 → v12.36b — 원정 Ⅶ·Ⅷ. 사용자 검수 후 hpMult 범위 축소. 기존 sky_sovereign 62 대비
+  //   ch300 dread_sovereign 95 까지 1.5× 범위. chm.hp 평탄화 + 신규 카드 (×4-8) 와 결합해
+  //   SSS 풀세트 기준 ch300 보스 ~10분 클리어선. dmgMult 도 완만화 (5.5→7.0). ===
+  covenant_warden:         { hpMult:54.0, dmgMult:4.30, sizeMult:1.36, label:'성약의 검문관',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:55,  saturate:1.0 },    // 201-205
+  archon_blade:            { hpMult:56.0, dmgMult:4.40, sizeMult:1.38, label:'대권의 검',         baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:45,  saturate:1.1 },    // 206-210
+  throne_judicator:        { hpMult:58.0, dmgMult:4.50, sizeMult:1.38, label:'옥좌의 심판자',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.0 },    // 211-215
+  nameless_oracle:         { hpMult:60.0, dmgMult:4.60, sizeMult:1.38, label:'이름 잃은 신탁',    baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:60,  saturate:0.7 },    // 216-220
+  wrath_legion:            { hpMult:62.0, dmgMult:4.75, sizeMult:1.40, label:'분노의 군단',       baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:25,  saturate:1.2 },    // 221-225
+  grace_marshal:           { hpMult:64.0, dmgMult:4.85, sizeMult:1.40, label:'은총의 사령관',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:50,  saturate:1.0 },    // 226-230
+  sanctum_examiner:        { hpMult:66.0, dmgMult:4.95, sizeMult:1.40, label:'성소의 시험관',     baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:50,  saturate:0.95 },   // 231-235
+  third_heaven_warden:     { hpMult:68.0, dmgMult:5.05, sizeMult:1.42, label:'3층천 검문관',      baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.0 },    // 236-240
+  herald_archon:           { hpMult:70.0, dmgMult:5.20, sizeMult:1.42, label:'기수의 대권',       baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:35,  saturate:1.2 },    // 241-245
+  third_heaven_sovereign:  { hpMult:74.0, dmgMult:5.40, sizeMult:1.46, label:'3층천의 군주',       baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.2 },    // 246-250 (원정 Ⅶ 끝)
+  // === 원정 Ⅷ — 아마겟돈 (ch251-300). 악의 세력 침공. ===
+  fallen_vanguard:         { hpMult:76.0, dmgMult:5.55, sizeMult:1.42, label:'타락한 전위대장',  baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:0,   saturate:1.3 },    // 251-255
+  dread_legion:            { hpMult:78.0, dmgMult:5.70, sizeMult:1.42, label:'공포의 군단장',    baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:0,   saturate:1.4 },    // 256-260
+  ravager_warden:          { hpMult:80.0, dmgMult:5.85, sizeMult:1.44, label:'유린자 검문',      baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:340, saturate:1.3 },    // 261-265
+  nightlance_marshal:      { hpMult:82.0, dmgMult:6.00, sizeMult:1.46, label:'야창의 마샬',     baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:280, saturate:1.4 },    // 266-270
+  armageddon_invader:      { hpMult:85.0, dmgMult:6.15, sizeMult:1.50, label:'아마겟돈 침공자',  baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:0,   saturate:1.5 },    // 271-275
+  fallen_choir:            { hpMult:88.0, dmgMult:6.30, sizeMult:1.50, label:'타락한 합창단',    baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:0,   saturate:1.4 },    // 276-280
+  abyss_marshal:           { hpMult:90.0, dmgMult:6.45, sizeMult:1.52, label:'심연의 마샬',      baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:300, saturate:1.4 },    // 281-285
+  liar_legion:             { hpMult:92.0, dmgMult:6.65, sizeMult:1.52, label:'거짓의 군단장',    baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:340, saturate:1.5 },    // 286-290
+  // ch291-295 — 컨트롤 강요. dmgMult 도약, sizeMult 더 큼. 악의 정점.
+  dread_apex:              { hpMult:96.0, dmgMult:7.05, sizeMult:1.58, label:'공포의 정점',      baseStyle:'void',      baseBehavior:'void',      hueShift:340, saturate:1.5 },    // 291-295
+  // ch296-300 — 게임 최종. 악의 군주 — 모든 패턴 통합.
+  dread_sovereign:         { hpMult:105.0, dmgMult:7.40, sizeMult:1.65, label:'악의 군주',        baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:1.6 },    // 296-300 (게임 최종)
 };
 function bossBaseStyleFor(variant){
   const v = BOSS_VARIANTS[variant];
@@ -8178,6 +9781,28 @@ function bossFilterFor(variant){
   return `hue-rotate(${v.hueShift}deg) saturate(${sat})`;
 }
 function bossVariantForChapter(c){
+  // v12.35 — 원정 Ⅷ 아마겟돈 (5챕터 간격) — 게임 최종 ch300. 악의 세력 보스.
+  if(c >= 296) return 'dread_sovereign';
+  if(c >= 291) return 'dread_apex';
+  if(c >= 286) return 'liar_legion';
+  if(c >= 281) return 'abyss_marshal';
+  if(c >= 276) return 'fallen_choir';
+  if(c >= 271) return 'armageddon_invader';
+  if(c >= 266) return 'nightlance_marshal';
+  if(c >= 261) return 'ravager_warden';
+  if(c >= 256) return 'dread_legion';
+  if(c >= 251) return 'fallen_vanguard';
+  // v12.35 — 원정 Ⅶ 천국 3층천 침범 (5챕터 간격)
+  if(c >= 246) return 'third_heaven_sovereign';
+  if(c >= 241) return 'herald_archon';
+  if(c >= 236) return 'third_heaven_warden';
+  if(c >= 231) return 'sanctum_examiner';
+  if(c >= 226) return 'grace_marshal';
+  if(c >= 221) return 'wrath_legion';
+  if(c >= 216) return 'nameless_oracle';
+  if(c >= 211) return 'throne_judicator';
+  if(c >= 206) return 'archon_blade';
+  if(c >= 201) return 'covenant_warden';
   // v12.34 — 원정 Ⅵ 천국 2층천 (5챕터 간격)
   if(c >= 196) return 'sky_sovereign';
   if(c >= 191) return 'gabriel_horn';
@@ -8245,9 +9870,13 @@ function spawnBoss(){
   // 5-card builds, v3 (3500, 110) 30s for the typical full-XP build.
   // v11: × progressionMult() — maxed-shop players replaying old chapters get 2-5× HP so
   // the boss stays a real fight instead of dying in 3 seconds (reported user complaint).
-  b.hp = b.maxHp = Math.ceil((3500 + Math.pow(c, 1.45)*110) * chm.hp * v.hpMult * progressionMult());
+  // v12.36b — base HP 공식의 c^1.45 항을 ch200 으로 clamp. ch>200 도 base 동일.
+  //   chm.hp 평탄화 + base 평탄화 + hpMult 완만화 = ch300 보스 HP 클리어 가능선.
+  const cBaseHp = Math.min(c, 200);
+  const cBaseDmg = Math.min(c, 200);
+  b.hp = b.maxHp = Math.ceil((3500 + Math.pow(cBaseHp, 1.45)*110) * chm.hp * v.hpMult * progressionMult());
   b.speed = (52 + c*2.2) * chm.speed;
-  b.damage = Math.ceil((14 + c*1.8) * chm.dmg * v.dmgMult);
+  b.damage = Math.ceil((14 + cBaseDmg*1.8) * chm.dmg * v.dmgMult);
   b.size = 2.9 * v.sizeMult;
   b.collideRadius = 68 * v.sizeMult;
   b.isChapterBoss = true;
@@ -8297,7 +9926,20 @@ function waveEnemyPool(wave){
   // 그대로". 원정 Ⅲ/Ⅳ에서는 base 자체를 톤에 맞게 교체.
   const c = state.chapter;
   let base;
-  if(c >= 101){
+  if(c >= 251){
+    // v12.35 — 원정 Ⅷ 아마겟돈 base. **악의 세력**(타락 천사·심연 군세) 위주.
+    //   imp = 작은 악마, hellhound = 타락 사자, soul_husk = 영혼 침식자, tyrant = 타락 천사 장수.
+    //   사용자 명시: "악의 세력이 천국에 쳐들어왔다고 생각하면 돼."
+    if(wave === 1)      base = ['imp','imp','hellhound','soul_husk','soul_husk'];
+    else if(wave === 2) base = ['imp','hellhound','hellhound','soul_husk','soul_husk','tank'];
+    else                base = ['hellhound','soul_husk','soul_husk','tank','tyrant','imp','hellhound'];
+  } else if(c >= 201){
+    // v12.35 — 원정 Ⅶ 천국 3층천 침범 base. 천사 권속 + 빛의 권속 위주.
+    // void_drone = 빛의 사자 / star_eye = 신성의 눈 / soul_husk = 거룩한 권속.
+    if(wave === 1)      base = ['void_drone','void_drone','star_eye','star_eye','soul_husk'];
+    else if(wave === 2) base = ['void_drone','star_eye','star_eye','soul_husk','soul_husk','tank'];
+    else                base = ['star_eye','soul_husk','soul_husk','tank','tyrant','void_drone','star_eye'];
+  } else if(c >= 101){
     // 원정 Ⅳ 지옥 base — imp/hellhound/soul_husk 위주.
     if(wave === 1)      base = ['imp','imp','imp','hellhound','hellhound'];
     else if(wave === 2) base = ['imp','hellhound','hellhound','soul_husk','soul_husk','imp'];
@@ -8497,6 +10139,47 @@ const UPGRADES = [
   { id:'singularity', title:'특이점 코어', icon:'🌌', max:1, rarity:'l', unlockCh:45,
     desc:(l)=>'발사 +2, 탄속 ×1.5, 투사체 크기 ×1.3',
     apply:p=>{ p.projCount += 2; p.projSpeed *= 1.5; p.projSize *= 1.3; } },
+  // v12.36b — ch130+ 고티어 스킬. 기존 카드만으로는 ch200+ 보스 HP 못 따라잡아 클리어 시간 폭증.
+  // 사용자 명시: "스킬트리가 ch300까지 추가가 안된거 같다 — 고려해서 난이도 재조정".
+  { id:'hellbringer', title:'지옥 부름꾼', icon:'👹', max:1, rarity:'l', unlockCh:101,
+    desc:(l)=>'공격력 ×1.6, 관통 +3 (지옥 원정 카드)',
+    apply:p=>{ p.damage *= 1.6; p.pierce += 3; } },
+  { id:'rescuer_might', title:'구원자의 권능', icon:'⛓️', max:2, rarity:'l', unlockCh:115,
+    desc:(l)=>l?'추가 ×1.3 dmg + 발사 +1':'공격력 ×1.4, 발사 +1, 동료 사기',
+    apply:p=>{ p.damage *= (1.4 + 0.3); p.projCount += 1; } },
+  // 천국 1·2층천 — SS 코스튬과 시너지.
+  { id:'celestial_grace', title:'천공의 은총', icon:'🪽', max:2, rarity:'l', unlockCh:131,
+    desc:(l)=>l?'추가 ×1.4 dmg + 치명타 +15%':'공격력 ×1.5, 치명타 +15%, 자가 회복 +0.5/s',
+    apply:p=>{ p.damage *= 1.5; p.crit = Math.min(0.95, p.crit+0.15); p.regenPerSec = (p.regenPerSec||0)+0.5; } },
+  { id:'seraph_strike', title:'세라핌의 일격', icon:'⚜️', max:1, rarity:'l', unlockCh:161,
+    desc:(l)=>'공격력 ×1.8, 관통 +2, 발사 +1',
+    apply:p=>{ p.damage *= 1.8; p.pierce += 2; p.projCount += 1; } },
+  { id:'sky_sovereign_pact', title:'창공의 계약', icon:'☁️', max:1, rarity:'l', unlockCh:181,
+    desc:(l)=>'공격력 ×2.0, 연사 ×1.3 (단, 최대 HP -15%)',
+    apply:p=>{ p.damage *= 2.0; p.fireRate *= 1.3; p.maxHp = Math.max(20, Math.round(p.maxHp*0.85)); p.hp = Math.min(p.maxHp, p.hp); } },
+  // 천국 3층천 — 신성 침범, 다음 단계 폭발적 강화.
+  { id:'covenant_blade', title:'성약의 검', icon:'🗡️', max:1, rarity:'l', unlockCh:201,
+    desc:(l)=>'공격력 ×2.0, 치명타 배율 +1.5',
+    apply:p=>{ p.damage *= 2.0; p.critMult += 1.5; } },
+  { id:'archon_decree', title:'대권의 칙령', icon:'📜', max:2, rarity:'l', unlockCh:221,
+    desc:(l)=>l?'추가 ×1.5 dmg + 발사 +1 + 관통 +2':'공격력 ×1.6, 발사 +2, 관통 +2',
+    apply:p=>{ p.damage *= 1.6; p.projCount += 2; p.pierce += 2; } },
+  { id:'third_heaven_writ', title:'3층천의 명령서', icon:'⚜️', max:1, rarity:'l', unlockCh:241,
+    desc:(l)=>'공격력 ×2.5, 연사 ×1.4 (단, 최대 HP -20%)',
+    apply:p=>{ p.damage *= 2.5; p.fireRate *= 1.4; p.maxHp = Math.max(20, Math.round(p.maxHp*0.80)); p.hp = Math.min(p.maxHp, p.hp); } },
+  // 아마겟돈 — 악의 세력에 맞선 신성 강화. SSS 와 시너지. 사용자 검수 후 보수적 multiplier.
+  { id:'dawn_alliance', title:'창조주와의 동맹', icon:'🌟', max:1, rarity:'l', unlockCh:251,
+    desc:(l)=>'공격력 ×1.6, 발사 +2, 보스 추가 데미지 +20%',
+    apply:p=>{ p.damage *= 1.6; p.projCount += 2; p.holyBossBonus = (p.holyBossBonus||0) + 0.20; } },
+  { id:'armageddon_legion', title:'아마겟돈 진군', icon:'⚔️', max:2, rarity:'l', unlockCh:271,
+    desc:(l)=>l?'추가 ×1.4 dmg + 관통 +2':'공격력 ×1.4, 관통 +3, 보스 추가 데미지 +15%',
+    apply:p=>{ p.damage *= 1.4; p.pierce += 3; p.holyBossBonus = (p.holyBossBonus||0) + 0.15; } },
+  { id:'creator_blessing', title:'창조주의 축복', icon:'✨', max:1, rarity:'l', unlockCh:286,
+    desc:(l)=>'공격력 ×1.7, 치명타 배율 +1.5, 보스 추가 데미지 +25%',
+    apply:p=>{ p.damage *= 1.7; p.critMult += 1.5; p.holyBossBonus = (p.holyBossBonus||0) + 0.25; } },
+  { id:'final_judgment', title:'최후의 심판', icon:'⚡', max:1, rarity:'l', unlockCh:296,
+    desc:(l)=>'공격력 ×2.0, 연사 ×1.4, 발사 +2 (마지막 5챕터 전용)',
+    apply:p=>{ p.damage *= 2.0; p.fireRate *= 1.4; p.projCount += 2; } },
 ];
 
 function rebuildOrbits(){
@@ -8646,6 +10329,10 @@ function fireWeapon(wid){
 
 function damageEnemy(e, dmg, crit=false, knockbackDir=null){
   if(e.dead) return;
+  // v12.35 — SSS weapon holyBossBonus: 보스(원정 Ⅷ 아마겟돈/3층천 천국 포함)에 추가 데미지.
+  if(e.isChapterBoss && state.player && state.player.holyBossBonus){
+    dmg = Math.ceil(dmg * (1 + state.player.holyBossBonus));
+  }
   e.hp -= dmg;
   e.hitT = 0.1;
   if(knockbackDir){
@@ -8963,6 +10650,7 @@ function onBossDefeated(){
   // v12 phase 2 / v12.11 phase 3b — companion unlocks. 가족 (ch51 wife, ch60 child) +
   // 원정 Ⅳ 구출 친구들 (ch105 sparrow, ch110 magpie, ch115 owl, ch120 parrot, ch125 squirrel).
   state.newCompanion = null;
+  state._lastJoinedKind = null;
   if(state.chapter === 51 && !progress.companionUnlocks.wife){
     progress.companionUnlocks.wife = true;
     grantDefaultCompanionCostume('wife');
@@ -8974,6 +10662,7 @@ function onBossDefeated(){
   } else if(state.chapter === 105 && !progress.companionUnlocks.sparrow){
     progress.companionUnlocks.sparrow = true;
     state.newCompanion = { kind:'sparrow', label:'참새 친구', sub:'사냥꾼의 숲에서 구출 🐦' };
+    state._lastJoinedKind = 'sparrow';   // v12.35 — 5종 친구 세트 미리보기 트리거
   } else if(state.chapter === 110 && !progress.companionUnlocks.magpie){
     progress.companionUnlocks.magpie = true;
     state.newCompanion = { kind:'magpie', label:'까치 친구', sub:'불의 광장에서 구출 🪶' };
@@ -8986,6 +10675,22 @@ function onBossDefeated(){
   } else if(state.chapter === 125 && !progress.companionUnlocks.squirrel){
     progress.companionUnlocks.squirrel = true;
     state.newCompanion = { kind:'squirrel', label:'다람쥐 친구', sub:'심연의 첨탑에서 구출 🐿' };
+  }
+  // v12.35 — 원정 Ⅶ 부모 합류 (남편 부모 ch205, 아내 부모 ch210). pair 단위.
+  else if(state.chapter === 205 && !progress.companionUnlocks.husbandParents){
+    progress.companionUnlocks.husbandParents = true;
+    state.newCompanion = { kind:'husbandParents', label:'남편의 부모님 합류', sub:'천국 3층천에서 다시 만난 가족 — 천사의 옷을 입고 있습니다 🪽' };
+  } else if(state.chapter === 210 && !progress.companionUnlocks.wifeParents){
+    progress.companionUnlocks.wifeParents = true;
+    state.newCompanion = { kind:'wifeParents', label:'아내의 부모님 합류', sub:'천국에 모인 일가 — 천사의 옷차림으로 등장 🪽' };
+  }
+  // v12.35 — 원정 Ⅷ 조상 합류 (구구나르도 다 둘치 ch255, 비리스토둘레스 ch260).
+  else if(state.chapter === 255 && !progress.companionUnlocks.gugunardo){
+    progress.companionUnlocks.gugunardo = true;
+    state.newCompanion = { kind:'gugunardo', label:'구구나르도 다 둘치 합류', sub:'비둘기 가문의 위대한 발명가 조상이 도면을 들고 합류 📐' };
+  } else if(state.chapter === 260 && !progress.companionUnlocks.bristotodul){
+    progress.companionUnlocks.bristotodul = true;
+    state.newCompanion = { kind:'bristotodul', label:'비리스토둘레스 합류', sub:'비둘기 가문의 위대한 철학자 조상이 두루마리를 들고 합류 📜' };
   }
   // v12.34 — ch131(원정 Ⅴ 첫 챕터) 클리어 시 천국 SS 코스튬 일괄 자동 지급. 한 번만 발생.
   if(state.chapter === 131 && !progress.heavenCostumesGranted){
@@ -9000,9 +10705,41 @@ function onBossDefeated(){
       };
     }
   }
+  // v12.35 — ch251(원정 Ⅷ 첫 챕터) 클리어 시 아마겟돈 SSS 코스튬 일괄 자동 지급 + 동료 SSS 세트.
+  if(state.chapter === 251 && !progress.armageddonCostumesGranted){
+    const granted = grantArmageddonSSSCostumes();
+    grantArmageddonCompanionCostumes();
+    progress.armageddonCostumesGranted = true;
+    if(granted > 0){
+      state.toastBanner = {
+        text:'⚔️ 아마겟돈 SSS 코스튬 해금!',
+        sub:'남편 무기는 성전의 새우깡. 가족·부모·조상·5종 친구도 일괄 SSS 세트 획득.',
+        t:5.5, maxT:5.5, tone:'critical'
+      };
+    }
+  }
+  // v12.35 — ch300 클리어 = 아마겟돈 승리 = 게임 최종. 영구 효과 부여.
+  if(state.chapter === 300 && !progress.armageddonVictory){
+    progress.armageddonVictory = true;
+    progress.eyesGlowPermanent = true;
+    if(!progress.ownedSkins.includes('celestial_cracker')){
+      progress.ownedSkins.push('celestial_cracker');
+    }
+    state.toastBanner = {
+      text:'🌟 천상의 새우깡 — 창조주의 인정!',
+      sub:'남편 비둘기 눈은 영원히 빛나고, 천상의 새우깡 스킨이 해금됐습니다.',
+      t:6.0, maxT:6.0, tone:'critical'
+    };
+  }
   // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
   // v12.21 → v12.22 → v12.23 — v12.22 대비 ×1.75 (원본 대비 ~1/3).
-  awardCoins(21 + state.chapter * 5);
+  // v12.35 — 사용자 명시: SSS 풀세트 구매가 어렵도록 ch200+ 곡선 완만화. 곡선:
+  //   ~ch200: 21 + ch*5 (이전과 동일)
+  //   ch201-300: ch200 보너스(1021) + (ch-200)*3.5 (1500→1370으로 완만)
+  // → ch300 클리어 보상 ≈ 1370 코인 (이전 1521 대비 ~10% ↓). SSS 풀세트(70k+) 구매에 ~50 챕터.
+  const baseCh = Math.min(state.chapter, 200);
+  const tail = Math.max(0, state.chapter - 200);
+  awardCoins(Math.round(21 + baseCh * 5 + tail * 3.5));
   // Chapter-clear costume drop: 10% rare drop, with pity guaranteeing one every 10 clears.
   state.earnedCostumeThisChapter = rollChapterClearCostume();
   saveProgress();
@@ -9105,6 +10842,28 @@ function showCompanionMeetModal(){
       sub: '심연의 첨탑 — 도토리를 빼앗긴 다람쥐',
       story: '심연의 첨탑 정상에서 도토리를 빼앗기고 떨고 있던 다람쥐.<br>가족 뒤에서 도토리를 입에 물고 부지런히 따라옵니다.',
     },
+    // v12.35 — 원정 Ⅶ 부모 합류 (pair 단위, 천사 디폴트 옷).
+    husbandParents: {
+      title: '🪽 남편의 부모님 합류!', color:'#FFE066',
+      sub: '천국 3층천에서 다시 만난 가족',
+      story: '먼 옛날 별이 된 남편의 부모님이 천사의 옷을 입고 마중 나옵니다.<br>창조주가 침범에 노여워하고 있지만, 가족은 멈추지 않고 함께 새우깡을 던집니다.',
+    },
+    wifeParents: {
+      title: '🪽 아내의 부모님 합류!', color:'#FFD43B',
+      sub: '하늘에서 일가가 모이다',
+      story: '아내의 부모님이 따뜻한 깃털과 함께 합류합니다.<br>천사의 옷자락은 디폴트 — 상점의 세트 코스튬으로 한 번에 갈아입을 수 있습니다.',
+    },
+    // v12.35 — 원정 Ⅷ 조상 합류 (개별, 발명가/철학자 디폴트 옷).
+    gugunardo: {
+      title: '📐 구구나르도 다 둘치 합류!', color:'#FFA94D',
+      sub: '비둘기 가문의 위대한 발명가 조상',
+      story: '르네상스 어디쯤에서 도면과 깃털 펜을 휘두르던 전설의 발명가 비둘기.<br>"새우깡의 비행 궤적은 정확히 황금비를 따라야 하지." — 합류 후 다양한 직업 코스튬으로 변신할 수 있습니다.',
+    },
+    bristotodul: {
+      title: '📜 비리스토둘레스 합류!', color:'#9775FA',
+      sub: '비둘기 가문의 위대한 철학자 조상',
+      story: '"새우깡이란 무엇인가." 두루마리를 펴 들고 합류한 고대 사상가 비둘기.<br>합류 후 시인·연설가·현자 등 다양한 직업 코스튬을 입혀줄 수 있습니다.',
+    },
   };
   const cp = meetCopy[c.kind] || meetCopy.wife;
   titleEl.textContent = cp.title;
@@ -9164,10 +10923,131 @@ function showCompanionMeetModal(){
 function continueAfterCompanionMeet(){
   document.getElementById('companionMeetModal').classList.add('hidden');
   if(state._cmmRaf){ cancelAnimationFrame(state._cmmRaf); state._cmmRaf = 0; }
+  // v12.35 — 세트 첫 멤버 합류 시 세트 시스템 안내 팝업.
+  // 친구: sparrow(105) 첫 합류 시 / 부모: husbandParents(205) 첫 합류 시 / 조상: gugunardo(255) 첫 합류 시.
+  const triggered = state._lastJoinedKind;
+  state._lastJoinedKind = null;
+  if(triggered === 'sparrow' && !progress.setIntroSeen_friends){
+    progress.setIntroSeen_friends = true; saveProgress();
+    showSetIntroModal('friends');
+    return;
+  }
+  if(triggered === 'husbandParents' && !progress.setIntroSeen_parents){
+    progress.setIntroSeen_parents = true; saveProgress();
+    showSetIntroModal('parents');
+    return;
+  }
+  if(triggered === 'gugunardo' && !progress.setIntroSeen_ancestors){
+    progress.setIntroSeen_ancestors = true; saveProgress();
+    showSetIntroModal('ancestors');
+    return;
+  }
   // v12.26 — 사용자 피드백 "챕터 클리어 화면에서 합류 내용을 또 보여주지 말 것".
   // meet 모달이 닫혔으니 chapterCleared 의 "💗 ___ 합류!" 배너가 또 뜨지 않게 비움.
   state.newCompanion = null;
   // Continue the queued reveal: costume reward → chapter clear, or directly clear.
+  if(state.earnedCostumeThisChapter){
+    showChapterRewardModal(state.earnedCostumeThisChapter);
+  } else {
+    renderChapterCleared();
+    document.getElementById('chapterCleared').classList.remove('hidden');
+  }
+}
+// v12.35 — 세트 파티원 안내 팝업. 친구 5종 / 부모 2pair / 조상 2종 모두 한 화면에 미리보기.
+function showSetIntroModal(setKey){
+  const mTitle = document.getElementById('simTitle');
+  const mSub = document.getElementById('simSub');
+  const mPreview = document.getElementById('simPreview');
+  const mStory = document.getElementById('simStory');
+  if(!mTitle || !mSub || !mPreview || !mStory) return continueAfterSetIntro();
+  let kinds, title, sub, story, drawer;
+  if(setKey === 'friends'){
+    title = '🐦 구출 친구 5종 세트 — 미리 알림';
+    sub = 'Ch105·110·115·120·125 클리어 시 차례로 합류';
+    kinds = [
+      { kind:'sparrow',  label:'참새 (Ch105)' },
+      { kind:'magpie',   label:'까치 (Ch110)' },
+      { kind:'owl',      label:'부엉이 (Ch115)' },
+      { kind:'parrot',   label:'앵무새 (Ch120)' },
+      { kind:'squirrel', label:'다람쥐 (Ch125)' },
+    ];
+    story = '5종 친구 모두 합류 후 코스튬 탭에 <b style="color:#FFA94D;">"🐦 구출 친구 세트"</b> 가 활성화됩니다.<br>한 세트 = 5명 일괄 구매·일괄 장착. 부분 착용도 부분 효과 (1pc 20% → 5pc 90%).';
+    drawer = (cv, k) => {
+      const ctx2 = cv.getContext('2d'); const cssW = 56, cssH = 60;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = cssW * dpr; cv.height = cssH * dpr;
+      cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px';
+      ctx2.setTransform(dpr,0,0,dpr,0,0); ctx2.clearRect(0,0,cssW,cssH);
+      ctx2.save(); ctx2.translate(cssW/2, cssH-10); ctx2.scale(0.95, 0.95);
+      const fn = ({sparrow:drawSparrowFriend, magpie:drawMagpieFriend, owl:drawOwlFriend, parrot:drawParrotFriend, squirrel:drawSquirrelFriend})[k];
+      if(fn) fn(ctx2, { x:0, y:0, kind:k, phaseSeed:0 });
+      ctx2.restore();
+    };
+  } else if(setKey === 'parents'){
+    title = '🪽 부모 세트 — 미리 알림';
+    sub = 'Ch205 (남편 부모) → Ch210 (아내 부모) 차례로 합류';
+    kinds = [
+      { kind:'husbandParents', label:'남편 부모님' },
+      { kind:'wifeParents',    label:'아내 부모님' },
+    ];
+    story = '두 pair 모두 합류 후 코스튬 탭에 <b style="color:#FFD43B;">"🪽 부모 세트"</b> 가 활성화됩니다.<br>천사 디폴트는 무료 — 다른 세트는 일괄 구매. 부분 착용도 부분 효과 (1 pair 45% / 2 pair 85%).';
+    drawer = (cv, k) => {
+      const ctx2 = cv.getContext('2d'); const cssW = 110, cssH = 60;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = cssW * dpr; cv.height = cssH * dpr;
+      cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px';
+      ctx2.setTransform(dpr,0,0,dpr,0,0); ctx2.clearRect(0,0,cssW,cssH);
+      // 임시로 angel default 코스튬을 입혀 미리보기.
+      if(!progress.companionCostumes[k]) progress.companionCostumes[k] = { unlocked:['angel'], equipped:{head:null, body:'angel'} };
+      ctx2.save(); ctx2.translate(cssW/2, cssH-10); ctx2.scale(0.95, 0.95);
+      drawParentPair(ctx2, { x:0, y:0, kind:k }, k === 'husbandParents' ? 'husband' : 'wife');
+      ctx2.restore();
+    };
+  } else if(setKey === 'ancestors'){
+    title = '📜 조상 비둘기 — 미리 알림';
+    sub = 'Ch255 (구구나르도) → Ch260 (비리스토둘레스) 차례로 합류';
+    kinds = [
+      { kind:'gugunardo',   label:'구구나르도 (발명가)' },
+      { kind:'bristotodul', label:'비리스토둘레스 (철학자)' },
+    ];
+    story = '두 조상 모두 합류 후 코스튬 탭에 <b style="color:#9775FA;">"📜 조상"</b> 이 활성화됩니다.<br>각 조상마다 <b>여러 직업 코스튬을 따로 사서 따로 장착</b>할 수 있어요. 디폴트(발명가복/철학자복) 무료.';
+    drawer = (cv, k) => {
+      const ctx2 = cv.getContext('2d'); const cssW = 80, cssH = 64;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = cssW * dpr; cv.height = cssH * dpr;
+      cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px';
+      ctx2.setTransform(dpr,0,0,dpr,0,0); ctx2.clearRect(0,0,cssW,cssH);
+      const defaultId = k === 'gugunardo' ? 'inventor' : 'scholar';
+      if(!progress.companionCostumes[k]) progress.companionCostumes[k] = { unlocked:[defaultId], equipped:{head:null, body:defaultId} };
+      ctx2.save(); ctx2.translate(cssW/2, cssH-10);
+      const fn = k === 'gugunardo' ? drawGugunardo : drawBristotodul;
+      fn(ctx2, { x:0, y:0, kind:k });
+      ctx2.restore();
+    };
+  } else {
+    return continueAfterSetIntro();
+  }
+  mTitle.textContent = title;
+  mSub.textContent = sub;
+  mStory.innerHTML = story;
+  mPreview.innerHTML = '';
+  for(const item of kinds){
+    const cell = document.createElement('div');
+    cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;';
+    const cv = document.createElement('canvas');
+    cell.appendChild(cv);
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:10px;color:#FFE066;font-weight:800;text-align:center;';
+    lbl.textContent = item.label;
+    cell.appendChild(lbl);
+    mPreview.appendChild(cell);
+    drawer(cv, item.kind);
+  }
+  document.getElementById('setIntroModal').classList.remove('hidden');
+}
+function continueAfterSetIntro(){
+  document.getElementById('setIntroModal').classList.add('hidden');
+  state.newCompanion = null;
   if(state.earnedCostumeThisChapter){
     showChapterRewardModal(state.earnedCostumeThisChapter);
   } else {
@@ -9271,7 +11151,7 @@ function queueLevelUp(){
   if(state.scene==='playing'){ showLevelUp(); pendingLevelUps = Math.max(0, pendingLevelUps-1); }
 }
 
-function damagePlayer(dmg){
+function damagePlayer(dmg, srcEnemy){
   const p = state.player;
   if(p.invT>0) return;
   // Body costumes can grant a damage-reduction multiplier capped at 70% so the costume can't
@@ -9279,8 +11159,15 @@ function damagePlayer(dmg){
   if(p.damageReduction > 0){
     dmg = Math.max(1, Math.ceil(dmg * (1 - Math.min(0.70, p.damageReduction))));
   }
+  // v12.35 — SSS body 데미지 반사 (받은 피해의 12% 를 적에게 되돌림. srcEnemy 있을 때만).
+  if(p.damageReflect > 0 && srcEnemy && !srcEnemy.dead){
+    const reflect = Math.max(1, Math.ceil(dmg * Math.min(0.30, p.damageReflect)));
+    srcEnemy.hp = (srcEnemy.hp || 0) - reflect;
+    if(srcEnemy.hp <= 0) srcEnemy.dead = true;
+  }
   p.hp -= dmg;
-  p.invT = 0.5;
+  // v12.35 — SS/SSS head 무적 시간 보너스 (기본 0.5s + invulBonus).
+  p.invT = 0.5 + (p.invulBonus || 0);
   // v12.17 — 사용자 명령 "남편 비둘기 파티원들은 모두가 남편이 공격 당하면 공격당한 효과가 모두
   // 같이 적용되게 해줘". p.hitT 으로 hurt 시각 신호를 띄워 updateCompanions 에서 모든 동료
   // (아내/아기/구출 친구들)에게 동일 시간만큼 hitT 전파. 이전 버전은 p.hitT 가 set 되지 않아
@@ -10371,6 +12258,9 @@ function updateInvBar(){
 // the tier index back through the early biomes — each cycle shifts the chapter palette via
 // (state.chapter-1)%5 indexing within the tier so the look is similar but not identical.
 function chapterTier(ch){
+  // v12.35 — 원정 Ⅶ (ch201-250) tier 11 (천국 3층천 침범), 원정 Ⅷ (ch251-300) tier 12 (아마겟돈 전쟁).
+  if(ch >= 251) return 12;
+  if(ch >= 201) return 11;
   // v12.34 — 원정 Ⅴ (ch131-160) tier 9, 원정 Ⅵ (ch161-200) tier 10. 천국 테마.
   if(ch >= 161) return 10;
   if(ch >= 131) return 9;
@@ -10589,6 +12479,102 @@ function drawSkyline(stageHue, themeIdx){
       ctx.fillRect(W*0.42 + beamT*60, 0, 90, H*0.7);
       ctx.globalAlpha = 1;
     }
+  } else if(tier===11){
+    // v12.35 — 원정 Ⅶ 천국 3층천 침범: 신성 자색 안개 + 황금 광휘 + 창조주의 진노 번개.
+    // 구름 안개 (자색)
+    for(let i=0;i<22;i++){
+      const px = (i*113 + t*12) % (W+80) - 40;
+      const py = (i*61) % H;
+      ctx.globalAlpha = 0.55 + Math.abs(Math.sin(t*0.4+i))*0.25;
+      ctx.fillStyle = 'rgba(229,176,255,0.85)';
+      ctx.beginPath(); ctx.ellipse(px, py, 26 + (i%5)*4, 9 + (i%3)*2, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,224,102,0.45)';
+      ctx.beginPath(); ctx.ellipse(px-6, py-3, 14, 4, 0, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // 자색 sparkle
+    for(let i=0;i<40;i++){
+      const px = (i*89 + t*40) % W;
+      const py = (i*47 + Math.sin(t*1.4+i)*22) % H;
+      const tw = 0.4 + Math.abs(Math.sin(t*3+i))*0.6;
+      ctx.globalAlpha = tw;
+      ctx.fillStyle = i%3===0 ? '#9775FA' : i%3===1 ? '#FFE066' : '#FFFFFF';
+      const sz = i%5===0 ? 2.6 : 1.3;
+      ctx.fillRect(px, py, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+    // 가끔 번개 (창조주의 진노) — 위에서 아래로 한 줄기
+    const lightT = (t*0.4 + state.chapter*0.3) % 5;
+    if(lightT < 0.25){
+      ctx.globalAlpha = (1 - lightT/0.25);
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2.4;
+      ctx.shadowColor = 'rgba(255,224,102,0.95)'; ctx.shadowBlur = 14;
+      const lx = W * (0.2 + ((state.chapter*7)%50)/100);
+      ctx.beginPath();
+      ctx.moveTo(lx, 0);
+      ctx.lineTo(lx + 12, H*0.20);
+      ctx.lineTo(lx - 8,  H*0.40);
+      ctx.lineTo(lx + 14, H*0.65);
+      ctx.lineTo(lx,      H*0.85);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+  } else if(tier===12){
+    // v12.35 — 원정 Ⅷ 아마겟돈: 황금 광휘 광선 + 떨어지는 불꽃/깃털 + 십자가 별빛.
+    // 광휘 광선 (정중앙에서 사방으로) — 아마겟돈 본진 톤
+    ctx.save();
+    ctx.translate(W*0.5, H*0.18);
+    for(let i=0;i<8;i++){
+      const a = (i/8)*Math.PI*2 + t*0.15;
+      ctx.save();
+      ctx.rotate(a);
+      const grad = ctx.createLinearGradient(0,0, W*0.6, 0);
+      grad.addColorStop(0, 'rgba(255,212,59,0.55)');
+      grad.addColorStop(1, 'rgba(255,212,59,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, -8, W*0.6, 16);
+      ctx.restore();
+    }
+    ctx.restore();
+    // 떨어지는 황금 깃털
+    for(let i=0;i<22;i++){
+      const px = (i*157 + t*8 + Math.sin(t+i)*22) % W;
+      const py = (i*73 + t*36) % (H+30);
+      const rot = t*0.6 + i;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(rot);
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = i%3===0 ? '#FF6B6B' : i%3===1 ? '#FFD43B' : '#FFFFFF';
+      ctx.beginPath(); ctx.ellipse(0, 0, 5, 1.8, 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+    // 별빛 십자 (가끔 큰 sparkle, 십자 형태)
+    for(let i=0;i<22;i++){
+      const px = (i*97 + t*4) % W;
+      const py = (i*53) % H;
+      const tw = 0.3 + Math.abs(Math.sin(t*2 + i*0.4))*0.7;
+      ctx.globalAlpha = tw;
+      const sz = i%9===0 ? 4 : i%4===0 ? 2 : 1;
+      ctx.fillStyle = i%4===0 ? '#FF6B6B' : i%4===1 ? '#FFE066' : i%4===2 ? '#FFFFFF' : '#FFD43B';
+      // 십자 모양
+      ctx.fillRect(px - sz/2, py - sz/2, sz, sz);
+      if(i%9===0){
+        ctx.fillRect(px - sz*1.5, py - 0.5, sz*3, 1);
+        ctx.fillRect(px - 0.5, py - sz*1.5, 1, sz*3);
+      }
+    }
+    ctx.globalAlpha = 1;
+    // 거대한 별 (창조주의 시선) — 화면 상단 중앙 펄스
+    const pulseHo = 0.7 + 0.3*Math.sin(t*1.5);
+    ctx.globalAlpha = pulseHo*0.4;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowColor = 'rgba(255,212,59,0.95)'; ctx.shadowBlur = 22;
+    ctx.beginPath(); ctx.arc(W*0.5, H*0.10, 6, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
   } else if(tier===8){
     // v12.11 — 원정 Ⅳ Hellfire Rescue: rising embers + crimson rain + cinder snow
     for(let i=0;i<48;i++){
@@ -10676,6 +12662,8 @@ function drawSkyline(stageHue, themeIdx){
     'rgba(255,107,107,.22)', // 8 hellfire rescue — crimson glow
     'rgba(255,243,191,.22)', // v12.34 — 9 heaven first — soft white-gold
     'rgba(255,224,102,.26)', // v12.34 — 10 heaven second — radiant golden aurora
+    'rgba(229,176,255,.28)', // v12.35 — 11 heaven third — divine violet-gold
+    'rgba(255,212,59,.32)',  // v12.35 — 12 armageddon — radiant gold-crimson
   ][tier];
   const gg = ctx.createRadialGradient(W/2, H/2, 60, W/2, H/2, Math.max(W,H)*0.45);
   gg.addColorStop(0, glowCol);
@@ -10716,6 +12704,8 @@ function drawArenaFloor(camX, camY, themeIdx, stageHue){
     ['#2A0808','#3A1010','#1F0A0A'], // 8 원정 Ⅳ Hellfire: blackened + crimson scorch + ash floor
     ['#FFF9DB','#E7F5FF','#FFFFFF'], // v12.34 — 9 원정 Ⅴ 천국 1층천: 구름 floor (흰빛/금빛/하늘색)
     ['#FFF3BF','#FFE066','#E599F7'], // v12.34 — 10 원정 Ⅵ 천국 2층천: 황금 광휘 floor (광휘/금/오로라)
+    ['#F3D9FF','#FFE066','#FFFFFF'], // v12.35 — 11 원정 Ⅶ 천국 3층천: 신성 자색 floor (자색/금/순백)
+    ['#FFD43B','#FF6B6B','#FFFFFF'], // v12.35 — 12 원정 Ⅷ 아마겟돈: 황금/적금 전쟁터 (황금/적금/순백)
   ][tier][themeIdx];
   ctx.save();
   ctx.fillStyle = groundCol;
@@ -10871,7 +12861,91 @@ function drawTileProps(tx, ty, tile, tier, themeIdx, hue){
     else if(propType < 22){ drawLavaCrack(jx, jy, tile, h); }
     else if(propType < 30){ drawHellfireBrazier(jx, jy, h); }
     else if(propType < 36){ drawSkullMark(jx, jy, h); }
+  } else if(tier === 11){
+    // v12.35 — 원정 Ⅶ 천국 3층천: 신성 기둥 + 자색 결정 + 황금 띠 + 떨어진 깃털
+    if(propType < 12){ drawHeavenPillar(jx, jy, h); }
+    else if(propType < 22){ drawDivineCrystal(jx, jy, h); }
+    else if(propType < 32){ drawGoldRibbon(jx, jy, h, rot); }
+    else if(propType < 40){ drawFeather(jx, jy, rot); }
+  } else if(tier === 12){
+    // v12.35 — 원정 Ⅷ 아마겟돈: 십자가 표식 + 황금 깃발 잔해 + 광휘 잔재 + 천사 깃털
+    if(propType < 14){ drawArmageddonCross(jx, jy, h); }
+    else if(propType < 24){ drawGoldenBanner(jx, jy, h, rot); }
+    else if(propType < 32){ drawDivineCrystal(jx, jy, h); }
+    else if(propType < 40){ drawFeather(jx, jy, rot); }
   }
+}
+
+// v12.35 — 원정 Ⅶ/Ⅷ props
+function drawHeavenPillar(x, y, h){
+  propShadow(x, y+5, 14, 4);
+  // 신성 자색 기둥 base
+  ctx.fillStyle = '#9775FA';
+  ctx.beginPath(); ctx.ellipse(x, y, 11, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#E5B0FF';
+  ctx.fillRect(x-7, y-12, 14, 12);
+  // 황금 띠
+  ctx.fillStyle = '#FFD43B';
+  ctx.fillRect(x-7, y-3, 14, 1.6);
+  // 상단 광휘
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.beginPath(); ctx.arc(x, y-13, 3, 0, Math.PI*2); ctx.fill();
+}
+function drawDivineCrystal(x, y, h){
+  // 자색/황금 결정 (다이아몬드 형태)
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(((h>>>16)&0xFF)/255 * Math.PI*2);
+  ctx.fillStyle = (h&1) ? 'rgba(229,176,255,0.85)' : 'rgba(255,212,59,0.85)';
+  ctx.beginPath();
+  ctx.moveTo(0, -7); ctx.lineTo(5, 0); ctx.lineTo(0, 7); ctx.lineTo(-5, 0);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.beginPath(); ctx.arc(-1.5, -2, 1.2, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function drawGoldRibbon(x, y, h, rot){
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  ctx.fillStyle = '#FFD43B';
+  ctx.fillRect(-9, -1, 18, 2);
+  ctx.fillStyle = '#FFE066';
+  ctx.fillRect(-9, -2, 18, 1);
+  ctx.restore();
+}
+function drawArmageddonCross(x, y, h){
+  // 황금 십자가 표식 (전쟁터)
+  propShadow(x, y+4, 10, 3);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(((h>>>20)&0xFF)/255 * 0.4 - 0.2);
+  ctx.fillStyle = '#FFD43B';
+  ctx.fillRect(-1.5, -8, 3, 16);
+  ctx.fillRect(-6, -3, 12, 3);
+  ctx.shadowColor = 'rgba(255,212,59,0.85)'; ctx.shadowBlur = 6;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(-0.6, -8, 1.2, 16);
+  ctx.fillRect(-6, -2.6, 12, 1.2);
+  ctx.shadowBlur = 0;
+  ctx.restore();
+}
+function drawGoldenBanner(x, y, h, rot){
+  // 황금 깃발 (꺾인 채 떨어진 잔해)
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot * 0.4);
+  ctx.fillStyle = '#FFD43B';
+  ctx.fillRect(-1, -10, 2, 20);   // 깃대
+  ctx.fillStyle = '#FF6B6B';
+  ctx.beginPath();
+  ctx.moveTo(1, -8); ctx.lineTo(10, -6); ctx.lineTo(8, -4); ctx.lineTo(10, -2);
+  ctx.lineTo(8, 0); ctx.lineTo(1, -2);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(3, -7, 4, 1);   // 깃발 십자가
+  ctx.fillRect(4, -8, 2, 3);
+  ctx.restore();
 }
 
 // v12.11 — 원정 Ⅳ 지옥 props
@@ -11464,6 +13538,16 @@ function drawVictoryScene(){
     sky.addColorStop(0, 'rgba(255,224,102,.50)');
     sky.addColorStop(0.5, 'rgba(255,212,59,.55)');
     sky.addColorStop(1, 'rgba(151,117,250,.55)');
+  } else if(expId === 7){
+    // v12.35 — 원정 Ⅶ — heaven 3rd floor 침범: 신성 자색 + 황금 광휘 + 흰빛 정점
+    sky.addColorStop(0, 'rgba(151,117,250,.55)');
+    sky.addColorStop(0.5, 'rgba(229,176,255,.55)');
+    sky.addColorStop(1, 'rgba(255,255,255,.55)');
+  } else if(expId === 8){
+    // v12.35 — 원정 Ⅷ — armageddon: 황금 + 적금 + 신성 흰빛 (창조주의 인정)
+    sky.addColorStop(0, 'rgba(255,212,59,.65)');
+    sky.addColorStop(0.5, 'rgba(255,107,107,.55)');
+    sky.addColorStop(1, 'rgba(255,255,255,.65)');
   } else {
     // 원정 Ⅰ — original cosmic violet
     sky.addColorStop(0, 'rgba(10,2,30,.85)');
@@ -11545,6 +13629,10 @@ function drawVictoryScene(){
     drawVictoryHeavenFirst(earthCx, earthCy, earthR, t);
   } else if(expId === 6){
     drawVictoryHeavenSecond(earthCx, earthCy, earthR, t);
+  } else if(expId === 7){
+    drawVictoryHeavenThird(earthCx, earthCy, earthR, t);
+  } else if(expId === 8){
+    drawVictoryArmageddon(earthCx, earthCy, earthR, t);
   } else {
     drawVictoryEarth(earthCx, earthCy, earthR, t);
   }
@@ -11576,20 +13664,28 @@ function drawVictoryScene(){
     const d = Math.min(Math.abs(dx), earthR - 1);
     return earthCy - Math.sqrt(earthR*earthR - d*d);
   };
-  // v12.32 — 설정에서 가족·동료 보이기 OFF 면 시네마틱 엔딩에서도 husband 만 그리기.
-  if(showFamilyOn() && expId >= 2 && expId <= 3){
+  // v12.32 → v12.36 — 카테고리별 보이기 토글로 분기. 각 동료별 companionVisible(kind) 가드.
+  if(expId >= 2 && expId <= 3){
     // 원정 Ⅱ·Ⅲ: 남편 + 아내 + 아기 (5종 구출 친구는 아직 만나지 않은 상태)
-    const wifeDx = -52 * pigScale;
-    drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
-    const childDx = 50 * pigScale;
-    drawCompanion(ctx, { x: pigCx + childDx, y: surfaceY(childDx) - 18, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+    if(companionVisible('wife')){
+      const wifeDx = -52 * pigScale;
+      drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
+    }
+    if(companionVisible('child')){
+      const childDx = 50 * pigScale;
+      drawCompanion(ctx, { x: pigCx + childDx, y: surfaceY(childDx) - 18, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+    }
   }
-  if(showFamilyOn() && expId >= 4){
+  if(expId >= 4){
     // 원정 Ⅳ/Ⅴ/Ⅵ: 남편 + 아내 + 아기 + 5종 구출 친구. 가족은 안쪽, 친구는 양옆 바깥에 넓게 분산.
-    const wifeDx = -42 * pigScale;
-    drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
-    const childDx = 40 * pigScale;
-    drawCompanion(ctx, { x: pigCx + childDx, y: surfaceY(childDx) - 18, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+    if(companionVisible('wife')){
+      const wifeDx = -42 * pigScale;
+      drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
+    }
+    if(companionVisible('child')){
+      const childDx = 40 * pigScale;
+      drawCompanion(ctx, { x: pigCx + childDx, y: surfaceY(childDx) - 18, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+    }
     // 5 friends — globe 가장자리 양쪽에 분산. dx 간격 충분히 넓게 (안 겹치게).
     const friendDX = [
       { kind:'sparrow',  dx: -Math.min(earthR-12, 110) },
@@ -11600,9 +13696,33 @@ function drawVictoryScene(){
       { kind:'squirrel', dx: 0, frontOffset: 22 },
     ];
     for(const f of friendDX){
+      if(!companionVisible(f.kind)) continue;
       const sx = pigCx + f.dx;
       const sy = surfaceY(f.dx) - 7.6 + (f.frontOffset || 0);
       drawCompanion(ctx, { x: sx, y: sy, kind:f.kind });
+    }
+  }
+  // v12.35 — 원정 Ⅶ/Ⅷ: 부모 pair + 조상 비둘기 추가.
+  if(expId >= 7){
+    const husbandParentsDx = -Math.min(earthR*0.55, 100);
+    const wifeParentsDx    =  Math.min(earthR*0.55, 100);
+    const parentFoot = 0.62 * 52;
+    if(progress.companionUnlocks && progress.companionUnlocks.husbandParents && companionVisible('husbandParents')){
+      drawCompanion(ctx, { x: pigCx + husbandParentsDx, y: surfaceY(husbandParentsDx) - parentFoot, kind:'husbandParents' });
+    }
+    if(progress.companionUnlocks && progress.companionUnlocks.wifeParents && companionVisible('wifeParents')){
+      drawCompanion(ctx, { x: pigCx + wifeParentsDx, y: surfaceY(wifeParentsDx) - parentFoot, kind:'wifeParents' });
+    }
+  }
+  if(expId >= 8){
+    const ancestorFoot = 0.85 * 52;
+    if(progress.companionUnlocks && progress.companionUnlocks.gugunardo && companionVisible('gugunardo')){
+      const dx = -Math.min(earthR*0.32, 65);
+      drawCompanion(ctx, { x: pigCx + dx, y: surfaceY(dx) - ancestorFoot, kind:'gugunardo' });
+    }
+    if(progress.companionUnlocks && progress.companionUnlocks.bristotodul && companionVisible('bristotodul')){
+      const dx = Math.min(earthR*0.32, 65);
+      drawCompanion(ctx, { x: pigCx + dx, y: surfaceY(dx) - ancestorFoot, kind:'bristotodul' });
     }
   }
 
@@ -11659,18 +13779,24 @@ function drawVictoryScene(){
   // wrap the emoji and create a weird halo around it.
   ctx.font = `900 ${fs}px sans-serif`;
   // v12 Phase 5 / v12.11 — headline + emoji vary per expedition.
-  const heroEmoji = expId === 6 ? '🪽' :
+  const heroEmoji = expId === 8 ? '🌟' :
+                    expId === 7 ? '⚜️' :
+                    expId === 6 ? '🪽' :
                     expId === 5 ? '🌟' :
                     expId === 4 ? '🔥' :
                     expId === 3 ? '🌌' :
                     expId === 2 ? '🪐' : '🌍';
-  const text = expId === 6 ? '창공의 끝! 신화 완성' :
+  const text = expId === 8 ? '천상의 새우깡 — 창조주의 인정!' :
+               expId === 7 ? '천국 3층천 침범 완료!' :
+               expId === 6 ? '창공의 끝! 신화 완성' :
                expId === 5 ? '천국 1층천 도달!' :
                expId === 4 ? '지옥 구출 완료!' :
                expId === 3 ? '전 우주 정복!' :
                expId === 2 ? '비둘기 행성 정복!' :
                               '전 세계 정복!';
-  const heroShadowCol = expId === 6 ? 'rgba(255,224,102,0.9)' :
+  const heroShadowCol = expId === 8 ? 'rgba(255,212,59,0.95)' :
+                        expId === 7 ? 'rgba(229,176,255,0.85)' :
+                        expId === 6 ? 'rgba(255,224,102,0.9)' :
                         expId === 5 ? 'rgba(255,224,102,0.7)' :
                         expId === 4 ? 'rgba(255,107,107,0.9)' :
                         expId === 3 ? 'rgba(151,117,250,0.85)' :
@@ -11707,7 +13833,16 @@ function drawVictoryScene(){
   ctx.fillStyle = '#FFF9DB';
   ctx.shadowColor = 'rgba(0,0,0,0.7)';
   ctx.shadowBlur = 6;
-  ctx.fillText('전설의 비둘기, 새우깡으로 한계를 돌파하다', W/2, headlineY + fs*0.85);
+  // v12.35 — 원정별 sub-tagline 차별화. ch300 최종은 창조주와 함께 악을 격퇴 + 인정 문구.
+  const subTag = expId === 8 ? '창조주와 함께 악의 세력을 격퇴 — 천상의 새우깡을 받은 가족' :
+                 expId === 7 ? '창조주의 영역 3층천에 발을 들인 비둘기 가족' :
+                 expId === 6 ? '대천사의 시험을 통과한 가족 — 창조주 다음 영역으로' :
+                 expId === 5 ? '천국이 가족에게 문을 연 그날' :
+                 expId === 4 ? '억울하게 갇힌 친구들을 모두 구해내다' :
+                 expId === 3 ? '우주의 모든 별을 손에 넣다' :
+                 expId === 2 ? '비둘기 행성을 점령하고 가족을 이루다' :
+                                '전설의 비둘기, 새우깡으로 한계를 돌파하다';
+  ctx.fillText(subTag, W/2, headlineY + fs*0.85);
   ctx.restore();
 }
 
@@ -12089,6 +14224,161 @@ function drawVictoryHeavenSecond(cx, cy, r, t){
   ctx.restore();
 }
 
+// v12.35 — 원정 Ⅶ centerpiece: 천국 3층천 침범 — 신성 자색 + 황금 + 회전 후광 + 균열의 빛.
+// "창조주가 노여워했지만 가족은 멈추지 않는다" 톤. 균열 사이 빛이 새어나오는 비주얼.
+function drawVictoryHeavenThird(cx, cy, r, t){
+  ctx.save();
+  // 외곽 자색 halo
+  const halo = ctx.createRadialGradient(cx, cy, r*0.85, cx, cy, r*1.85);
+  halo.addColorStop(0, 'rgba(229,176,255,0.85)');
+  halo.addColorStop(0.5, 'rgba(255,212,59,0.55)');
+  halo.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy, r*1.85, 0, Math.PI*2); ctx.fill();
+  // 본체 (자색 sphere)
+  const body = ctx.createRadialGradient(cx - r*0.3, cy - r*0.35, r*0.2, cx, cy, r);
+  body.addColorStop(0, '#FFFFFF');
+  body.addColorStop(0.4, '#E5B0FF');
+  body.addColorStop(0.7, '#9775FA');
+  body.addColorStop(1, '#5F3DC4');
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  // 균열 (창조주의 진노가 비치는 통로 — 황금 빛이 새어나옴)
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
+  ctx.strokeStyle = '#FFE066';
+  ctx.lineWidth = 2.2;
+  ctx.shadowColor = 'rgba(255,224,102,0.85)';
+  ctx.shadowBlur = 10;
+  for(let i=0;i<5;i++){
+    const a = i*(Math.PI*2/5) + t*0.18;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a)*r*0.05, cy + Math.sin(a)*r*0.05);
+    const m = a + 0.4;
+    ctx.lineTo(cx + Math.cos(m)*r*0.5, cy + Math.sin(m)*r*0.5);
+    const e = a + 0.8;
+    ctx.lineTo(cx + Math.cos(e)*r*0.95, cy + Math.sin(e)*r*0.95);
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
+  ctx.restore();
+  // 회전 후광 ring (자색 + 황금)
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(0.25);
+  ctx.strokeStyle = 'rgba(151,117,250,0.95)'; ctx.lineWidth = 3.4;
+  ctx.shadowColor = 'rgba(229,176,255,0.85)'; ctx.shadowBlur = 14;
+  ctx.beginPath(); ctx.ellipse(0, 0, r*1.40, r*0.36, 0, 0, Math.PI*2); ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,212,59,0.85)'; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.ellipse(0, 0, r*1.55, r*0.42, 0, 0, Math.PI*2); ctx.stroke();
+  // ring 위 sparkle
+  for(let i=0;i<14;i++){
+    const a = i*(Math.PI*2/14) + t*0.7;
+    const fx = Math.cos(a)*r*1.40, fy = Math.sin(a)*r*0.36;
+    ctx.fillStyle = i%3===0 ? '#FFE066' : i%3===1 ? '#E5B0FF' : '#FFFFFF';
+    ctx.beginPath(); ctx.arc(fx, fy, 2.4, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  // 중심 작은 옥좌 표식 (창조주의 좌석)
+  ctx.fillStyle = '#FFE066';
+  ctx.shadowColor = 'rgba(255,224,102,0.95)'; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.10, 0, Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.05, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+// v12.35 — 원정 Ⅷ centerpiece: 아마겟돈 전쟁 승리 — 창조주가 직접 천상의 새우깡을 내리는 모습.
+// 천상의 새우깡(중앙) + 황금 광휘 ring 8 + 적금 광선 + 흰빛 오로라.
+function drawVictoryArmageddon(cx, cy, r, t){
+  ctx.save();
+  // 외곽 광휘 (창조주의 빛)
+  const halo = ctx.createRadialGradient(cx, cy, r*0.7, cx, cy, r*2.0);
+  halo.addColorStop(0, 'rgba(255,255,255,0.95)');
+  halo.addColorStop(0.4, 'rgba(255,212,59,0.75)');
+  halo.addColorStop(0.75, 'rgba(255,107,107,0.45)');
+  halo.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy, r*2.0, 0, Math.PI*2); ctx.fill();
+  // 본체 (황금 sphere — 천상의 빛)
+  const body = ctx.createRadialGradient(cx - r*0.25, cy - r*0.3, r*0.15, cx, cy, r);
+  body.addColorStop(0, '#FFFFFF');
+  body.addColorStop(0.35, '#FFE066');
+  body.addColorStop(0.65, '#FFD43B');
+  body.addColorStop(1, '#FF6B6B');
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  // 광선 (창조주의 손길) — 중심에서 사방으로
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(t*0.1);
+  for(let i=0;i<12;i++){
+    const a = i*(Math.PI*2/12);
+    ctx.save();
+    ctx.rotate(a);
+    const grad = ctx.createLinearGradient(0,0, r*1.6, 0);
+    grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+    grad.addColorStop(0.5, 'rgba(255,212,59,0.6)');
+    grad.addColorStop(1, 'rgba(255,107,107,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, -7, r*1.6, 14);
+    ctx.restore();
+  }
+  ctx.restore();
+  // 표면 별 + 십자가 표식
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
+  for(let i=0;i<32;i++){
+    const ang = (i*107 + t*15) % 360 * Math.PI/180;
+    const rd = ((i%7) + 1) * r/9;
+    const px = cx + Math.cos(ang)*rd;
+    const py = cy + Math.sin(ang)*rd*0.85;
+    if(Math.hypot(px-cx, py-cy) > r*0.95) continue;
+    ctx.fillStyle = i%3===0 ? '#FFFFFF' : i%3===1 ? '#FFE066' : '#FF6B6B';
+    ctx.globalAlpha = 0.6 + 0.4*Math.abs(Math.sin(t*2+i));
+    ctx.beginPath(); ctx.arc(px, py, i%5===0 ? 2.6 : 1.3, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  // 중앙: 천상의 새우깡 — 큰 새우깡 모양 (성스러운 톤)
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(Math.sin(t*0.6)*0.15);
+  // 새우깡 본체 (긴 타원)
+  const shrimpL = r*0.55;
+  const shrimpW = r*0.18;
+  ctx.shadowColor = 'rgba(255,255,255,0.95)'; ctx.shadowBlur = 18;
+  ctx.fillStyle = '#FFE066';
+  ctx.beginPath(); ctx.ellipse(0, 0, shrimpL, shrimpW, 0, 0, Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  // 새우깡 꼬리 (오른쪽)
+  ctx.fillStyle = '#FF6B6B';
+  ctx.beginPath();
+  ctx.moveTo(shrimpL-2, -shrimpW*0.5);
+  ctx.lineTo(shrimpL+r*0.10, -shrimpW*1.2);
+  ctx.lineTo(shrimpL+r*0.10,  shrimpW*1.2);
+  ctx.lineTo(shrimpL-2,  shrimpW*0.5);
+  ctx.closePath(); ctx.fill();
+  // 새우깡 마디 (4개)
+  ctx.strokeStyle = '#E67700'; ctx.lineWidth = 1.4;
+  for(let i=-2; i<=1; i++){
+    ctx.beginPath();
+    ctx.moveTo(i*shrimpL*0.25, -shrimpW);
+    ctx.lineTo(i*shrimpL*0.25,  shrimpW);
+    ctx.stroke();
+  }
+  // 빛나는 십자가 새겨짐 (성스러운 새우깡 — 아마겟돈 전쟁의 상징)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.shadowColor = 'rgba(255,255,255,0.95)'; ctx.shadowBlur = 8;
+  ctx.fillRect(-1, -shrimpW*0.6, 2, shrimpW*1.2);
+  ctx.fillRect(-shrimpW*0.5, -1, shrimpW, 2);
+  ctx.shadowBlur = 0;
+  ctx.restore();
+  ctx.restore();
+}
+
 function drawVictoryEarth(cx, cy, r, t){
   ctx.save();
   // Outer glow
@@ -12337,6 +14627,22 @@ function render(){
       ['#FFA94D','#FFD43B','#FF6B6B','#9775FA','#3B0764'],
       ['#A5D8FF','#74C0FC','#FFE066','#9775FA','#1A0033'],
     ],
+    // v12.35 — Tier 11: 원정 Ⅶ Heaven Third Floor (Ch 201-250). 신성 자색 + 황금 + 흰빛.
+    [
+      ['#E5B0FF','#9775FA','#FFE066','#FFFFFF','#3B0764'],
+      ['#FFFFFF','#E5B0FF','#9775FA','#FFE066','#5F3DC4'],
+      ['#FFE066','#FFD43B','#E5B0FF','#9775FA','#1A0033'],
+      ['#FFFFFF','#FFE066','#9775FA','#3B0764','#1A0033'],
+      ['#A5D8FF','#E5B0FF','#FFE066','#FFFFFF','#3B0764'],
+    ],
+    // v12.35 — Tier 12: 원정 Ⅷ Armageddon (Ch 251-300). 황금 + 적금 + 흰빛 (성스러운 전쟁).
+    [
+      ['#FFD43B','#FFA94D','#FF6B6B','#FFFFFF','#5A0F0F'],
+      ['#FFFFFF','#FFD43B','#FF6B6B','#FFA94D','#3B0710'],
+      ['#FFE066','#FFA94D','#FF6B6B','#FFFFFF','#5A0F0F'],
+      ['#FFFFFF','#FFE066','#FFA94D','#FF6B6B','#5A0F0F'],
+      ['#FFD43B','#FFFFFF','#FFA94D','#FF6B6B','#3B0710'],
+    ],
   ];
   const tier = chapterTier(state.chapter);
   // Sky gradient is fixed per chapter — varies across the 5 chapters within a tier
@@ -12451,16 +14757,24 @@ function render(){
     ctx.restore();
   }
 
+  // v12.35 — 부모/조상 비둘기는 남편 비둘기 *뒤에* 그려져야 함 (사용자 명시).
+  //   companions 배열에서 _back:true 인 entity (부모/조상) 는 player 보다 먼저 draw → 남편이 가림.
+  //   _back 아닌 entity (가족·친구) 는 기존대로 player 후 draw.
+  // v12.36 — 카테고리별 보이기 토글로 분기 (companionVisible 가드).
+  for(const c of state.companions){
+    if(c._back && companionVisible(c.kind)) drawCompanion(ctx, c);
+  }
   // Player
   const p = state.player;
   const flash = p.invT>0 && Math.floor(state.time*16)%2===0;
   if(!flash){
     drawPigeon(ctx, p.x, p.y, PLAYER_DRAW_SCALE, p.facing, p.walkPhase, p.invT>0, 1, p);
   }
-  // v12 phase 2 — companions drawn AFTER player so they layer in front (player is the focal
-  // point; companions are visual flair next to them).
-  // v12.32 — 설정에서 가족·동료 보이기 OFF 면 렌더 스킵 (위치/사격 로직은 별개로 가드).
-  if(showFamilyOn()) for(const c of state.companions) drawCompanion(ctx, c);
+  // v12 phase 2 — 가족·친구 등 _back 아닌 동료는 player 후 (앞 layer) 에 그림.
+  // v12.32 → v12.36 — 카테고리별 보이기 토글로 분기.
+  for(const c of state.companions){
+    if(!c._back && companionVisible(c.kind)) drawCompanion(ctx, c);
+  }
 
   // Player bullets — dispatch by weapon kind. Missile also drops thrust particles per frame.
   for(const b of state.bullets){
@@ -12765,12 +15079,28 @@ document.addEventListener('click', e => {
     state.toastBanner = { text:'🔒 구출 친구 세트 잠금', sub:'원정 Ⅳ Ch125 까지 진행 시 활성', t:2.4, maxT:2.4, tone:'warn' };
     return;
   }
+  // v12.35 — 부모/조상 탭 가드.
+  const parentsOk = progress.companionUnlocks && (typeof PARENTS_KINDS !== 'undefined') &&
+    PARENTS_KINDS.every(k => progress.companionUnlocks[k]);
+  const ancestorsOk = progress.companionUnlocks && (typeof ANCESTOR_KINDS !== 'undefined') &&
+    ANCESTOR_KINDS.some(k => progress.companionUnlocks[k]);
+  if(target === 'parents' && !parentsOk){
+    state.toastBanner = { text:'🔒 부모 세트 잠금', sub:'원정 Ⅶ Ch210 까지 진행 시 활성', t:2.4, maxT:2.4, tone:'warn' };
+    return;
+  }
+  if(target === 'ancestors' && !ancestorsOk){
+    state.toastBanner = { text:'🔒 조상 코스튬 잠금', sub:'원정 Ⅷ Ch255 (구구나르도) / Ch260 (비리스토둘레스) 합류 후 활성', t:2.4, maxT:2.4, tone:'warn' };
+    return;
+  }
   state.cosCharTab = target;
   renderCompanionCostumeSection();
 });
 document.getElementById('gachaSingleBtn').addEventListener('click', ()=> doGachaPull(1));
 document.getElementById('gachaTenBtn').addEventListener('click', ()=> doGachaPull(10));
 document.getElementById('cmmContinueBtn').addEventListener('click', continueAfterCompanionMeet);
+// v12.35 — 세트 안내 팝업 닫기 핸들러.
+const simBtn = document.getElementById('simContinueBtn');
+if(simBtn) simBtn.addEventListener('click', continueAfterSetIntro);
 // v12.11 — hell prologue 닫기.
 // v12.31 — 2단계 시네마틱: 팝업 → 풀스크린. 팝업의 '지옥문 통과' 클릭 → 풀스크린 시네마틱.
 document.getElementById('hellPrologueCloseBtn').addEventListener('click', () => {
@@ -13273,17 +15603,27 @@ function renderCompanionCostumeSection(){
   const childOk = progress.companionUnlocks && progress.companionUnlocks.child;
   // v12.18 — 구출 친구 세트는 5명 모두 합류 시(Ch125 클리어 후) 활성.
   const rescuedOk = progress.companionUnlocks && RESCUED_KINDS.every(k => progress.companionUnlocks[k]);
+  // v12.35 — 부모 세트는 두 부모 pair 모두 합류 시(Ch210 클리어 후) 활성.
+  const parentsOk = progress.companionUnlocks && PARENTS_KINDS.every(k => progress.companionUnlocks[k]);
+  // v12.35 — 조상 탭은 둘 중 하나라도 합류했으면 활성 (개별 구매라 둘 다 안 모여도 노출).
+  const ancestorsOk = progress.companionUnlocks && ANCESTOR_KINDS.some(k => progress.companionUnlocks[k]);
   const tabBar = document.getElementById('cosCharTabs');
   if(tabBar){
     const wifeTab = tabBar.querySelector('button[data-char="wife"]');
     const childTab = tabBar.querySelector('button[data-char="child"]');
     const rescuedTab = tabBar.querySelector('button[data-char="rescued"]');
+    const parentsTab = tabBar.querySelector('button[data-char="parents"]');
+    const ancestorsTab = tabBar.querySelector('button[data-char="ancestors"]');
     if(wifeTab) wifeTab.style.display = wifeOk ? '' : 'none';
     if(childTab) childTab.style.display = childOk ? '' : 'none';
     if(rescuedTab) rescuedTab.style.display = rescuedOk ? '' : 'none';
+    if(parentsTab) parentsTab.style.display = parentsOk ? '' : 'none';
+    if(ancestorsTab) ancestorsTab.style.display = ancestorsOk ? '' : 'none';
     if((state.cosCharTab === 'wife' && !wifeOk) ||
        (state.cosCharTab === 'child' && !childOk) ||
-       (state.cosCharTab === 'rescued' && !rescuedOk)){
+       (state.cosCharTab === 'rescued' && !rescuedOk) ||
+       (state.cosCharTab === 'parents' && !parentsOk) ||
+       (state.cosCharTab === 'ancestors' && !ancestorsOk)){
       state.cosCharTab = 'player';
     }
     for(const b of tabBar.querySelectorAll('button[data-char]')){
@@ -13294,13 +15634,19 @@ function renderCompanionCostumeSection(){
   const wifeBlock = document.getElementById('wifeCostumeBlock');
   const childBlock = document.getElementById('childCostumeBlock');
   const rescuedBlock = document.getElementById('rescuedCostumeBlock');
-  if(playerBlock)  playerBlock.style.display  = state.cosCharTab === 'player'  ? '' : 'none';
-  if(wifeBlock)    wifeBlock.style.display    = state.cosCharTab === 'wife'    ? '' : 'none';
-  if(childBlock)   childBlock.style.display   = state.cosCharTab === 'child'   ? '' : 'none';
-  if(rescuedBlock) rescuedBlock.style.display = state.cosCharTab === 'rescued' ? '' : 'none';
-  if(state.cosCharTab === 'wife' && wifeOk)   renderCompanionGrid('wife',  'wifeCostumeGrid');
-  if(state.cosCharTab === 'child' && childOk) renderCompanionGrid('child', 'childCostumeGrid');
-  if(state.cosCharTab === 'rescued' && rescuedOk) renderRescuedSetGrid();
+  const parentsBlock = document.getElementById('parentsCostumeBlock');
+  const ancestorsBlock = document.getElementById('ancestorsCostumeBlock');
+  if(playerBlock)    playerBlock.style.display    = state.cosCharTab === 'player'    ? '' : 'none';
+  if(wifeBlock)      wifeBlock.style.display      = state.cosCharTab === 'wife'      ? '' : 'none';
+  if(childBlock)     childBlock.style.display     = state.cosCharTab === 'child'     ? '' : 'none';
+  if(rescuedBlock)   rescuedBlock.style.display   = state.cosCharTab === 'rescued'   ? '' : 'none';
+  if(parentsBlock)   parentsBlock.style.display   = state.cosCharTab === 'parents'   ? '' : 'none';
+  if(ancestorsBlock) ancestorsBlock.style.display = state.cosCharTab === 'ancestors' ? '' : 'none';
+  if(state.cosCharTab === 'wife' && wifeOk)         renderCompanionGrid('wife',  'wifeCostumeGrid');
+  if(state.cosCharTab === 'child' && childOk)       renderCompanionGrid('child', 'childCostumeGrid');
+  if(state.cosCharTab === 'rescued' && rescuedOk)   renderRescuedSetGrid();
+  if(state.cosCharTab === 'parents' && parentsOk)   renderParentsSetGrid();
+  if(state.cosCharTab === 'ancestors' && ancestorsOk) renderAncestorsCostumeGrid();
 }
 
 // v12.18 — 구출 친구 세트 그리드. 3개 세트 카드, 각 카드는 "5종 일괄 구매/장착/해제".
@@ -13398,6 +15744,234 @@ function renderRescuedSetGrid(){
     card.appendChild(btnRow);
     grid.appendChild(card);
   }
+}
+
+// v12.35 → v12.36b — 부모 세트 그리드. 각 카드 안에 [남편 부모][아내 부모] 두 측면별 분리 구매·장착.
+// 사용자 명시: "남편 비둘기 부모와 아내 비둘기 부모 코스튬은 각각의 세트로 구매할 수 있게".
+function renderParentsSetGrid(){
+  const grid = document.getElementById('parentsSetGrid');
+  if(!grid) return;
+  const activeId = getActiveParentsSetId();
+  grid.innerHTML = '';
+  for(const setDef of PARENTS_SET_DEFS){
+    const isActive = activeId === setDef.id;
+    const card = document.createElement('div');
+    const border = isActive ? setDef.accent : '#495057';
+    card.style.cssText = `border:2px solid ${border};border-radius:14px;padding:12px 14px;background:linear-gradient(180deg,rgba(40,15,70,.6),rgba(15,2,30,.85));display:flex;flex-direction:column;gap:8px;`;
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+    const perPct = Math.round((setDef.perPieceBoost - 1) * 100 * 10) / 10;
+    const fullPct = Math.round((Math.pow(setDef.perPieceBoost, 2) * setDef.setBonus - 1) * 100 * 10) / 10;
+    header.innerHTML = `
+      <span style="font-size:18px;">${setDef.icon}</span>
+      <span style="font-weight:900;color:${setDef.accent};font-size:14px;">${setDef.name}</span>
+      ${isActive ? '<span style="font-size:10px;color:#A9E34B;font-weight:900;">✓ 풀세트 발동 중</span>' : ''}
+    `;
+    card.appendChild(header);
+    const desc = document.createElement('div');
+    desc.style.cssText = 'font-size:11px;color:#FFF9DB;opacity:.85;line-height:1.45;';
+    desc.innerHTML = `${setDef.description}<br>
+      <span style="color:#74C0FC;">각 pair</span> +${perPct}% 부모 DPS ·
+      <span style="color:#FFE066;">풀세트(2pair) 보너스</span> ×${setDef.setBonus.toFixed(2)} (
+      <b style="color:${setDef.accent};">합산 +${fullPct}%</b>) ·
+      <span style="color:#A9E34B;">부분:</span> 1 pair 45% / 2 pair 85% — <b>각자 따로 구매 가능</b>`;
+    card.appendChild(desc);
+    // 측면별 (husbandParents / wifeParents) 분리 구매·장착 카드 2개를 grid 로.
+    const sidesRow = document.createElement('div');
+    sidesRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;';
+    for(const k of PARENTS_KINDS){
+      const sideCell = document.createElement('div');
+      sideCell.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(0,0,0,.28);border-radius:10px;padding:8px 6px;';
+      const cv = document.createElement('canvas');
+      cv.style.cssText = 'width:80px;height:54px;background:radial-gradient(circle at 50% 60%, rgba(255,224,102,.12) 0%, rgba(20,8,40,.3) 70%);border-radius:6px;';
+      sideCell.appendChild(cv);
+      drawParentPairPreview(cv, k, setDef.id);
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:10px;color:#FFE066;font-weight:800;';
+      lbl.textContent = k === 'husbandParents' ? '👨‍👩 남편 부모님' : '👨‍👩 아내 부모님';
+      sideCell.appendChild(lbl);
+      // 구매 / 장착 / 해제 버튼
+      const itemId = setDef.id === 'angelDefault' ? 'angel' : (setDef.id + '_' + k);
+      const slot = progress.companionCostumes[k] || { unlocked:[] };
+      const owned = !!(slot.unlocked && slot.unlocked.includes(itemId));
+      const equipped = !!(slot.equipped && slot.equipped.body === itemId);
+      const cost = setDef.costPerPiece;
+      const affordable = (progress.coins||0) >= cost;
+      const unlockedSide = !!(progress.companionUnlocks && progress.companionUnlocks[k]);
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.style.cssText = 'font-size:10px;padding:5px 8px;width:100%;';
+      if(!unlockedSide){
+        btn.textContent = '🔒 합류 전';
+        btn.style.background = 'linear-gradient(180deg,#495057,#212529)';
+        btn.style.opacity = '.55';
+        btn.disabled = true;
+      } else if(!owned){
+        btn.style.background = `linear-gradient(180deg,${affordable?'#FFD43B':'#495057'},${affordable?'#F76707':'#212529'})`;
+        if(!affordable) btn.style.opacity = '.7';
+        btn.textContent = cost === 0 ? '🪙 무료 — 구매' : `🪙 ${cost.toLocaleString()} — 구매`;
+        btn.addEventListener('click', () => {
+          const r = buyParentsSet(setDef.id, k);
+          if(!r.ok){
+            state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:2.0, maxT:2.0, tone:'warn' };
+          } else {
+            sfxLevelUp();
+            const sideLbl = k === 'husbandParents' ? '남편 부모님' : '아내 부모님';
+            state.toastBanner = { text:`✨ ${setDef.name} (${sideLbl}) 구매!`, sub:`-${(r.cost||0).toLocaleString()} 🪙`, t:2.4, maxT:2.4, tone:'critical' };
+          }
+          renderCompanionCostumeSection();
+          const sc = document.getElementById('shopCoinTxt');
+          if(sc) sc.textContent = (progress.coins||0).toLocaleString();
+        });
+      } else if(equipped){
+        btn.textContent = '✓ 착용 중 (해제)';
+        btn.style.background = 'linear-gradient(180deg,#A9E34B,#37B24D)';
+        btn.addEventListener('click', () => {
+          unequipParentsSet(k);
+          renderCompanionCostumeSection();
+        });
+      } else {
+        btn.textContent = '장착';
+        btn.style.background = 'linear-gradient(180deg,#74C0FC,#1864AB)';
+        btn.addEventListener('click', () => {
+          equipParentsSet(setDef.id, k);
+          renderCompanionCostumeSection();
+        });
+      }
+      sideCell.appendChild(btn);
+      sidesRow.appendChild(sideCell);
+    }
+    card.appendChild(sidesRow);
+    grid.appendChild(card);
+  }
+}
+function drawParentPairPreview(cv, kind, setId){
+  const ctx2 = cv.getContext('2d');
+  const cssW = 80, cssH = 54;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if(cv.width !== cssW * dpr || cv.height !== cssH * dpr){
+    cv.width = cssW * dpr;
+    cv.height = cssH * dpr;
+  }
+  cv.style.width = cssW + 'px';
+  cv.style.height = cssH + 'px';
+  ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx2.clearRect(0, 0, cssW, cssH);
+  if(!progress.companionCostumes[kind]) progress.companionCostumes[kind] = { unlocked:[], equipped:{head:null, body:null} };
+  const slot = progress.companionCostumes[kind];
+  _normalizeCompanionEquipped(slot, kind);
+  const prev = { head: slot.equipped.head, body: slot.equipped.body };
+  const itemId = setId === 'angelDefault' ? 'angel' : (setId + '_' + kind);
+  slot.equipped = { head: null, body: itemId };
+  ctx2.save();
+  ctx2.translate(cssW/2, cssH - 8);
+  ctx2.scale(0.95, 0.95);
+  drawParentPair(ctx2, { x:0, y:0, kind }, kind === 'husbandParents' ? 'husband' : 'wife');
+  ctx2.restore();
+  slot.equipped = prev;
+}
+
+// v12.35 — 조상 코스튬 그리드. 두 조상(구구나르도/비리스토둘레스)을 같은 화면에 보여줌.
+// 각 조상마다 직업 코스튬 다종 — 개별 구매·개별 장착.
+function renderAncestorsCostumeGrid(){
+  const grid = document.getElementById('ancestorsCostumeGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  for(const ak of ANCESTOR_KINDS){
+    if(!progress.companionUnlocks || !progress.companionUnlocks[ak]) continue;
+    const card = document.createElement('div');
+    const accent = ak === 'gugunardo' ? '#FFA94D' : '#9775FA';
+    const label = ak === 'gugunardo' ? '구구나르도 다 둘치 (발명가)' : '비리스토둘레스 (철학자)';
+    const icon = ak === 'gugunardo' ? '📐' : '📜';
+    card.style.cssText = `border:2px solid ${accent};border-radius:14px;padding:12px 14px;background:linear-gradient(180deg,rgba(40,15,70,.6),rgba(15,2,30,.85));display:flex;flex-direction:column;gap:8px;`;
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;gap:8px;';
+    header.innerHTML = `<span style="font-size:18px;">${icon}</span><span style="font-weight:900;color:${accent};font-size:14px;">${label}</span>`;
+    card.appendChild(header);
+    const slot = progress.companionCostumes[ak];
+    _normalizeCompanionEquipped(slot, ak);
+    const list = COMPANION_COSTUMES[ak] || [];
+    const itemsRow = document.createElement('div');
+    itemsRow.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;';
+    for(const def of list){
+      const owned = (slot.unlocked || []).includes(def.id);
+      const equipped = slot.equipped.body === def.id;
+      const itm = document.createElement('div');
+      const bd = equipped ? '#A9E34B' : (owned ? '#FFE066' : '#495057');
+      itm.style.cssText = `border:2px solid ${bd};border-radius:10px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(0,0,0,0.3);`;
+      // 미니 캔버스 프리뷰
+      const cv = document.createElement('canvas');
+      cv.style.cssText = 'width:60px;height:60px;';
+      itm.appendChild(cv);
+      drawAncestorPreview(cv, ak, def.id);
+      const nm = document.createElement('div');
+      nm.style.cssText = `font-size:10px;color:${accent};font-weight:800;text-align:center;`;
+      nm.textContent = (def.icon || '') + ' ' + def.name;
+      itm.appendChild(nm);
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.style.cssText = 'font-size:10px;padding:4px 8px;width:100%;';
+      if(!owned){
+        const affordable = (progress.coins||0) >= (def.cost||0);
+        btn.style.background = affordable ? 'linear-gradient(180deg,#FFD43B,#F76707)' : 'linear-gradient(180deg,#495057,#212529)';
+        btn.textContent = `🪙 ${(def.cost||0).toLocaleString()} 구매`;
+        btn.addEventListener('click', () => {
+          const r = buyCompanionCostume(ak, def.id);
+          if(!r.ok){
+            state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:2.0, maxT:2.0, tone:'warn' };
+          } else {
+            sfxLevelUp();
+            renderCompanionCostumeSection();
+            const sc = document.getElementById('shopCoinTxt');
+            if(sc) sc.textContent = (progress.coins||0).toLocaleString();
+          }
+        });
+      } else if(equipped){
+        btn.textContent = '✓ 착용 중 (해제)';
+        btn.style.background = 'linear-gradient(180deg,#A9E34B,#37B24D)';
+        btn.addEventListener('click', () => {
+          slot.equipped.body = null;
+          saveProgress();
+          renderCompanionCostumeSection();
+        });
+      } else {
+        btn.textContent = '장착';
+        btn.style.background = 'linear-gradient(180deg,#74C0FC,#1864AB)';
+        btn.addEventListener('click', () => {
+          equipCompanionCostume(ak, def.id);
+          renderCompanionCostumeSection();
+        });
+      }
+      itm.appendChild(btn);
+      itemsRow.appendChild(itm);
+    }
+    card.appendChild(itemsRow);
+    grid.appendChild(card);
+  }
+}
+function drawAncestorPreview(cv, kind, costumeId){
+  const ctx2 = cv.getContext('2d');
+  const cssW = 60, cssH = 60;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if(cv.width !== cssW * dpr || cv.height !== cssH * dpr){
+    cv.width = cssW * dpr;
+    cv.height = cssH * dpr;
+  }
+  cv.style.width = cssW + 'px';
+  cv.style.height = cssH + 'px';
+  ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx2.clearRect(0, 0, cssW, cssH);
+  if(!progress.companionCostumes[kind]) progress.companionCostumes[kind] = { unlocked:[], equipped:{head:null, body:null} };
+  const slot = progress.companionCostumes[kind];
+  _normalizeCompanionEquipped(slot, kind);
+  const prev = { head: slot.equipped.head, body: slot.equipped.body };
+  slot.equipped = { head: null, body: costumeId };
+  ctx2.save();
+  ctx2.translate(cssW/2, cssH - 8);
+  const drawFn = kind === 'gugunardo' ? drawGugunardo : drawBristotodul;
+  drawFn(ctx2, { x:0, y:0, kind });
+  ctx2.restore();
+  slot.equipped = prev;
 }
 
 // v12.18 — 구출 친구 미니 프리뷰. 작은 46×54 canvas 에 친구 + 세트 코스튬 합성.
@@ -14620,8 +17194,8 @@ function drawHellGateScene(ctx2, W, H, t){
   // ── 갇힌 5종 친구 + 철창 ──
   // drawSadFriend 는 좌표를 받지만 내부 사이즈는 고정 — 큰 캔버스에서도 작은 친구만 그림.
   // scale 적용 위해 ctx 전체 scale 임시 변환.
-  // v12.32 — 설정에서 가족·동료 보이기 OFF 면 친구·철창 둘 다 숨김 (지옥문만 회전).
-  if(showFamilyOn()){
+  // v12.32 → v12.36 — 친구 카테고리 보이기 OFF 면 친구·철창 둘 다 숨김 (지옥문만 회전).
+  if(companionVisible('sparrow')){
     ctx2.save();
     ctx2.scale(scale, scale);
     const Wb = 360, Hb = H/scale, cyB = Hb*0.50, cxB = Wb/2;
