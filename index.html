@@ -334,6 +334,8 @@
   /* Stage/wave entry toast — DOM-rendered so it always sits above the inventory pill bar (z-index 2)
      and any item glow on the canvas. Slides in from the top, fades out near the end. */
   #toastBanner{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 130px);left:50%;transform:translateX(-50%);background:rgba(20,8,40,0.92);border:3px solid rgba(255,224,102,.95);border-radius:14px;padding:10px 22px;color:#FFE066;font-weight:900;font-family:inherit;font-size:18px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.7);box-shadow:0 6px 24px rgba(0,0,0,.6),inset 0 0 18px rgba(255,224,102,.18);pointer-events:none;z-index:1100;opacity:0;transition:opacity .25s, transform .25s;line-height:1.3;}
+  /* 빈 토스트가 노란 빈 알약처럼 보이는 문제 — 내용이 없으면 완전히 숨김 */
+  #toastBanner:empty{display:none;}
   #toastBanner.show{opacity:1;transform:translateX(-50%) translateY(0);}
   #toastBanner.enter{opacity:0;transform:translateX(-50%) translateY(-30px);}
   #toastBanner .toast-sub{display:block;color:#A5D6A7;font-size:13px;margin-top:4px;font-weight:700;}
@@ -5349,38 +5351,52 @@ function rollChapterClearCostume(){
 // All nodes now have an unlock condition — either a chapter-cleared gate or a previous-node level gate.
 // Coins inflated quickly under the old shop because every first-tier node was free; gating each branch
 // behind a chapter-cleared milestone gives shop progression actual structure.
+// v12.19 — 130챕터 분포에 맞춰 5단계로 확장. 챕터 게이트: ch1, ch10, ch25, ch50, ch90.
+// 원래 3단계까지 ch12 안에 다 풀려 ch15에서 만렙이던 문제를 해결. 기존 노드 id 보존(저장 호환).
 const SHOP_BRANCHES = [
   {
     id:'def', label:'방어', color:'#FF6B9D', tip:'생존력',
     nodes:[
-      { id:'hp',     icon:'❤️', name:'단단한 깃털',    desc:'시작 최대 HP +15',        max:10, cost:l=>60+l*45,    reqClearedCh:1,
+      { id:'hp',     icon:'❤️', name:'단단한 깃털',    desc:'시작 최대 HP +15',         max:10, cost:l=>60+l*45,     reqClearedCh:1,
         apply:(p,l)=>{ p.maxHp += 15*l; p.hp = p.maxHp; } },
-      { id:'magnet', icon:'🧲', name:'은빛 깃털 자석', desc:'XP 자석 반경 +25%',       max:5,  cost:l=>120+l*80,   req:'hp',     reqLvl:3, reqClearedCh:3,
+      { id:'magnet', icon:'🧲', name:'은빛 깃털 자석', desc:'XP 자석 반경 +25%',        max:5,  cost:l=>120+l*80,    req:'hp',     reqLvl:3, reqClearedCh:10,
         apply:(p,l)=>{ p.magnet *= Math.pow(1.25, l); } },
-      { id:'revive', icon:'🛡️', name:'예비 부활',      desc:'런 당 1회 부활 (HP 50%)', max:1,  cost:l=>1500,       req:'magnet', reqLvl:3, reqClearedCh:8,
+      { id:'revive', icon:'🛡️', name:'예비 부활',     desc:'런 당 1회 부활 (HP 50%)',  max:1,  cost:l=>1500,        req:'magnet', reqLvl:3, reqClearedCh:25,
         apply:(p,l,s)=>{ if(l>0) s.abilities.shield = 1; } },
+      { id:'dr',     icon:'🪨', name:'바위 깃털',      desc:'피해 감소 +4%',            max:5,  cost:l=>800+l*500,   req:'revive', reqLvl:1, reqClearedCh:50,
+        apply:(p,l)=>{ p.damageReduction = (p.damageReduction||0) + 0.04*l; } },
+      { id:'regen',  icon:'🩹', name:'재생의 깃털',    desc:'매 초 HP +1',              max:3,  cost:l=>2200+l*1500, req:'dr',     reqLvl:3, reqClearedCh:90,
+        apply:(p,l)=>{ p.regenPerSec = (p.regenPerSec||0) + 1*l; } },
     ]
   },
   {
     id:'atk', label:'공격', color:'#FFA94D', tip:'화력',
     nodes:[
-      { id:'dmg',  icon:'💪', name:'근육질 한 방', desc:'시작 공격력 +6%',     max:10, cost:l=>80+l*55,    reqClearedCh:1,
+      { id:'dmg',     icon:'💪', name:'근육질 한 방', desc:'시작 공격력 +6%',     max:10, cost:l=>80+l*55,     reqClearedCh:1,
         apply:(p,l)=>{ p.damage *= Math.pow(1.06, l); } },
-      { id:'rate', icon:'⚡', name:'빠른 손놀림', desc:'시작 연사 속도 +5%',  max:8,  cost:l=>140+l*95,   req:'dmg',  reqLvl:3, reqClearedCh:5,
+      { id:'rate',    icon:'⚡', name:'빠른 손놀림', desc:'시작 연사 속도 +5%',  max:8,  cost:l=>140+l*95,    req:'dmg',   reqLvl:3, reqClearedCh:10,
         apply:(p,l)=>{ p.fireRate *= Math.pow(1.05, l); } },
-      { id:'proj', icon:'🎯', name:'추가 새우깡', desc:'시작 새우깡 발사 +1', max:3,  cost:l=>500+l*500,  req:'rate', reqLvl:3, reqClearedCh:12,
+      { id:'proj',    icon:'🎯', name:'추가 새우깡', desc:'시작 새우깡 발사 +1', max:3,  cost:l=>500+l*500,   req:'rate',  reqLvl:3, reqClearedCh:25,
         apply:(p,l)=>{ p.projCount += l; } },
+      { id:'pierce',  icon:'🔪', name:'예리한 깃끝',  desc:'시작 관통 +1',         max:5,  cost:l=>900+l*600,   req:'proj',  reqLvl:1, reqClearedCh:50,
+        apply:(p,l)=>{ p.pierce = (p.pierce||0) + l; } },
+      { id:'critmult',icon:'💥', name:'폭격 한 방',  desc:'치명타 배율 +0.3',     max:3,  cost:l=>2500+l*1800, req:'pierce',reqLvl:3, reqClearedCh:90,
+        apply:(p,l)=>{ p.critMult = (p.critMult||2.0) + 0.3*l; } },
     ]
   },
   {
     id:'agi', label:'민첩', color:'#74C0FC', tip:'기동',
     nodes:[
-      { id:'speed', icon:'👟', name:'잽싼 발걸음',   desc:'이동 속도 +4%',     max:8, cost:l=>70+l*45,    reqClearedCh:2,
+      { id:'speed',     icon:'👟', name:'잽싼 발걸음',   desc:'이동 속도 +4%',     max:8, cost:l=>70+l*45,     reqClearedCh:1,
         apply:(p,l)=>{ p.speed *= Math.pow(1.04, l); } },
-      { id:'crit',  icon:'🎲', name:'행운의 비둘기', desc:'시작 치명타 +3%',   max:5, cost:l=>180+l*120,  req:'speed', reqLvl:3, reqClearedCh:6,
+      { id:'crit',      icon:'🎲', name:'행운의 비둘기', desc:'시작 치명타 +3%',   max:5, cost:l=>180+l*120,   req:'speed', reqLvl:3, reqClearedCh:10,
         apply:(p,l)=>{ p.crit = Math.min(0.9, p.crit + 0.03*l); } },
-      { id:'xp',    icon:'🪶', name:'경험의 깃털',   desc:'경험치 획득 +6%',   max:5, cost:l=>260+l*180,  req:'crit',  reqLvl:2, reqClearedCh:10,
+      { id:'xp',        icon:'🪶', name:'경험의 깃털',   desc:'경험치 획득 +6%',   max:5, cost:l=>260+l*180,   req:'crit',  reqLvl:2, reqClearedCh:25,
         apply:(p,l)=>{ p.xpMult *= Math.pow(1.06, l); } },
+      { id:'pspeed',    icon:'💨', name:'바람 깃털',     desc:'시작 탄속 +8%',     max:5, cost:l=>700+l*500,   req:'xp',    reqLvl:3, reqClearedCh:50,
+        apply:(p,l)=>{ p.projSpeed *= Math.pow(1.08, l); } },
+      { id:'coingreed', icon:'💰', name:'탐욕의 부리',   desc:'코인 획득 +15%',    max:3, cost:l=>2000+l*1400, req:'pspeed',reqLvl:3, reqClearedCh:90,
+        apply:(p,l)=>{ p.coinMult = (p.coinMult||1) * Math.pow(1.15, l); } },
     ]
   },
 ];
@@ -5413,7 +5429,10 @@ function shopUnlockReason(def){
 }
 function awardCoins(n){
   if(!n || n<=0) return;
-  const amt = Math.floor(n);
+  // v12.19 — 탐욕의 부리(coinMult)는 player에 붙어있어 게임 중일 때만 적용.
+  const mult = (state.player && state.player.coinMult) || 1;
+  const amt = Math.floor(n * mult);
+  if(amt <= 0) return;
   progress.coins = (progress.coins||0) + amt;
   state.coinsThisRun = (state.coinsThisRun||0) + amt;
   saveProgress();
