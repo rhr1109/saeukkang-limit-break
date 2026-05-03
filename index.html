@@ -889,7 +889,7 @@
     <div class="card" style="max-width:380px;text-align:center;">
       <h2 id="cmmTitle" style="color:#FFB4D8;text-shadow:0 0 16px rgba(255,180,216,.85);">💗 새 가족 합류!</h2>
       <div class="sub" id="cmmSub" style="font-size:13px;">다음 원정부터 함께 싸웁니다</div>
-      <canvas id="cmmCanvas" width="220" height="220" style="display:block;margin:12px auto;background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.4) 0%, rgba(20,8,40,.85) 70%);border-radius:12px;border:2px solid #FFB4D8;"></canvas>
+      <canvas id="cmmCanvas" width="220" height="260" style="display:block;margin:12px auto;background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.4) 0%, rgba(20,8,40,.85) 70%);border-radius:12px;border:2px solid #FFB4D8;"></canvas>
       <div id="cmmStory" style="font-size:13px;color:#FFE066;font-weight:700;margin:6px 0 14px;line-height:1.5;"></div>
       <button class="btn small" id="cmmContinueBtn" style="width:100%;background:linear-gradient(180deg,#FFB4D8,#D63384);">▶ 함께 다음 원정으로</button>
     </div>
@@ -7872,6 +7872,10 @@ function onBossDefeated(){
   // Chapter-clear costume drop: 10% rare drop, with pity guaranteeing one every 10 clears.
   state.earnedCostumeThisChapter = rollChapterClearCostume();
   saveProgress();
+  // v12.26 — 사용자 피드백 "공허의 황제-최종단계 UI가 시네마틱 진입 후에도 안 사라짐".
+  // 보스 페이즈 경고 토스트(state.toastBanner)는 #hud 밖에 위치해 scene 전환 후에도 lifetime(t)
+  // 동안 시네마틱 위에 잔존. 챕터 클리어/원정 끝 진입 시 강제로 비워 시네마틱 비둘기를 가리지 않게.
+  state.toastBanner = null;
   // v12 — three expedition endings. ch50/70/100 each show a unique cinematic; ch100 is the
   // game's final ending. Other expedition ends (ch50, ch70) launch the cinematic but the run
   // continues from the next chapter onward.
@@ -8016,6 +8020,9 @@ function showCompanionMeetModal(){
 function continueAfterCompanionMeet(){
   document.getElementById('companionMeetModal').classList.add('hidden');
   if(state._cmmRaf){ cancelAnimationFrame(state._cmmRaf); state._cmmRaf = 0; }
+  // v12.26 — 사용자 피드백 "챕터 클리어 화면에서 합류 내용을 또 보여주지 말 것".
+  // meet 모달이 닫혔으니 chapterCleared 의 "💗 ___ 합류!" 배너가 또 뜨지 않게 비움.
+  state.newCompanion = null;
   // Continue the queued reveal: costume reward → chapter clear, or directly clear.
   if(state.earnedCostumeThisChapter){
     showChapterRewardModal(state.earnedCostumeThisChapter);
@@ -10887,6 +10894,9 @@ function render(){
   // Drawn instead of the gameplay world so the player sees the pigeon, not a paused arena.
   if(state.scene === 'victory'){
     drawVictoryScene();
+    // v12.26 — victory 진입 후에도 잔존 토스트가 시네마틱 위에 남던 문제 수정.
+    // syncToast 가 frame 마다 호출되어야 state.toastBanner=null 이 DOM 에 반영됨.
+    syncToast();
     return;
   }
 
@@ -11547,6 +11557,8 @@ function replayCinematic(ch){
   state.scene = 'victory';
   state.chapter = ch;
   state.victoryExpeditionId = expeditionFor(ch).id;
+  // v12.26 — 잔존 토스트(보스 페이즈 경고 등) 시네마틱 위 잔존 방지.
+  state.toastBanner = null;
   // v12.18 — replay 모드 플래그. CSS .v-replay 토글로 "🔁 처음부터 다시" 숨기고 "🔙 챕터 선택으로"
   // 노출. 사용자 명령 "엔딩 다시보기 클릭하면 뒤로가기 버튼도 없고".
   state._cinematicReplayMode = true;
