@@ -1255,6 +1255,49 @@ function sfxPickup(){
 function sfxLevelUp(){ beep(523,.1,'square',.3); setTimeout(()=>beep(659,.1,'square',.3),90); setTimeout(()=>beep(784,.14,'square',.3),180); setTimeout(()=>beep(1047,.2,'square',.3),280);}
 function sfxHurt(){ noise(.15,.3); beep(140,.12,'sawtooth',.25,-50); }
 function sfxBoss(){ beep(80,.5,'sawtooth',.4,-40); beep(160,.3,'square',.2); }
+// v12.34 — 천국 보스 등장 SFX. major chord arpeggio + 종소리 + 합창 노이즈. 기존 sfxBoss 의
+// "어둠 sawtooth" 와 대비되는 빛나는 등장.
+function sfxHeavenBoss(){
+  if(!audioCtx || muted) return;
+  // Layer 1 — 큰 종소리 (낮은 C, 1.5s decay)
+  const bO = audioCtx.createOscillator(), bG = audioCtx.createGain();
+  bO.type = 'triangle';
+  bO.frequency.value = 261.63;  // C4
+  bG.gain.value = 0;
+  bG.gain.linearRampToValueAtTime(0.30, audioCtx.currentTime + 0.02);
+  bG.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+  bO.connect(bG); bG.connect(masterGain);
+  bO.start(); bO.stop(audioCtx.currentTime + 1.55);
+  // Layer 2 — major chord arp (C-E-G-C5) cascading up over 0.8s
+  const arp = ['C4','E4','G4','C5'];
+  arp.forEach((n, i) => {
+    setTimeout(() => {
+      if(!audioCtx || muted) return;
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.value = NOTE[n];
+      g.gain.value = 0;
+      g.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      o.connect(g); g.connect(masterGain);
+      o.start(); o.stop(audioCtx.currentTime + 0.65);
+    }, i * 180);
+  });
+  // Layer 3 — 합창 noise (천사의 등장 — 부드러운 wash, 0.6s)
+  setTimeout(() => noise(0.6, 0.10), 200);
+  // Layer 4 — 후속 high bell (G5, 종 추가 echo, 1.0s decay)
+  setTimeout(() => {
+    if(!audioCtx || muted) return;
+    const hO = audioCtx.createOscillator(), hG = audioCtx.createGain();
+    hO.type = 'triangle';
+    hO.frequency.value = NOTE['G5'];
+    hG.gain.value = 0;
+    hG.gain.linearRampToValueAtTime(0.16, audioCtx.currentTime + 0.02);
+    hG.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.0);
+    hO.connect(hG); hG.connect(masterGain);
+    hO.start(); hO.stop(audioCtx.currentTime + 1.05);
+  }, 700);
+}
 function sfxVictory(){ [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>beep(f,.18,'square',.3),i*130));}
 function sfxExplosion(){ noise(.2,.35); beep(80,.25,'sawtooth',.3,-40); }
 // Crisp two-tone UI click for menu / HUD buttons
@@ -1559,6 +1602,80 @@ const BGM_CHAPTER_PACKS = [
   { label:'구원의 다리',     bars:[['G4','B4','D5','G5'],['F4','A4','C5','F5'],['Bb3','D4','F4','Bb4'],['G3','Bb3','D4','G4']], interval:118, wave:'square',   bassShift:'3', vol:.15 },
   { label:'마지막 심판',     bars:[['E3','G3','B3','E4'],['F3','Ab3','C4','F4'],['G3','B3','D4','G4'],['A3','C4','E4','A4']], interval:108, wave:'sawtooth', bassShift:'3', vol:.17 },
   { label:'지옥문의 군주',   bars:[['D3','F3','Ab3','D4'],['Eb3','F#3','Bb3','Eb4'],['D3','Ab3','D4','Ab3'],['C#3','E3','G3','Bb3']], interval:96,  wave:'sawtooth', bassShift:'3', vol:.18 },
+  // === v12.34 — 원정 Ⅴ — 천국 1층천 (131-160). Triangle/sine, bright major progressions,
+  //   peaceful → epic. 160-180ms 평화로운 시작 → 후반 영광스러운. ===
+  { label:'구름 입구',          bars:[['C4','E4','G4','C5'],['F4','A4','C5','F5'],['G4','B4','D5','G5'],['C4','E4','G4','C5']], interval:180, wave:'triangle', bassShift:'3', vol:.13 },
+  { label:'빛의 다리',          bars:[['F4','A4','C5','F5'],['C5','E5','G5','C5'],['G4','B4','D5','G5'],['A4','C5','E5','A5']], interval:175, wave:'triangle', bassShift:'3', vol:.13 },
+  { label:'수호 천사 정원',     bars:[['G4','B4','D5','G5'],['D4','F#4','A4','D5'],['A4','C5','E5','A5'],['F4','A4','C5','F5']], interval:178, wave:'triangle', bassShift:'3', vol:.13 },
+  { label:'거룩한 분수대',      bars:[['C5','E5','G5','C5'],['G4','B4','D5','G5'],['F4','A4','C5','F5'],['C5','E5','G5','C5']], interval:172, wave:'sine',     bassShift:'3', vol:.12 },
+  { label:'별빛 회랑',          bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['G4','B4','D5','G5'],['E4','G#4','B4','E5']], interval:170, wave:'triangle', bassShift:'3', vol:.13 },
+  { label:'천사 합창단',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G4','B4','D5','G5'],['C5','E5','G5','C5']], interval:168, wave:'sine',     bassShift:'3', vol:.13 },
+  { label:'연꽃 호수',          bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['G4','B4','D5','G5'],['A4','C5','E5','A5']], interval:175, wave:'sine',     bassShift:'3', vol:.12 },
+  { label:'은빛 첨탑',          bars:[['G4','B4','D5','G5'],['D4','F#4','A4','D5'],['E4','G#4','B4','E5'],['C4','E4','G4','C5']], interval:165, wave:'triangle', bassShift:'3', vol:.13 },
+  { label:'평화의 들판',        bars:[['C4','E4','G4','C5'],['G3','B3','D4','G4'],['F4','A4','C5','F5'],['D4','F#4','A4','D5']], interval:178, wave:'triangle', bassShift:'3', vol:.13 },
+  { label:'달빛 정원',          bars:[['F4','A4','C5','F5'],['Bb3','D4','F4','Bb4'],['Eb4','G4','Bb4','Eb5'],['F4','A4','C5','F5']], interval:170, wave:'sine',     bassShift:'3', vol:.12 },
+  { label:'대천사 도서관',      bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['A4','C5','E5','A5'],['D5','F#5','A5','D5']], interval:165, wave:'square',   bassShift:'3', vol:.13 },
+  { label:'금빛 회의장',        bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G4','B4','D5','G5'],['F4','A4','C5','F5']], interval:160, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'진리의 거울방',      bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E4','G#4','B4','E5'],['G4','B4','D5','G5']], interval:158, wave:'square',   bassShift:'3', vol:.13 },
+  { label:'약속의 신전',        bars:[['C5','E5','G5','C5'],['F4','A4','C5','F5'],['G4','B4','D5','G5'],['C5','E5','G5','C5']], interval:160, wave:'triangle', bassShift:'3', vol:.14 },
+  { label:'새벽의 광장',        bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G4','B4','D5','G5']], interval:155, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'구름의 군대',        bars:[['F4','A4','C5','F5'],['G4','B4','D5','G5'],['C5','E5','G5','C5'],['A4','C5','E5','A5']], interval:152, wave:'sawtooth', bassShift:'3', vol:.13 },
+  { label:'수호자의 성벽',      bars:[['E4','G#4','B4','E5'],['A4','C#5','E5','A5'],['D4','F#4','A4','D5'],['G4','B4','D5','G5']], interval:150, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'은총의 강',          bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['Bb3','D4','F4','Bb4'],['F4','A4','C5','F5']], interval:165, wave:'sine',     bassShift:'3', vol:.13 },
+  { label:'빛의 폭포',          bars:[['G4','B4','D5','G5'],['D5','F#5','A5','D5'],['A4','C5','E5','A5'],['G4','B4','D5','G5']], interval:148, wave:'triangle', bassShift:'3', vol:.14 },
+  { label:'약속의 봉우리',      bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:142, wave:'square',   bassShift:'3', vol:.15 },
+  { label:'천국 검문소',        bars:[['F4','A4','C5','F5'],['G4','B4','D5','G5'],['A4','C5','E5','A5'],['Bb4','D5','F5','Bb5']], interval:148, wave:'square',   bassShift:'3', vol:.14 },
+  { label:'경이의 문',          bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['F4','A4','C5','F5'],['G4','B4','D5','G5']], interval:145, wave:'triangle', bassShift:'3', vol:.14 },
+  { label:'첫 번째 시험관',     bars:[['D4','F#4','A4','D5'],['G4','B4','D5','G5'],['A4','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:140, wave:'square',   bassShift:'3', vol:.15 },
+  { label:'여명의 옥좌',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:138, wave:'sawtooth', bassShift:'3', vol:.15 },
+  { label:'1층천의 수호자',     bars:[['F4','A4','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:135, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'경계의 문',          bars:[['G4','B4','D5','G5'],['D5','F#5','A5','D5'],['E5','G#5','B5','E5'],['G5','B5','D5','G5']], interval:138, wave:'square',   bassShift:'3', vol:.15 },
+  { label:'두 하늘 사이의 다리',bars:[['C5','E5','G5','C5'],['G4','B4','D5','G5'],['A4','C5','E5','A5'],['F5','A5','C5','F5']], interval:135, wave:'triangle', bassShift:'3', vol:.15 },
+  { label:'천공의 검문',        bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E4','G#4','B4','E5'],['G4','B4','D5','G5']], interval:130, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'승천의 광장',        bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:125, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'1층천의 군주',       bars:[['C5','E5','G5','C5'],['F4','A4','C5','F5'],['G4','B4','D5','G5'],['C5','E5','G5','C5']], interval:115, wave:'sawtooth', bassShift:'3', vol:.17 },
+  // === v12.34 — 원정 Ⅵ — 천국 2층천 (161-200). 더 epic, anthemic. Sawtooth/square epic.
+  //   100-140ms tempo, 후반은 finale 톤. 게임 최종 ch200 은 sky_sovereign 대결의 정점. ===
+  { label:'2층천 입구',         bars:[['G4','B4','D5','G5'],['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E5','G#5','B5','E5']], interval:140, wave:'square',   bassShift:'3', vol:.15 },
+  { label:'광휘의 회랑',        bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:135, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'반사의 회당',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['A5','C5','E5','A5'],['G5','B5','D5','G5']], interval:138, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'은총의 광장',        bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['D5','F#5','A5','D5']], interval:132, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'거룩한 강',          bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['Bb3','D4','F4','Bb4'],['F4','A4','C5','F5']], interval:155, wave:'sine',     bassShift:'3', vol:.13 },
+  { label:'천사 합창의 정점',   bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:130, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'금빛 옥좌',          bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['G4','B4','D5','G5'],['F5','A5','C5','F5']], interval:128, wave:'sawtooth', bassShift:'3', vol:.16 },
+  { label:'경이의 회의장',      bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E4','G#4','B4','E5'],['G4','B4','D5','G5']], interval:130, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'승리의 노래',        bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:125, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'시간 너머의 빛',     bars:[['C5','E5','G5','C5'],['F4','A4','C5','F5'],['G4','B4','D5','G5'],['C5','E5','G5','C5']], interval:142, wave:'sine',     bassShift:'3', vol:.14 },
+  { label:'대천사의 회랑',      bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G4','B4','D5','G5'],['F5','A5','C5','F5']], interval:128, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'맹세의 신전',        bars:[['G4','B4','D5','G5'],['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E5','G#5','B5','E5']], interval:125, wave:'square',   bassShift:'3', vol:.16 },
+  { label:'심판의 회의장',      bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:122, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'약속의 옥좌',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['G4','B4','D5','G5']], interval:120, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'거룩한 별자리',      bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:118, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'세라핌의 정원',      bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:115, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'불꽃의 회랑',        bars:[['F4','A4','C5','F5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:118, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'거룩한 화염',        bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5']], interval:120, wave:'sawtooth', bassShift:'3', vol:.17 },
+  { label:'새벽의 신전',        bars:[['F4','A4','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:115, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'승화의 옥좌',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:112, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'오필의 광장',        bars:[['D5','F#5','A5','D5'],['G4','B4','D5','G5'],['A4','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:115, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'진리의 강',          bars:[['F4','A4','C5','F5'],['C4','E4','G4','C5'],['G4','B4','D5','G5'],['F4','A4','C5','F5']], interval:135, wave:'sine',     bassShift:'3', vol:.14 },
+  { label:'회의의 문',          bars:[['G4','B4','D5','G5'],['C5','E5','G5','C5'],['D5','F#5','A5','D5'],['G5','B5','D5','G5']], interval:118, wave:'square',   bassShift:'3', vol:.17 },
+  { label:'지혜의 정원',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['G4','B4','D5','G5']], interval:120, wave:'triangle', bassShift:'3', vol:.16 },
+  { label:'명백함의 첨탑',      bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:112, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'미가엘 검문소',      bars:[['D5','F#5','A5','D5'],['A4','C#5','E5','A5'],['E5','G#5','B5','E5'],['G5','B5','D5','G5']], interval:110, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'대천사의 검',        bars:[['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['Eb5','G5','Bb5','Eb5'],['F5','A5','C5','F5']], interval:108, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'거룩한 전장',        bars:[['G5','B5','D5','G5'],['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5']], interval:106, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'빛의 군대',          bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:108, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'마지막 시험',        bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:104, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'가브리엘 회랑',      bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:108, wave:'square',   bassShift:'3', vol:.18 },
+  { label:'선포의 첨탑',        bars:[['G5','B5','D5','G5'],['D5','F#5','A5','D5'],['A5','C#5','E5','A5'],['G5','B5','D5','G5']], interval:105, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'천공의 문',          bars:[['C5','E5','G5','C5'],['G4','B4','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:108, wave:'square',   bassShift:'3', vol:.18 },
+  { label:'약속의 강',          bars:[['F4','A4','C5','F5'],['Bb3','D4','F4','Bb4'],['Eb4','G4','Bb4','Eb5'],['F4','A4','C5','F5']], interval:130, wave:'sine',     bassShift:'3', vol:.15 },
+  { label:'신성의 들판',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:106, wave:'sawtooth', bassShift:'3', vol:.18 },
+  { label:'창공의 끝',          bars:[['G5','B5','D5','G5'],['F5','A5','C5','F5'],['Bb4','D5','F5','Bb5'],['G5','B5','D5','G5']], interval:104, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'별이 태어나는 곳',   bars:[['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5'],['C5','E5','G5','C5']], interval:102, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'마지막 회의장',      bars:[['F5','A5','C5','F5'],['C5','E5','G5','C5'],['G5','B5','D5','G5'],['F5','A5','C5','F5']], interval:100, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'신성의 광장',        bars:[['D5','F#5','A5','D5'],['G5','B5','D5','G5'],['A5','C#5','E5','A5'],['D5','F#5','A5','D5']], interval:100, wave:'sawtooth', bassShift:'3', vol:.19 },
+  { label:'창공의 주인',        bars:[['C5','E5','G5','C5'],['F5','A5','C5','F5'],['G5','B5','D5','G5'],['C5','E5','G5','C5']], interval:92,  wave:'sawtooth', bassShift:'3', vol:.20 },
 ];
 // Title / chapter-select BGM — calm, hopeful arcade loop in C major.
 // Slightly louder than chapter packs so the menu feels alive the moment audio unlocks.
@@ -8153,9 +8270,15 @@ function spawnBoss(){
     t: 2.6, maxT: 2.6, tone: 'boss'
   };
   // Stack: deep boss sting + warning rumble + air-raid klaxon.
-  sfxBoss();
-  sfxBossWarn();
-  sfxBossSiren();
+  // v12.34 — 천국 챕터(ch131-200)는 sfxHeavenBoss(밝은 종+합창) 으로 교체. 어둠 sting 어색.
+  if(state.chapter >= 131){
+    sfxHeavenBoss();
+    sfxBossSiren();  // siren 은 위급함 강조 위해 유지.
+  } else {
+    sfxBoss();
+    sfxBossWarn();
+    sfxBossSiren();
+  }
   // Switch BGM into boss mode — faster, more urgent. bgmStart re-reads currentBgmPack.
   bgmResync();
 }
@@ -10368,6 +10491,97 @@ function drawSkyline(stageHue, themeIdx){
       ctx.beginPath(); ctx.ellipse(fx-6, fy, 5, 2, 0.3, 0, Math.PI*2); ctx.fill();
       ctx.globalAlpha = 1;
     }
+  } else if(tier===9){
+    // v12.34 — 원정 Ⅴ Heaven First Floor: 떠다니는 흰빛 구름 + 황금 sparkle + 떨어지는 깃털
+    for(let i=0;i<22;i++){
+      // 큰 흰 구름 (천천히 떠다님)
+      const px = (i*113 + t*15) % (W+80) - 40;
+      const py = (i*61) % H;
+      ctx.globalAlpha = 0.55 + Math.abs(Math.sin(t*0.4+i))*0.25;
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath(); ctx.ellipse(px, py, 24 + (i%5)*4, 9 + (i%3)*2, 0, 0, Math.PI*2); ctx.fill();
+      // 구름 하이라이트
+      ctx.fillStyle = 'rgba(255,243,191,0.45)';
+      ctx.beginPath(); ctx.ellipse(px-6, py-3, 14, 4, 0, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // 떠다니는 황금 sparkle
+    for(let i=0;i<35;i++){
+      const px = (i*89 + t*40) % W;
+      const py = (i*47 + Math.sin(t*1.4+i)*22) % H;
+      const tw = 0.4 + Math.abs(Math.sin(t*3+i))*0.6;
+      ctx.globalAlpha = tw;
+      ctx.fillStyle = i%2 ? '#FFE066' : '#FFFFFF';
+      const sz = i%5===0 ? 2.4 : 1.2;
+      ctx.fillRect(px, py, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+    // 떨어지는 깃털 (느린 회전)
+    for(let i=0;i<12;i++){
+      const px = (i*157 + t*8 + Math.sin(t+i)*16) % W;
+      const py = (i*73 + t*22) % (H+30);
+      const rot = t*0.6 + i;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(rot);
+      ctx.globalAlpha = 0.7;
+      ctx.fillStyle = i%2 ? '#FFE066' : '#FFFFFF';
+      ctx.beginPath(); ctx.ellipse(0, 0, 4, 1.4, 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  } else if(tier===10){
+    // v12.34 — 원정 Ⅵ Heaven Second Floor: 오로라 띠 + 광휘 별 + 황금 광선 + 거룩한 별자리
+    // 오로라 띠 (3 파동)
+    ctx.save();
+    for(let band=0; band<3; band++){
+      const grad = ctx.createLinearGradient(0, H*0.18 + band*30, W, H*0.18 + band*30);
+      const cols = [['#FFE066','#9775FA','#A5D8FF'],['#FFA94D','#E599F7','#FFE066'],['#9775FA','#FFE066','#FFFFFF']][band];
+      grad.addColorStop(0, cols[0]+'00');
+      grad.addColorStop(0.5, cols[1]+'66');
+      grad.addColorStop(1, cols[2]+'00');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      const yBase = H*(0.16 + band*0.10);
+      ctx.moveTo(0, yBase);
+      for(let x=0; x<=W; x+=24){
+        const yy = yBase + Math.sin(x*0.012 + t*(0.7 + band*0.25) + band)*22;
+        ctx.lineTo(x, yy);
+      }
+      ctx.lineTo(W, yBase + 50);
+      for(let x=W; x>=0; x-=24){
+        const yy = yBase + 50 + Math.sin(x*0.012 + t*(0.5 + band*0.18))*16;
+        ctx.lineTo(x, yy);
+      }
+      ctx.closePath();
+      ctx.globalAlpha = 0.30;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    // 광휘 별 (밝게 빛나는 큰 별)
+    for(let i=0;i<60;i++){
+      const px = (i*97 + t*3) % W;
+      const py = (i*53) % H;
+      const tw = 0.3 + Math.abs(Math.sin(t*2 + i*0.4))*0.7;
+      ctx.globalAlpha = tw;
+      const sz = i%13===0 ? 3.0 : i%5===0 ? 1.8 : 1.0;
+      ctx.fillStyle = i%4===0 ? '#FFE066' : i%4===1 ? '#A5D8FF' : i%4===2 ? '#E599F7' : '#FFFFFF';
+      ctx.fillRect(px, py, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+    // 거룩한 광선 (드물게, 위에서 아래로)
+    const beamT = (t*0.35 + state.chapter*0.4) % 4.5;
+    if(beamT < 1.2){
+      ctx.globalAlpha = (1 - beamT/1.2) * 0.5;
+      const grad = ctx.createLinearGradient(W*0.5, 0, W*0.5, H*0.7);
+      grad.addColorStop(0, 'rgba(255,224,102,.85)');
+      grad.addColorStop(0.6, 'rgba(255,224,102,.35)');
+      grad.addColorStop(1, 'rgba(255,224,102,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(W*0.42 + beamT*60, 0, 90, H*0.7);
+      ctx.globalAlpha = 1;
+    }
   } else if(tier===8){
     // v12.11 — 원정 Ⅳ Hellfire Rescue: rising embers + crimson rain + cinder snow
     for(let i=0;i<48;i++){
@@ -10453,6 +10667,8 @@ function drawSkyline(stageHue, themeIdx){
     'rgba(255,180,216,.22)', // 6 pigeon planet — warm pink
     'rgba(151,117,250,.20)', // 7 cosmos — deep violet
     'rgba(255,107,107,.22)', // 8 hellfire rescue — crimson glow
+    'rgba(255,243,191,.22)', // v12.34 — 9 heaven first — soft white-gold
+    'rgba(255,224,102,.26)', // v12.34 — 10 heaven second — radiant golden aurora
   ][tier];
   const gg = ctx.createRadialGradient(W/2, H/2, 60, W/2, H/2, Math.max(W,H)*0.45);
   gg.addColorStop(0, glowCol);
@@ -10491,6 +10707,8 @@ function drawArenaFloor(camX, camY, themeIdx, stageHue){
     ['#E8B8C0','#F0CCAA','#FFD8DD'], // 6 원정 Ⅱ Pigeon Planet: peach/rose stone
     ['#0F0A28','#1A0F36','#0A0828'], // 7 원정 Ⅲ Cosmos: deep void
     ['#2A0808','#3A1010','#1F0A0A'], // 8 원정 Ⅳ Hellfire: blackened + crimson scorch + ash floor
+    ['#FFF9DB','#E7F5FF','#FFFFFF'], // v12.34 — 9 원정 Ⅴ 천국 1층천: 구름 floor (흰빛/금빛/하늘색)
+    ['#FFF3BF','#FFE066','#E599F7'], // v12.34 — 10 원정 Ⅵ 천국 2층천: 황금 광휘 floor (광휘/금/오로라)
   ][tier][themeIdx];
   ctx.save();
   ctx.fillStyle = groundCol;
