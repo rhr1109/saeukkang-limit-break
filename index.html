@@ -7581,11 +7581,13 @@ function killEnemy(e){
   // stream from regular mobs is what bleeds the coin economy looser than intended.
   // v12.21 — 사용자 피드백 "ch39에 192k 잉여" — 모든 코인 sink 합산 시 2.7배 잉여 확인.
   // 전체 획득량을 2/5(약 40%) 수준으로 컷. 130챕터 풀클리어 누적이 고정 sink 총합과 비슷해짐.
-  if(e.kind === 'boss')        awardCoins(8 + state.chapter*2);
-  else if(e.kind === 'tyrant' || e.kind === 'leviathan') awardCoins(4);
-  else if(e.kind === 'summoner' || e.kind === 'reaper') awardCoins(1);
-  else if(e.kind === 'sniper' || e.kind === 'tank')     awardCoins(1);
-  else if(Math.random() < 0.04) awardCoins(1);
+  // v12.22 — 추가 1/2 컷 (원본 대비 약 1/5). summoner/reaper, sniper/tank 는 1 floor 라
+  //   확률 50% 로 발동시켜 평균값을 절반으로 맞춤.
+  if(e.kind === 'boss')        awardCoins(4 + state.chapter*1);
+  else if(e.kind === 'tyrant' || e.kind === 'leviathan') awardCoins(2);
+  else if(e.kind === 'summoner' || e.kind === 'reaper') { if(Math.random() < 0.5) awardCoins(1); }
+  else if(e.kind === 'sniper' || e.kind === 'tank')     { if(Math.random() < 0.5) awardCoins(1); }
+  else if(Math.random() < 0.02) awardCoins(1);
   sfxKill();
   // particles
   for(let i=0;i<14;i++){
@@ -7803,8 +7805,8 @@ function applyItem(item){
     const bonus = 25 + Math.floor(state.chapter*10);
     state.score += bonus;
     // Meta currency: coin pickups feed the title-screen shop. Higher chapters drop more.
-    // v12.21 — 픽업 가치 2/5 컷 (잉여 보정).
-    const metaCoins = 1 + Math.floor(state.chapter * 0.25);
+    // v12.21 → v12.22 — 픽업 가치 추가 1/2 컷 (원본 대비 ~1/5).
+    const metaCoins = 1 + Math.floor(state.chapter * 0.12);
     awardCoins(metaCoins);
     sfxCoin();
     state.pickupTexts.push({ x:p.x+10, y:p.y-28, t:.8, txt:`+${bonus}점 · +${metaCoins}🪙`, color:'#FFE066' });
@@ -7852,8 +7854,8 @@ function onBossDefeated(){
     state.newCompanion = { kind:'squirrel', label:'다람쥐 친구', sub:'심연의 첨탑에서 구출 🐿' };
   }
   // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
-  // v12.21 — 클리어 보너스 2/5 컷.
-  awardCoins(24 + state.chapter * 7);
+  // v12.21 → v12.22 — 클리어 보너스 추가 1/2 컷 (원본 대비 ~1/5).
+  awardCoins(12 + state.chapter * 3);
   // Chapter-clear costume drop: 10% rare drop, with pity guaranteeing one every 10 clears.
   state.earnedCostumeThisChapter = rollChapterClearCostume();
   saveProgress();
