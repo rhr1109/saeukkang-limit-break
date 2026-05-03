@@ -9205,6 +9205,14 @@ function chapterTier(ch){
   if(ch >= 101) return 8;
   if(ch >= 71)  return 7;
   if(ch >= 51)  return 6;
+  // v12.20 — 31~50 챕터 이름과 배경 불일치 수정.
+  // 종전: ((ch-1)%30)/5 로 1순환의 city/neon/cave/ice 를 그대로 재사용 → 이름이
+  //   "심연 입구/수정 차원/재의 들판/시간의 균열" 인데 배경은 도시/네온/동굴/얼음.
+  // 수정: 챕터 이름 테마에 가장 가까운 기존 tier 비주얼로 직접 매핑.
+  if(ch >= 46) return 7; // 46-50 (시간의 균열/별먼지/무한 너머) → Cosmos 별먼지
+  if(ch >= 41) return 5; // 41-45 (재의 평원/쇳가루)            → Hellfire 잿불/재
+  if(ch >= 36) return 2; // 36-40 (수정 차원/프리즘)             → Crystal cave 수정
+  if(ch >= 31) return 4; // 31-35 (심연 입구/산호초/해저 폐허)  → Space 깊은 어둠+드리프트
   return Math.min(5, Math.floor(((ch-1) % 30)/5));
 }
 function themeId(){
