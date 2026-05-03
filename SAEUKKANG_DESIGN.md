@@ -2,7 +2,7 @@
 
 > 이 문서는 게임의 현재 사양을 기록한다. 기능이 바뀌면 변경이력에 한 줄을 추가하지 말고 이 문서의 해당 섹션을 직접 수정한다.
 >
-> **현재 빌드 버전: v12.36b** — 난이도 검수 후 chm.hp/dmg 곡선 ch130 이후 평탄화(×1.0008/ch) + boss base HP ch200 clamp + ch201+ hpMult 범위 축소 + ch101/115/131/161/181/201/221/241/251/271/286/296 chapter-gated 신규 카드 12종 추가. 부모 4명 단안 통일 + 개성 분리(콧수염/모노클/큰수염/보넷), 조상 차별화(다빈치 곱슬+펜 / 아리스토 풍성수염+두루마리), 카테고리별 설정 토글 5세트(아내·아기·친구5종·부모·조상 각자 [👁 보이기][✨ 효과]), 부모 코스튬 측면별 분리 구매(남편 부모 / 아내 부모 각자), 부모 인게임 세로 2단 배치(남편 뒤). 이전 v12.35: 원정 Ⅶ·Ⅷ 추가(MAX_CHAPTERS 300), 천국 3층천 침범 + 아마겟돈(악의 세력 침공, 가족·창조주 동맹), SSS 코스튬(가족 자동 무료/동료 유료), 풀세트 시너지 ×1.40 dmg + holyBossBonus +35%, 천상의 새우깡 스킨(Ch300 자동 무료) + 영구 글로우 눈, tier 11/12 BG + 100 신규 BGM. 자세한 변경은 STATUS.md 참조.
+> **현재 빌드 버전: v12.36c** — 난이도 단조증가 보장. ch290+ 곡선 ×1.025 → ×1.105/ch 강화 + 신규 카드 multiplier ×1.6~2.0 → ×1.15~1.20 보수화 + dread_apex/sovereign hpMult 살짝 ↑. SSS 풀세트 ch300 5.2분, ch295 4.1분, ch290 2분 (단조증가 ✓, "아슬아슬 클리어선"). v12.36b: 부모 4명 단안 통일 + 개성 분리(콧수염/모노클/큰수염/보넷), 조상 차별화(다빈치 곱슬+펜 / 아리스토 풍성수염+두루마리), 카테고리별 설정 토글 5세트(아내·아기·친구5종·부모·조상 각자 [👁 보이기][✨ 효과]), 부모 코스튬 측면별 분리 구매(남편 부모 / 아내 부모 각자), 부모 인게임 세로 2단 배치(남편 뒤), chm.hp/dmg ch130 이후 평탄화 + boss base HP ch200 clamp + chapter-gated 신규 카드 12종 (ch101/115/131/161/181/201/221/241/251/271/286/296). v12.35: 원정 Ⅶ·Ⅷ 추가(MAX_CHAPTERS 300), 천국 3층천 침범 + 아마겟돈(악의 세력 침공, 가족·창조주 동맹), SSS 코스튬(가족 자동 무료/동료 유료), 풀세트 시너지 + 천상의 새우깡 스킨 + 영구 글로우 눈. 자세한 변경은 STATUS.md 참조.
 
 ## 1. 개요
 
@@ -1105,18 +1105,94 @@ saeukkang-limit-break/
 ### 11.7 BGM·몹 풀
 
 - BGM_CHAPTER_PACKS 100 신규 entry (ch201-300). 자색·황금 주조; ch271+ 90-110ms; ch290+ 80-100ms; ch300 "천상의 새우깡" 72ms — finale.
-- waveEnemyPool: ch201+ void_drone/star_eye/soul_husk/tank/tyrant 혼합 (천계 권속 톤). ch251+ 천계 + 타락 천사 + 지옥 잔당 혼합.
-- 보스: BOSS_VARIANTS 20 신규 (ch201-300, 5챕터마다 변종 변경). hpMult 64.0→175.0, dmgMult 4.30→8.00.
+- waveEnemyPool: ch201+ void_drone/star_eye/soul_husk/tank/tyrant 혼합 (천계 권속 톤). ch251+ imp/hellhound/soul_husk 위주 (악의 세력 침공).
+- 보스: BOSS_VARIANTS 20 신규 (ch201-300, 5챕터마다 변종 변경). v12.36c 기준 hpMult 54→135 (ch300 dread_sovereign), dmgMult 4.30→7.40.
 
-### 11.8 난이도 캘리브레이션 (ch290+)
+### 11.8 난이도 캘리브레이션 (v12.36c — 단조증가 보장)
 
-- chapterMult ch290+: HP_CH289 × 1.030^(c-289), DMG_CH289 × 1.025^(c-289). ch300 = ~1.385× HP / ~1.312× dmg vs ch289.
-- SSS 풀세트(+40% dmg + +35% holyBoss + +30% maxHp + projCount/pierce/regen)로 아슬아슬한 클리어선.
-- SSS 풀세트 없이도 클리어는 가능 (부분 세트 시너지로 헤드룸 확보). 단 컨트롤은 더 까다로움.
-- 코인 보상 ch201+ 곡선 완만화: 21 + min(ch,200)×5 + (ch-200)×3.5. ch300 ≈ 1370 코인. SSS 풀세트(70k+)는 ~50 챕터 farming 필요.
+**chapterMult 곡선** (ch130 이후 평탄화 + ch290+ 가팔리기):
+- ch1-130: 기존 sim-tuned 유지
+- ch131-289: HP/dmg ×1.0008/ch (사실상 동결, ch130 곡선의 연속)
+- ch290-300: HP ×1.105/ch, dmg ×1.045/ch — 단조증가 + "barely clearable" 영역
+
+**보스 base HP 공식**: `(3500 + min(c,200)^1.45 * 110) * chm.hp * v.hpMult`. c^1.45 항을 ch200 으로 clamp 하여 ch>200 base HP 일정.
+
+**SSS 풀세트 시너지** (3pc 동시 착용):
+- 공격력 ×1.40 + 최대 HP ×1.30 + holyBossBonus +35% + projCount +1 + pierce +1 + regen +0.5/s
+- 부분 (1pc): dmg ×1.08 / 1pc maxHp ×1.06 / +8% holyBoss
+- 부분 (2pc): dmg ×1.20 / maxHp ×1.14 / +18% holyBoss
+
+**Chapter-gated 카드** (v12.36b 신규 추가, ch300까지 점진적 강화):
+
+| 카드 | 챕터 | 효과 |
+|---|---|---|
+| hellbringer | ch101 | dmg ×1.6, pierce +3 |
+| rescuer_might | ch115 (×2) | dmg ×1.7 + projCount +1 (per pick) |
+| celestial_grace | ch131 (×2) | dmg ×1.5 + crit +15% + regen +0.5/s |
+| seraph_strike | ch161 | dmg ×1.8 + pierce +2 + projCount +1 |
+| sky_sovereign_pact | ch181 | dmg ×2.0 + fireRate ×1.3 (단, maxHp -15%) |
+| covenant_blade | ch201 | dmg ×2.0 + critMult +1.5 |
+| archon_decree | ch221 (×2) | dmg ×1.6 + projCount +2 + pierce +2 |
+| third_heaven_writ | ch241 | dmg ×2.5 + fireRate ×1.4 (단, maxHp -20%) |
+| dawn_alliance | ch251 | dmg ×1.20 + projCount +1 + holyBoss +15% |
+| armageddon_legion | ch271 (×2) | dmg ×1.15 + pierce +2 + holyBoss +10% (per pick) |
+| creator_blessing | ch286 | dmg ×1.20 + critMult +1.0 + holyBoss +15% |
+| final_judgment | ch296 | dmg ×1.20 + fireRate ×1.20 + projCount +1 (마지막 5챕터 전용) |
+
+**SSS 풀세트 기준 보스 클리어 시간 시뮬** (ch130-300):
+
+| Ch | 보스 | nothing | S풀 | SS풀 | SSS풀 |
+|---|---|---|---|---|---|
+| 130 | 지옥문의 군주 | 16분 | 10분 | 7분 | **3분** |
+| 200 | 창공의 주인 | 16분 | 10분 | 7분 | **3분** |
+| 250 | 3층천의 군주 | 19분 | 12분 | 8분 | **4분** |
+| 270 | 야창의 마샬 | 15분 | 9분 | 6분 | **3분** |
+| 290 | 거짓의 군단장 | 9분 | 6분 | 4분 | **2분** |
+| 295 | 공포의 정점 | 19분 | 12분 | 8분 | **4분** |
+| 300 | 악의 군주 | 24분 | 15분 | 10분 | **5.2분** |
+
+ch290-300 단조증가 ✓. ch300 SSS풀 5.2분 = "아슬아슬한 클리어선" (cap 15분 안 충분). ch300 SS풀 10분 (cap 직전), S풀 15분 (cap 초과) → SSS 풀세트 사실상 필수.
+
+**코인 보상 ch201+ 완만화**: 21 + min(ch,200)×5 + (ch-200)×3.5. ch300 ≈ 1370 코인. SSS 풀세트(친구 20k + 부모 22k + 조상 26k = 68k코인)는 ~50 챕터 farming 필요.
 
 ### 11.9 챕터 클리어 시 안내 팝업
 
 - 5종 친구 첫 합류(Ch105 sparrow), 부모 첫 합류(Ch205 husbandParents), 조상 첫 합류(Ch255 gugunardo) 시 `showSetIntroModal` 트리거.
 - 같은 세트 멤버 모두를 하나의 화면에 미리보기 + 합류 일정 + 시스템 설명 (일괄 구매·풀세트 시너지·부분 효과).
+
+### 11.10 v12.36b — 부모 비둘기 디자인·개성 분리
+
+부모 4명 모두 단안 통일 (남편·아내·아빠 비둘기와 일치) + 페어별 개성:
+
+| 파트너 | 페르소나 | 특징 |
+|---|---|---|
+| 시아버지 (husbandParents 좌) | fatherInLaw | 푸른 톤 + 대머리(옆머리만) + 회색 콧수염 + 진한 눈썹 |
+| 시어머니 (husbandParents 우) | motherInLaw | 분홍 톤 + 머리망(분홍 bun) + 황금 머리띠 + 모노클(외눈 안경) |
+| 장인 (wifeParents 좌) | fatherOfWife | 초록 톤 + 풍성한 흰 수염(가장 큼) + 머리 위 흰털 |
+| 장모 (wifeParents 우) | motherOfWife | 살구 톤 + 흰 보넷(정수리만, 분홍 꽃 5개) + 감은 미소눈 |
+
+조상 2명도 단순한 elder 대신 개성 분리:
+- **구구나르도 다 둘치** (다빈치 풍): 르네상스 cream 톤 + 곱슬 흰 수염 + 머리 옆 흰 곱슬털 4개 + 한쪽 날개 끝에 깃털 펜
+- **비리스토둘레스** (아리스토텔레스 풍): 그리스 대리석 톤 + 풍성한 흰 수염(턱 아래 큰 sweep) + 묵직한 눈썹 + 한쪽 날개에 두루마리 + 옅은 월계관
+
+**인게임 위치**: 부모 4명은 남편 비둘기 *뒤*에 세로 2단 배치 (`_back:true` 플래그로 player 보다 먼저 draw). 아내 부모 pair → 살짝 앞 (oy=-72), 남편 부모 pair → 가장 뒤 (oy=-110). 가족·친구는 기존 위치 유지.
+
+### 11.11 v12.36b — 카테고리별 설정 토글
+
+`progress.settings` 5세트 추가:
+- `showWife/fxWife`, `showChild/fxChild`, `showFriends/fxFriends`, `showParents/fxParents`, `showAncestors/fxAncestors`
+- 마스터 `showFamily/familyFx` 도 유지 (모든 카테고리 일괄 OFF)
+
+**helpers**: `companionVisible(kind)` / `companionFxOn(kind)` — kind 를 카테고리에 매핑해 마스터 + 카테고리 모두 ON 일 때만 true.
+
+**UI**:
+- 설정 모달에 [👁 보이기 / ✨ 효과] 컬럼 헤더 + 카테고리별 미니 토글 행 5개
+- 합류 안 된 카테고리 행 `display:none` (설정 자체 불가)
+- 마스터 OFF 시 카테고리 토글 disabled
+
+### 11.12 v12.36b — 부모 코스튬 측면별 분리 구매
+
+`buyParentsSet(setId, side='husbandParents'|'wifeParents'|'both')` — 한 측면만 구매·장착·해제.
+
+**UI** (`renderParentsSetGrid`): 각 세트 카드 안에 [👨‍👩 남편 부모][👨‍👩 아내 부모] 두 측면별 버튼. 측면별로 보유/장착/구매 상태 독립.
 
