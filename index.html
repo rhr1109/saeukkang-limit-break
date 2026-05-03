@@ -157,7 +157,26 @@
      Pause sits on top (most-used) and mute below; quitting goes through the pause menu so
      there is no rogue ✕ next to the joystick that fires a confirm() on accidental taps. */
   #pauseBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(112px + env(safe-area-inset-bottom, 0px));}
-  #muteBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(60px + env(safe-area-inset-bottom, 0px));width:44px;height:44px;border-radius:10px;font-size:18px;}
+  /* v12.32 — 음소거 버튼이 있던 자리에 통합 설정 버튼. 음소거는 모달 안으로 이동. */
+  #settingsBtn{left:calc(env(safe-area-inset-left, 0px) + 12px);bottom:calc(60px + env(safe-area-inset-bottom, 0px));width:44px;height:44px;border-radius:10px;font-size:20px;}
+  #settingsBtn[data-muted="1"]::after{content:'';position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#FF6B6B;border:2px solid #120300;box-shadow:0 0 6px rgba(255,107,107,.7);}
+  /* Title screen 설정 버튼 — titleShopPill 의 좌상단 미러. 작은 아이콘 버튼. */
+  #titleSettingsBtn{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 14px);left:calc(env(safe-area-inset-left, 0px) + 12px);width:46px;height:46px;border-radius:12px;background:rgba(0,0,0,.65);border:3px solid #FFD43B;color:#FFE066;font-size:22px;font-weight:900;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 0 rgba(0,0,0,.45),inset 0 -2px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.18);font-family:inherit;text-shadow:0 1px 0 rgba(0,0,0,.5);}
+  #titleSettingsBtn:active{transform:translateY(2px);box-shadow:0 3px 0 rgba(0,0,0,.45),inset 0 -2px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.18);}
+  #titleSettingsBtn[data-muted="1"]::after{content:'';position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;background:#FF6B6B;border:2px solid #120300;box-shadow:0 0 6px rgba(255,107,107,.7);}
+  /* Settings modal — sectioned toggle list */
+  .set-section-title{color:#FFE066;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;margin:14px 4px 6px;opacity:.85;}
+  .set-section-title:first-of-type{margin-top:6px;}
+  .set-row{display:flex;align-items:center;gap:12px;padding:11px 12px;background:rgba(20,8,40,.45);border:2px solid rgba(255,212,59,.32);border-radius:10px;margin-bottom:6px;}
+  .set-row .ic{font-size:22px;flex:0 0 auto;width:30px;text-align:center;line-height:1;}
+  .set-row .lbl{flex:1;color:#FFF9DB;font-weight:800;font-size:14px;letter-spacing:-.2px;line-height:1.2;}
+  .set-row .lbl .desc{display:block;color:#FFE066;font-size:10.5px;font-weight:500;opacity:.78;margin-top:3px;letter-spacing:0;line-height:1.3;}
+  .set-row.disabled{opacity:.45;}
+  .set-row.disabled .set-toggle{pointer-events:none;}
+  .set-toggle{position:relative;width:50px;height:28px;border-radius:999px;background:#495057;border:2px solid #6C757D;cursor:pointer;flex:0 0 auto;transition:background .15s, border-color .15s;padding:0;font-family:inherit;}
+  .set-toggle::after{content:'';position:absolute;left:1px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.5);transition:left .18s ease-out;}
+  .set-toggle.on{background:linear-gradient(180deg,#51CF66,#2F9E44);border-color:#FFE066;}
+  .set-toggle.on::after{left:25px;}
   /* While a non-playing scene is up (gameover / victory / chapter cleared / level up overlay),
      hide the in-game HUD entirely so the modal owns the screen. The pause modal stays an
      exception because the surrounding HUD is meaningful context for "resume". */
@@ -690,7 +709,7 @@
     <button class="hud-btn" id="pauseBtn" title="일시정지">⏸</button>
     <div id="joyArea"></div>
     <div id="joystick"><div class="stick"></div></div>
-    <button class="hud-btn" id="muteBtn" title="음소거">🔊</button>
+    <button class="hud-btn" id="settingsBtn" title="설정 (음소거 · 가족 표시 · 효과)">⚙</button>
     <button id="ultBtn" type="button" title="비둘기의 외침 — 충전 후 재사용 가능">
       <div class="ult-fill" id="ultFill"></div>
       <div class="ult-icon">🐦‍🔥</div>
@@ -701,6 +720,8 @@
   <!-- Title screen -->
   <div id="title" class="overlay on">
     <div class="rays"></div>
+    <!-- v12.32 — 시작화면 설정 버튼. 우상단 상점 pill 의 좌상단 미러 위치. -->
+    <button id="titleSettingsBtn" type="button" title="설정 (음소거 · 가족 표시 · 효과)">⚙</button>
     <button id="titleShopPill" type="button" title="상점 열기 (스킬 트리 + 코스튬 가챠)">
       <span class="awning"></span>
       <span class="shop-front">
@@ -893,6 +914,38 @@
        a 짜자잔! moment with the dropped costume and an immediate equip prompt. -->
   <!-- v12 phase 2.1 — Companion meet popup. Shown BEFORE chapter reward / clear modals
        when wife (ch51) or child (ch60) joins. Player taps to continue, then normal flow resumes. -->
+  <!-- v12.32 — 통합 설정 모달. 게임 HUD ⚙ 버튼 / 시작화면 ⚙ 버튼 양쪽에서 호출.
+       음소거는 항상 노출. 가족·동료 토글은 ch51 아내 비둘기 합류 후에만 표시. -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="card" style="max-width:380px;">
+      <h2 style="color:#FFE066;text-shadow:0 0 14px rgba(255,224,102,.65);">⚙ 설정</h2>
+      <div class="sub">언제든 다시 변경할 수 있어요</div>
+
+      <div class="set-section-title">사운드</div>
+      <div class="set-row" id="setMuteRow">
+        <div class="ic">🔊</div>
+        <div class="lbl">음소거<span class="desc">BGM · 효과음 모두 끔</span></div>
+        <button type="button" class="set-toggle" id="setMuteToggle" aria-label="음소거 토글"></button>
+      </div>
+
+      <div id="setFamilyBlock" style="display:none;">
+        <div class="set-section-title">비둘기 가족 · 동료</div>
+        <div class="set-row" id="setShowFamilyRow">
+          <div class="ic">👁</div>
+          <div class="lbl">보이기<span class="desc">시작화면 · 게임 · 시네마틱에서 표시</span></div>
+          <button type="button" class="set-toggle" id="setShowFamilyToggle" aria-label="가족·동료 보이기 토글"></button>
+        </div>
+        <div class="set-row" id="setFamilyFxRow">
+          <div class="ic">✨</div>
+          <div class="lbl">효과<span class="desc">자동 사격 · 사격음 (보이기 OFF 시 자동 비활성)</span></div>
+          <button type="button" class="set-toggle" id="setFamilyFxToggle" aria-label="가족·동료 효과 토글"></button>
+        </div>
+      </div>
+
+      <button class="btn small" id="setCloseBtn" style="width:100%;margin-top:14px;background:linear-gradient(180deg,#FFE066,#FAB005,#E67700);color:#5A1A04;">닫기</button>
+    </div>
+  </div>
+
   <div id="companionMeetModal" class="modal hidden">
     <div class="card" style="max-width:380px;text-align:center;">
       <h2 id="cmmTitle" style="color:#FFB4D8;text-shadow:0 0 16px rgba(255,180,216,.85);">💗 새 가족 합류!</h2>
@@ -1007,7 +1060,7 @@
       <h2>조작법 · 규칙</h2>
       <div style="font-size:13px;line-height:1.65;color:#FFF9DB;">
         <p><b style="color:#FFE066;">💻 PC:</b> WASD 또는 방향키로 이동. 자동으로 가장 가까운 적에게 새우깡을 던집니다. ESC로 일시정지.</p>
-        <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 부동 조이스틱으로 이동. 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ⏸ 일시정지 / 🔊 음소거 버튼.</p>
+        <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 부동 조이스틱으로 이동. 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ⏸ 일시정지 / ⚙ 설정 버튼.</p>
         <p><b style="color:#FFE066;">🛒 상점:</b> 타이틀에서 진입. 코인은 적/보스 처치, 코인 픽업, 챕터 클리어로 누적되며 영구 업그레이드(시작 HP·공격력·이속·자석 반경·치명타 등)를 살 수 있어 다음 런에 자동 적용됩니다.</p>
         <p><b style="color:#FFE066;">👗 코스튬:</b> 머리·몸통·무기 슬롯에 1개씩 장착. 등급은 S/A/B/C이며, 상점에서 가챠로 뽑거나 챕터 클리어 보상으로 드물게 획득합니다. 10판마다 최소 한 번은 코스튬이 보장됩니다.</p>
         <p><b style="color:#FFE066;">📕 챕터:</b> 총 130개 챕터(4원정). 각 챕터는 3웨이브 + 최종 보스로 진행됩니다. 모든 챕터 캡은 15분 이하 — Ch1~10 약 4-5분, Ch11~25 약 7-9분, Ch26~40 약 9-12분, Ch41~50 약 11-15분, Ch51~100(원정 Ⅱ·Ⅲ) 약 7-12분, Ch101~130(원정 Ⅳ 지옥) 약 9-15분 (보스를 못 잡으면 캡 시간에 자동 처치).</p>
@@ -1162,7 +1215,8 @@ function initAudio(){
   if(audioCtx) return;
   try{
     audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    masterGain = audioCtx.createGain(); masterGain.gain.value=0.45; masterGain.connect(audioCtx.destination);
+    // v12.32 — masterGain 초기값은 영구 저장된 mute 설정을 반영.
+    masterGain = audioCtx.createGain(); masterGain.gain.value = muted ? 0 : 0.45; masterGain.connect(audioCtx.destination);
     bgmGain = audioCtx.createGain(); bgmGain.gain.value=0.25; bgmGain.connect(masterGain);
   }catch(e){}
 }
@@ -1769,11 +1823,79 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-document.getElementById('muteBtn').addEventListener('click',()=>{
-  muted=!muted;
-  document.getElementById('muteBtn').textContent = muted?'🔇':'🔊';
-  if(masterGain) masterGain.gain.value = muted?0:.45;
+// v12.32 — 통합 설정 모달. 게임 HUD ⚙ / 시작화면 ⚙ 양쪽에서 같은 모달 호출.
+function _setToggleVisual(id, on){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('on', !!on);
+}
+function _refreshSettingsBtnIndicator(){
+  // 음소거 상태를 두 ⚙ 버튼 모두에 빨간 dot 으로 표시.
+  for(const id of ['settingsBtn','titleSettingsBtn']){
+    const b = document.getElementById(id);
+    if(b) b.dataset.muted = settingsMuted() ? '1' : '0';
+  }
+}
+function openSettingsModal(){
+  const modal = document.getElementById('settingsModal');
+  if(!modal) return;
+  // mute 토글 — 항상 노출.
+  _setToggleVisual('setMuteToggle', settingsMuted());
+  // 가족·동료 블록 — ch51 아내 합류 후에만 노출.
+  const famBlock = document.getElementById('setFamilyBlock');
+  if(famBlock) famBlock.style.display = familyToggleAvailable() ? '' : 'none';
+  if(familyToggleAvailable()){
+    _setToggleVisual('setShowFamilyToggle', showFamilyOn());
+    _setToggleVisual('setFamilyFxToggle', familyFxPref());
+    // 효과 행 disabled 처리 — 보이기 OFF 면 효과도 자동 OFF.
+    const fxRow = document.getElementById('setFamilyFxRow');
+    if(fxRow) fxRow.classList.toggle('disabled', !showFamilyOn());
+  }
+  modal.classList.remove('hidden');
+}
+function closeSettingsModal(){
+  const modal = document.getElementById('settingsModal');
+  if(modal) modal.classList.add('hidden');
+}
+document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+const _titleSetBtn = document.getElementById('titleSettingsBtn');
+if(_titleSetBtn) _titleSetBtn.addEventListener('click', openSettingsModal);
+document.getElementById('setCloseBtn').addEventListener('click', closeSettingsModal);
+// 모달 배경 클릭 시 닫기 (카드 자체 클릭은 stopPropagation 으로 보존).
+document.getElementById('settingsModal').addEventListener('click', (e)=>{
+  if(e.target.id === 'settingsModal') closeSettingsModal();
 });
+
+document.getElementById('setMuteToggle').addEventListener('click', ()=>{
+  const next = !settingsMuted();
+  if(!progress.settings) progress.settings = {};
+  progress.settings.muted = next;
+  muted = next;
+  if(masterGain) masterGain.gain.value = next ? 0 : 0.45;
+  saveProgress();
+  _setToggleVisual('setMuteToggle', next);
+  _refreshSettingsBtnIndicator();
+});
+document.getElementById('setShowFamilyToggle').addEventListener('click', ()=>{
+  if(!progress.settings) progress.settings = {};
+  const next = !showFamilyOn();
+  progress.settings.showFamily = next;
+  saveProgress();
+  _setToggleVisual('setShowFamilyToggle', next);
+  // 효과 행 disabled 동기화.
+  const fxRow = document.getElementById('setFamilyFxRow');
+  if(fxRow) fxRow.classList.toggle('disabled', !next);
+});
+document.getElementById('setFamilyFxToggle').addEventListener('click', ()=>{
+  if(!progress.settings) progress.settings = {};
+  // 보이기 OFF 시 효과 토글은 disabled — 클릭 무시.
+  if(!showFamilyOn()) return;
+  const next = !familyFxPref();
+  progress.settings.familyFx = next;
+  saveProgress();
+  _setToggleVisual('setFamilyFxToggle', next);
+});
+// 부팅 시 indicator 동기화는 progress const 가 초기화된 이후에 (아래 helpers 정의 시점) 실행.
 
 // ---------- Drawing helpers ----------
 function roundRect(ctx,x,y,w,h,r){
@@ -3622,7 +3744,8 @@ function drawSkinPreviewPigeonFrame(){
   };
   // v12.13 — 스킨 미리보기에도 가족이 함께 보이게. 사용자 요청 "스킨 구매 전 미리보기에
   // 안 잘린 비둘기 가족 보이게".
-  drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, true);
+  // v12.32 — 단, 설정에서 가족 보이기 OFF 면 미리보기에서도 숨김.
+  drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, showFamilyOn());
 }
 
 function drawTitlePigeonFrame(){
@@ -3650,7 +3773,8 @@ function drawTitlePigeonFrame(){
   };
   // v12.13 — 공통 drawFamilyGroup 사용. husband 0.85×, compScale 1.5, offsetX scale*50으로
   // 가족 셋이 모두 캔버스 안에 들어가게 보수적 선택. 사용자 피드백 "타이틀 가족 잘림" 반영.
-  drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, true);
+  // v12.32 — 설정에서 가족 보이기 OFF 면 husband 만 그리기 (drawFamilyGroup 내부 처리).
+  drawFamilyGroup(ctx2, cssW, cssH, fakePlayer, showFamilyOn());
 }
 
 // Draw a saeukkang (shrimp-chip bag) — used as projectile
@@ -4874,6 +4998,9 @@ const progress = (()=>{
       parrot:   { unlocked:[],           equipped:{head:null, body:null} },
       squirrel: { unlocked:[],           equipped:{head:null, body:null} },
     },
+    // v12.32 — 통합 설정. muted 는 기존 runtime 변수에서 옮겨와 영구 저장.
+    // showFamily/familyFx 는 ch51 아내 합류 이후에만 UI 노출 (기본 ON).
+    settings: { muted:false, showFamily:true, familyFx:true },
   };
   const cuDefault = {wife:false, child:false, sparrow:false, magpie:false, owl:false, parrot:false, squirrel:false};
   const merged = Object.assign(base, saved || {}, {
@@ -4897,6 +5024,8 @@ const progress = (()=>{
       // 여기선 데이터 형태만 보장하고, 실제 정규화는 첫 사용 시점에 lazy 처리.
       return out;
     })(),
+    // v12.32 — 통합 설정 머지. 구버전 progress 엔 settings 가 없을 수 있음.
+    settings: Object.assign({ muted:false, showFamily:true, familyFx:true }, (saved && saved.settings) || {}),
   });
   // Sanity: drop equipped uids that no longer exist in inventory.
   for(const slot of ['head','body','weapon']){
@@ -4911,6 +5040,20 @@ const progress = (()=>{
 })();
 function saveProgress(){ try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }catch(e){} }
 function unlockedChapters(){ return Math.min(MAX_CHAPTERS, progress.clearedChapter + 1); }
+
+// v12.32 — 통합 설정 helpers. progress.settings 는 위에서 default 로 보장됨.
+//   settingsMuted   : BGM/SFX 음소거. 기존 runtime `muted` 와 동기.
+//   showFamilyOn   : 비둘기 가족·동료 그리기 (시작화면, 게임, 시네마틱 모두).
+//   familyFxEffective: 자동 사격/사격음. 보이기 OFF 면 효과도 자동 OFF (사용자 직관).
+function settingsMuted(){ return !!(progress.settings && progress.settings.muted); }
+function showFamilyOn(){ return !progress.settings || progress.settings.showFamily !== false; }
+function familyFxPref(){ return !progress.settings || progress.settings.familyFx !== false; }
+function familyFxEffective(){ return showFamilyOn() && familyFxPref(); }
+function familyToggleAvailable(){ return !!(progress.companionUnlocks && progress.companionUnlocks.wife); }
+// 기존 runtime `muted` 변수에 영구 설정 반영. 여기서 한 번 동기화하면 이후 모든 audio 가드가 정상 동작.
+muted = settingsMuted();
+// HUD/시작화면 ⚙ 버튼의 mute dot indicator 도 부팅 시 동기화.
+_refreshSettingsBtnIndicator();
 
 // ---------- Title background skins ----------
 // Pure-cosmetic skins for the start screen. Themed to the chapter biomes + a few "scenic" skins
@@ -5806,7 +5949,9 @@ function updateCompanions(dt){
     c.reloadT -= dt;
     if(c.reloadT <= 0){
       c.reloadT = 1 / c.fireRate;
-      fireCompanionShrimp(c);
+      // v12.32 — 효과 OFF (또는 보이기 OFF → 효과도 자동 OFF) 시 사격 건너뛰기.
+      // 위치 갱신 + 피격 sync 는 그대로 → 보이기 ON 으로 재토글 시 즉시 자연스러움.
+      if(familyFxEffective()) fireCompanionShrimp(c);
     }
   }
 }
@@ -10887,14 +11032,15 @@ function drawVictoryScene(){
     const d = Math.min(Math.abs(dx), earthR - 1);
     return earthCy - Math.sqrt(earthR*earthR - d*d);
   };
-  if(expId >= 2 && expId <= 3){
+  // v12.32 — 설정에서 가족·동료 보이기 OFF 면 시네마틱 엔딩에서도 husband 만 그리기.
+  if(showFamilyOn() && expId >= 2 && expId <= 3){
     // 원정 Ⅱ·Ⅲ: 남편 + 아내 + 아기 (5종 구출 친구는 아직 만나지 않은 상태)
     const wifeDx = -52 * pigScale;
     drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
     const childDx = 50 * pigScale;
     drawCompanion(ctx, { x: pigCx + childDx, y: surfaceY(childDx) - 18, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
   }
-  if(expId >= 4){
+  if(showFamilyOn() && expId >= 4){
     // 원정 Ⅳ: 남편 + 아내 + 아기 + 5종 구출 친구. 가족은 안쪽, 친구는 양옆 바깥에 넓게 분산.
     const wifeDx = -42 * pigScale;
     drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
@@ -11619,7 +11765,8 @@ function render(){
   }
   // v12 phase 2 — companions drawn AFTER player so they layer in front (player is the focal
   // point; companions are visual flair next to them).
-  for(const c of state.companions) drawCompanion(ctx, c);
+  // v12.32 — 설정에서 가족·동료 보이기 OFF 면 렌더 스킵 (위치/사격 로직은 별개로 가드).
+  if(showFamilyOn()) for(const c of state.companions) drawCompanion(ctx, c);
 
   // Player bullets — dispatch by weapon kind. Missile also drops thrust particles per frame.
   for(const b of state.bullets){
@@ -13778,23 +13925,26 @@ function drawHellGateScene(ctx2, W, H, t){
   // ── 갇힌 5종 친구 + 철창 ──
   // drawSadFriend 는 좌표를 받지만 내부 사이즈는 고정 — 큰 캔버스에서도 작은 친구만 그림.
   // scale 적용 위해 ctx 전체 scale 임시 변환.
-  ctx2.save();
-  ctx2.scale(scale, scale);
-  const Wb = 360, Hb = H/scale, cyB = Hb*0.50, cxB = Wb/2;
-  drawSadFriend(ctx2, 'sparrow',  46,  cyB - 6, t);
-  drawSadFriend(ctx2, 'magpie',   46,  cyB + 12, t);
-  drawSadFriend(ctx2, 'owl',      Wb-46, cyB - 6, t);
-  drawSadFriend(ctx2, 'parrot',   Wb-46, cyB + 12, t);
-  drawSadFriend(ctx2, 'squirrel', cxB,   Hb - 14, t);
-  // 철창
-  ctx2.strokeStyle = '#3A2828'; ctx2.lineWidth = 2; ctx2.shadowColor = 'rgba(0,0,0,.4)'; ctx2.shadowBlur = 2;
-  for(let i=0; i<3; i++){
-    ctx2.beginPath(); ctx2.moveTo(36 + i*14, cyB - 22); ctx2.lineTo(36 + i*14, cyB + 22); ctx2.stroke();
-    ctx2.beginPath(); ctx2.moveTo(Wb-50 + i*12, cyB - 22); ctx2.lineTo(Wb-50 + i*12, cyB + 22); ctx2.stroke();
-    ctx2.beginPath(); ctx2.moveTo(cxB - 12 + i*12, Hb - 28); ctx2.lineTo(cxB - 12 + i*12, Hb - 4); ctx2.stroke();
+  // v12.32 — 설정에서 가족·동료 보이기 OFF 면 친구·철창 둘 다 숨김 (지옥문만 회전).
+  if(showFamilyOn()){
+    ctx2.save();
+    ctx2.scale(scale, scale);
+    const Wb = 360, Hb = H/scale, cyB = Hb*0.50, cxB = Wb/2;
+    drawSadFriend(ctx2, 'sparrow',  46,  cyB - 6, t);
+    drawSadFriend(ctx2, 'magpie',   46,  cyB + 12, t);
+    drawSadFriend(ctx2, 'owl',      Wb-46, cyB - 6, t);
+    drawSadFriend(ctx2, 'parrot',   Wb-46, cyB + 12, t);
+    drawSadFriend(ctx2, 'squirrel', cxB,   Hb - 14, t);
+    // 철창
+    ctx2.strokeStyle = '#3A2828'; ctx2.lineWidth = 2; ctx2.shadowColor = 'rgba(0,0,0,.4)'; ctx2.shadowBlur = 2;
+    for(let i=0; i<3; i++){
+      ctx2.beginPath(); ctx2.moveTo(36 + i*14, cyB - 22); ctx2.lineTo(36 + i*14, cyB + 22); ctx2.stroke();
+      ctx2.beginPath(); ctx2.moveTo(Wb-50 + i*12, cyB - 22); ctx2.lineTo(Wb-50 + i*12, cyB + 22); ctx2.stroke();
+      ctx2.beginPath(); ctx2.moveTo(cxB - 12 + i*12, Hb - 28); ctx2.lineTo(cxB - 12 + i*12, Hb - 4); ctx2.stroke();
+    }
+    ctx2.shadowBlur = 0;
+    ctx2.restore();
   }
-  ctx2.shadowBlur = 0;
-  ctx2.restore();
 }
 function showHellPrologue(){
   // v12.31 — 팝업은 가벼운 안내. 회전 캔버스만 표시, 버튼은 즉시 활성.
