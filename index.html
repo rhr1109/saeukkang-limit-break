@@ -10981,19 +10981,25 @@ function drawVictoryScene(){
   ctx.globalAlpha = 1;
   ctx.restore();
 
-  // ── Layout — three vertical bands: headline (top 18%), pigeon+globe (middle band),
-  // modal (bottom ~38%). Computed from viewport so layout stays clean across phone/desktop.
-  // v12.28 — 사용자 피드백 "globe 잘 안보임". 종전 earthR W*0.16 (≈77px @ 480w) 였는데
-  //   pigeon body 가 globe 상단을 거의 다 덮고 modal 이 하단을 덮어 가시 영역 협소. 반경
-  //   대폭 확대 + 중심 위로 이동해 globe 가 시네마틱 메인 비주얼로 보이도록 조정.
+  // ── Layout — three vertical bands: headline (top), pigeon+globe (middle), modal (bottom).
+  // v12.33 — 사용자 피드백 "또다시 비둘기랑 글로브가 안보이는데". 종전엔 modal 시작점을
+  //   고정 H*0.62 로 가정했지만, 모바일(390x844)에서 normal-clear 흐름은 버튼 3개 wrap 으로
+  //   modal 이 70vh(≈520px) 까지 차서 실제로는 H*0.40 부터 시작 → globe 가 modal 뒤에 가려짐.
+  //   해결: #victory .card 의 실제 top(getBoundingClientRect) 을 읽어 sceneBottom 계산.
+  //   추가로 globe 반경을 W*0.36 로 확대(.review/cinematic_expedition*.png 와 동일 톤).
   const headlineEndsAt = H * 0.20;
-  const modalStartsAt = H * 0.62;
+  let modalTopPx = H * 0.62; // fallback (시네마틱 다시보기 직후 등 DOM 미준비 시).
+  const _vCard = document.querySelector('#victory .card');
+  if(_vCard){
+    const r = _vCard.getBoundingClientRect();
+    if(r.height > 0 && r.top > 0) modalTopPx = r.top;
+  }
   const sceneTop = headlineEndsAt;
-  const sceneBottom = modalStartsAt;
+  // globe 가 modal 에 너무 붙지 않도록 8px 여백.
+  const sceneBottom = Math.max(headlineEndsAt + 80, modalTopPx - 8);
   const earthCx = W/2;
-  const earthR = Math.min(W*0.26, (sceneBottom - sceneTop)*0.50, 160);
-  // 종전 sceneBottom - earthR*0.55. globe 의 하부 1/4 만 modal 뒤로 살짝 들어가도록 0.30 으로
-  // 끌어올려, globe 의 3/4 가 노출되고 비둘기가 globe 상단 어깨에 자연스럽게 서있도록 함.
+  const earthR = Math.min(W*0.36, (sceneBottom - sceneTop)*0.55, 220);
+  // globe 의 하부 ~1/3 만 modal 뒤로 살짝 들어가게 (3/4 노출 + 비둘기 어깨 위 발 닿음).
   const earthCy = sceneBottom - earthR * 0.30;
   // v12 Phase 5 — centerpiece changes per expedition.
   if(expId === 2){
@@ -12239,6 +12245,15 @@ document.getElementById('vBackBtn').addEventListener('click', ()=>{
 document.getElementById('vNextExpBtn').addEventListener('click', (e)=>{
   if(e.currentTarget.dataset.hellEntry === '1'){
     showHellPrologue();
+    return;
+  }
+  // v12.33 — ch130(최종) 시네마틱: 챕터 선택으로 진입.
+  if(e.currentTarget.dataset.toChapterSelect === '1'){
+    const vm = document.getElementById('victory');
+    vm.classList.add('hidden'); vm.classList.remove('v-replay');
+    state._cinematicReplayMode = false;
+    bgmStop();
+    openChapterSelect();
     return;
   }
   document.getElementById('victory').classList.add('hidden');
@@ -14146,28 +14161,41 @@ function renderVictory(finalEnding){
   const homeBtn = document.getElementById('vHomeBtn');
   // v12.31 — ch100 (원정 3 끝) 전용: 단일 '✓ 확인' 버튼 → 검은 레이어 + 지옥 프롤로그 팝업.
   const isHellEntry = state.chapter === 100 && !state._cinematicReplayMode;
+  // v12.33 — 2버튼 layout 으로 단순화. 사용자: "차라리 챕터 선택으로 버튼을 원정 Ⅱ로 형식으로
+  //   매 원정 클리어때마다 바꿔주면 될거같아". 종전 [원정Ⅱ로][처음부터 다시][홈으로] 3버튼이
+  //   모바일에서 wrap 되어 modal 키 늘어남 → globe 가림. 이제 [primary CTA][홈으로] 2버튼.
+  if(againBtn) againBtn.style.display = 'none';
   if(nextBtn){
     if(isHellEntry){
       nextBtn.style.display = '';
       nextBtn.textContent = '✓ 확인';
       nextBtn.style.background = 'linear-gradient(180deg,#FFD43B 0%,#FF6B6B 50%,#C92A2A 100%)';
       nextBtn.dataset.hellEntry = '1';
-    } else if(isExpEnd && !isFinal){
+      delete nextBtn.dataset.toChapterSelect;
+    } else if(isFinal){
+      // ch130 최종 클리어 — 챕터 선택으로 (재플레이 진입). [처음부터 다시] 는 챕터 선택의 숨겨진
+      // 진입점이 아니라 명시적 CTA 가 더 직관적.
+      nextBtn.style.display = '';
+      nextBtn.textContent = '🏆 챕터 선택으로 ▶';
+      nextBtn.style.background = '';
+      delete nextBtn.dataset.hellEntry;
+      nextBtn.dataset.toChapterSelect = '1';
+    } else if(isExpEnd){
       nextBtn.style.display = '';
       nextBtn.textContent = state.chapter === 50  ? '🪐 원정 Ⅱ — 비둘기 행성으로 ▶' :
                             state.chapter === 70  ? '🌌 원정 Ⅲ — 우주 정복으로 ▶' :
                                                     '▶ 다음 원정 시작';
       nextBtn.style.background = '';
       delete nextBtn.dataset.hellEntry;
+      delete nextBtn.dataset.toChapterSelect;
     } else {
       nextBtn.style.display = 'none';
       nextBtn.style.background = '';
       delete nextBtn.dataset.hellEntry;
+      delete nextBtn.dataset.toChapterSelect;
     }
   }
-  // ch100 진입 시 [처음부터 다시] / [홈으로] 숨김 — 단일 [확인] 으로 통합.
-  if(againBtn) againBtn.style.display = isHellEntry ? 'none' : '';
-  if(homeBtn)  homeBtn.style.display  = isHellEntry ? 'none' : '';
+  if(homeBtn) homeBtn.style.display = isHellEntry ? 'none' : '';
   const h2 = document.querySelector('#victory .card h2');
   const sub = document.querySelector('#victory .card .sub');
   if(isFinal){
