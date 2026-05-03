@@ -10592,23 +10592,45 @@ function drawVictoryPigeonPlanet(cx, cy, r, t){
 // v12 Phase 5 — 원정 Ⅲ centerpiece: cosmic singularity with spiral galaxy + black-hole core.
 function drawVictoryCosmicSingularity(cx, cy, r, t){
   ctx.save();
-  // Bright violet halo
-  const glow = ctx.createRadialGradient(cx, cy, r*0.5, cx, cy, r*1.8);
-  glow.addColorStop(0, 'rgba(229,153,247,0.65)');
-  glow.addColorStop(0.5, 'rgba(116,64,255,0.4)');
-  glow.addColorStop(1, 'rgba(116,64,255,0)');
-  ctx.fillStyle = glow;
+  // Outer halo (밖으로 퍼지는 보랏빛 광휘)
+  const halo = ctx.createRadialGradient(cx, cy, r*0.95, cx, cy, r*1.8);
+  halo.addColorStop(0, 'rgba(151,117,250,0.55)');
+  halo.addColorStop(1, 'rgba(116,64,255,0)');
+  ctx.fillStyle = halo;
   ctx.beginPath(); ctx.arc(cx, cy, r*1.8, 0, Math.PI*2); ctx.fill();
-  // Spiral arms — 3 arms rotating
+  // v12.30 — 사용자 피드백 "원정 3 globe 안 보임". 종전엔 작은 black-hole core 만
+  // 솔리드라 globe 형체 인식 X. 가시적 천체 본체(보라/청 그라데 sphere)를 추가.
+  // 본체 sphere — 우주의 주재자 행성 느낌
+  const body = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, r*0.2, cx, cy, r);
+  body.addColorStop(0, '#A98DFA');   // 밝은 보라 highlight
+  body.addColorStop(0.4, '#7048E8'); // 본체 보라
+  body.addColorStop(0.8, '#3D1A78'); // 어두운 보라
+  body.addColorStop(1, '#1A0033');   // 외곽 짙은 보라
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  // 표면 별/은하 점들
+  for(let i=0;i<24;i++){
+    const ang = (i*97 + t*15) % 360 * Math.PI/180;
+    const rd = (i%5 + 1) * r/6;
+    const px = cx + Math.cos(ang) * rd;
+    const py = cy + Math.sin(ang) * rd * 0.85;
+    if(Math.hypot(px-cx, py-cy) > r*0.95) continue;
+    ctx.fillStyle = i%4===0 ? '#FFE066' : i%4===1 ? '#74C0FC' : i%4===2 ? '#E599F7' : '#FFF';
+    ctx.globalAlpha = 0.5 + 0.5*Math.abs(Math.sin(t*2+i));
+    ctx.beginPath(); ctx.arc(px, py, i%7===0 ? 2.0 : 1.0, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // Spiral arms (구체 위 회전 은하 무늬) — 본체 위에 살짝 어둡게
   ctx.save();
   ctx.translate(cx, cy);
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2); ctx.clip(); // sphere 안에만 그림
   for(let arm=0; arm<3; arm++){
     ctx.save();
-    ctx.rotate(t*0.3 + arm*Math.PI*2/3);
-    ctx.strokeStyle = arm===0 ? 'rgba(229,153,247,0.7)' :
-                      arm===1 ? 'rgba(116,192,252,0.7)' :
-                                 'rgba(255,224,102,0.65)';
-    ctx.lineWidth = 3;
+    ctx.rotate(t*0.25 + arm*Math.PI*2/3);
+    ctx.strokeStyle = arm===0 ? 'rgba(229,153,247,0.55)' :
+                      arm===1 ? 'rgba(116,192,252,0.55)' :
+                                 'rgba(255,224,102,0.50)';
+    ctx.lineWidth = 4;
     ctx.beginPath();
     for(let p=0; p<60; p++){
       const ang = p*0.18;
@@ -10618,28 +10640,23 @@ function drawVictoryCosmicSingularity(cx, cy, r, t){
       if(p===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     }
     ctx.stroke();
-    // Star dots along arm
-    for(let p=4; p<60; p+=4){
-      const ang = p*0.18;
-      const rad = p * r/60;
-      ctx.fillStyle = '#FFF';
-      ctx.beginPath();
-      ctx.arc(Math.cos(ang)*rad, Math.sin(ang)*rad, 1.2 + Math.sin(t*4+p)*0.4, 0, Math.PI*2);
-      ctx.fill();
-    }
     ctx.restore();
   }
   ctx.restore();
-  // Black-hole core
-  ctx.fillStyle = '#000';
-  ctx.beginPath(); ctx.arc(cx, cy, r*0.35, 0, Math.PI*2); ctx.fill();
-  // Event horizon ring (golden)
+  // Event horizon ring (sphere 외곽 황금 테)
   ctx.strokeStyle = '#FFD43B';
-  ctx.lineWidth = 2.4;
-  ctx.beginPath(); ctx.arc(cx, cy, r*0.38, 0, Math.PI*2); ctx.stroke();
-  // Inner accretion disk shimmer
-  ctx.fillStyle = 'rgba(255,224,102,0.35)';
-  ctx.beginPath(); ctx.ellipse(cx, cy, r*0.55, r*0.18, 0, 0, Math.PI*2); ctx.fill();
+  ctx.lineWidth = 2.8;
+  ctx.shadowColor = 'rgba(255,224,102,0.7)';
+  ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+  ctx.shadowBlur = 0;
+  // 중심 black-hole core (작게)
+  ctx.fillStyle = '#0A0014';
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.18, 0, Math.PI*2); ctx.fill();
+  // 코어 hot ring (accretion)
+  ctx.strokeStyle = 'rgba(255,224,102,0.85)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx, cy, r*0.20, 0, Math.PI*2); ctx.stroke();
   ctx.restore();
 }
 
