@@ -9,6 +9,7 @@
 ## 최근 배포
 | 버전 | 일자 | 요약 |
 |---|---|---|
+| v12.34b | 2026-05-03 | **시네마틱 왕관 + 챕터선택 UI 픽스** — (1) floating crown body extent 정확히 반영해 머리/목 침범 회피(안전영역 부족시 skip). (2) 모바일 챕터선택 원정 탭(6개) flex-wrap 으로 2-3줄 분배 + font/padding 축소 + nowrap. 시네마틱 다시보기 row 챕터선택에서 제거. |
 | v12.34a | 2026-05-03 | 천국 폴리시 — BGM 70 신규 pack(원정 Ⅴ/Ⅵ 챕터별), 천국 보스 SFX(sfxHeavenBoss — 종+major chord arp+합창), drawSkyline tier 9(구름+sparkle+깃털)/tier 10(오로라+광휘+광선) 배경 props, drawArenaFloor groundCol tier 9/10 추가. 기존 ch131+ 입장 시 groundCol undefined page error 도 동시 픽스. |
 | v12.34 | 2026-05-03 | **천국 확장** — 원정 Ⅴ(천국 1층천 ch131-160) + 원정 Ⅵ(천국 2층천 ch161-200) 추가. MAX_CHAPTERS 130→200. 14 신규 보스, 70 신규 챕터, tier 9/10 배경, SS등급 코스튬(남편/아내/아기 부위별 + 친구 5종 천국 세트), 7-8단계 스킬, 천국 BG 스킨 2종(유료). 시네마틱 엔딩 4종 추가. 남편 왕관 위치 버그 픽스. **원정 보상 스킨 가격 책정** — 자동 무료 지급 제거 (해금 후 코인 결제 필요). |
 | v12.33 | 2026-05-03 | 시네마틱 엔딩 layout 픽스 — modal 실제 top 동적 측정 + globe 반경 확대(W*0.36) + 2버튼 단순화. 모바일에서 globe·비둘기 가려지던 문제 해결. |
