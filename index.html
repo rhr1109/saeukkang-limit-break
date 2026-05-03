@@ -937,7 +937,7 @@
         </div>
         <div class="set-row" id="setFamilyFxRow">
           <div class="ic">✨</div>
-          <div class="lbl">효과<span class="desc">자동 사격 · 사격음 (보이기 OFF 시 자동 비활성)</span></div>
+          <div class="lbl">효과<span class="desc">자동 사격 · 공격력 기여 · 사격음 (OFF 시 가족·동료 데미지 0 · 보이기 OFF 면 자동 비활성)</span></div>
           <button type="button" class="set-toggle" id="setFamilyFxToggle" aria-label="가족·동료 효과 토글"></button>
         </div>
       </div>
@@ -5950,7 +5950,8 @@ function updateCompanions(dt){
     if(c.reloadT <= 0){
       c.reloadT = 1 / c.fireRate;
       // v12.32 — 효과 OFF (또는 보이기 OFF → 효과도 자동 OFF) 시 사격 건너뛰기.
-      // 위치 갱신 + 피격 sync 는 그대로 → 보이기 ON 으로 재토글 시 즉시 자연스러움.
+      // 사격이 곧 동료의 유일한 공격 메커니즘 → 효과 OFF = 데미지 기여 0.
+      // 위치 갱신 + 피격 sync 는 그대로 → 보이기/효과 ON 재토글 시 즉시 자연스러움.
       if(familyFxEffective()) fireCompanionShrimp(c);
     }
   }
