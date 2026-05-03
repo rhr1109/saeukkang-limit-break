@@ -7741,6 +7741,10 @@ function rollItemDrop(e){
       // v12.24 — 사용자 피드백 "체력회복 너무 많음". heal 이 선택된 경우만 50% 확률로 스킵
       // → heal 절대 드롭 빈도만 1/2, 다른 아이템(bomb/golden/coin/magnet) 절대 빈도는 그대로.
       if(k === 'heal' && Math.random() < 0.5) return;
+      // v12.25 — 사용자 피드백 "자석도 너무 많음. 1/3 로 줄여".
+      // magnet 선택 시 2/3 확률 스킵 → magnet 절대 빈도 1/3, 나머지 비중은 그대로.
+      // gem 자체는 player.magnet (기본 110, 풀스킬 3x) + 30s 수명으로 회수 가능, QoL 만 감소.
+      if(k === 'magnet' && Math.random() < 2/3) return;
       spawnItem(e.x, e.y, k);
       return;
     }
