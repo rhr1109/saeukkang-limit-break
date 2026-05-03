@@ -7579,11 +7579,13 @@ function killEnemy(e){
   // v11.6 — random trash-mob drop chance cut 0.35 → 0.10 per user feedback ("코인이 너무 잘
   // 벌린다"). Per-mob amounts unchanged so elite kills still feel rewarding; the bulk-drop
   // stream from regular mobs is what bleeds the coin economy looser than intended.
-  if(e.kind === 'boss')        awardCoins(20 + state.chapter*5);
-  else if(e.kind === 'tyrant' || e.kind === 'leviathan') awardCoins(10);
-  else if(e.kind === 'summoner' || e.kind === 'reaper') awardCoins(3);
-  else if(e.kind === 'sniper' || e.kind === 'tank')     awardCoins(2);
-  else if(Math.random() < 0.10) awardCoins(1);
+  // v12.21 — 사용자 피드백 "ch39에 192k 잉여" — 모든 코인 sink 합산 시 2.7배 잉여 확인.
+  // 전체 획득량을 2/5(약 40%) 수준으로 컷. 130챕터 풀클리어 누적이 고정 sink 총합과 비슷해짐.
+  if(e.kind === 'boss')        awardCoins(8 + state.chapter*2);
+  else if(e.kind === 'tyrant' || e.kind === 'leviathan') awardCoins(4);
+  else if(e.kind === 'summoner' || e.kind === 'reaper') awardCoins(1);
+  else if(e.kind === 'sniper' || e.kind === 'tank')     awardCoins(1);
+  else if(Math.random() < 0.04) awardCoins(1);
   sfxKill();
   // particles
   for(let i=0;i<14;i++){
@@ -7801,7 +7803,8 @@ function applyItem(item){
     const bonus = 25 + Math.floor(state.chapter*10);
     state.score += bonus;
     // Meta currency: coin pickups feed the title-screen shop. Higher chapters drop more.
-    const metaCoins = 2 + Math.floor(state.chapter * 0.6);
+    // v12.21 — 픽업 가치 2/5 컷 (잉여 보정).
+    const metaCoins = 1 + Math.floor(state.chapter * 0.25);
     awardCoins(metaCoins);
     sfxCoin();
     state.pickupTexts.push({ x:p.x+10, y:p.y-28, t:.8, txt:`+${bonus}점 · +${metaCoins}🪙`, color:'#FFE066' });
@@ -7849,7 +7852,8 @@ function onBossDefeated(){
     state.newCompanion = { kind:'squirrel', label:'다람쥐 친구', sub:'심연의 첨탑에서 구출 🐿' };
   }
   // Chapter-clear coin bounty — scales with chapter so late-game runs feel rewarding.
-  awardCoins(60 + state.chapter * 18);
+  // v12.21 — 클리어 보너스 2/5 컷.
+  awardCoins(24 + state.chapter * 7);
   // Chapter-clear costume drop: 10% rare drop, with pity guaranteeing one every 10 clears.
   state.earnedCostumeThisChapter = rollChapterClearCostume();
   saveProgress();
