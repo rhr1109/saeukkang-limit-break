@@ -5557,7 +5557,7 @@ function chapterMult(){
           : c <= 130 ? HP_CH100 * Math.pow(1.014, c-100)   // 지옥 (sim-tuned)
           : c <= 200 ? HP_CH130 * Math.pow(1.0008, c-130)  // 천국 1·2층천 (사실상 평탄)
           : c <= 289 ? HP_CH200 * Math.pow(1.0008, c-200)  // 3층천+아마겟돈 전반 (사실상 평탄)
-          :            HP_CH289 * Math.pow(1.025, c-289);  // ch290+ 컨트롤 강요 (1.025/ch → ch300 1.31× ramp)
+          :            HP_CH289 * Math.pow(1.105, c-289);  // ch290+ 컨트롤 강요 (1.105/ch → ch300 ~3.0× ramp). 단조증가 + barely-clearable.
   const dmg = c <= 10  ? 1 + (c-1)*0.06
             : c <= 20  ? DMG_CH10 * Math.pow(1.030, c-10)
             : c <= 30  ? DMG_CH20 * Math.pow(1.035, c-20)
@@ -5568,7 +5568,7 @@ function chapterMult(){
             : c <= 130 ? DMG_CH100* Math.pow(1.011, c-100)
             : c <= 200 ? DMG_CH130* Math.pow(1.0008, c-130)
             : c <= 289 ? DMG_CH200* Math.pow(1.0008, c-200)
-            :            DMG_CH289* Math.pow(1.020, c-289);
+            :            DMG_CH289* Math.pow(1.045, c-289);
   const speed = 1 + Math.min(0.95, (c-1)*0.028);
   return {
     hp,
@@ -9761,10 +9761,10 @@ const BOSS_VARIANTS = {
   fallen_choir:            { hpMult:88.0, dmgMult:6.30, sizeMult:1.50, label:'타락한 합창단',    baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:0,   saturate:1.4 },    // 276-280
   abyss_marshal:           { hpMult:90.0, dmgMult:6.45, sizeMult:1.52, label:'심연의 마샬',      baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:300, saturate:1.4 },    // 281-285
   liar_legion:             { hpMult:92.0, dmgMult:6.65, sizeMult:1.52, label:'거짓의 군단장',    baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:340, saturate:1.5 },    // 286-290
-  // ch291-295 — 컨트롤 강요. dmgMult 도약, sizeMult 더 큼. 악의 정점.
-  dread_apex:              { hpMult:96.0, dmgMult:7.05, sizeMult:1.58, label:'공포의 정점',      baseStyle:'void',      baseBehavior:'void',      hueShift:340, saturate:1.5 },    // 291-295
-  // ch296-300 — 게임 최종. 악의 군주 — 모든 패턴 통합.
-  dread_sovereign:         { hpMult:105.0, dmgMult:7.40, sizeMult:1.65, label:'악의 군주',        baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:1.6 },    // 296-300 (게임 최종)
+  // ch291-295 — 컨트롤 강요. v12.36b 단조증가 보장 위해 hpMult 살짝 ↑.
+  dread_apex:              { hpMult:115.0, dmgMult:7.05, sizeMult:1.58, label:'공포의 정점',      baseStyle:'void',      baseBehavior:'void',      hueShift:340, saturate:1.5 },    // 291-295
+  // ch296-300 — 게임 최종. 악의 군주 — 모든 패턴 통합. SSS 풀세트로도 아슬아슬한 클리어선.
+  dread_sovereign:         { hpMult:135.0, dmgMult:7.40, sizeMult:1.65, label:'악의 군주',        baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:1.6 },    // 296-300 (게임 최종)
 };
 function bossBaseStyleFor(variant){
   const v = BOSS_VARIANTS[variant];
@@ -10167,19 +10167,20 @@ const UPGRADES = [
   { id:'third_heaven_writ', title:'3층천의 명령서', icon:'⚜️', max:1, rarity:'l', unlockCh:241,
     desc:(l)=>'공격력 ×2.5, 연사 ×1.4 (단, 최대 HP -20%)',
     apply:p=>{ p.damage *= 2.5; p.fireRate *= 1.4; p.maxHp = Math.max(20, Math.round(p.maxHp*0.80)); p.hp = Math.min(p.maxHp, p.hp); } },
-  // 아마겟돈 — 악의 세력에 맞선 신성 강화. SSS 와 시너지. 사용자 검수 후 보수적 multiplier.
+  // 아마겟돈 — 악의 세력에 맞선 신성 강화. v12.36b 사용자 검수 후 단조증가 위반 픽스.
+  //   기존 multiplier 가 ch300 → ch250 보다 짧은 클리어 시간 → 보수적 재조정.
   { id:'dawn_alliance', title:'창조주와의 동맹', icon:'🌟', max:1, rarity:'l', unlockCh:251,
-    desc:(l)=>'공격력 ×1.6, 발사 +2, 보스 추가 데미지 +20%',
-    apply:p=>{ p.damage *= 1.6; p.projCount += 2; p.holyBossBonus = (p.holyBossBonus||0) + 0.20; } },
+    desc:(l)=>'공격력 ×1.20, 발사 +1, 보스 추가 데미지 +15%',
+    apply:p=>{ p.damage *= 1.20; p.projCount += 1; p.holyBossBonus = (p.holyBossBonus||0) + 0.15; } },
   { id:'armageddon_legion', title:'아마겟돈 진군', icon:'⚔️', max:2, rarity:'l', unlockCh:271,
-    desc:(l)=>l?'추가 ×1.4 dmg + 관통 +2':'공격력 ×1.4, 관통 +3, 보스 추가 데미지 +15%',
-    apply:p=>{ p.damage *= 1.4; p.pierce += 3; p.holyBossBonus = (p.holyBossBonus||0) + 0.15; } },
+    desc:(l)=>l?'추가 ×1.15 dmg + 관통 +1':'공격력 ×1.15, 관통 +2, 보스 추가 데미지 +10%',
+    apply:p=>{ p.damage *= 1.15; p.pierce += 2; p.holyBossBonus = (p.holyBossBonus||0) + 0.10; } },
   { id:'creator_blessing', title:'창조주의 축복', icon:'✨', max:1, rarity:'l', unlockCh:286,
-    desc:(l)=>'공격력 ×1.7, 치명타 배율 +1.5, 보스 추가 데미지 +25%',
-    apply:p=>{ p.damage *= 1.7; p.critMult += 1.5; p.holyBossBonus = (p.holyBossBonus||0) + 0.25; } },
+    desc:(l)=>'공격력 ×1.20, 치명타 배율 +1.0, 보스 추가 데미지 +15%',
+    apply:p=>{ p.damage *= 1.20; p.critMult += 1.0; p.holyBossBonus = (p.holyBossBonus||0) + 0.15; } },
   { id:'final_judgment', title:'최후의 심판', icon:'⚡', max:1, rarity:'l', unlockCh:296,
-    desc:(l)=>'공격력 ×2.0, 연사 ×1.4, 발사 +2 (마지막 5챕터 전용)',
-    apply:p=>{ p.damage *= 2.0; p.fireRate *= 1.4; p.projCount += 2; } },
+    desc:(l)=>'공격력 ×1.20, 연사 ×1.20, 발사 +1 (마지막 5챕터 전용)',
+    apply:p=>{ p.damage *= 1.20; p.fireRate *= 1.20; p.projCount += 1; } },
 ];
 
 function rebuildOrbits(){
