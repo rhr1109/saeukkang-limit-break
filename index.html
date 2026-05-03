@@ -10292,14 +10292,18 @@ function drawVictoryScene(){
 
   // ── Layout — three vertical bands: headline (top 18%), pigeon+globe (middle band),
   // modal (bottom ~38%). Computed from viewport so layout stays clean across phone/desktop.
+  // v12.28 — 사용자 피드백 "globe 잘 안보임". 종전 earthR W*0.16 (≈77px @ 480w) 였는데
+  //   pigeon body 가 globe 상단을 거의 다 덮고 modal 이 하단을 덮어 가시 영역 협소. 반경
+  //   대폭 확대 + 중심 위로 이동해 globe 가 시네마틱 메인 비주얼로 보이도록 조정.
   const headlineEndsAt = H * 0.20;
   const modalStartsAt = H * 0.62;
   const sceneTop = headlineEndsAt;
   const sceneBottom = modalStartsAt;
-  // Globe at the bottom of the scene band, pigeon above it, all bounded inside the scene window.
   const earthCx = W/2;
-  const earthR = Math.min(W*0.16, (sceneBottom - sceneTop)*0.32, 110);
-  const earthCy = sceneBottom - earthR * 0.55;
+  const earthR = Math.min(W*0.26, (sceneBottom - sceneTop)*0.50, 160);
+  // 종전 sceneBottom - earthR*0.55. globe 의 하부 1/4 만 modal 뒤로 살짝 들어가도록 0.30 으로
+  // 끌어올려, globe 의 3/4 가 노출되고 비둘기가 globe 상단 어깨에 자연스럽게 서있도록 함.
+  const earthCy = sceneBottom - earthR * 0.30;
   // v12 Phase 5 — centerpiece changes per expedition.
   if(expId === 2){
     drawVictoryPigeonPlanet(earthCx, earthCy, earthR, t);
@@ -10319,21 +10323,52 @@ function drawVictoryScene(){
   }
 
   // ── Giant pigeon on top of the globe — uses player costumes if present, else fresh refs.
-  // Scale is bounded by the available scene band height so the pigeon never breaches the headline
-  // or the modal. Floor at 1.0, ceiling computed from the scene window.
+  // v12.28 — globe 노출을 위해 pigeon 을 더 작게(0.75~1.0) + globe 어깨 위로 살짝 띄워
+  // (overlap 작게) 배치. 이전 1.0~2.0 범위에서는 pigeon 이 globe 의 60% 이상을 가렸음.
   const pigCx = earthCx;
-  const sceneAvail = (earthCy - earthR * 0.92) - sceneTop;
-  // Pigeon body is ~110px tall at scale 1; reserve ~80px for the crown above. So the largest
-  // safe scale is sceneAvail / (110 + 80).
-  const pigScaleMax = Math.max(1.0, Math.min(2.0, sceneAvail / 190));
-  const pigScale = pigScaleMax;
+  const sceneAvail = (earthCy - earthR) - sceneTop;
+  // Pigeon body is ~110px tall at scale 1. 작은 globe 일 때는 비례를 맞춰 작게.
+  const pigScale = Math.max(0.75, Math.min(1.0, sceneAvail / 230));
   const pigBodyHalfH = 55 * pigScale;
-  const pigCy = earthCy - earthR * 0.92 - pigBodyHalfH * 0.4;
+  // pigeon 발이 globe 의 상단보다 살짝 위에 위치해 globe 윗부분의 호가 완전 노출되도록.
+  const pigCy = earthCy - earthR - pigBodyHalfH * 0.55;
   const fakePlayer = {
     fireRate: 1, reloadT: 0, vx: 0, vy: 0,
     costumes: state.player ? state.player.costumes : buildPlayerCostumeRefs()
   };
   drawPigeon(ctx, pigCx, pigCy, pigScale, 1, t * 1.5, false, 1.4, fakePlayer);
+
+  // v12.28 — 원정별 가족·동료 합류 (사용자 피드백):
+  //   원정 Ⅰ: 남편만
+  //   원정 Ⅱ·Ⅲ: 남편 + 아내 + 아기
+  //   원정 Ⅳ: 남편 + 아내 + 아기 + 5종 구출 친구
+  // 비둘기는 globe 상단 호 위에 가족이 모여있도록 옆으로 살짝 분산 + footline 비슷하게 배치.
+  const familyFootY = pigCy + 38 * pigScale;  // 남편 발 부근 y
+  if(expId >= 2){
+    // 아내 — 좌측 (자체 0.85 scale)
+    drawCompanion(ctx, {
+      x: pigCx - 70 * pigScale, y: familyFootY - 50,
+      kind:'wife', tint:'#FFB4D8', accent:'#FA80B0'
+    });
+    // 아기 — 우측 (자체 작은 scale)
+    drawCompanion(ctx, {
+      x: pigCx + 65 * pigScale, y: familyFootY - 18,
+      kind:'child', tint:'#A5D8FF', accent:'#74C0FC'
+    });
+  }
+  if(expId >= 4){
+    // 5종 구출 친구 — 가족 양옆 더 바깥에 분산. 작은 사이즈라 더 멀리 + 살짝 아래.
+    const friendsLayout = [
+      { kind:'sparrow',  dx:-130, dy: -6 },
+      { kind:'magpie',   dx:-105, dy: 14 },
+      { kind:'owl',      dx: 105, dy: 14 },
+      { kind:'parrot',   dx: 130, dy: -6 },
+      { kind:'squirrel', dx:   0, dy: 28 },
+    ];
+    for(const f of friendsLayout){
+      drawCompanion(ctx, { x: pigCx + f.dx, y: familyFootY + f.dy, kind:f.kind });
+    }
+  }
 
   // ── Crown floating above pigeon ── (compact distance so it stays under the headline)
   const crownY = Math.max(sceneTop + 30, pigCy - 60*pigScale);
