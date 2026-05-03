@@ -767,8 +767,8 @@
       <div class="costume-section">
         <div class="cos-char-tabs" id="cosCharTabs" style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center;">
           <button class="cs-tab on" type="button" data-char="player" style="border-color:#9775FA;">👤 남편</button>
-          <button class="cs-tab" type="button" data-char="wife"   style="border-color:#FFB4D8;display:none;">💗 아내 (Ch51)</button>
-          <button class="cs-tab" type="button" data-char="child"  style="border-color:#A5D8FF;display:none;">👶 아기 (Ch60)</button>
+          <button class="cs-tab" type="button" data-char="wife"   style="border-color:#FFB4D8;display:none;">💗 아내</button>
+          <button class="cs-tab" type="button" data-char="child"  style="border-color:#A5D8FF;display:none;">👶 아기</button>
           <button class="cs-tab" type="button" data-char="rescued" style="border-color:#FFA94D;display:none;">🐦 구출 친구 세트 (Ch125)</button>
         </div>
         <!-- 남편 코스튬 도감 -->
@@ -6159,27 +6159,44 @@ const COMPANION_COSTUMES = {
       } },
     { id:'space_suit', name:'우주복', cost:6500, icon:'🚀', slot:'body', dmgBoost:1.0,
       draw:(ctx)=>{
-        // 메인 슈트 (밝은 민트)
-        ctx.fillStyle = '#C7F5E5';
+        // v12.27 — 사용자 피드백 "우주복이 깨져보임" — 다른 코스튬과 동일한 풀바디 실루엣.
+        // 메인 슈트 (은백색) — 새의 몸 폴리곤에 맞게 확장.
+        ctx.fillStyle = '#E8EEF5';
         ctx.beginPath();
-        ctx.moveTo(-15, 0); ctx.quadraticCurveTo(-17, 16, -15, 30);
-        ctx.lineTo(15, 30); ctx.quadraticCurveTo(17, 16, 15, 0);
-        ctx.quadraticCurveTo(8, -3, 0, -3); ctx.quadraticCurveTo(-8, -3, -15, 0);
+        ctx.moveTo(-22, 0); ctx.quadraticCurveTo(-26, 18, -22, 32);
+        ctx.lineTo(22, 32); ctx.quadraticCurveTo(26, 18, 22, 0);
+        ctx.quadraticCurveTo(11, -3, 0, -3); ctx.quadraticCurveTo(-11, -3, -22, 0);
         ctx.closePath(); ctx.fill();
-        // 가슴 헬멧 ring
-        ctx.strokeStyle = '#1864AB'; ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.arc(0, 6, 5, 0, Math.PI*2); ctx.stroke();
-        // 가슴 패치 별
+        // 우측 어깨 패널 (얕은 그라데 느낌의 면)
+        ctx.fillStyle = '#A5C9E5';
+        ctx.beginPath();
+        ctx.moveTo(0, -3); ctx.quadraticCurveTo(11, -3, 22, 0); ctx.quadraticCurveTo(24, 14, 22, 24);
+        ctx.lineTo(0, 24); ctx.closePath(); ctx.fill();
+        // 가슴 헬멧 글래스 (둥근 청록 visor)
+        ctx.fillStyle = '#1864AB';
+        ctx.beginPath(); ctx.arc(0, 8, 7.5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#74C0FC';
+        ctx.beginPath(); ctx.arc(0, 8, 6, 0, Math.PI*2); ctx.fill();
+        // visor highlight
+        ctx.fillStyle = '#FFF';
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath(); ctx.ellipse(-1.5, 6, 2.4, 1.4, -0.4, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+        // 허리 벨트 (감색)
+        ctx.fillStyle = '#1864AB';
+        ctx.fillRect(-22, 18, 44, 3.5);
+        // 벨트 버클 (금색 별)
         ctx.fillStyle = '#FFD43B';
         ctx.beginPath();
-        ctx.moveTo(0, 4); ctx.lineTo(1.5, 7.5); ctx.lineTo(5, 7.5); ctx.lineTo(2, 9.5);
-        ctx.lineTo(3, 13); ctx.lineTo(0, 11); ctx.lineTo(-3, 13); ctx.lineTo(-2, 9.5);
-        ctx.lineTo(-5, 7.5); ctx.lineTo(-1.5, 7.5); ctx.closePath(); ctx.fill();
-        // 허리 벨트
-        ctx.fillStyle = '#1864AB';
-        ctx.fillRect(-15, 16, 30, 3);
-        ctx.fillStyle = '#FFD43B';
-        ctx.fillRect(-3, 16, 6, 3);
+        ctx.moveTo(0, 17); ctx.lineTo(1.3, 19.5); ctx.lineTo(4, 19.7); ctx.lineTo(2, 21.6);
+        ctx.lineTo(2.7, 24.2); ctx.lineTo(0, 22.8); ctx.lineTo(-2.7, 24.2); ctx.lineTo(-2, 21.6);
+        ctx.lineTo(-4, 19.7); ctx.lineTo(-1.3, 19.5); ctx.closePath(); ctx.fill();
+        // 어깨 라인 / 외곽 darkline 으로 슈트 윤곽 강조
+        ctx.strokeStyle = '#94A4B8'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(-22, 0); ctx.quadraticCurveTo(-26, 18, -22, 32);
+        ctx.lineTo(22, 32); ctx.quadraticCurveTo(26, 18, 22, 0);
+        ctx.stroke();
       } },
   ],
   child: [
@@ -7897,6 +7914,9 @@ function onBossDefeated(){
     sfxVictory();
     renderVictory(state.chapter >= MAX_CHAPTERS);
     document.getElementById('hud').classList.add('hidden');
+    // v12.27 — 사용자 피드백 "시네마틱에 게임시작화면이 떠". 안전하게 title 강제 숨김.
+    document.getElementById('title').classList.add('hidden');
+    document.getElementById('chapterSelect').classList.add('hidden');
     // v12.12 — 원정 끝 챕터(ch50/70/100/130)에서도 떨어진 코스튬이 있으면 reveal 모달 먼저
     // 노출. 닫으면 시네마틱(victory)으로 진입. 사용자 검수 메모 "원정 끝 reveal 모달 스킵" 처리.
     if(state.earnedCostumeThisChapter){
@@ -7935,14 +7955,14 @@ function showCompanionMeetModal(){
   // v12.11 Phase 3b — 5종 구출 친구 분기 추가. 모두 "지옥에서 억울하게 끌려간 친구를 구한다" 톤.
   const meetCopy = {
     wife: {
-      title: '💗 마누라 비둘기 합류!', color:'#FFB4D8',
+      title: '💗 아내 비둘기 합류!', color:'#FFB4D8',
       sub: '비둘기 행성에서 만난 운명의 짝',
       story: '비둘기 행성에 발 디딘 그날, 깃털 평원에서 만난 한 비둘기.<br>지금부터 모든 원정에서 옆에 함께 서서 새우깡을 던집니다.',
     },
     child: {
       title: '👶 아기 비둘기 합류!', color:'#A5D8FF',
       sub: '두 비둘기의 사랑으로 태어난 새 생명',
-      story: '남편 비둘기와 마누라 비둘기의 사랑으로 태어난 첫 아이.<br>아빠 따라 작은 새우깡을 던지며 함께 우주를 정복합니다.',
+      story: '남편 비둘기와 아내 비둘기의 사랑으로 태어난 첫 아이.<br>아빠 따라 작은 새우깡을 던지며 함께 우주를 정복합니다.',
     },
     sparrow: {
       title: '🐦 참새 친구 구출!', color:'#FFE066',
@@ -8001,7 +8021,15 @@ function showCompanionMeetModal(){
                        : c.kind === 'owl' ? '#FFE8CC'
                        : c.kind === 'parrot' ? '#D3F9D8'
                        : '#FFE0B2';
-    const fakeC = { x:110, y:135, kind:c.kind, tint:c.tint || '#FFB4D8', accent:c.accent || '#FA80B0' };
+    // v12.27 — 사용자 피드백 "아기 비둘기 색이 변경됨". fakeC 의 tint 기본값이 #FFB4D8 (분홍)
+    // 으로 강제 매핑돼 있어 child kind 도 분홍으로 그려졌던 문제. kind 별 정상 색상 매핑.
+    const tintByKind = { wife:'#FFB4D8', child:'#A5D8FF' };
+    const accentByKind = { wife:'#FA80B0', child:'#74C0FC' };
+    const fakeC = {
+      x:110, y:135, kind:c.kind,
+      tint: c.tint || tintByKind[c.kind] || '#FFE0B2',
+      accent: c.accent || accentByKind[c.kind] || '#FFA94D'
+    };
     ctx2.save();
     ctx2.translate(110, 135);
     ctx2.scale(2.0, 2.0);
@@ -11568,6 +11596,8 @@ function replayCinematic(ch){
   document.getElementById('chapterSelect').classList.add('hidden');
   // v12.11 — 시네마틱 다시보기에서도 HUD 숨김.
   document.getElementById('hud').classList.add('hidden');
+  // v12.27 — title 잔존 방지.
+  document.getElementById('title').classList.add('hidden');
   const vm = document.getElementById('victory');
   vm.classList.add('v-replay');
   vm.classList.remove('hidden');
@@ -13159,7 +13189,7 @@ function renderVictory(finalEnding){
     if(sub) sub.textContent = '50개 챕터의 모든 적을 무찌르고 인류 영토를 정복했습니다. 다음 원정은 비둘기 행성으로.';
   } else if(isExpEnd && exp.id === 2){
     h2.textContent = '🪐 원정 Ⅱ 완료 — 비둘기 행성 정복!';
-    if(sub) sub.textContent = '비둘기 황제를 쓰러뜨리고 행성을 손에 넣었습니다. 마누라와 아이가 함께 다음 원정을 떠납니다.';
+    if(sub) sub.textContent = '비둘기 황제를 쓰러뜨리고 행성을 손에 넣었습니다. 아내와 아이가 함께 다음 원정을 떠납니다.';
   } else if(isExpEnd && exp.id === 3){
     h2.textContent = '🌌 원정 Ⅲ 완료 — 전 우주 정복!';
     if(sub) sub.textContent = '오메가를 쓰러뜨리고 우주의 주재자가 되었습니다. 그러나 지옥에서 친구들이 구원을 기다리고 있습니다.';
