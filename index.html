@@ -10315,58 +10315,59 @@ function drawVictoryScene(){
     drawVictoryEarth(earthCx, earthCy, earthR, t);
   }
 
-  // ── Bowing enemies arranged in a semicircle behind the globe ──
-  for(const be of _victory.bowEnemies){
-    const ex = earthCx + Math.cos(be.angle) * (earthR + be.distance);
-    const ey = earthCy - Math.abs(Math.sin(be.angle)) * earthR * 0.55 + be.yJitter;
-    drawBowingEnemy(ex, ey, be.kind, be.scale, t * 1.2 + be.phase);
-  }
+  // v12.29 — 사용자 피드백 "원정 1 엔 남편만, 원정 2-3 엔 남편+아내+아기만". bowing enemies
+  // 가 cat/mouse/crow/dog 로 그려져 가족/동료처럼 보였음. 시네마틱에서 bowing enemies 제거 →
+  // 가족/동료만 명확히 보이도록.
+  // (참고: _victory.bowEnemies 자체는 그대로 — 데이터만 보유, 그리지 않음.)
 
   // ── Giant pigeon on top of the globe — uses player costumes if present, else fresh refs.
-  // v12.28 — globe 노출을 위해 pigeon 을 더 작게(0.75~1.0) + globe 어깨 위로 살짝 띄워
-  // (overlap 작게) 배치. 이전 1.0~2.0 범위에서는 pigeon 이 globe 의 60% 이상을 가렸음.
   const pigCx = earthCx;
   const sceneAvail = (earthCy - earthR) - sceneTop;
-  // Pigeon body is ~110px tall at scale 1. 작은 globe 일 때는 비례를 맞춰 작게.
   const pigScale = Math.max(0.75, Math.min(1.0, sceneAvail / 230));
-  const pigBodyHalfH = 55 * pigScale;
-  // pigeon 발이 globe 의 상단보다 살짝 위에 위치해 globe 윗부분의 호가 완전 노출되도록.
-  const pigCy = earthCy - earthR - pigBodyHalfH * 0.55;
+  // v12.29 — 발이 globe 표면(상단)에 정확히 닿도록. drawPigeon foot offset = 52*scale.
+  const pigFootY = earthCy - earthR;
+  const pigCy = pigFootY - 52 * pigScale;
   const fakePlayer = {
     fireRate: 1, reloadT: 0, vx: 0, vy: 0,
     costumes: state.player ? state.player.costumes : buildPlayerCostumeRefs()
   };
   drawPigeon(ctx, pigCx, pigCy, pigScale, 1, t * 1.5, false, 1.4, fakePlayer);
 
-  // v12.28 — 원정별 가족·동료 합류 (사용자 피드백):
-  //   원정 Ⅰ: 남편만
-  //   원정 Ⅱ·Ⅲ: 남편 + 아내 + 아기
-  //   원정 Ⅳ: 남편 + 아내 + 아기 + 5종 구출 친구
-  // 비둘기는 globe 상단 호 위에 가족이 모여있도록 옆으로 살짝 분산 + footline 비슷하게 배치.
-  const familyFootY = pigCy + 38 * pigScale;  // 남편 발 부근 y
-  if(expId >= 2){
-    // 아내 — 좌측 (자체 0.85 scale)
-    drawCompanion(ctx, {
-      x: pigCx - 70 * pigScale, y: familyFootY - 50,
-      kind:'wife', tint:'#FFB4D8', accent:'#FA80B0'
-    });
-    // 아기 — 우측 (자체 작은 scale)
-    drawCompanion(ctx, {
-      x: pigCx + 65 * pigScale, y: familyFootY - 18,
-      kind:'child', tint:'#A5D8FF', accent:'#74C0FC'
-    });
+  // v12.29 — 원정별 가족·동료. globe 호 위에 발 닿게 배치. 각 캐릭터의 foot offset 별도 보정.
+  //   wife : draw 내부 scale 0.85, shadow at local y=52  → foot offset = 0.85*52 = 44.2
+  //   child: scale 1.0, shadow at local y=18           → foot offset = 18
+  //   friends: scale 0.42~0.46, shadow at local y=18    → foot offset ≈ 7.6
+  // globe 표면 좌표: y = earthCy - sqrt(earthR² - dx²)  (위쪽 호)
+  const surfaceY = (dx) => {
+    const d = Math.min(Math.abs(dx), earthR - 1);
+    return earthCy - Math.sqrt(earthR*earthR - d*d);
+  };
+  if(expId >= 2 && expId <= 3){
+    // 원정 Ⅱ·Ⅲ: 남편 + 아내 + 아기 (5종 구출 친구는 아직 만나지 않은 상태)
+    const wifeDx = -52 * pigScale;
+    drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
+    const childDx = 50 * pigScale;
+    drawCompanion(ctx, { x: pigCx + childDx, y: surfaceY(childDx) - 18, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
   }
   if(expId >= 4){
-    // 5종 구출 친구 — 가족 양옆 더 바깥에 분산. 작은 사이즈라 더 멀리 + 살짝 아래.
-    const friendsLayout = [
-      { kind:'sparrow',  dx:-130, dy: -6 },
-      { kind:'magpie',   dx:-105, dy: 14 },
-      { kind:'owl',      dx: 105, dy: 14 },
-      { kind:'parrot',   dx: 130, dy: -6 },
-      { kind:'squirrel', dx:   0, dy: 28 },
+    // 원정 Ⅳ: 남편 + 아내 + 아기 + 5종 구출 친구. 가족은 안쪽, 친구는 양옆 바깥에 넓게 분산.
+    const wifeDx = -42 * pigScale;
+    drawCompanion(ctx, { x: pigCx + wifeDx, y: surfaceY(wifeDx) - 44.2, kind:'wife', tint:'#FFB4D8', accent:'#FA80B0' });
+    const childDx = 40 * pigScale;
+    drawCompanion(ctx, { x: pigCx + childDx, y: surfaceY(childDx) - 18, kind:'child', tint:'#A5D8FF', accent:'#74C0FC' });
+    // 5 friends — globe 가장자리 양쪽에 분산. dx 간격 충분히 넓게 (안 겹치게).
+    const friendDX = [
+      { kind:'sparrow',  dx: -Math.min(earthR-12, 110) },
+      { kind:'magpie',   dx: -Math.min(earthR-12, 80)  },
+      { kind:'owl',      dx:  Math.min(earthR-12, 80)  },
+      { kind:'parrot',   dx:  Math.min(earthR-12, 110) },
+      // squirrel — globe 앞쪽 호 살짝 아래(약간 멀어진 곡선) 중앙. 가족과 충돌 회피.
+      { kind:'squirrel', dx: 0, frontOffset: 22 },
     ];
-    for(const f of friendsLayout){
-      drawCompanion(ctx, { x: pigCx + f.dx, y: familyFootY + f.dy, kind:f.kind });
+    for(const f of friendDX){
+      const sx = pigCx + f.dx;
+      const sy = surfaceY(f.dx) - 7.6 + (f.frontOffset || 0);
+      drawCompanion(ctx, { x: sx, y: sy, kind:f.kind });
     }
   }
 
