@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>새우깡으로 한계돌파</title>
+<title>Saeukkang Limit Break</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <style>
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -182,6 +182,39 @@
   .set-toggle.set-mini::after{width:16px;height:16px;}
   .set-toggle.set-mini.on::after{left:18px;}
   .set-toggle.set-mini.disabled{opacity:.4;pointer-events:none;}
+  /* v12.36d — EN-only typography overrides (Korean letter-spacing/wraps differ from English).
+     [data-i18n] 엘리먼트들이 영어로 길어질 때 깨짐 방지. */
+  html[lang="en"] #title .sub{letter-spacing:2.5px;font-size:min(3vw,16px);}
+  html[lang="en"] .set-row .lbl{font-size:13px;}
+  html[lang="en"] .set-row .lbl .desc{font-size:10px;}
+  html[lang="en"] .shop-tab{font-size:12px;padding:8px 10px;letter-spacing:0;}
+  html[lang="en"] .cs-tab{font-size:12px;padding:7px 10px;letter-spacing:0;}
+  html[lang="en"] .cos-slot-tab{font-size:12px;letter-spacing:0;}
+  html[lang="en"] #title .btn{letter-spacing:0;}
+  html[lang="en"] .gacha-btn{font-size:13px;letter-spacing:0;}
+  html[lang="en"] .gacha-btn .cost{letter-spacing:0;}
+  html[lang="en"] .cs-section-title{font-size:13px;}
+  html[lang="en"] .set-cat-header-title{font-size:10.5px;letter-spacing:.8px;}
+  html[lang="en"] .set-cat-header-col .lbl-tx{font-size:9.5px;letter-spacing:.3px;}
+  html[lang="en"] #shopScreen h2,
+  html[lang="en"] #chapterSelect h2{font-size:18px;letter-spacing:0;}
+  html[lang="en"] .v-actions .btn{font-size:13px;letter-spacing:0;}
+  html[lang="en"] #pauseModal .btn,
+  html[lang="en"] #gameOver .btn,
+  html[lang="en"] #chapterCleared .btn{font-size:13px;letter-spacing:0;}
+  /* v12.36d — UI 언어 EN/KO 세그먼트 토글. 두 pill 중 하나만 active. */
+  .lang-seg{display:flex;gap:4px;flex:0 0 auto;align-items:center;}
+  .lang-pill{
+    min-width:42px;height:28px;padding:0 10px;border-radius:999px;
+    background:#495057;border:2px solid #6C757D;color:#FFF9DB;
+    font-family:inherit;font-weight:900;font-size:12px;letter-spacing:0.6px;
+    cursor:pointer;transition:background .15s, border-color .15s, color .15s;
+  }
+  .lang-pill.on{
+    background:linear-gradient(180deg,#FFE066,#F76707);border-color:#FFF9DB;color:#5A1A04;
+    box-shadow:0 0 12px rgba(255,224,102,.55);
+  }
+  .lang-pill:hover:not(.on){border-color:#FFE066;color:#FFE066;}
   /* v12.36b — 섹션 제목 + 컬럼 헤더 통합 행.
      사용자 명시: 다른 소제목(.set-section-title margin:14px 4px 6px) 과 텍스트 시작점 동일,
      우측 아이콘 컬럼은 set-row 내 우측 토글과 동일 위치. */
@@ -742,14 +775,14 @@
         <div class="boss-hp-text" id="bossHpText">0 / 0</div>
       </div>
     </div>
-    <button class="hud-btn" id="pauseBtn" title="일시정지">⏸</button>
+    <button class="hud-btn" id="pauseBtn" data-i18n-title="hud.pause" title="일시정지">⏸</button>
     <div id="joyArea"></div>
     <div id="joystick"><div class="stick"></div></div>
-    <button class="hud-btn" id="settingsBtn" title="설정 (음소거 · 가족 표시 · 효과)">⚙</button>
-    <button id="ultBtn" type="button" title="비둘기의 외침 — 충전 후 재사용 가능">
+    <button class="hud-btn" id="settingsBtn" data-i18n-title="hud.settings" title="설정 (음소거 · 가족 표시 · 효과)">⚙</button>
+    <button id="ultBtn" type="button" data-i18n-title="hud.ult" title="비둘기의 외침 — 충전 후 재사용 가능">
       <div class="ult-fill" id="ultFill"></div>
       <div class="ult-icon">🐦‍🔥</div>
-      <div class="ult-label" id="ultLabel">외침</div>
+      <div class="ult-label" id="ultLabel" data-i18n="hud.ultLabel">외침</div>
     </button>
   </div>
 
@@ -757,58 +790,58 @@
   <div id="title" class="overlay on">
     <div class="rays"></div>
     <!-- v12.32 — 시작화면 설정 버튼. 우상단 상점 pill 의 좌상단 미러 위치. -->
-    <button id="titleSettingsBtn" type="button" title="설정 (음소거 · 가족 표시 · 효과)">⚙</button>
-    <button id="titleShopPill" type="button" title="상점 열기 (스킬 트리 + 코스튬 가챠)">
+    <button id="titleSettingsBtn" type="button" data-i18n-title="title.settingsTip" title="설정 (음소거 · 가족 표시 · 효과)">⚙</button>
+    <button id="titleShopPill" type="button" data-i18n-title="title.shopTip" title="상점 열기 (스킬 트리 + 코스튬 가챠)">
       <span class="awning"></span>
       <span class="shop-front">
         <span class="shop-icon">🛒</span>
         <span class="shop-info">
-          <span class="shop-label">상점</span>
+          <span class="shop-label" data-i18n="title.shop">상점</span>
           <span class="shop-coin">🪙 <span id="titleCoinTxt">0</span></span>
         </span>
       </span>
     </button>
-    <div class="sub">새우깡으로</div>
-    <h1>한계돌파!</h1>
+    <div class="sub" data-i18n="title.sub">새우깡으로</div>
+    <h1 data-i18n="title.h1">한계돌파!</h1>
     <div class="pigeon-stage" id="titlePigeonStage">
       <span class="hunger-badge" id="titleHungerBadge"></span>
       <canvas id="titlePigeon"></canvas>
-      <button id="feedBubbleBtn" type="button" title="비둘기 먹이주기">
+      <button id="feedBubbleBtn" type="button" data-i18n-title="title.feed" title="비둘기 먹이주기">
         <span class="fb-icon">🍴</span>
-        <span class="fb-text">먹이주기</span>
+        <span class="fb-text" data-i18n="title.feed">먹이주기</span>
       </button>
     </div>
     <div class="btns">
-      <button class="btn" id="startBtn">▶ 챕터 선택</button>
-      <button class="btn alt small" id="howBtn">조작법 · 규칙</button>
-      <button class="btn alt small" id="resetProgBtn" style="font-size:12px;">기록 초기화</button>
+      <button class="btn" id="startBtn" data-i18n="title.start">▶ 챕터 선택</button>
+      <button class="btn alt small" id="howBtn" data-i18n="title.how">조작법 · 규칙</button>
+      <button class="btn alt small" id="resetProgBtn" data-i18n="title.reset" style="font-size:12px;">기록 초기화</button>
     </div>
-    <div class="hint">근육질 비둘기가 되어 새우깡을 뿌려 적을 제압하세요!<br>50개 챕터 · 챕터당 3웨이브 + 보스 · 레벨업 카드와 코스튬으로 빌드 완성.</div>
+    <div class="hint" data-i18n-html="title.hint">근육질 비둘기가 되어 새우깡을 뿌려 적을 제압하세요!<br>50개 챕터 · 챕터당 3웨이브 + 보스 · 레벨업 카드와 코스튬으로 빌드 완성.</div>
   </div>
 
   <!-- Shop screen — permanent meta-progression upgrades + costume gacha, all under one roof.
        Top tabs swap between "스킬 트리" (skill upgrades) and "코스튬" (gacha + inventory + album). -->
   <div id="shopScreen" class="overlay hidden">
     <div class="cs-header">
-      <button class="back-btn" id="shopBackBtn" title="뒤로">◀</button>
-      <h2>🛒 비둘기 상점</h2>
+      <button class="back-btn" id="shopBackBtn" data-i18n-title="cs.back" title="뒤로">◀</button>
+      <h2 data-i18n="shop.title">🛒 비둘기 상점</h2>
       <div style="width:40px;"></div>
     </div>
     <div class="coin-bar"><span class="coin-ic">🪙</span><span id="shopCoinTxt">0</span></div>
     <div class="shop-tabs">
-      <button class="shop-tab on" id="shopTabSkill" type="button">🌳 스킬 트리</button>
-      <button class="shop-tab" id="shopTabCostume" type="button">👗 코스튬 가챠</button>
-      <button class="shop-tab" id="shopTabSkin" type="button">🎨 배경 스킨</button>
+      <button class="shop-tab on" id="shopTabSkill" type="button" data-i18n="shop.tab.skill">🌳 스킬 트리</button>
+      <button class="shop-tab" id="shopTabCostume" type="button" data-i18n="shop.tab.costume">👗 코스튬 가챠</button>
+      <button class="shop-tab" id="shopTabSkin" type="button" data-i18n="shop.tab.skin">🎨 배경 스킨</button>
     </div>
     <!-- Skill tree section -->
     <div id="shopSkillSection">
-      <div class="shop-hint">위 → 아래로 가지를 키워가는 스킬 트리예요.<br>아래 단계는 위 노드를 일정 레벨까지 올려야 열립니다.</div>
+      <div class="shop-hint" data-i18n-html="shop.skill.hint">위 → 아래로 가지를 키워가는 스킬 트리예요.<br>아래 단계는 위 노드를 일정 레벨까지 올려야 열립니다.</div>
       <div class="tree" id="shopGrid"></div>
     </div>
     <!-- Costume gacha section (was the standalone costume screen) -->
     <div id="shopCostumeSection" class="hidden">
       <div class="gacha-hero-banner">
-        ✨ <b style="color:#FFE066;">비둘기 코스튬 가챠</b> — 머리 · 몸통 · 무기 슬롯에 장착하면 강력한 능력치 보너스!
+        <span data-i18n-html="shop.gacha.banner">✨ <b style="color:#FFE066;">비둘기 코스튬 가챠</b> — 머리 · 몸통 · 무기 슬롯에 장착하면 강력한 능력치 보너스!</span>
         <div class="ratebox">
           <span class="rate-pip"><span class="grade S">S</span>2%</span>
           <span class="rate-pip"><span class="grade A">A</span>8%</span>
@@ -817,62 +850,62 @@
         </div>
       </div>
       <div class="gacha-row">
-        <button class="gacha-btn" id="gachaSingleBtn">🎲 1회 뽑기<span class="cost">🪙 1,500</span></button>
-        <button class="gacha-btn gacha-ten" id="gachaTenBtn">🎰 10연 뽑기<span class="cost">🪙 12,000 · A 보장</span></button>
+        <button class="gacha-btn" id="gachaSingleBtn"><span data-i18n="shop.gacha.single">🎲 1회 뽑기</span><span class="cost" data-i18n="shop.gacha.singleCost">🪙 1,500</span></button>
+        <button class="gacha-btn gacha-ten" id="gachaTenBtn"><span data-i18n="shop.gacha.ten">🎰 10연 뽑기</span><span class="cost" data-i18n="shop.gacha.tenSub">🪙 12,000 · A 보장</span></button>
       </div>
       <div class="gacha-row" id="combineRow" style="margin-top:6px;">
-        <button class="gacha-btn" id="combineBtn" style="background:linear-gradient(180deg,#FFD43B,#F76707);border-color:#FFE066;">🔧 코스튬 합성<span class="cost" id="combineCostText">같은 등급 3장 → 상위 1장</span></button>
+        <button class="gacha-btn" id="combineBtn" style="background:linear-gradient(180deg,#FFD43B,#F76707);border-color:#FFE066;"><span data-i18n="shop.combine">🔧 코스튬 합성</span><span class="cost" id="combineCostText" data-i18n="shop.combineSub">같은 등급 3장 → 상위 1장</span></button>
       </div>
       <div class="costume-section">
-        <h3 style="text-align:center;color:#E599F7;">현재 착용 중</h3>
+        <h3 style="text-align:center;color:#E599F7;" data-i18n="shop.equipped">현재 착용 중</h3>
         <div class="equip-row" id="equipRow"></div>
       </div>
       <!-- v12.10/v12.11 — 캐릭터별 탭. 가족(아내/아기)만 코스튬 시스템. 원정 Ⅳ 구출 친구들은
            코스튬 없음 (사용자 명시). -->
       <div class="costume-section">
         <div class="cos-char-tabs" id="cosCharTabs" style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center;">
-          <button class="cs-tab on" type="button" data-char="player" style="border-color:#9775FA;">👤 남편</button>
-          <button class="cs-tab" type="button" data-char="wife"   style="border-color:#FFB4D8;display:none;">💗 아내</button>
-          <button class="cs-tab" type="button" data-char="child"  style="border-color:#A5D8FF;display:none;">👶 아기</button>
-          <button class="cs-tab" type="button" data-char="rescued" style="border-color:#FFA94D;display:none;">🐦 구출 친구 세트 (Ch125)</button>
-          <button class="cs-tab" type="button" data-char="parents" style="border-color:#FFD43B;display:none;">🪽 부모 세트 (Ch210)</button>
-          <button class="cs-tab" type="button" data-char="ancestors" style="border-color:#9775FA;display:none;">📜 조상 (Ch260)</button>
+          <button class="cs-tab on" type="button" data-char="player" data-i18n="cos.tab.player" style="border-color:#9775FA;">👤 남편</button>
+          <button class="cs-tab" type="button" data-char="wife" data-i18n="cos.tab.wife"   style="border-color:#FFB4D8;display:none;">💗 아내</button>
+          <button class="cs-tab" type="button" data-char="child" data-i18n="cos.tab.child"  style="border-color:#A5D8FF;display:none;">👶 아기</button>
+          <button class="cs-tab" type="button" data-char="rescued" data-i18n="cos.tab.rescued" style="border-color:#FFA94D;display:none;">🐦 구출 친구 세트 (Ch125)</button>
+          <button class="cs-tab" type="button" data-char="parents" data-i18n="cos.tab.parents" style="border-color:#FFD43B;display:none;">🪽 부모 세트 (Ch210)</button>
+          <button class="cs-tab" type="button" data-char="ancestors" data-i18n="cos.tab.ancestors" style="border-color:#9775FA;display:none;">📜 조상 (Ch260)</button>
         </div>
         <!-- 남편 코스튬 도감 -->
         <div id="playerCostumeBlock">
           <h3 style="display:flex;align-items:center;gap:8px;">
-            📒 남편 코스튬 도감 <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span>
+            <span data-i18n="cos.album.title">📒 남편 코스튬 도감</span> <span id="albumProgress" style="color:#FFD43B;font-size:12px;font-weight:700;"></span>
           </h3>
           <div class="cos-slot-tabs">
-            <button class="cos-slot-tab on" type="button" data-slot="head">🎩 머리</button>
-            <button class="cos-slot-tab" type="button" data-slot="body">👕 몸통</button>
-            <button class="cos-slot-tab" type="button" data-slot="weapon">⚔ 무기</button>
+            <button class="cos-slot-tab on" type="button" data-slot="head" data-i18n="cos.slot.head">🎩 머리</button>
+            <button class="cos-slot-tab" type="button" data-slot="body" data-i18n="cos.slot.body">👕 몸통</button>
+            <button class="cos-slot-tab" type="button" data-slot="weapon" data-i18n="cos.slot.weapon">⚔ 무기</button>
           </div>
           <div class="cos-detail-grid" id="cosDetailGrid"></div>
         </div>
         <!-- 아내 코스튬 (ch51 클리어 시 노출). v12.18 — head/body 서브탭 분리. -->
         <div id="wifeCostumeBlock" style="display:none;">
-          <h3 style="display:flex;align-items:center;gap:8px;color:#FFB4D8;">💗 아내 코스튬 <span style="color:#FFE066;font-size:11px;font-weight:700;">머리장식 1개 + 옷 1개 동시 착용</span></h3>
+          <h3 style="display:flex;align-items:center;gap:8px;color:#FFB4D8;"><span data-i18n="cos.wife.title">💗 아내 코스튬</span> <span style="color:#FFE066;font-size:11px;font-weight:700;" data-i18n="cos.wife.sub">머리장식 1개 + 옷 1개 동시 착용</span></h3>
           <div class="cos-slot-tabs" data-companion="wife" style="margin-bottom:6px;">
-            <button class="cos-slot-tab on" type="button" data-slot="head">🎀 머리장식</button>
-            <button class="cos-slot-tab" type="button" data-slot="body">👗 옷</button>
+            <button class="cos-slot-tab on" type="button" data-slot="head" data-i18n="cos.slot.headAcc">🎀 머리장식</button>
+            <button class="cos-slot-tab" type="button" data-slot="body" data-i18n="cos.slot.bodyDress">👗 옷</button>
           </div>
           <div id="wifeCostumeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
         </div>
         <!-- 아기 코스튬 (ch60 클리어 시 노출). v12.18 — head/body 서브탭 분리. -->
         <div id="childCostumeBlock" style="display:none;">
-          <h3 style="display:flex;align-items:center;gap:8px;color:#A5D8FF;">👶 아기 코스튬 <span style="color:#FFE066;font-size:11px;font-weight:700;">머리장식 1개 + 옷 1개 동시 착용</span></h3>
+          <h3 style="display:flex;align-items:center;gap:8px;color:#A5D8FF;"><span data-i18n="cos.child.title">👶 아기 코스튬</span> <span style="color:#FFE066;font-size:11px;font-weight:700;" data-i18n="cos.child.sub">머리장식 1개 + 옷 1개 동시 착용</span></h3>
           <div class="cos-slot-tabs" data-companion="child" style="margin-bottom:6px;">
-            <button class="cos-slot-tab on" type="button" data-slot="head">🧢 머리장식</button>
-            <button class="cos-slot-tab" type="button" data-slot="body">👶 옷</button>
+            <button class="cos-slot-tab on" type="button" data-slot="head" data-i18n="cos.slot.babyHead">🧢 머리장식</button>
+            <button class="cos-slot-tab" type="button" data-slot="body" data-i18n="cos.slot.babyBody">👶 옷</button>
           </div>
           <div id="childCostumeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
         </div>
         <!-- v12.18 — 구출 친구 5종 세트 (Ch125 다람쥐까지 합류해야 활성). 사용자 명령
              "지옥에서 영입되는 동료들은 일괄 코스튬 적용될 수 있도록 5종 코스튬이 1세트로". -->
         <div id="rescuedCostumeBlock" style="display:none;">
-          <h3 style="display:flex;align-items:center;gap:8px;color:#FFA94D;">🐦 구출 친구 세트 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅳ Ch125 까지 진행 시 활성</span></h3>
-          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;">
+          <h3 style="display:flex;align-items:center;gap:8px;color:#FFA94D;"><span data-i18n="cos.rescued.title">🐦 구출 친구 세트</span> <span style="color:#FFE066;font-size:11px;font-weight:700;" data-i18n="cos.rescued.sub">원정 Ⅳ Ch125 까지 진행 시 활성</span></h3>
+          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;" data-i18n="cos.rescued.desc">
             5명의 친구(참새·까치·부엉이·앵무새·다람쥐) 가 같은 세트의 코스튬을 입으면 추가 세트 보너스가 발동.
             친구 화력에만 영향 — 챕터 난이도엔 미미 (~+1.5~3% 풀파티 DPS).
           </div>
@@ -880,8 +913,8 @@
         </div>
         <!-- v12.35 — 부모 세트 (Ch210 클리어 시 활성). 일괄 구매만, 한 세트 = pair × 2. -->
         <div id="parentsCostumeBlock" style="display:none;">
-          <h3 style="display:flex;align-items:center;gap:8px;color:#FFD43B;">🪽 부모 세트 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅶ Ch210 까지 진행 시 활성 — 일괄 구매</span></h3>
-          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;">
+          <h3 style="display:flex;align-items:center;gap:8px;color:#FFD43B;"><span data-i18n="cos.parents.title">🪽 부모 세트</span> <span style="color:#FFE066;font-size:11px;font-weight:700;" data-i18n="cos.parents.sub">원정 Ⅶ Ch210 까지 진행 시 활성 — 일괄 구매</span></h3>
+          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;" data-i18n="cos.parents.desc">
             남편 부모님 + 아내 부모님 (총 4마리) 이 같은 세트의 코스튬을 입으면 세트 보너스 발동.
             기본 천사 디폴트는 무료, 다른 세트는 코인 결제. 부분 착용도 부분 효과 (1pair 45%, 2pair 85%).
           </div>
@@ -889,8 +922,8 @@
         </div>
         <!-- v12.35 — 조상 코스튬 (Ch260 클리어 시 활성). 개별 비둘기 마다 직업 코스튬 다종. -->
         <div id="ancestorsCostumeBlock" style="display:none;">
-          <h3 style="display:flex;align-items:center;gap:8px;color:#9775FA;">📜 조상 비둘기 <span style="color:#FFE066;font-size:11px;font-weight:700;">원정 Ⅷ Ch260 까지 진행 시 활성 — 개별 구매</span></h3>
-          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;">
+          <h3 style="display:flex;align-items:center;gap:8px;color:#9775FA;"><span data-i18n="cos.ancestors.title">📜 조상 비둘기</span> <span style="color:#FFE066;font-size:11px;font-weight:700;" data-i18n="cos.ancestors.sub">원정 Ⅷ Ch260 까지 진행 시 활성 — 개별 구매</span></h3>
+          <div style="font-size:11px;color:#FFF9DB;opacity:.8;margin:6px 0 8px;line-height:1.4;" data-i18n="cos.ancestors.desc">
             구구나르도 다 둘치 (발명가) · 비리스토둘레스 (철학자). 각 조상마다 직업 코스튬을 따로 살 수 있음.
             기본 디폴트(발명가복/철학자복)은 무료. 직업 코스튬은 개별 코인 결제.
           </div>
@@ -902,7 +935,7 @@
     </div>
     <!-- Background skin section — purely cosmetic title-screen backgrounds. -->
     <div id="shopSkinSection" class="hidden">
-      <div class="skin-banner">
+      <div class="skin-banner" data-i18n-html="shop.skin.banner">
         🎨 <b style="color:#FFE066;">타이틀 배경 스킨</b> — 시작 화면의 분위기를 바꾸는 코스메틱 아이템. 게임 난이도엔 영향 없음.
       </div>
       <div class="skin-grid" id="skinGrid"></div>
@@ -912,34 +945,34 @@
   <!-- Chapter select -->
   <div id="chapterSelect" class="overlay hidden">
     <div class="cs-header">
-      <button class="back-btn" id="csBackBtn" title="뒤로">◀</button>
-      <h2>챕터 선택</h2>
+      <button class="back-btn" id="csBackBtn" data-i18n-title="cs.back" title="뒤로">◀</button>
+      <h2 data-i18n="cs.title">챕터 선택</h2>
       <div style="width:40px;"></div>
     </div>
     <!-- v12.5/v12.11 — 원정 선택 탭. ch50/70/100 클리어 시 원정 Ⅱ/Ⅲ/Ⅳ 해금. -->
     <div class="cs-tabs" id="csExpTabs">
-      <button class="cs-tab on" id="csExpTab1" type="button" data-exp="1">🌍 원정 Ⅰ</button>
-      <button class="cs-tab" id="csExpTab2" type="button" data-exp="2">🪐 원정 Ⅱ</button>
-      <button class="cs-tab" id="csExpTab3" type="button" data-exp="3">🌌 원정 Ⅲ</button>
-      <button class="cs-tab" id="csExpTab4" type="button" data-exp="4">🔥 원정 Ⅳ</button>
+      <button class="cs-tab on" id="csExpTab1" type="button" data-exp="1" data-i18n="cs.exp.1">🌍 원정 Ⅰ</button>
+      <button class="cs-tab" id="csExpTab2" type="button" data-exp="2" data-i18n="cs.exp.2">🪐 원정 Ⅱ</button>
+      <button class="cs-tab" id="csExpTab3" type="button" data-exp="3" data-i18n="cs.exp.3">🌌 원정 Ⅲ</button>
+      <button class="cs-tab" id="csExpTab4" type="button" data-exp="4" data-i18n="cs.exp.4">🔥 원정 Ⅳ</button>
       <!-- v12.34 — 원정 Ⅴ/Ⅵ 천국 추가. -->
-      <button class="cs-tab" id="csExpTab5" type="button" data-exp="5">🌟 원정 Ⅴ</button>
-      <button class="cs-tab" id="csExpTab6" type="button" data-exp="6">🪽 원정 Ⅵ</button>
+      <button class="cs-tab" id="csExpTab5" type="button" data-exp="5" data-i18n="cs.exp.5">🌟 원정 Ⅴ</button>
+      <button class="cs-tab" id="csExpTab6" type="button" data-exp="6" data-i18n="cs.exp.6">🪽 원정 Ⅵ</button>
     </div>
     <!-- v12.10 — 원정 끝 챕터(50/70/100)를 클리어한 사용자가 시네마틱 엔딩을 다시 볼 수 있는 영역.
          v12.34b — 사용자 피드백 "원정 다시보기 버튼을 빼고 원정 선택 버튼을 2줄이나 3줄로 수정" →
          row 자체는 유지하되 항상 hidden. renderCinematicReplayRow 도 noop 화. -->
     <div id="cinematicReplayRow" style="display:none !important;"></div>
     <div class="cs-tabs">
-      <button class="cs-tab on" id="csTabFocus" type="button">⭐ 진행</button>
-      <button class="cs-tab" id="csTabAll" type="button">🗺 전체 보기</button>
+      <button class="cs-tab on" id="csTabFocus" type="button" data-i18n="cs.tab.focus">⭐ 진행</button>
+      <button class="cs-tab" id="csTabAll" type="button" data-i18n="cs.tab.all">🗺 전체 보기</button>
     </div>
     <!-- Focused view: hero card + cleared strip + locked preview -->
     <div id="csFocusView">
       <div class="cs-focus" id="csFocusHero"></div>
-      <div class="cs-section-title">🏆 정복한 챕터 (다시 도전 가능)</div>
+      <div class="cs-section-title" data-i18n="cs.section.cleared">🏆 정복한 챕터 (다시 도전 가능)</div>
       <div class="cs-strip" id="csClearedStrip"></div>
-      <div class="cs-section-title">🔒 다가올 챕터</div>
+      <div class="cs-section-title" data-i18n="cs.section.upcoming">🔒 다가올 챕터</div>
       <div class="cs-strip" id="csUpcomingStrip"></div>
     </div>
     <!-- Legacy view: full 50-card grid for free navigation -->
@@ -950,9 +983,9 @@
   <!-- Gacha reveal modal -->
   <div id="gachaModal" class="modal hidden">
     <div class="card" style="max-width:340px;">
-      <h2 style="color:#E599F7;">✨ 코스튬 획득!</h2>
+      <h2 style="color:#E599F7;" data-i18n="modal.gacha.title">✨ 코스튬 획득!</h2>
       <div id="gachaReveal" class="gacha-reveal"></div>
-      <button class="btn" id="gachaCloseBtn" style="width:100%;margin-top:8px;">확인</button>
+      <button class="btn" id="gachaCloseBtn" data-i18n="modal.gacha.confirm" style="width:100%;margin-top:8px;">확인</button>
     </div>
   </div>
 
@@ -961,12 +994,12 @@
        grants a temporary combat boost that affects the next chapter run. -->
   <div id="feedModal" class="modal hidden">
     <div class="card" style="max-width:480px;">
-      <h2 style="color:#FFE066;">🐦 비둘기 먹이주기</h2>
-      <div class="sub" id="feedSub">우리 비둘기, 배가 고프지 않은지 살펴봐주세요!</div>
+      <h2 style="color:#FFE066;" data-i18n="modal.feed.title">🐦 비둘기 먹이주기</h2>
+      <div class="sub" id="feedSub" data-i18n="modal.feed.sub">우리 비둘기, 배가 고프지 않은지 살펴봐주세요!</div>
       <div id="feedStatus" style="background:rgba(255,224,102,.10);border:2px solid rgba(255,224,102,.4);border-radius:12px;padding:12px;margin:6px 0 12px;text-align:center;font-size:13px;color:#FFF9DB;line-height:1.6;"></div>
-      <div class="sub" style="margin-top:8px;">사료를 골라주세요</div>
+      <div class="sub" style="margin-top:8px;" data-i18n="modal.feed.pickFood">사료를 골라주세요</div>
       <div id="feedGrid" style="display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0;max-height:50vh;overflow-y:auto;"></div>
-      <button class="btn alt small" id="feedCloseBtn" style="width:100%;">닫기</button>
+      <button class="btn alt small" id="feedCloseBtn" data-i18n="modal.feed.close" style="width:100%;">닫기</button>
     </div>
   </div>
 
@@ -978,121 +1011,132 @@
        음소거는 항상 노출. 가족·동료 토글은 ch51 아내 비둘기 합류 후에만 표시. -->
   <div id="settingsModal" class="modal hidden">
     <div class="card" style="max-width:380px;">
-      <h2 style="color:#FFE066;text-shadow:0 0 14px rgba(255,224,102,.65);">⚙ 설정</h2>
-      <div class="sub">언제든 다시 변경할 수 있어요</div>
+      <h2 style="color:#FFE066;text-shadow:0 0 14px rgba(255,224,102,.65);" data-i18n="set.title">⚙ 설정</h2>
+      <div class="sub" data-i18n="set.sub">언제든 다시 변경할 수 있어요</div>
 
-      <div class="set-section-title">사운드</div>
+      <!-- v12.36d — 언어 설정 (UI 다국어). KO / EN 토글, 기본 EN. -->
+      <div class="set-section-title" data-i18n="set.lang.title">언어</div>
+      <div class="set-row" id="setLangRow">
+        <div class="ic">🌐</div>
+        <div class="lbl"><span data-i18n="set.lang.label">UI 언어</span><span class="desc" data-i18n="set.lang.desc">인터페이스 언어를 전환합니다</span></div>
+        <div class="lang-seg" id="setLangSeg" role="group" style="display:flex;gap:4px;">
+          <button type="button" class="lang-pill" id="setLangBtnEn" data-lang="en">EN</button>
+          <button type="button" class="lang-pill" id="setLangBtnKo" data-lang="ko">KO</button>
+        </div>
+      </div>
+
+      <div class="set-section-title" data-i18n="set.section.sound">사운드</div>
       <div class="set-row" id="setMuteRow">
         <div class="ic">🔊</div>
-        <div class="lbl">음소거<span class="desc">BGM · 효과음 모두 끔</span></div>
-        <button type="button" class="set-toggle" id="setMuteToggle" aria-label="음소거 토글"></button>
+        <div class="lbl"><span data-i18n="set.mute">음소거</span><span class="desc" data-i18n="set.muteDesc">BGM · 효과음 모두 끔</span></div>
+        <button type="button" class="set-toggle" id="setMuteToggle" aria-label="Mute toggle"></button>
       </div>
 
       <div id="setFamilyBlock" style="display:none;">
-        <div class="set-section-title">비둘기 가족 · 동료 (전체)</div>
+        <div class="set-section-title" data-i18n="set.family.title">비둘기 가족 · 동료 (전체)</div>
         <div class="set-row" id="setShowFamilyRow">
           <div class="ic">👁</div>
-          <div class="lbl">전체 보이기<span class="desc">시작화면 · 게임 · 시네마틱 — 마스터 토글 (OFF 면 모두 OFF)</span></div>
-          <button type="button" class="set-toggle" id="setShowFamilyToggle" aria-label="가족·동료 보이기 토글"></button>
+          <div class="lbl"><span data-i18n="set.family.show">전체 보이기</span><span class="desc" data-i18n="set.family.showDesc">시작화면 · 게임 · 시네마틱 — 마스터 토글 (OFF 면 모두 OFF)</span></div>
+          <button type="button" class="set-toggle" id="setShowFamilyToggle" aria-label="Show family toggle"></button>
         </div>
         <div class="set-row" id="setFamilyFxRow">
           <div class="ic">✨</div>
-          <div class="lbl">전체 효과<span class="desc">자동 사격 · 공격력 기여 · 사격음 (OFF 시 모든 동료 데미지 0)</span></div>
-          <button type="button" class="set-toggle" id="setFamilyFxToggle" aria-label="가족·동료 효과 토글"></button>
+          <div class="lbl"><span data-i18n="set.family.fx">전체 효과</span><span class="desc" data-i18n="set.family.fxDesc">자동 사격 · 공격력 기여 · 사격음 (OFF 시 모든 동료 데미지 0)</span></div>
+          <button type="button" class="set-toggle" id="setFamilyFxToggle" aria-label="Family fx toggle"></button>
         </div>
         <!-- v12.36 — 카테고리별 토글. 합류 후에만 행 노출. 각 행에 [👁 보이기][✨ 효과] 두 토글. -->
         <!-- v12.36b — 섹션 제목 + 컬럼 헤더를 한 행에 통합 (떠 있는 라벨 회피) -->
         <div class="set-cat-header">
-          <div class="set-cat-header-title">카테고리별 설정</div>
-          <div class="set-cat-header-col"><span class="ic-em">👁</span><span class="lbl-tx">보이기</span></div>
-          <div class="set-cat-header-col"><span class="ic-em">✨</span><span class="lbl-tx">효과</span></div>
+          <div class="set-cat-header-title" data-i18n="set.cat.header">카테고리별 설정</div>
+          <div class="set-cat-header-col"><span class="ic-em">👁</span><span class="lbl-tx" data-i18n="set.cat.show">보이기</span></div>
+          <div class="set-cat-header-col"><span class="ic-em">✨</span><span class="lbl-tx" data-i18n="set.cat.fx">효과</span></div>
         </div>
         <div class="set-row set-cat-row" id="setRowWife" style="display:none;">
           <div class="ic">💗</div>
-          <div class="lbl">아내 비둘기<span class="desc">Ch51 합류</span></div>
-          <div class="set-cat-cell" title="보이기">
-            <button type="button" class="set-toggle set-mini" data-cat="Wife" data-kind="show" aria-label="아내 보이기"></button>
+          <div class="lbl"><span data-i18n="set.cat.wife">아내 비둘기</span><span class="desc" data-i18n="set.cat.wifeSub">Ch51 합류</span></div>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Wife" data-kind="show" aria-label="Wife show"></button>
           </div>
-          <div class="set-cat-cell" title="효과">
-            <button type="button" class="set-toggle set-mini" data-cat="Wife" data-kind="fx" aria-label="아내 효과"></button>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Wife" data-kind="fx" aria-label="Wife fx"></button>
           </div>
         </div>
         <div class="set-row set-cat-row" id="setRowChild" style="display:none;">
           <div class="ic">👶</div>
-          <div class="lbl">아기 비둘기<span class="desc">Ch60 합류</span></div>
-          <div class="set-cat-cell" title="보이기">
-            <button type="button" class="set-toggle set-mini" data-cat="Child" data-kind="show" aria-label="아기 보이기"></button>
+          <div class="lbl"><span data-i18n="set.cat.child">아기 비둘기</span><span class="desc" data-i18n="set.cat.childSub">Ch60 합류</span></div>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Child" data-kind="show" aria-label="Child show"></button>
           </div>
-          <div class="set-cat-cell" title="효과">
-            <button type="button" class="set-toggle set-mini" data-cat="Child" data-kind="fx" aria-label="아기 효과"></button>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Child" data-kind="fx" aria-label="Child fx"></button>
           </div>
         </div>
         <div class="set-row set-cat-row" id="setRowFriends" style="display:none;">
           <div class="ic">🐦</div>
-          <div class="lbl">구출 친구 5종<span class="desc">참새·까치·부엉이·앵무새·다람쥐 (Ch125)</span></div>
-          <div class="set-cat-cell" title="보이기">
-            <button type="button" class="set-toggle set-mini" data-cat="Friends" data-kind="show" aria-label="친구 5종 보이기"></button>
+          <div class="lbl"><span data-i18n="set.cat.friends">구출 친구 5종</span><span class="desc" data-i18n="set.cat.friendsSub">참새·까치·부엉이·앵무새·다람쥐 (Ch125)</span></div>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Friends" data-kind="show" aria-label="Friends show"></button>
           </div>
-          <div class="set-cat-cell" title="효과">
-            <button type="button" class="set-toggle set-mini" data-cat="Friends" data-kind="fx" aria-label="친구 5종 효과"></button>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Friends" data-kind="fx" aria-label="Friends fx"></button>
           </div>
         </div>
         <div class="set-row set-cat-row" id="setRowParents" style="display:none;">
           <div class="ic">🪽</div>
-          <div class="lbl">부모 비둘기<span class="desc">남편·아내 부모 pair 4마리 (Ch210)</span></div>
-          <div class="set-cat-cell" title="보이기">
-            <button type="button" class="set-toggle set-mini" data-cat="Parents" data-kind="show" aria-label="부모 보이기"></button>
+          <div class="lbl"><span data-i18n="set.cat.parents">부모 비둘기</span><span class="desc" data-i18n="set.cat.parentsSub">남편·아내 부모 pair 4마리 (Ch210)</span></div>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Parents" data-kind="show" aria-label="Parents show"></button>
           </div>
-          <div class="set-cat-cell" title="효과">
-            <button type="button" class="set-toggle set-mini" data-cat="Parents" data-kind="fx" aria-label="부모 효과"></button>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Parents" data-kind="fx" aria-label="Parents fx"></button>
           </div>
         </div>
         <div class="set-row set-cat-row" id="setRowAncestors" style="display:none;">
           <div class="ic">📜</div>
-          <div class="lbl">조상 비둘기<span class="desc">구구나르도 · 비리스토둘레스 (Ch260)</span></div>
-          <div class="set-cat-cell" title="보이기">
-            <button type="button" class="set-toggle set-mini" data-cat="Ancestors" data-kind="show" aria-label="조상 보이기"></button>
+          <div class="lbl"><span data-i18n="set.cat.ancestors">조상 비둘기</span><span class="desc" data-i18n="set.cat.ancestorsSub">구구나르도 · 비리스토둘레스 (Ch260)</span></div>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Ancestors" data-kind="show" aria-label="Ancestors show"></button>
           </div>
-          <div class="set-cat-cell" title="효과">
-            <button type="button" class="set-toggle set-mini" data-cat="Ancestors" data-kind="fx" aria-label="조상 효과"></button>
+          <div class="set-cat-cell">
+            <button type="button" class="set-toggle set-mini" data-cat="Ancestors" data-kind="fx" aria-label="Ancestors fx"></button>
           </div>
         </div>
       </div>
 
-      <button class="btn small" id="setCloseBtn" style="width:100%;margin-top:14px;background:linear-gradient(180deg,#FFE066,#FAB005,#E67700);color:#5A1A04;">닫기</button>
+      <button class="btn small" id="setCloseBtn" data-i18n="set.close" style="width:100%;margin-top:14px;background:linear-gradient(180deg,#FFE066,#FAB005,#E67700);color:#5A1A04;">닫기</button>
     </div>
   </div>
 
   <div id="companionMeetModal" class="modal hidden">
     <div class="card" style="max-width:380px;text-align:center;">
-      <h2 id="cmmTitle" style="color:#FFB4D8;text-shadow:0 0 16px rgba(255,180,216,.85);">💗 새 가족 합류!</h2>
-      <div class="sub" id="cmmSub" style="font-size:13px;">다음 원정부터 함께 싸웁니다</div>
+      <h2 id="cmmTitle" style="color:#FFB4D8;text-shadow:0 0 16px rgba(255,180,216,.85);" data-i18n="modal.cmm.title">💗 새 가족 합류!</h2>
+      <div class="sub" id="cmmSub" style="font-size:13px;" data-i18n="modal.cmm.sub">다음 원정부터 함께 싸웁니다</div>
       <canvas id="cmmCanvas" width="220" height="260" style="display:block;margin:12px auto;background:radial-gradient(circle at 50% 60%, rgba(255,180,216,.4) 0%, rgba(20,8,40,.85) 70%);border-radius:12px;border:2px solid #FFB4D8;"></canvas>
       <div id="cmmStory" style="font-size:13px;color:#FFE066;font-weight:700;margin:6px 0 14px;line-height:1.5;"></div>
-      <button class="btn small" id="cmmContinueBtn" style="width:100%;background:linear-gradient(180deg,#FFB4D8,#D63384);">▶ 함께 다음 원정으로</button>
+      <button class="btn small" id="cmmContinueBtn" data-i18n="modal.cmm.continue" style="width:100%;background:linear-gradient(180deg,#FFB4D8,#D63384);">▶ 함께 다음 원정으로</button>
     </div>
   </div>
 
   <!-- v12.35 — 세트 파티원 미리보기 안내 팝업. 첫 멤버 합류 시 같은 세트의 미래 멤버들과 시스템 안내. -->
   <div id="setIntroModal" class="modal hidden">
     <div class="card" style="max-width:440px;text-align:center;">
-      <h2 id="simTitle" style="color:#FFE066;text-shadow:0 0 16px rgba(255,224,102,.85);">🐦 세트 파티원 시스템</h2>
-      <div class="sub" id="simSub" style="font-size:13px;">앞으로 합류할 동료 미리보기</div>
+      <h2 id="simTitle" style="color:#FFE066;text-shadow:0 0 16px rgba(255,224,102,.85);" data-i18n="modal.sim.title">🐦 세트 파티원 시스템</h2>
+      <div class="sub" id="simSub" style="font-size:13px;" data-i18n="modal.sim.sub">앞으로 합류할 동료 미리보기</div>
       <div id="simPreview" style="display:flex;justify-content:space-around;gap:6px;background:rgba(0,0,0,.3);border-radius:10px;padding:10px 6px;margin:10px 0;"></div>
       <div id="simStory" style="font-size:12px;color:#FFF9DB;font-weight:700;margin:6px 0 12px;line-height:1.55;"></div>
-      <button class="btn small" id="simContinueBtn" style="width:100%;background:linear-gradient(180deg,#FFE066,#F76707);color:#5A1A04;">알겠어요!</button>
+      <button class="btn small" id="simContinueBtn" data-i18n="modal.sim.continue" style="width:100%;background:linear-gradient(180deg,#FFE066,#F76707);color:#5A1A04;">알겠어요!</button>
     </div>
   </div>
 
   <div id="chapterRewardModal" class="modal hidden">
     <div class="card" style="max-width:360px;text-align:center;">
-      <h2 style="color:#FFE066;text-shadow:0 0 16px rgba(255,224,102,.7);">🎉 짜자잔! 코스튬 획득!</h2>
-      <div class="sub">챕터 클리어 보상</div>
+      <h2 style="color:#FFE066;text-shadow:0 0 16px rgba(255,224,102,.7);" data-i18n="modal.crm.title">🎉 짜자잔! 코스튬 획득!</h2>
+      <div class="sub" data-i18n="modal.crm.sub">챕터 클리어 보상</div>
       <div id="crmReveal" class="gacha-reveal"></div>
-      <div id="crmPrompt" style="font-size:14px;color:#FFF9DB;margin:6px 0 12px;font-weight:700;">바로 착용하시겠어요?</div>
+      <div id="crmPrompt" style="font-size:14px;color:#FFF9DB;margin:6px 0 12px;font-weight:700;" data-i18n="modal.crm.prompt">바로 착용하시겠어요?</div>
       <div style="display:flex;gap:8px;">
-        <button class="btn alt small" id="crmSkipBtn" style="flex:1;">그냥 챙기기</button>
-        <button class="btn small" id="crmEquipBtn" style="flex:2;">✨ 착용하기</button>
+        <button class="btn alt small" id="crmSkipBtn" data-i18n="modal.crm.skip" style="flex:1;">그냥 챙기기</button>
+        <button class="btn small" id="crmEquipBtn" style="flex:2;">✨ <span data-i18n="modal.crm.equip">착용</span></button>
       </div>
     </div>
   </div>
@@ -1100,10 +1144,10 @@
   <!-- Equip picker — shown when the player taps an empty + slot in the costume tab -->
   <div id="equipPickerModal" class="modal hidden">
     <div class="card" style="max-width:480px;">
-      <h2 style="color:#E599F7;">코스튬 선택</h2>
-      <div class="sub" id="epSlotLabel">머리 슬롯에 장착할 코스튬을 골라주세요</div>
+      <h2 style="color:#E599F7;" data-i18n="ep.title">코스튬 선택</h2>
+      <div class="sub" id="epSlotLabel" data-i18n="ep.head">머리 슬롯에 장착할 코스튬을 골라주세요</div>
       <div id="epOptions" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:10px 0;max-height:60vh;overflow-y:auto;"></div>
-      <button class="btn alt small" id="epCloseBtn" style="width:100%;">닫기</button>
+      <button class="btn alt small" id="epCloseBtn" data-i18n="ep.close" style="width:100%;">닫기</button>
     </div>
   </div>
 
@@ -1113,16 +1157,16 @@
   <div id="costumePreviewModal" class="modal hidden">
     <div class="card" style="max-width:380px;text-align:center;">
       <div id="cpmGradeChip" style="display:inline-block;padding:4px 14px;border-radius:999px;font-weight:900;font-size:14px;margin-bottom:8px;"></div>
-      <h2 id="cpmTitle" style="margin:0 0 4px;">코스튬</h2>
-      <div class="sub" id="cpmSlotLabel">머리 슬롯</div>
+      <h2 id="cpmTitle" style="margin:0 0 4px;" data-i18n="cpm.head">코스튬</h2>
+      <div class="sub" id="cpmSlotLabel" data-i18n="cpm.headSlot">머리 슬롯</div>
       <div id="cpmPreviewWrap" style="display:flex;justify-content:center;align-items:center;background:linear-gradient(180deg,rgba(190,75,219,.18),rgba(20,8,40,.6));border:2px solid rgba(255,255,255,.18);border-radius:16px;padding:18px;margin:8px auto 12px;width:180px;height:180px;">
         <canvas id="cpmCanvas"></canvas>
       </div>
       <div id="cpmStats" style="background:rgba(255,224,102,.08);border:1px solid rgba(255,224,102,.3);border-radius:10px;padding:10px;font-size:13px;color:#FFF9DB;margin-bottom:10px;font-weight:700;"></div>
       <div id="cpmOwnership" style="font-size:12px;color:#868E96;margin-bottom:12px;"></div>
       <div style="display:flex;gap:8px;">
-        <button class="btn alt small" id="cpmCloseBtn" style="flex:1;">닫기</button>
-        <button class="btn small" id="cpmActionBtn" style="flex:2;display:none;">장착</button>
+        <button class="btn alt small" id="cpmCloseBtn" data-i18n="btn.close" style="flex:1;">닫기</button>
+        <button class="btn small" id="cpmActionBtn" data-i18n="btn.equip" style="flex:2;display:none;">장착</button>
       </div>
     </div>
   </div>
@@ -1131,21 +1175,21 @@
        appear after applying: skin gradient + currently equipped costumes worn by the pigeon. -->
   <div id="skinPreviewModal" class="modal hidden">
     <div class="card" style="max-width:440px;text-align:center;">
-      <h2 id="spmTitle" style="margin:0 0 4px;">배경 스킨</h2>
-      <div class="sub">적용 시 타이틀 화면 미리보기</div>
+      <h2 id="spmTitle" style="margin:0 0 4px;" data-i18n="spm.title">배경 스킨</h2>
+      <div class="sub" data-i18n="spm.sub">적용 시 타이틀 화면 미리보기</div>
       <div id="spmPreview" style="position:relative;width:100%;aspect-ratio:16/10;border-radius:14px;border:2px solid rgba(255,255,255,.2);overflow:hidden;margin:8px 0 12px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);">
         <!-- Title text overlay -->
         <div style="position:absolute;top:8%;left:0;right:0;text-align:center;pointer-events:none;">
-          <div style="font-size:13px;font-weight:900;letter-spacing:1px;opacity:.95;">새우깡으로</div>
-          <div style="font-size:24px;font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A,0 0 18px rgba(255,224,102,.5);margin-top:2px;">한계돌파!</div>
+          <div style="font-size:13px;font-weight:900;letter-spacing:1px;opacity:.95;" data-i18n="title.sub">새우깡으로</div>
+          <div style="font-size:24px;font-weight:900;color:#FFE066;text-shadow:0 3px 0 #C92A2A,0 0 18px rgba(255,224,102,.5);margin-top:2px;" data-i18n="title.h1">한계돌파!</div>
         </div>
         <!-- Pigeon canvas, layered above the gradient -->
         <canvas id="spmPigeon" style="position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:48%;height:70%;"></canvas>
       </div>
       <div id="spmOwnership" style="font-size:13px;color:#FFF9DB;margin-bottom:12px;font-weight:700;"></div>
       <div style="display:flex;gap:8px;">
-        <button class="btn alt small" id="spmCloseBtn" style="flex:1;">닫기</button>
-        <button class="btn small" id="spmActionBtn" style="flex:2;">적용</button>
+        <button class="btn alt small" id="spmCloseBtn" data-i18n="spm.close" style="flex:1;">닫기</button>
+        <button class="btn small" id="spmActionBtn" data-i18n="spm.apply" style="flex:2;">적용</button>
       </div>
     </div>
   </div>
@@ -1153,8 +1197,8 @@
   <!-- Level up modal -->
   <div id="levelUp" class="modal hidden">
     <div class="card">
-      <h2>✨ 레벨 업!</h2>
-      <div class="sub">하나를 선택해 한계를 돌파하라</div>
+      <h2 data-i18n="lvl.title">✨ 레벨 업!</h2>
+      <div class="sub" data-i18n="lvl.sub">하나를 선택해 한계를 돌파하라</div>
       <div class="choices" id="lvChoices"></div>
     </div>
   </div>
@@ -1162,12 +1206,12 @@
   <!-- Pause modal -->
   <div id="pauseModal" class="modal hidden">
     <div class="card" style="max-width:360px;text-align:center;">
-      <h2>일시정지</h2>
-      <div class="sub">한숨 돌리는 중...</div>
+      <h2 data-i18n="pause.title">일시정지</h2>
+      <div class="sub" data-i18n="pause.sub">한숨 돌리는 중...</div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
-        <button class="btn" id="resumeBtn">계속하기</button>
-        <button class="btn alt small" id="quitToChapterBtn">🗺 챕터 선택으로</button>
-        <button class="btn alt small" id="quitBtn">🏠 포기하고 타이틀로</button>
+        <button class="btn" id="resumeBtn" data-i18n="pause.resume">계속하기</button>
+        <button class="btn alt small" id="quitToChapterBtn" data-i18n="pause.toChapter">🗺 챕터 선택으로</button>
+        <button class="btn alt small" id="quitBtn" data-i18n="pause.toTitle">🏠 포기하고 타이틀로</button>
       </div>
     </div>
   </div>
@@ -1185,42 +1229,42 @@
   <!-- How to play -->
   <div id="howModal" class="modal hidden">
     <div class="card" style="max-width:460px;max-height:90vh;overflow-y:auto;">
-      <h2>조작법 · 규칙</h2>
+      <h2 data-i18n="how.title">조작법 · 규칙</h2>
       <div style="font-size:13px;line-height:1.65;color:#FFF9DB;">
-        <p><b style="color:#FFE066;">💻 PC:</b> WASD 또는 방향키로 이동. 자동으로 가장 가까운 적에게 새우깡을 던집니다. ESC로 일시정지.</p>
-        <p><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 부동 조이스틱으로 이동. 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ⏸ 일시정지 / ⚙ 설정 버튼.</p>
-        <p><b style="color:#FFE066;">🛒 상점:</b> 타이틀에서 진입. 코인은 적/보스 처치, 코인 픽업, 챕터 클리어로 누적되며 영구 업그레이드(시작 HP·공격력·이속·자석 반경·치명타 등)를 살 수 있어 다음 런에 자동 적용됩니다.</p>
-        <p><b style="color:#FFE066;">👗 코스튬:</b> 머리·몸통·무기 슬롯에 1개씩 장착. 등급은 S/A/B/C이며, 상점에서 가챠로 뽑거나 챕터 클리어 보상으로 드물게 획득합니다. 10판마다 최소 한 번은 코스튬이 보장됩니다.</p>
-        <p><b style="color:#FFE066;">📕 챕터:</b> 총 130개 챕터(4원정). 각 챕터는 3웨이브 + 최종 보스로 진행됩니다. 모든 챕터 캡은 15분 이하 — Ch1~10 약 4-5분, Ch11~25 약 7-9분, Ch26~40 약 9-12분, Ch41~50 약 11-15분, Ch51~100(원정 Ⅱ·Ⅲ) 약 7-12분, Ch101~130(원정 Ⅳ 지옥) 약 9-15분 (보스를 못 잡으면 캡 시간에 자동 처치).</p>
-        <p><b style="color:#FFE066;">⚔ 웨이브:</b> 시간이 지나면 웨이브가 자동으로 진행되고 적 밀도와 종류가 강해집니다. 웨이브 3 종료 시 챕터 보스 등장!</p>
-        <p><b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.</p>
-        <p><b style="color:#FFE066;">🎁 드롭 아이템:</b> 적이 확률로 5종 특수 아이템을 떨어뜨립니다 (5킬·10킬 pity 보장):
+        <p data-i18n-html="how.pc"><b style="color:#FFE066;">💻 PC:</b> WASD 또는 방향키로 이동. 자동으로 가장 가까운 적에게 새우깡을 던집니다. ESC로 일시정지.</p>
+        <p data-i18n-html="how.mobile"><b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 부동 조이스틱으로 이동. 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ⏸ 일시정지 / ⚙ 설정 버튼.</p>
+        <p data-i18n-html="how.shop"><b style="color:#FFE066;">🛒 상점:</b> 타이틀에서 진입. 코인은 적/보스 처치, 코인 픽업, 챕터 클리어로 누적되며 영구 업그레이드(시작 HP·공격력·이속·자석 반경·치명타 등)를 살 수 있어 다음 런에 자동 적용됩니다.</p>
+        <p data-i18n-html="how.cos"><b style="color:#FFE066;">👗 코스튬:</b> 머리·몸통·무기 슬롯에 1개씩 장착. 등급은 S/A/B/C이며, 상점에서 가챠로 뽑거나 챕터 클리어 보상으로 드물게 획득합니다. 10판마다 최소 한 번은 코스튬이 보장됩니다.</p>
+        <p data-i18n-html="how.ch"><b style="color:#FFE066;">📕 챕터:</b> 총 130개 챕터(4원정). 각 챕터는 3웨이브 + 최종 보스로 진행됩니다. 모든 챕터 캡은 15분 이하 — Ch1~10 약 4-5분, Ch11~25 약 7-9분, Ch26~40 약 9-12분, Ch41~50 약 11-15분, Ch51~100(원정 Ⅱ·Ⅲ) 약 7-12분, Ch101~130(원정 Ⅳ 지옥) 약 9-15분 (보스를 못 잡으면 캡 시간에 자동 처치).</p>
+        <p data-i18n-html="how.wave"><b style="color:#FFE066;">⚔ 웨이브:</b> 시간이 지나면 웨이브가 자동으로 진행되고 적 밀도와 종류가 강해집니다. 웨이브 3 종료 시 챕터 보스 등장!</p>
+        <p data-i18n-html="how.cards"><b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.</p>
+        <p data-i18n-html="how.drops"><b style="color:#FFE066;">🎁 드롭 아이템:</b> 적이 확률로 5종 특수 아이템을 떨어뜨립니다 (5킬·10킬 pity 보장):
           <br>&nbsp;&nbsp;💖 포카칩 — HP 30% 회복
           <br>&nbsp;&nbsp;🧲 자석 깃털 — 화면의 XP 전부 흡수
           <br>&nbsp;&nbsp;💣 꿀꽈배기 폭탄 — 반경 260px 폭발 (공격력 ×3.5)
           <br>&nbsp;&nbsp;🌟 황금 새우깡 — 다음 레벨업 XP 35% 즉시 지급
           <br>&nbsp;&nbsp;🪙 코인 — 점수 +25 (챕터당 가산)
         </p>
-        <p><b style="color:#FFE066;">💡 팁:</b> 챕터마다 체력·공격력·속도가 배율로 상승합니다. 카드와 코스튬 선택을 전략적으로!</p>
+        <p data-i18n-html="how.tip"><b style="color:#FFE066;">💡 팁:</b> 챕터마다 체력·공격력·속도가 배율로 상승합니다. 카드와 코스튬 선택을 전략적으로!</p>
       </div>
-      <button class="btn" id="howCloseBtn" style="width:100%;margin-top:8px;">닫기</button>
+      <button class="btn" id="howCloseBtn" data-i18n="how.close" style="width:100%;margin-top:8px;">닫기</button>
     </div>
   </div>
 
   <!-- Chapter cleared -->
   <div id="chapterCleared" class="modal hidden">
     <div class="card" style="max-width:420px;text-align:center;background:linear-gradient(180deg,#2C1509,#120300);">
-      <h2 style="color:#FFE066;">🏆 챕터 클리어!</h2>
-      <div class="sub" id="ccSub">다음 챕터가 기다립니다...</div>
+      <h2 style="color:#FFE066;" data-i18n="cc.title">🏆 챕터 클리어!</h2>
+      <div class="sub" id="ccSub" data-i18n="cc.sub">다음 챕터가 기다립니다...</div>
       <div id="ccStats" style="margin:12px 0;"></div>
       <div style="background:rgba(255,107,107,.1);border:2px dashed #FF6B6B;border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;color:#FFF9DB;">
-        <b style="color:#FF6B6B;">⚠ 다음 챕터:</b> <span id="ccNextLabel"></span><br>
-        <span style="opacity:.85;">적이 강해지고 새로운 종류가 등장합니다. 레벨과 업그레이드는 초기화되어 새 빌드를 짜게 됩니다.</span>
+        <b style="color:#FF6B6B;" data-i18n="cc.warn.next">⚠ 다음 챕터:</b> <span id="ccNextLabel"></span><br>
+        <span style="opacity:.85;" data-i18n="cc.warn.body">적이 강해지고 새로운 종류가 등장합니다. 레벨과 업그레이드는 초기화되어 새 빌드를 짜게 됩니다.</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button class="btn" id="ccNextDirectBtn">⚔ 다음 챕터 바로 도전 ▶</button>
-        <button class="btn alt" id="ccNextBtn">🗺 챕터 선택으로</button>
-        <button class="btn alt" id="ccHomeBtn">🏠 홈으로</button>
+        <button class="btn" id="ccNextDirectBtn" data-i18n="cc.next.direct">⚔ 다음 챕터 바로 도전 ▶</button>
+        <button class="btn alt" id="ccNextBtn" data-i18n="cc.next.list">🗺 챕터 선택으로</button>
+        <button class="btn alt" id="ccHomeBtn" data-i18n="cc.home">🏠 홈으로</button>
       </div>
     </div>
   </div>
@@ -1228,15 +1272,15 @@
   <!-- v12.12 — 코스튬 합성 미리보기 다이얼로그. oldest-first 자동 소비를 사전 확인. -->
   <div id="combinePreviewModal" class="modal hidden">
     <div class="card" style="max-width:380px;text-align:center;">
-      <h2 style="color:#FFD43B;">🔧 코스튬 합성 확인</h2>
-      <div class="sub" id="cpmGradeText">같은 등급 3장 → 상위 1장</div>
+      <h2 style="color:#FFD43B;" data-i18n="comb.title">🔧 코스튬 합성 확인</h2>
+      <div class="sub" id="cpmGradeText" data-i18n="comb.sub">같은 등급 3장 → 상위 1장</div>
       <div id="cpmConsumeList" style="background:rgba(255,107,107,.10);border:2px dashed #FA5252;border-radius:10px;padding:10px;margin:10px 0;font-size:12px;color:#FFE3E3;line-height:1.5;text-align:left;"></div>
-      <div style="font-size:12px;color:#FFE066;font-weight:700;margin:6px 0 12px;line-height:1.5;">
+      <div style="font-size:12px;color:#FFE066;font-weight:700;margin:6px 0 12px;line-height:1.5;" data-i18n-html="comb.warn">
         ⚠ 위 3장이 영구 소비됩니다.<br>결과 코스튬은 무작위 슬롯·외형으로 나옵니다.
       </div>
       <div style="display:flex;gap:8px;">
-        <button class="btn alt small" id="combineCancelBtn" style="flex:1;">취소</button>
-        <button class="btn small" id="combineConfirmBtn" style="flex:2;background:linear-gradient(180deg,#FFD43B,#F76707);">✨ 합성 진행</button>
+        <button class="btn alt small" id="combineCancelBtn" data-i18n="comb.cancel" style="flex:1;">취소</button>
+        <button class="btn small" id="combineConfirmBtn" data-i18n="comb.confirm" style="flex:2;background:linear-gradient(180deg,#FFD43B,#F76707);">✨ 합성 진행</button>
       </div>
     </div>
   </div>
@@ -1270,12 +1314,12 @@
   <!-- Game over -->
   <div id="gameOver" class="modal hidden">
     <div class="card" style="max-width:380px;text-align:center;">
-      <h2 style="color:#FF6B6B;">한계 도달...</h2>
-      <div class="sub">비둘기가 쓰러졌습니다</div>
+      <h2 style="color:#FF6B6B;" data-i18n="go.title">한계 도달...</h2>
+      <div class="sub" data-i18n="go.sub">비둘기가 쓰러졌습니다</div>
       <div id="goStats" style="margin:12px 0;"></div>
       <div style="display:flex;gap:10px;">
-        <button class="btn" id="retryBtn" style="flex:1;">🔁 다시 도전</button>
-        <button class="btn alt" id="goTitleBtn" style="flex:1;">🏠 타이틀</button>
+        <button class="btn" id="retryBtn" data-i18n="go.retry" style="flex:1;">🔁 다시 도전</button>
+        <button class="btn alt" id="goTitleBtn" data-i18n="go.title2" style="flex:1;">🏠 타이틀</button>
       </div>
     </div>
   </div>
@@ -1284,14 +1328,14 @@
        (drawn in render() when scene === 'victory') stays visible behind the stats. -->
   <div id="victory" class="modal hidden">
     <div class="card" style="max-width:520px;text-align:center;">
-      <h2>🏆 한계돌파 성공!</h2>
-      <div class="sub" style="color:#FFE066;font-weight:700;">전 챕터를 정복한 전설의 비둘기</div>
+      <h2 data-i18n="vict.title">🏆 한계돌파 성공!</h2>
+      <div class="sub" style="color:#FFE066;font-weight:700;" data-i18n="vict.sub">전 챕터를 정복한 전설의 비둘기</div>
       <div id="vStats"></div>
       <!-- v12.18 — 하단 버튼 row 를 .v-actions 로 묶어 sticky 로 고정. card 가 짤려도 버튼은 항상 보임. -->
       <div class="v-actions">
         <!-- v12.10 — 원정 끝(ch50/70) 클리어 후 다음 원정으로 직진하는 CTA. ch100(최종)에서는 숨김. -->
-        <button class="btn" id="vNextExpBtn" style="flex:2;min-width:160px;display:none;background:linear-gradient(180deg,#FFB4D8,#D63384);">▶ 다음 원정 시작</button>
-        <button class="btn" id="vAgainBtn" style="flex:1;min-width:140px;">🔁 처음부터 다시</button>
+        <button class="btn" id="vNextExpBtn" data-i18n="vict.next" style="flex:2;min-width:160px;display:none;background:linear-gradient(180deg,#FFB4D8,#D63384);">▶ 다음 원정 시작</button>
+        <button class="btn" id="vAgainBtn" data-i18n="vict.again" style="flex:1;min-width:140px;">🔁 처음부터 다시</button>
         <!-- v12.18 — replay-mode 전용 back 버튼 (사용자 "엔딩 다시보기 뒤로가기 버튼 없음"). -->
         <button class="btn" id="vBackBtn">🔙 챕터 선택으로</button>
         <button class="btn alt" id="vHomeBtn" style="flex:1;min-width:140px;">🏠 홈으로</button>
@@ -2193,6 +2237,8 @@ function openSettingsModal(){
   if(!modal) return;
   // mute 토글 — 항상 노출.
   _setToggleVisual('setMuteToggle', settingsMuted());
+  // v12.36d — 언어 토글 동기화 (항상 노출).
+  if(typeof _syncLangSeg === 'function') _syncLangSeg();
   // 가족·동료 블록 — ch51 아내 합류 후에만 노출.
   const famBlock = document.getElementById('setFamilyBlock');
   if(famBlock) famBlock.style.display = familyToggleAvailable() ? '' : 'none';
@@ -2300,6 +2346,23 @@ document.addEventListener('click', e => {
   progress.settings[key] = !cur;
   saveProgress();
   _syncCategoryToggleRows();
+});
+// v12.36d — UI 언어 토글 (EN/KO segmented). 클릭 시 즉시 전환 + 모달은 그대로 유지.
+function _syncLangSeg(){
+  const cur = getLang();
+  const en = document.getElementById('setLangBtnEn');
+  const ko = document.getElementById('setLangBtnKo');
+  if(en) en.classList.toggle('on', cur === 'en');
+  if(ko) ko.classList.toggle('on', cur === 'ko');
+}
+document.addEventListener('click', e => {
+  const btn = e.target.closest('#setLangSeg .lang-pill');
+  if(!btn) return;
+  const target = btn.dataset.lang;
+  if(target !== 'ko' && target !== 'en') return;
+  if(getLang() === target) return;
+  setLang(target);
+  _syncLangSeg();
 });
 // 부팅 시 indicator 동기화는 progress const 가 초기화된 이후에 (아래 helpers 정의 시점) 실행.
 
@@ -5670,6 +5733,8 @@ const progress = (()=>{
       showParents:true,   fxParents:true,
       showAncestors:true, fxAncestors:true,
     },
+    // v12.36d — UI 언어. 'en'(기본) / 'ko'. 설정에서 토글.
+    lang: 'en',
   };
   const cuDefault = {
     wife:false, child:false,
@@ -5716,6 +5781,8 @@ const progress = (()=>{
     // v12.35 — 원정 Ⅷ ch300 클리어 시 영구 설정. 남편 비둘기 눈 glow 유지 + 천상의 새우깡 스킨 해금.
     eyesGlowPermanent: !!(saved && saved.eyesGlowPermanent),
     armageddonVictory: !!(saved && saved.armageddonVictory),
+    // v12.36d — UI 언어. saved 가 없으면 'en' 기본.
+    lang: (saved && (saved.lang === 'ko' || saved.lang === 'en')) ? saved.lang : 'en',
   });
   // Sanity: drop equipped uids that no longer exist in inventory.
   for(const slot of ['head','body','weapon']){
@@ -5730,6 +5797,458 @@ const progress = (()=>{
 })();
 function saveProgress(){ try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }catch(e){} }
 function unlockedChapters(){ return Math.min(MAX_CHAPTERS, progress.clearedChapter + 1); }
+
+// ==================== v12.36d — UI i18n ====================
+// 정적 HTML 은 [data-i18n="key"] / [data-i18n-html="key"] / [data-i18n-title="key"] 표기로 번역.
+// 동적 JS 문자열은 T('key') 호출로 번역. fallback: 키가 없으면 ko 사용 → 그래도 없으면 키 그대로.
+const I18N = {
+  en: {
+    // Title screen
+    'title.sub': 'BY SAEUKKANG',
+    'title.h1': 'Limit Break!',
+    'title.feed': 'Feed',
+    'title.start': '▶ Select Chapter',
+    'title.how': 'Controls · Rules',
+    'title.reset': 'Reset Progress',
+    'title.hint': 'Become a buff pigeon and rain saeukkang on your foes!<br>Chapters · 3 waves + boss each · build with level-up cards & costumes.',
+    'title.shop': 'Shop',
+    'title.shopTip': 'Open shop (skill tree + costume gacha)',
+    'title.settingsTip': 'Settings (mute · family · effects)',
+    // Shop screen
+    'shop.title': '🛒 Pigeon Shop',
+    'shop.tab.skill': '🌳 Skill Tree',
+    'shop.tab.costume': '👗 Costume Gacha',
+    'shop.tab.skin': '🎨 Background Skin',
+    'shop.skill.hint': 'A skill tree that grows top-down.<br>Lower-tier nodes unlock once you raise their parent.',
+    'shop.gacha.banner': '✨ <b style="color:#FFE066;">Pigeon Costume Gacha</b> — equip a head · body · weapon piece for big stat bonuses!',
+    'shop.gacha.single': '🎲 Single Pull',
+    'shop.gacha.ten': '🎰 10× Pull',
+    'shop.gacha.tenSub': '🪙 12,000 · A guaranteed',
+    'shop.gacha.singleCost': '🪙 1,500',
+    'shop.combine': '🔧 Combine Costumes',
+    'shop.combineSub': '3× same grade → 1 higher',
+    'shop.equipped': 'Currently Equipped',
+    'shop.skin.banner': '🎨 <b style="color:#FFE066;">Title Background Skins</b> — cosmetic backgrounds for the title screen. Doesn\'t affect difficulty.',
+    // Costume tabs
+    'cos.tab.player': '👤 Husband',
+    'cos.tab.wife': '💗 Wife',
+    'cos.tab.child': '👶 Baby',
+    'cos.tab.rescued': '🐦 Rescued Friends Set (Ch125)',
+    'cos.tab.parents': '🪽 Parents Set (Ch210)',
+    'cos.tab.ancestors': '📜 Ancestors (Ch260)',
+    'cos.album.title': '📒 Husband Costume Album',
+    'cos.slot.head': '🎩 Head',
+    'cos.slot.body': '👕 Body',
+    'cos.slot.weapon': '⚔ Weapon',
+    'cos.slot.headAcc': '🎀 Head',
+    'cos.slot.bodyDress': '👗 Outfit',
+    'cos.slot.babyHead': '🧢 Head',
+    'cos.slot.babyBody': '👶 Outfit',
+    'cos.wife.title': '💗 Wife Costumes',
+    'cos.wife.sub': 'Wear 1 head + 1 outfit at the same time',
+    'cos.child.title': '👶 Baby Costumes',
+    'cos.child.sub': 'Wear 1 head + 1 outfit at the same time',
+    'cos.rescued.title': '🐦 Rescued Friends Set',
+    'cos.rescued.sub': 'Active once Ch125 of Expedition IV is reached',
+    'cos.rescued.desc': 'When the 5 friends (sparrow · magpie · owl · parrot · squirrel) all wear the same set, an extra set bonus activates. Friend DPS only — chapter difficulty barely shifts (~+1.5–3% full party DPS).',
+    'cos.parents.title': '🪽 Parents Set',
+    'cos.parents.sub': 'Active once Ch210 of Expedition VII is reached — bulk purchase',
+    'cos.parents.desc': 'When all 4 parents (husband\'s + wife\'s) wear the same set, the set bonus activates. The angel default is free; other sets cost coins. Partial wear gives partial effect (1 pair 45%, 2 pair 85%).',
+    'cos.ancestors.title': '📜 Ancestor Pigeons',
+    'cos.ancestors.sub': 'Active once Ch260 of Expedition VIII is reached — individual purchase',
+    'cos.ancestors.desc': 'Gugunardo da Dulci (inventor) · Bristotodules (philosopher). Each ancestor has their own job costumes for sale. The default (inventor / scholar robe) is free; other jobs cost coins individually.',
+    // Chapter select
+    'cs.title': 'Select Chapter',
+    'cs.tab.focus': '⭐ Progress',
+    'cs.tab.all': '🗺 All',
+    'cs.section.cleared': '🏆 Conquered Chapters (Replayable)',
+    'cs.section.upcoming': '🔒 Upcoming Chapters',
+    'cs.exp.1': '🌍 Exp. I',
+    'cs.exp.2': '🪐 Exp. II',
+    'cs.exp.3': '🌌 Exp. III',
+    'cs.exp.4': '🔥 Exp. IV',
+    'cs.exp.5': '🌟 Exp. V',
+    'cs.exp.6': '🪽 Exp. VI',
+    'cs.back': 'Back',
+    // HUD
+    'hud.pause': 'Pause',
+    'hud.settings': 'Settings (mute · family · effects)',
+    'hud.ult': 'Pigeon\'s Cry — recharges after use',
+    'hud.ultLabel': 'Cry',
+    // Settings modal
+    'set.title': '⚙ Settings',
+    'set.sub': 'You can change these any time',
+    'set.section.sound': 'Sound',
+    'set.mute': 'Mute',
+    'set.muteDesc': 'Disables BGM and SFX',
+    'set.family.title': 'Pigeon Family · Allies (All)',
+    'set.family.show': 'Show All',
+    'set.family.showDesc': 'Title · in-game · cinematic — master toggle (OFF hides everyone)',
+    'set.family.fx': 'Effects All',
+    'set.family.fxDesc': 'Auto-fire · damage · shoot SFX (OFF puts ally damage to 0)',
+    'set.cat.header': 'Per-Category Settings',
+    'set.cat.show': 'Show',
+    'set.cat.fx': 'Effects',
+    'set.cat.wife': 'Wife Pigeon',
+    'set.cat.wifeSub': 'Joins Ch51',
+    'set.cat.child': 'Baby Pigeon',
+    'set.cat.childSub': 'Joins Ch60',
+    'set.cat.friends': '5 Rescued Friends',
+    'set.cat.friendsSub': 'Sparrow · magpie · owl · parrot · squirrel (Ch125)',
+    'set.cat.parents': 'Parent Pigeons',
+    'set.cat.parentsSub': 'Husband\'s + Wife\'s parent pairs, 4 total (Ch210)',
+    'set.cat.ancestors': 'Ancestor Pigeons',
+    'set.cat.ancestorsSub': 'Gugunardo · Bristotodules (Ch260)',
+    'set.lang.title': 'Language',
+    'set.lang.label': 'UI Language',
+    'set.lang.desc': 'Switches the user interface language',
+    'set.close': 'Close',
+    // Modals
+    'modal.gacha.title': '✨ Costume obtained!',
+    'modal.gacha.confirm': 'OK',
+    'modal.feed.title': '🐦 Feed the Pigeon',
+    'modal.feed.sub': 'Take a moment to check if your pigeon is hungry!',
+    'modal.feed.pickFood': 'Choose a food',
+    'modal.feed.close': 'Close',
+    'modal.cmm.title': '💗 New family member!',
+    'modal.cmm.sub': 'They\'ll fight alongside you from the next expedition',
+    'modal.cmm.continue': '▶ Continue together',
+    'modal.sim.title': '🐦 Set Party System',
+    'modal.sim.sub': 'Preview of allies that will join later',
+    'modal.sim.continue': 'Got it!',
+    'modal.crm.title': '🎉 Ta-da! Costume drop!',
+    'modal.crm.sub': 'Chapter clear reward',
+    'modal.crm.prompt': 'Equip it right away?',
+    'modal.crm.skip': 'Just keep it',
+    'modal.crm.equip': 'Equip',
+    'modal.cct.skip': 'Skip',
+    // Pause modal
+    'pause.title': 'Paused',
+    'pause.sub': 'Catching your breath...',
+    'pause.resume': 'Resume',
+    'pause.toChapter': '🗺 Back to chapter select',
+    'pause.toTitle': '🏠 Give up and back to title',
+    // Level up
+    'lvl.title': '✨ Level Up!',
+    'lvl.sub': 'Pick one to break the limit',
+    // How-to
+    'how.title': 'Controls · Rules',
+    'how.close': 'Close',
+    'how.pc': '<b style="color:#FFE066;">💻 PC:</b> WASD or arrow keys to move. You auto-throw saeukkang at the nearest enemy. ESC to pause.',
+    'how.mobile': '<b style="color:#FFE066;">📱 Mobile:</b> Floating joystick at the bottom right. Touch anywhere in the lower-right half and the joystick follows your finger. ⏸ pause / ⚙ settings on the left.',
+    'how.shop': '<b style="color:#FFE066;">🛒 Shop:</b> Open from the title. Coins drop from enemies, bosses, pickups, and chapter clears. Spend them on permanent upgrades (start HP · DMG · move speed · magnet radius · crit, etc.) that auto-apply to the next run.',
+    'how.cos': '<b style="color:#FFE066;">👗 Costumes:</b> One per head/body/weapon slot. Grades S/A/B/C, pulled from the gacha or rarely dropped on chapter clear. At least one costume is guaranteed every 10 clears.',
+    'how.ch': '<b style="color:#FFE066;">📕 Chapters:</b> Total 130 chapters across 4 expeditions. Each chapter is 3 waves + a final boss. Chapter cap ≤ 15 minutes — Ch1–10 ~4–5 min, Ch11–25 ~7–9 min, Ch26–40 ~9–12 min, Ch41–50 ~11–15 min, Ch51–100 (Exp II/III) ~7–12 min, Ch101–130 (Exp IV — Hell) ~9–15 min (auto-kill at the cap if the boss survives).',
+    'how.wave': '<b style="color:#FFE066;">⚔ Waves:</b> Waves auto-progress over time and enemy density / type ramps up. The chapter boss spawns at the end of wave 3!',
+    'how.cards': '<b style="color:#FFE066;">🃏 Level-up cards:</b> When XP fills, pick one of three cards to shape your build. Combine multishot · pierce · vortex · explosion · lightning, etc.',
+    'how.drops': '<b style="color:#FFE066;">🎁 Drops:</b> Enemies drop 5 special items by chance (5-kill / 10-kill pity guarantees):<br>&nbsp;&nbsp;💖 Pocachips — heal 30% HP<br>&nbsp;&nbsp;🧲 Magnet feather — pulls all on-screen XP<br>&nbsp;&nbsp;💣 Honey-twist bomb — radius 260px AoE (×3.5 damage)<br>&nbsp;&nbsp;🌟 Golden saeukkang — instantly grants 35% next-level XP<br>&nbsp;&nbsp;🪙 Coin — +25 score (per chapter)',
+    'how.tip': '<b style="color:#FFE066;">💡 Tip:</b> HP, ATK, and SPD scale by chapter. Pick cards and costumes strategically!',
+    // Chapter cleared
+    'cc.title': '🏆 Chapter Clear!',
+    'cc.sub': 'The next chapter awaits...',
+    'cc.warn.next': '⚠ Next chapter:',
+    'cc.warn.body': 'Enemies get stronger and new types appear. Level and upgrades reset, so you\'ll build anew.',
+    'cc.next.direct': '⚔ Jump straight to next chapter ▶',
+    'cc.next.list': '🗺 Back to chapter select',
+    'cc.home': '🏠 Home',
+    // Game over
+    'go.title': 'Limit reached...',
+    'go.sub': 'The pigeon has fallen',
+    'go.retry': '🔁 Retry',
+    'go.title2': '🏠 Title',
+    // Victory
+    'vict.title': '🏆 Limit Broken!',
+    'vict.sub': 'A legendary pigeon who conquered every chapter',
+    'vict.next': '▶ Start Next Expedition',
+    'vict.again': '🔁 Start Over',
+    // Costume preview
+    'cpm.head': 'Costume',
+    'cpm.headSlot': 'Head slot',
+    'cpm.bodySlot': 'Body slot',
+    'cpm.weaponSlot': 'Weapon slot',
+    // Combine
+    'comb.title': '🔧 Confirm Combine',
+    'comb.sub': '3× same grade → 1 higher',
+    'comb.warn': '⚠ The 3 selected costumes will be permanently consumed.<br>The result has random slot and look.',
+    'comb.cancel': 'Cancel',
+    'comb.confirm': '✨ Combine',
+    // Equip picker
+    'ep.title': 'Pick a costume',
+    'ep.head': 'Pick a costume for the head slot',
+    'ep.body': 'Pick a costume for the body slot',
+    'ep.weapon': 'Pick a costume for the weapon slot',
+    'ep.close': 'Close',
+    // Skin preview
+    'spm.title': 'Background skin',
+    'spm.sub': 'Title screen preview when applied',
+    'spm.close': 'Close',
+    'spm.apply': 'Apply',
+    // Buttons / generic
+    'btn.confirm': 'OK',
+    'btn.close': 'Close',
+    'btn.cancel': 'Cancel',
+    'btn.equip': 'Equip',
+    'btn.unequip': 'Unequip',
+    // Costume preview modal labels
+    'cpm.equipped': '★ Currently equipped',
+    'cpm.owned': 'Owned — ready to equip',
+    'cpm.locked': '🔒 Not owned — pull from gacha to collect',
+    // Status
+    'status.equipped': '✓ Wearing',
+    'status.tapEquip': 'Tap to equip',
+    'status.free': 'Free',
+    'status.notOwned': 'Not owned',
+    'status.tapEquipHint': 'Tap a grade to equip',
+    'status.tapUnequipHint': '★ Wearing — tap a grade to unequip',
+    'status.fail': 'Purchase failed',
+  },
+  ko: {
+    // Title screen
+    'title.sub': '새우깡으로',
+    'title.h1': '한계돌파!',
+    'title.feed': '먹이주기',
+    'title.start': '▶ 챕터 선택',
+    'title.how': '조작법 · 규칙',
+    'title.reset': '기록 초기화',
+    'title.hint': '근육질 비둘기가 되어 새우깡을 뿌려 적을 제압하세요!<br>50개 챕터 · 챕터당 3웨이브 + 보스 · 레벨업 카드와 코스튬으로 빌드 완성.',
+    'title.shop': '상점',
+    'title.shopTip': '상점 열기 (스킬 트리 + 코스튬 가챠)',
+    'title.settingsTip': '설정 (음소거 · 가족 표시 · 효과)',
+    // Shop screen
+    'shop.title': '🛒 비둘기 상점',
+    'shop.tab.skill': '🌳 스킬 트리',
+    'shop.tab.costume': '👗 코스튬 가챠',
+    'shop.tab.skin': '🎨 배경 스킨',
+    'shop.skill.hint': '위 → 아래로 가지를 키워가는 스킬 트리예요.<br>아래 단계는 위 노드를 일정 레벨까지 올려야 열립니다.',
+    'shop.gacha.banner': '✨ <b style="color:#FFE066;">비둘기 코스튬 가챠</b> — 머리 · 몸통 · 무기 슬롯에 장착하면 강력한 능력치 보너스!',
+    'shop.gacha.single': '🎲 1회 뽑기',
+    'shop.gacha.ten': '🎰 10연 뽑기',
+    'shop.gacha.tenSub': '🪙 12,000 · A 보장',
+    'shop.gacha.singleCost': '🪙 1,500',
+    'shop.combine': '🔧 코스튬 합성',
+    'shop.combineSub': '같은 등급 3장 → 상위 1장',
+    'shop.equipped': '현재 착용 중',
+    'shop.skin.banner': '🎨 <b style="color:#FFE066;">타이틀 배경 스킨</b> — 시작 화면의 분위기를 바꾸는 코스메틱 아이템. 게임 난이도엔 영향 없음.',
+    // Costume tabs
+    'cos.tab.player': '👤 남편',
+    'cos.tab.wife': '💗 아내',
+    'cos.tab.child': '👶 아기',
+    'cos.tab.rescued': '🐦 구출 친구 세트 (Ch125)',
+    'cos.tab.parents': '🪽 부모 세트 (Ch210)',
+    'cos.tab.ancestors': '📜 조상 (Ch260)',
+    'cos.album.title': '📒 남편 코스튬 도감',
+    'cos.slot.head': '🎩 머리',
+    'cos.slot.body': '👕 몸통',
+    'cos.slot.weapon': '⚔ 무기',
+    'cos.slot.headAcc': '🎀 머리장식',
+    'cos.slot.bodyDress': '👗 옷',
+    'cos.slot.babyHead': '🧢 머리장식',
+    'cos.slot.babyBody': '👶 옷',
+    'cos.wife.title': '💗 아내 코스튬',
+    'cos.wife.sub': '머리장식 1개 + 옷 1개 동시 착용',
+    'cos.child.title': '👶 아기 코스튬',
+    'cos.child.sub': '머리장식 1개 + 옷 1개 동시 착용',
+    'cos.rescued.title': '🐦 구출 친구 세트',
+    'cos.rescued.sub': '원정 Ⅳ Ch125 까지 진행 시 활성',
+    'cos.rescued.desc': '5명의 친구(참새·까치·부엉이·앵무새·다람쥐) 가 같은 세트의 코스튬을 입으면 추가 세트 보너스가 발동. 친구 화력에만 영향 — 챕터 난이도엔 미미 (~+1.5~3% 풀파티 DPS).',
+    'cos.parents.title': '🪽 부모 세트',
+    'cos.parents.sub': '원정 Ⅶ Ch210 까지 진행 시 활성 — 일괄 구매',
+    'cos.parents.desc': '남편 부모님 + 아내 부모님 (총 4마리) 이 같은 세트의 코스튬을 입으면 세트 보너스 발동. 기본 천사 디폴트는 무료, 다른 세트는 코인 결제. 부분 착용도 부분 효과 (1pair 45%, 2pair 85%).',
+    'cos.ancestors.title': '📜 조상 비둘기',
+    'cos.ancestors.sub': '원정 Ⅷ Ch260 까지 진행 시 활성 — 개별 구매',
+    'cos.ancestors.desc': '구구나르도 다 둘치 (발명가) · 비리스토둘레스 (철학자). 각 조상마다 직업 코스튬을 따로 살 수 있음. 기본 디폴트(발명가복/철학자복)은 무료. 직업 코스튬은 개별 코인 결제.',
+    // Chapter select
+    'cs.title': '챕터 선택',
+    'cs.tab.focus': '⭐ 진행',
+    'cs.tab.all': '🗺 전체 보기',
+    'cs.section.cleared': '🏆 정복한 챕터 (다시 도전 가능)',
+    'cs.section.upcoming': '🔒 다가올 챕터',
+    'cs.exp.1': '🌍 원정 Ⅰ',
+    'cs.exp.2': '🪐 원정 Ⅱ',
+    'cs.exp.3': '🌌 원정 Ⅲ',
+    'cs.exp.4': '🔥 원정 Ⅳ',
+    'cs.exp.5': '🌟 원정 Ⅴ',
+    'cs.exp.6': '🪽 원정 Ⅵ',
+    'cs.back': '뒤로',
+    // HUD
+    'hud.pause': '일시정지',
+    'hud.settings': '설정 (음소거 · 가족 표시 · 효과)',
+    'hud.ult': '비둘기의 외침 — 충전 후 재사용 가능',
+    'hud.ultLabel': '외침',
+    // Settings modal
+    'set.title': '⚙ 설정',
+    'set.sub': '언제든 다시 변경할 수 있어요',
+    'set.section.sound': '사운드',
+    'set.mute': '음소거',
+    'set.muteDesc': 'BGM · 효과음 모두 끔',
+    'set.family.title': '비둘기 가족 · 동료 (전체)',
+    'set.family.show': '전체 보이기',
+    'set.family.showDesc': '시작화면 · 게임 · 시네마틱 — 마스터 토글 (OFF 면 모두 OFF)',
+    'set.family.fx': '전체 효과',
+    'set.family.fxDesc': '자동 사격 · 공격력 기여 · 사격음 (OFF 시 모든 동료 데미지 0)',
+    'set.cat.header': '카테고리별 설정',
+    'set.cat.show': '보이기',
+    'set.cat.fx': '효과',
+    'set.cat.wife': '아내 비둘기',
+    'set.cat.wifeSub': 'Ch51 합류',
+    'set.cat.child': '아기 비둘기',
+    'set.cat.childSub': 'Ch60 합류',
+    'set.cat.friends': '구출 친구 5종',
+    'set.cat.friendsSub': '참새·까치·부엉이·앵무새·다람쥐 (Ch125)',
+    'set.cat.parents': '부모 비둘기',
+    'set.cat.parentsSub': '남편·아내 부모 pair 4마리 (Ch210)',
+    'set.cat.ancestors': '조상 비둘기',
+    'set.cat.ancestorsSub': '구구나르도 · 비리스토둘레스 (Ch260)',
+    'set.lang.title': '언어',
+    'set.lang.label': 'UI 언어',
+    'set.lang.desc': '인터페이스 언어를 전환합니다',
+    'set.close': '닫기',
+    // Modals
+    'modal.gacha.title': '✨ 코스튬 획득!',
+    'modal.gacha.confirm': '확인',
+    'modal.feed.title': '🐦 비둘기 먹이주기',
+    'modal.feed.sub': '우리 비둘기, 배가 고프지 않은지 살펴봐주세요!',
+    'modal.feed.pickFood': '사료를 골라주세요',
+    'modal.feed.close': '닫기',
+    'modal.cmm.title': '💗 새 가족 합류!',
+    'modal.cmm.sub': '다음 원정부터 함께 싸웁니다',
+    'modal.cmm.continue': '▶ 함께 다음 원정으로',
+    'modal.sim.title': '🐦 세트 파티원 시스템',
+    'modal.sim.sub': '앞으로 합류할 동료 미리보기',
+    'modal.sim.continue': '알겠어요!',
+    'modal.crm.title': '🎉 짜자잔! 코스튬 획득!',
+    'modal.crm.sub': '챕터 클리어 보상',
+    'modal.crm.prompt': '바로 착용하시겠어요?',
+    'modal.crm.skip': '그냥 챙기기',
+    'modal.crm.equip': '착용',
+    'modal.cct.skip': '건너뛰기',
+    // Pause modal
+    'pause.title': '일시정지',
+    'pause.sub': '한숨 돌리는 중...',
+    'pause.resume': '계속하기',
+    'pause.toChapter': '🗺 챕터 선택으로',
+    'pause.toTitle': '🏠 포기하고 타이틀로',
+    // Level up
+    'lvl.title': '✨ 레벨 업!',
+    'lvl.sub': '하나를 선택해 한계를 돌파하라',
+    // How-to
+    'how.title': '조작법 · 규칙',
+    'how.close': '닫기',
+    'how.pc': '<b style="color:#FFE066;">💻 PC:</b> WASD 또는 방향키로 이동. 자동으로 가장 가까운 적에게 새우깡을 던집니다. ESC로 일시정지.',
+    'how.mobile': '<b style="color:#FFE066;">📱 모바일:</b> 오른쪽 아래 부동 조이스틱으로 이동. 화면 우측 아래 절반 어디든 손가락을 대면 그 위치로 조이스틱이 따라옵니다. 왼쪽 ⏸ 일시정지 / ⚙ 설정 버튼.',
+    'how.shop': '<b style="color:#FFE066;">🛒 상점:</b> 타이틀에서 진입. 코인은 적/보스 처치, 코인 픽업, 챕터 클리어로 누적되며 영구 업그레이드(시작 HP·공격력·이속·자석 반경·치명타 등)를 살 수 있어 다음 런에 자동 적용됩니다.',
+    'how.cos': '<b style="color:#FFE066;">👗 코스튬:</b> 머리·몸통·무기 슬롯에 1개씩 장착. 등급은 S/A/B/C이며, 상점에서 가챠로 뽑거나 챕터 클리어 보상으로 드물게 획득합니다. 10판마다 최소 한 번은 코스튬이 보장됩니다.',
+    'how.ch': '<b style="color:#FFE066;">📕 챕터:</b> 총 130개 챕터(4원정). 각 챕터는 3웨이브 + 최종 보스로 진행됩니다. 모든 챕터 캡은 15분 이하 — Ch1~10 약 4-5분, Ch11~25 약 7-9분, Ch26~40 약 9-12분, Ch41~50 약 11-15분, Ch51~100(원정 Ⅱ·Ⅲ) 약 7-12분, Ch101~130(원정 Ⅳ 지옥) 약 9-15분 (보스를 못 잡으면 캡 시간에 자동 처치).',
+    'how.wave': '<b style="color:#FFE066;">⚔ 웨이브:</b> 시간이 지나면 웨이브가 자동으로 진행되고 적 밀도와 종류가 강해집니다. 웨이브 3 종료 시 챕터 보스 등장!',
+    'how.cards': '<b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.',
+    'how.drops': '<b style="color:#FFE066;">🎁 드롭 아이템:</b> 적이 확률로 5종 특수 아이템을 떨어뜨립니다 (5킬·10킬 pity 보장):<br>&nbsp;&nbsp;💖 포카칩 — HP 30% 회복<br>&nbsp;&nbsp;🧲 자석 깃털 — 화면의 XP 전부 흡수<br>&nbsp;&nbsp;💣 꿀꽈배기 폭탄 — 반경 260px 폭발 (공격력 ×3.5)<br>&nbsp;&nbsp;🌟 황금 새우깡 — 다음 레벨업 XP 35% 즉시 지급<br>&nbsp;&nbsp;🪙 코인 — 점수 +25 (챕터당 가산)',
+    'how.tip': '<b style="color:#FFE066;">💡 팁:</b> 챕터마다 체력·공격력·속도가 배율로 상승합니다. 카드와 코스튬 선택을 전략적으로!',
+    // Chapter cleared
+    'cc.title': '🏆 챕터 클리어!',
+    'cc.sub': '다음 챕터가 기다립니다...',
+    'cc.warn.next': '⚠ 다음 챕터:',
+    'cc.warn.body': '적이 강해지고 새로운 종류가 등장합니다. 레벨과 업그레이드는 초기화되어 새 빌드를 짜게 됩니다.',
+    'cc.next.direct': '⚔ 다음 챕터 바로 도전 ▶',
+    'cc.next.list': '🗺 챕터 선택으로',
+    'cc.home': '🏠 홈으로',
+    // Game over
+    'go.title': '한계 도달...',
+    'go.sub': '비둘기가 쓰러졌습니다',
+    'go.retry': '🔁 다시 도전',
+    'go.title2': '🏠 타이틀',
+    // Victory
+    'vict.title': '🏆 한계돌파 성공!',
+    'vict.sub': '전 챕터를 정복한 전설의 비둘기',
+    'vict.next': '▶ 다음 원정 시작',
+    'vict.again': '🔁 처음부터 다시',
+    // Costume preview
+    'cpm.head': '코스튬',
+    'cpm.headSlot': '머리 슬롯',
+    'cpm.bodySlot': '몸통 슬롯',
+    'cpm.weaponSlot': '무기 슬롯',
+    // Combine
+    'comb.title': '🔧 코스튬 합성 확인',
+    'comb.sub': '같은 등급 3장 → 상위 1장',
+    'comb.warn': '⚠ 위 3장이 영구 소비됩니다.<br>결과 코스튬은 무작위 슬롯·외형으로 나옵니다.',
+    'comb.cancel': '취소',
+    'comb.confirm': '✨ 합성 진행',
+    // Equip picker
+    'ep.title': '코스튬 선택',
+    'ep.head': '머리 슬롯에 장착할 코스튬을 골라주세요',
+    'ep.body': '몸통 슬롯에 장착할 코스튬을 골라주세요',
+    'ep.weapon': '무기 슬롯에 장착할 코스튬을 골라주세요',
+    'ep.close': '닫기',
+    // Skin preview
+    'spm.title': '배경 스킨',
+    'spm.sub': '적용 시 타이틀 화면 미리보기',
+    'spm.close': '닫기',
+    'spm.apply': '적용',
+    // Buttons / generic
+    'btn.confirm': '확인',
+    'btn.close': '닫기',
+    'btn.cancel': '취소',
+    'btn.equip': '장착',
+    'btn.unequip': '해제',
+    // Costume preview
+    'cpm.equipped': '★ 현재 장착 중',
+    'cpm.owned': '보유 중 — 장착할 수 있어요',
+    'cpm.locked': '🔒 미보유 — 가챠로 뽑아 수집해보세요',
+    // Status
+    'status.equipped': '✓ 착용 중',
+    'status.tapEquip': '클릭 장착',
+    'status.free': '기본 제공',
+    'status.notOwned': '미보유',
+    'status.tapEquipHint': '등급 클릭으로 장착',
+    'status.tapUnequipHint': '★ 착용 중 — 등급 클릭으로 해제',
+    'status.fail': '구매 실패',
+  },
+};
+function getLang(){ return progress.lang === 'ko' ? 'ko' : 'en'; }
+function setLang(lng){
+  progress.lang = (lng === 'ko') ? 'ko' : 'en';
+  saveProgress();
+  applyI18n();
+  // dynamic 재렌더가 필요한 화면들 — 가능하면 보이는 화면만.
+  try { if(typeof renderShop === 'function') renderShop(); } catch(e){}
+  try { if(typeof renderCostumeScreen === 'function') renderCostumeScreen(); } catch(e){}
+  try { if(typeof renderChapterGrid === 'function') renderChapterGrid(); } catch(e){}
+  try { if(typeof renderChapterFocus === 'function') renderChapterFocus(); } catch(e){}
+  try { if(typeof updateTitleCoinDisplay === 'function') updateTitleCoinDisplay(); } catch(e){}
+  try { if(typeof updateTitleHungerBadge === 'function') updateTitleHungerBadge(); } catch(e){}
+}
+function T(key, fallback){
+  const lng = getLang();
+  if(I18N[lng] && Object.prototype.hasOwnProperty.call(I18N[lng], key)) return I18N[lng][key];
+  if(I18N.ko && Object.prototype.hasOwnProperty.call(I18N.ko, key)) return I18N.ko[key];
+  return fallback != null ? fallback : key;
+}
+// Picks ko vs en variant for inline pairs without a dictionary entry.
+function L(ko, en){ return getLang() === 'ko' ? ko : (en != null ? en : ko); }
+function applyI18n(){
+  const root = document;
+  // textContent
+  root.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = T(key);
+  });
+  // innerHTML (for strings with embedded HTML, e.g. <br>, <b>)
+  root.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    el.innerHTML = T(key);
+  });
+  // title attribute
+  root.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    el.setAttribute('title', T(key));
+  });
+  // aria-label
+  root.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria');
+    el.setAttribute('aria-label', T(key));
+  });
+  // <html lang="..."> for accessibility
+  document.documentElement.lang = getLang() === 'ko' ? 'ko' : 'en';
+}
 
 // v12.32 — 통합 설정 helpers. progress.settings 는 위에서 default 로 보장됨.
 //   settingsMuted   : BGM/SFX 음소거. 기존 runtime `muted` 와 동기.
@@ -5772,6 +6291,8 @@ function companionFxOn(kind){
 muted = settingsMuted();
 // HUD/시작화면 ⚙ 버튼의 mute dot indicator 도 부팅 시 동기화.
 _refreshSettingsBtnIndicator();
+// v12.36d — 부팅 시 정적 HTML 의 [data-i18n*] 마커 일괄 번역. progress.lang 기본 'en'.
+try { applyI18n(); } catch(e){}
 
 // ---------- Title background skins ----------
 // Pure-cosmetic skins for the start screen. Themed to the chapter biomes + a few "scenic" skins
@@ -9261,6 +9782,11 @@ function buyCompanionCostume(kind, costumeId){
   const slot = progress.companionCostumes[kind];
   _normalizeCompanionEquipped(slot, kind);
   if(slot.unlocked.includes(costumeId)) return { ok:false, reason:'이미 보유 중' };
+  // v12.36d — autoUnlockClearedCh 게이트. 천국·아마겟돈 코스튬은 해당 챕터 클리어 전엔 구매 불가.
+  // (UI 에서도 숨기지만 안전을 위해 여기서도 가드.)
+  if(def.autoUnlockClearedCh && (progress.clearedChapter||0) < def.autoUnlockClearedCh){
+    return { ok:false, reason:`Ch${def.autoUnlockClearedCh} 클리어 후 해금` };
+  }
   if((progress.coins||0) < def.cost) return { ok:false, reason:'코인 부족' };
   progress.coins -= def.cost;
   slot.unlocked.push(costumeId);
@@ -16031,7 +16557,14 @@ function renderCompanionGrid(kind, gridId){
   }
   grid.innerHTML = '';
   // 활성 슬롯의 코스튬만 그리드에 표시 — 사용자 헷갈림 제거.
-  const sub = list.filter(c => (c.slot || 'head') === activeSk);
+  // v12.36d — autoUnlockClearedCh 게이트: 해당 챕터 클리어 전엔 미보유 항목 숨김 (이미 보유한
+  //   경우엔 계속 표시). 천국 SS·아마겟돈 SSS 가 ch51/ch60 부터 "기본 제공"으로 보이던 버그 수정.
+  const cleared = progress.clearedChapter || 0;
+  const sub = list.filter(c => {
+    if((c.slot || 'head') !== activeSk) return false;
+    if(c.autoUnlockClearedCh && cleared < c.autoUnlockClearedCh && !slot.unlocked.includes(c.id)) return false;
+    return true;
+  });
   for(const def of sub){
     const owned = slot.unlocked.includes(def.id);
     const equipped = slot.equipped[activeSk] === def.id;
@@ -16169,7 +16702,7 @@ function renderEquipRow(){
   const equipRow = document.getElementById('equipRow');
   if(!equipRow) return;
   equipRow.innerHTML = '';
-  const slotLabels = { head:'머리', body:'몸통', weapon:'무기' };
+  const slotLabels = L({ head:'머리', body:'몸통', weapon:'무기' }, { head:'Head', body:'Body', weapon:'Weapon' });
   for(const slot of ['head','body','weapon']){
     const uid = progress.equipped[slot];
     const eq = uid ? progress.costumes.find(c => c.uid === uid) : null;
@@ -16184,7 +16717,7 @@ function renderEquipRow(){
         <div style="font-size:11px;color:#FFE066;font-weight:900;">${def.name}</div>
         <div class="slot-grade ${g.borderClass}">${g.label}</div>
       `;
-      slotEl.title = '클릭하여 다른 코스튬으로 변경';
+      slotEl.title = L('클릭하여 다른 코스튬으로 변경', 'Click to swap costume');
       slotEl.style.cursor = 'pointer';
       slotEl.addEventListener('click', ()=>{
         // No longer auto-unequips on click. Opens the picker so the player can swap or keep.
@@ -16198,9 +16731,9 @@ function renderEquipRow(){
       slotEl.innerHTML = `
         <div class="slot-name">${slotLabels[slot]}</div>
         <div class="slot-icon" style="opacity:.4;">＋</div>
-        <div class="slot-empty">미착용 — 클릭하여 선택</div>
+        <div class="slot-empty">${L('미착용 — 클릭하여 선택', 'Empty — tap to pick')}</div>
       `;
-      slotEl.title = `${slotLabels[slot]} 슬롯에 장착할 코스튬 선택`;
+      slotEl.title = L(`${slotLabels[slot]} 슬롯에 장착할 코스튬 선택`, `Pick a costume for the ${slotLabels[slot]} slot`);
       slotEl.style.cursor = 'pointer';
       slotEl.addEventListener('click', ()=> openEquipPicker(slot));
       equipRow.appendChild(slotEl);
@@ -16213,13 +16746,13 @@ function renderEquipRow(){
 // what the player is currently wearing. Used for both empty-slot taps and currently-equipped slot
 // taps (no longer auto-unequip on click — players see the picker instead).
 function openEquipPicker(slot){
-  const slotLabels = { head:'머리', body:'몸통', weapon:'무기' };
+  const slotLabels = L({ head:'머리', body:'몸통', weapon:'무기' }, { head:'Head', body:'Body', weapon:'Weapon' });
   const modal = document.getElementById('equipPickerModal');
   const cur = getEquippedForSlot(slot);
   // Header: which slot, plus the currently-worn costume's stats so the player has a baseline.
   const labelHtml = cur
-    ? `${slotLabels[slot]} 슬롯 — 다른 코스튬으로 갈아입거나 그대로 두세요`
-    : `${slotLabels[slot]} 슬롯에 장착할 코스튬을 골라주세요`;
+    ? L(`${slotLabels[slot]} 슬롯 — 다른 코스튬으로 갈아입거나 그대로 두세요`, `${slotLabels[slot]} slot — swap or keep your current pick`)
+    : L(`${slotLabels[slot]} 슬롯에 장착할 코스튬을 골라주세요`, `Pick a costume for the ${slotLabels[slot]} slot`);
   document.getElementById('epSlotLabel').textContent = labelHtml;
   const optsEl = document.getElementById('epOptions');
   // Use a single column so each row can fit the stat line.
@@ -16312,11 +16845,14 @@ function renderCosDetailGrid(){
   let filled = 0;
   for(const id in collected){ for(const k of ['S','A','B','C']) if(collected[id][k]) filled++; }
   const progEl = document.getElementById('albumProgress');
-  if(progEl) progEl.textContent = `${filled} / ${totalSlots} 수집 (${Math.round(100*filled/totalSlots)}%)`;
+  if(progEl){
+    const pct = Math.round(100*filled/totalSlots);
+    progEl.textContent = L(`${filled} / ${totalSlots} 수집 (${pct}%)`, `${filled} / ${totalSlots} collected (${pct}%)`);
+  }
 
   grid.innerHTML = '';
   const slot = _cosBrowseSlot;
-  const slotLabel = { head:'머리', body:'몸통', weapon:'무기' }[slot];
+  const slotLabel = L({ head:'머리', body:'몸통', weapon:'무기' }[slot], { head:'Head', body:'Body', weapon:'Weapon' }[slot]);
   const equippedUid = progress.equipped[slot];
   const equippedItem = equippedUid ? progress.costumes.find(c=>c.uid===equippedUid) : null;
   // Count duplicates of each def×grade so the player knows they have spares.
@@ -16364,7 +16900,7 @@ function renderCosDetailGrid(){
 
     const desc = document.createElement('div');
     desc.className = 'desc';
-    desc.textContent = anyOwned ? costumeStatLines(previewEq) : `${slotLabel} · 가챠로 뽑아 수집`;
+    desc.textContent = anyOwned ? costumeStatLines(previewEq) : L(`${slotLabel} · 가챠로 뽑아 수집`, `${slotLabel} · pull from gacha`);
     card.appendChild(desc);
 
     const gradesRow = document.createElement('div');
@@ -16391,7 +16927,9 @@ function renderCosDetailGrid(){
 
     const hint = document.createElement('div');
     hint.className = 'equip-hint';
-    hint.textContent = isEquippedDef ? '★ 착용 중 — 등급 클릭으로 해제' : (anyOwned ? '등급 클릭으로 장착' : '미보유');
+    hint.textContent = isEquippedDef
+      ? T('status.tapUnequipHint')
+      : (anyOwned ? T('status.tapEquipHint') : T('status.notOwned'));
     card.appendChild(hint);
 
     grid.appendChild(card);
@@ -16409,15 +16947,15 @@ function openCostumePreviewModal(defId, grade, slot){
   const eqItem = progress.costumes.find(c => c.defId === defId && c.grade === grade);
   const equippedUid = progress.equipped[slot];
   const equippedHere = !!(eqItem && equippedUid === eqItem.uid);
-  const slotLabel = { head:'머리', body:'몸통', weapon:'무기' }[slot] || '';
+  const slotLabel = L({ head:'머리', body:'몸통', weapon:'무기' }[slot] || '', { head:'Head', body:'Body', weapon:'Weapon' }[slot] || '');
   const chipEl = document.getElementById('cpmGradeChip');
-  chipEl.textContent = grade + ' 등급';
+  chipEl.textContent = L(grade + ' 등급', grade + ' grade');
   chipEl.style.background = g.color;
   chipEl.style.color = grade === 'S' || grade === 'C' ? '#1A1300' : '#fff';
   chipEl.style.border = '2px solid #fff';
   chipEl.style.boxShadow = `0 0 16px ${g.color}aa`;
   document.getElementById('cpmTitle').textContent = def.name;
-  document.getElementById('cpmSlotLabel').textContent = `${slotLabel} 슬롯`;
+  document.getElementById('cpmSlotLabel').textContent = L(`${slotLabel} 슬롯`, `${slotLabel} slot`);
   // Render the costume at the requested grade — works for unowned grades too because
   // renderCostumePreview only needs {defId, grade}, not an actual owned eq item.
   const cv = document.getElementById('cpmCanvas');
@@ -16425,16 +16963,16 @@ function openCostumePreviewModal(defId, grade, slot){
   document.getElementById('cpmStats').textContent = costumeStatLines({ defId, grade });
   const ownEl = document.getElementById('cpmOwnership');
   if(equippedHere){
-    ownEl.innerHTML = '★ <b style="color:#51CF66;">현재 장착 중</b>';
+    ownEl.innerHTML = L('★ <b style="color:#51CF66;">현재 장착 중</b>', '★ <b style="color:#51CF66;">Currently equipped</b>');
   } else if(owned){
-    ownEl.innerHTML = '<b style="color:#FFE066;">보유 중</b> — 장착할 수 있어요';
+    ownEl.innerHTML = L('<b style="color:#FFE066;">보유 중</b> — 장착할 수 있어요', '<b style="color:#FFE066;">Owned</b> — ready to equip');
   } else {
-    ownEl.innerHTML = '🔒 <b style="color:#868E96;">미보유</b> — 가챠로 뽑아 수집해보세요';
+    ownEl.innerHTML = L('🔒 <b style="color:#868E96;">미보유</b> — 가챠로 뽑아 수집해보세요', '🔒 <b style="color:#868E96;">Not owned</b> — pull from gacha to collect');
   }
   const actBtn = document.getElementById('cpmActionBtn');
   actBtn.style.display = owned ? '' : 'none';
   if(owned){
-    actBtn.textContent = equippedHere ? '해제' : '장착';
+    actBtn.textContent = equippedHere ? T('btn.unequip') : T('btn.equip');
     actBtn.onclick = () => {
       if(equippedHere){ progress.equipped[slot] = null; }
       else { progress.equipped[slot] = eqItem.uid; }
