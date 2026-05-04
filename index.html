@@ -9630,12 +9630,13 @@ function _parentsSidesFor(side){
 }
 function buyParentsSet(setId, side='both'){
   const setDef = PARENTS_SET_DEFS.find(s => s.id === setId);
-  if(!setDef) return { ok:false, reason:'세트를 찾을 수 없음' };
+  if(!setDef) return { ok:false, reason:L('세트를 찾을 수 없음','Set not found') };
   const sides = _parentsSidesFor(side);
   for(const k of sides){
     if(!progress.companionUnlocks || !progress.companionUnlocks[k]){
-      const label = k === 'husbandParents' ? '남편 부모님' : '아내 부모님';
-      return { ok:false, reason:`아직 ${label}이 합류하지 않음` };
+      const labelKo = k === 'husbandParents' ? '남편 부모님' : '아내 부모님';
+      const labelEn = k === 'husbandParents' ? "husband's parents" : "wife's parents";
+      return { ok:false, reason:L(`아직 ${labelKo}이 합류하지 않음`, `${labelEn} haven't joined yet`) };
     }
   }
   let toBuy = 0;
@@ -9645,7 +9646,7 @@ function buyParentsSet(setId, side='both'){
     if(!slot.unlocked || !slot.unlocked.includes(itemId)) toBuy++;
   }
   const totalCost = toBuy * setDef.costPerPiece;
-  if((progress.coins||0) < totalCost) return { ok:false, reason:`코인 부족 (필요 ${totalCost.toLocaleString()})` };
+  if((progress.coins||0) < totalCost) return { ok:false, reason:L(`코인 부족 (필요 ${totalCost.toLocaleString()})`,`Insufficient coins (need ${totalCost.toLocaleString()})`) };
   progress.coins -= totalCost;
   for(const k of sides){
     if(!progress.companionCostumes[k]) progress.companionCostumes[k] = { unlocked:[], equipped:{head:null, body:null} };
@@ -9872,11 +9873,11 @@ function getRescuedSetBonus(){
 // 일괄 구매 — 한 세트의 5 친구 코스튬을 모두 unlocked 에 추가하고, 같은 세트로 자동 장착.
 function buyRescuedSet(setId){
   const setDef = RESCUED_SET_DEFS.find(s => s.id === setId);
-  if(!setDef) return { ok:false, reason:'세트를 찾을 수 없음' };
+  if(!setDef) return { ok:false, reason:L('세트를 찾을 수 없음','Set not found') };
   // 해금 안 된 친구가 있으면 거부
   for(const k of RESCUED_KINDS){
     if(!progress.companionUnlocks || !progress.companionUnlocks[k]){
-      return { ok:false, reason:'아직 모든 친구가 합류하지 않음 (Ch125 까지 진행 필요)' };
+      return { ok:false, reason:L('아직 모든 친구가 합류하지 않음 (Ch125 까지 진행 필요)','Not all friends have joined yet (reach Ch125)') };
     }
   }
   // 이미 보유한 친구는 비용에서 제외
@@ -9887,7 +9888,7 @@ function buyRescuedSet(setId){
     if(!slot.unlocked || !slot.unlocked.includes(itemId)) toBuy++;
   }
   const totalCost = toBuy * setDef.costPerPiece;
-  if((progress.coins||0) < totalCost) return { ok:false, reason:`코인 부족 (필요 ${totalCost.toLocaleString()})` };
+  if((progress.coins||0) < totalCost) return { ok:false, reason:L(`코인 부족 (필요 ${totalCost.toLocaleString()})`,`Insufficient coins (need ${totalCost.toLocaleString()})`) };
   // 구매 + 장착
   progress.coins -= totalCost;
   for(const k of RESCUED_KINDS){
@@ -10060,13 +10061,13 @@ function buyCompanionCostume(kind, costumeId){
   if(!def) return { ok:false, reason:'unknown costume' };
   const slot = progress.companionCostumes[kind];
   _normalizeCompanionEquipped(slot, kind);
-  if(slot.unlocked.includes(costumeId)) return { ok:false, reason:'이미 보유 중' };
+  if(slot.unlocked.includes(costumeId)) return { ok:false, reason:L('이미 보유 중','Already owned') };
   // v12.36d — autoUnlockClearedCh 게이트. 천국·아마겟돈 코스튬은 해당 챕터 클리어 전엔 구매 불가.
   // (UI 에서도 숨기지만 안전을 위해 여기서도 가드.)
   if(def.autoUnlockClearedCh && (progress.clearedChapter||0) < def.autoUnlockClearedCh){
     return { ok:false, reason:L(`Ch${def.autoUnlockClearedCh} 클리어 후 해금`, `Unlocks after clearing Ch${def.autoUnlockClearedCh}`) };
   }
-  if((progress.coins||0) < def.cost) return { ok:false, reason:'코인 부족' };
+  if((progress.coins||0) < def.cost) return { ok:false, reason:L('코인 부족','Insufficient coins') };
   progress.coins -= def.cost;
   slot.unlocked.push(costumeId);
   saveProgress();
@@ -10707,9 +10708,10 @@ function spawnBoss(){
   // Boss-tone toast banner — pulsing red+gold so the player feels the emergency.
   // v10: shortened 4.0s → 2.6s so the HP bar (which sits in the same screen real estate on mobile)
   // can fade in shortly after without the toast covering it.
+  const _vLabel = (getLang()==='en' && v.label_en) ? v.label_en : (v.label || L('챕터 보스','Chapter Boss'));
   state.toastBanner = {
-    text: '☠ ' + (v.label || '챕터 보스') + ' 등장! ☠',
-    sub: '⚠ 위험 — 비둘기의 외침으로 맞서세요',
+    text: L(`☠ ${_vLabel} 등장! ☠`, `☠ ${_vLabel} appears! ☠`),
+    sub: L('⚠ 위험 — 비둘기의 외침으로 맞서세요','⚠ Danger — fight back with the Pigeon\'s Cry'),
     t: 2.6, maxT: 2.6, tone: 'boss'
   };
   // Stack: deep boss sting + warning rumble + air-raid klaxon.
@@ -11510,8 +11512,9 @@ function onBossDefeated(){
     progress.heavenCostumesGranted = true;
     if(granted > 0){
       state.toastBanner = {
-        text:'🪽 천국 SS 코스튬 해금!',
-        sub:'남편·아내·아기·5종 친구 모두 천국 의상 획득. 시작화면 → 코스튬에서 장착.',
+        text:L('🪽 천국 SS 코스튬 해금!','🪽 Heaven SS Costumes Unlocked!'),
+        sub:L('남편·아내·아기·5종 친구 모두 천국 의상 획득. 시작화면 → 코스튬에서 장착.',
+              'Husband · wife · baby · 5 friends all received heaven outfits. Title → Costumes to equip.'),
         t:5.0, maxT:5.0, tone:'critical'
       };
     }
@@ -11523,8 +11526,9 @@ function onBossDefeated(){
     progress.armageddonCostumesGranted = true;
     if(granted > 0){
       state.toastBanner = {
-        text:'⚔️ 아마겟돈 SSS 코스튬 해금!',
-        sub:'남편 무기는 성전의 새우깡. 가족·부모·조상·5종 친구도 일괄 SSS 세트 획득.',
+        text:L('⚔️ 아마겟돈 SSS 코스튬 해금!','⚔️ Armageddon SSS Costumes Unlocked!'),
+        sub:L('남편 무기는 성전의 새우깡. 가족·부모·조상·5종 친구도 일괄 SSS 세트 획득.',
+              'Husband\'s weapon: Crusade Saeukkang. Family, parents, ancestors, and 5 friends all received SSS sets.'),
         t:5.5, maxT:5.5, tone:'critical'
       };
     }
@@ -11537,8 +11541,9 @@ function onBossDefeated(){
       progress.ownedSkins.push('celestial_cracker');
     }
     state.toastBanner = {
-      text:'🌟 천상의 새우깡 — 창조주의 인정!',
-      sub:'남편 비둘기 눈은 영원히 빛나고, 천상의 새우깡 스킨이 해금됐습니다.',
+      text:L('🌟 천상의 새우깡 — 창조주의 인정!','🌟 Celestial Saeukkang — The Creator\'s Acknowledgment!'),
+      sub:L('남편 비둘기 눈은 영원히 빛나고, 천상의 새우깡 스킨이 해금됐습니다.',
+            'The husband pigeon\'s eyes glow eternally; the Celestial Saeukkang skin has been unlocked.'),
       t:6.0, maxT:6.0, tone:'critical'
     };
   }
@@ -11784,16 +11789,17 @@ function showSetIntroModal(setKey){
   if(!mTitle || !mSub || !mPreview || !mStory) return continueAfterSetIntro();
   let kinds, title, sub, story, drawer;
   if(setKey === 'friends'){
-    title = '🐦 구출 친구 5종 세트 — 미리 알림';
-    sub = 'Ch105·110·115·120·125 클리어 시 차례로 합류';
+    title = L('🐦 구출 친구 5종 세트 — 미리 알림','🐦 5 Rescued Friends Set — Preview');
+    sub = L('Ch105·110·115·120·125 클리어 시 차례로 합류','Joins in order on Ch105·110·115·120·125 clear');
     kinds = [
-      { kind:'sparrow',  label:'참새 (Ch105)' },
-      { kind:'magpie',   label:'까치 (Ch110)' },
-      { kind:'owl',      label:'부엉이 (Ch115)' },
-      { kind:'parrot',   label:'앵무새 (Ch120)' },
-      { kind:'squirrel', label:'다람쥐 (Ch125)' },
+      { kind:'sparrow',  label:L('참새 (Ch105)','Sparrow (Ch105)') },
+      { kind:'magpie',   label:L('까치 (Ch110)','Magpie (Ch110)') },
+      { kind:'owl',      label:L('부엉이 (Ch115)','Owl (Ch115)') },
+      { kind:'parrot',   label:L('앵무새 (Ch120)','Parrot (Ch120)') },
+      { kind:'squirrel', label:L('다람쥐 (Ch125)','Squirrel (Ch125)') },
     ];
-    story = '5종 친구 모두 합류 후 코스튬 탭에 <b style="color:#FFA94D;">"🐦 구출 친구 세트"</b> 가 활성화됩니다.<br>한 세트 = 5명 일괄 구매·일괄 장착. 부분 착용도 부분 효과 (1pc 20% → 5pc 90%).';
+    story = L('5종 친구 모두 합류 후 코스튬 탭에 <b style="color:#FFA94D;">"🐦 구출 친구 세트"</b> 가 활성화됩니다.<br>한 세트 = 5명 일괄 구매·일괄 장착. 부분 착용도 부분 효과 (1pc 20% → 5pc 90%).',
+              'Once all 5 friends join, the costume tab activates <b style="color:#FFA94D;">"🐦 Rescued Friends Set"</b>.<br>One set = bulk purchase + bulk equip for all 5. Partial wear gives partial effect (1pc 20% → 5pc 90%).');
     drawer = (cv, k) => {
       const ctx2 = cv.getContext('2d'); const cssW = 56, cssH = 60;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -11806,13 +11812,14 @@ function showSetIntroModal(setKey){
       ctx2.restore();
     };
   } else if(setKey === 'parents'){
-    title = '🪽 부모 세트 — 미리 알림';
-    sub = 'Ch205 (남편 부모) → Ch210 (아내 부모) 차례로 합류';
+    title = L('🪽 부모 세트 — 미리 알림','🪽 Parents Set — Preview');
+    sub = L('Ch205 (남편 부모) → Ch210 (아내 부모) 차례로 합류','Ch205 (husband\'s parents) → Ch210 (wife\'s parents) in order');
     kinds = [
-      { kind:'husbandParents', label:'남편 부모님' },
-      { kind:'wifeParents',    label:'아내 부모님' },
+      { kind:'husbandParents', label:L('남편 부모님',"Husband's Parents") },
+      { kind:'wifeParents',    label:L('아내 부모님',"Wife's Parents") },
     ];
-    story = '두 pair 모두 합류 후 코스튬 탭에 <b style="color:#FFD43B;">"🪽 부모 세트"</b> 가 활성화됩니다.<br>천사 디폴트는 무료 — 다른 세트는 일괄 구매. 부분 착용도 부분 효과 (1 pair 45% / 2 pair 85%).';
+    story = L('두 pair 모두 합류 후 코스튬 탭에 <b style="color:#FFD43B;">"🪽 부모 세트"</b> 가 활성화됩니다.<br>천사 디폴트는 무료 — 다른 세트는 일괄 구매. 부분 착용도 부분 효과 (1 pair 45% / 2 pair 85%).',
+              'Once both pairs join, the costume tab activates <b style="color:#FFD43B;">"🪽 Parents Set"</b>.<br>Angel default is free — other sets bulk-purchase. Partial wear gives partial effect (1 pair 45% / 2 pair 85%).');
     drawer = (cv, k) => {
       const ctx2 = cv.getContext('2d'); const cssW = 110, cssH = 60;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -11826,13 +11833,14 @@ function showSetIntroModal(setKey){
       ctx2.restore();
     };
   } else if(setKey === 'ancestors'){
-    title = '📜 조상 비둘기 — 미리 알림';
-    sub = 'Ch255 (구구나르도) → Ch260 (비리스토둘레스) 차례로 합류';
+    title = L('📜 조상 비둘기 — 미리 알림','📜 Ancestor Pigeons — Preview');
+    sub = L('Ch255 (구구나르도) → Ch260 (비리스토둘레스) 차례로 합류','Ch255 (Gugunardo) → Ch260 (Bristotodules) in order');
     kinds = [
-      { kind:'gugunardo',   label:'구구나르도 (발명가)' },
-      { kind:'bristotodul', label:'비리스토둘레스 (철학자)' },
+      { kind:'gugunardo',   label:L('구구나르도 (발명가)','Gugunardo (Inventor)') },
+      { kind:'bristotodul', label:L('비리스토둘레스 (철학자)','Bristotodules (Philosopher)') },
     ];
-    story = '두 조상 모두 합류 후 코스튬 탭에 <b style="color:#9775FA;">"📜 조상"</b> 이 활성화됩니다.<br>각 조상마다 <b>여러 직업 코스튬을 따로 사서 따로 장착</b>할 수 있어요. 디폴트(발명가복/철학자복) 무료.';
+    story = L('두 조상 모두 합류 후 코스튬 탭에 <b style="color:#9775FA;">"📜 조상"</b> 이 활성화됩니다.<br>각 조상마다 <b>여러 직업 코스튬을 따로 사서 따로 장착</b>할 수 있어요. 디폴트(발명가복/철학자복) 무료.',
+              'Once both ancestors join, the costume tab activates <b style="color:#9775FA;">"📜 Ancestors"</b>.<br>Each ancestor has <b>multiple job costumes you can buy and equip individually</b>. Defaults (Inventor / Scholar robe) are free.');
     drawer = (cv, k) => {
       const ctx2 = cv.getContext('2d'); const cssW = 80, cssH = 64;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -12162,16 +12170,16 @@ function update(dt){
       // (border + glow + emoji) and SFX urgency. Camera shake also scales so the chair rumbles.
       if(nextWave === 2){
         state.toastBanner = {
-          text: '⚠ 웨이브 2 시작!',
-          sub: '적이 더 거세집니다',
+          text: L('⚠ 웨이브 2 시작!','⚠ Wave 2 begins!'),
+          sub: L('적이 더 거세집니다','Enemies grow fiercer'),
           t: 2.4, maxT: 2.4, tone: 'warn'
         };
         state.camera.shake = Math.max(state.camera.shake, 16);
         sfxWaveAlarm(2);
       } else { // wave 3
         state.toastBanner = {
-          text: '🚨 웨이브 3 — 최후의 파도! 🚨',
-          sub: '곧 챕터 보스가 나타납니다',
+          text: L('🚨 웨이브 3 — 최후의 파도! 🚨','🚨 Wave 3 — Final Wave! 🚨'),
+          sub: L('곧 챕터 보스가 나타납니다','The chapter boss is about to appear'),
           t: 2.8, maxT: 2.8, tone: 'critical'
         };
         state.camera.shake = Math.max(state.camera.shake, 28);
@@ -12759,7 +12767,7 @@ function updateUltButton(){
   btn.classList.toggle('ready', ready);
   btn.classList.toggle('used', false);
   if(label){
-    label.textContent = ready ? '외침!' : Math.round(pct) + '%';
+    label.textContent = ready ? L('외침!','Cry!') : Math.round(pct) + '%';
   }
 }
 
@@ -12962,7 +12970,7 @@ function updateHUD(){
       hungerPanel.classList.remove('hidden');
       const m = getPigeonStatMods();
       hungerPanel.style.color = m.color;
-      hungerTxt.textContent = m.label + '  공×' + m.dmg.toFixed(2);
+      hungerTxt.textContent = m.label + L('  공×','  ATK ×') + m.dmg.toFixed(2);
     }
   }
 }
@@ -16033,7 +16041,8 @@ document.getElementById('shopBackBtn').addEventListener('click', ()=>{
 document.getElementById('howBtn').addEventListener('click', ()=>document.getElementById('howModal').classList.remove('hidden'));
 document.getElementById('howCloseBtn').addEventListener('click', ()=>document.getElementById('howModal').classList.add('hidden'));
 document.getElementById('resetProgBtn').addEventListener('click', ()=>{
-  if(confirm('진행 기록을 모두 초기화할까요? 코인·상점 업그레이드·코스튬·배경 스킨까지 함께 초기화됩니다. 이 동작은 되돌릴 수 없습니다.')){
+  if(confirm(L('진행 기록을 모두 초기화할까요? 코인·상점 업그레이드·코스튬·배경 스킨까지 함께 초기화됩니다. 이 동작은 되돌릴 수 없습니다.',
+              'Reset all progress? Coins, shop upgrades, costumes, and background skins will all be reset. This cannot be undone.'))){
     progress.clearedChapter = 0; progress.highChapter = 0; progress.highStage = 0; progress.highScore = 0;
     progress.coins = 0; progress.shop = {};
     progress.costumes = []; progress.equipped = { head:null, body:null, weapon:null };
@@ -16042,7 +16051,7 @@ document.getElementById('resetProgBtn').addEventListener('click', ()=>{
     saveProgress();
     applyTitleSkin();
     updateTitleCoinDisplay();
-    alert('기록이 초기화되었습니다.');
+    alert(L('기록이 초기화되었습니다.','Progress has been reset.'));
   }
 });
 document.getElementById('csBackBtn').addEventListener('click', ()=>{
@@ -17398,7 +17407,7 @@ function renderGachaResult(items){
         <div></div>
       </div>`).join('');
     el.innerHTML = `
-      <div class="pull-title">🎰 10연 결과</div>
+      <div class="pull-title">${L('🎰 10연 결과','🎰 10× Pull Result')}</div>
       <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px 0;">${summary}</div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:100%;max-width:320px;">${gridHtml}</div>
     `;
@@ -17795,10 +17804,14 @@ function isExpeditionUnlocked(expId){
   if(expId === 4) return cleared >= 100;
   if(expId === 5) return cleared >= 130;
   if(expId === 6) return cleared >= 160;
+  if(expId === 7) return cleared >= 200;
+  if(expId === 8) return cleared >= 250;
   return false;
 }
 function defaultExpeditionTab(){
   const cleared = progress.clearedChapter || 0;
+  if(cleared >= 250) return 8;
+  if(cleared >= 200) return 7;
   if(cleared >= 160) return 6;
   if(cleared >= 130) return 5;
   if(cleared >= 100) return 4;
@@ -17810,23 +17823,35 @@ if(typeof state.csExpedition === 'undefined') state.csExpedition = 1;
 
 function setChapterExpeditionTab(expId){
   if(!isExpeditionUnlocked(expId)){
-    const labels = ['','Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ'];
-    const subs = {
+    const labels = ['','Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ','Ⅶ','Ⅷ'];
+    const subsKo = {
       2: '원정 Ⅰ(ch50)을 먼저 정복하세요',
       3: '원정 Ⅱ(ch70)을 먼저 정복하세요',
       4: '원정 Ⅲ(ch100)을 먼저 정복하세요',
       5: '원정 Ⅳ(ch130)을 먼저 정복하세요',
       6: '원정 Ⅴ(ch160)을 먼저 정복하세요',
+      7: '원정 Ⅵ(ch200)을 먼저 정복하세요',
+      8: '원정 Ⅶ(ch250)을 먼저 정복하세요',
     };
+    const subsEn = {
+      2: 'Conquer Expedition I (ch50) first',
+      3: 'Conquer Expedition II (ch70) first',
+      4: 'Conquer Expedition III (ch100) first',
+      5: 'Conquer Expedition IV (ch130) first',
+      6: 'Conquer Expedition V (ch160) first',
+      7: 'Conquer Expedition VI (ch200) first',
+      8: 'Conquer Expedition VII (ch250) first',
+    };
+    const lbl = labels[expId] || '';
     state.toastBanner = {
-      text:`🔒 원정 ${labels[expId]} 잠금`,
-      sub: subs[expId] || '잠긴 원정',
+      text: L(`🔒 원정 ${lbl} 잠금`, `🔒 Expedition ${lbl} locked`),
+      sub: L(subsKo[expId] || '잠긴 원정', subsEn[expId] || 'Locked expedition'),
       t:2.0, maxT:2.0, tone:'warn'
     };
     return;
   }
   state.csExpedition = expId;
-  for(const eid of [1,2,3,4,5,6]){
+  for(const eid of [1,2,3,4,5,6,7,8]){
     const b = document.getElementById('csExpTab'+eid);
     if(b) b.classList.toggle('on', eid === expId);
   }
@@ -17835,20 +17860,31 @@ function setChapterExpeditionTab(expId){
 }
 
 function refreshExpeditionTabs(){
-  const lockHints = {
+  const lockHintsKo = {
     2: '원정 Ⅰ(ch50) 클리어 시 해금',
     3: '원정 Ⅱ(ch70) 클리어 시 해금',
     4: '원정 Ⅲ(ch100) 클리어 시 해금',
     5: '원정 Ⅳ(ch130) 클리어 시 해금',
     6: '원정 Ⅴ(ch160) 클리어 시 해금',
+    7: '원정 Ⅵ(ch200) 클리어 시 해금',
+    8: '원정 Ⅶ(ch250) 클리어 시 해금',
   };
-  for(const eid of [1,2,3,4,5,6]){
+  const lockHintsEn = {
+    2: 'Unlocks on clearing Expedition I (ch50)',
+    3: 'Unlocks on clearing Expedition II (ch70)',
+    4: 'Unlocks on clearing Expedition III (ch100)',
+    5: 'Unlocks on clearing Expedition IV (ch130)',
+    6: 'Unlocks on clearing Expedition V (ch160)',
+    7: 'Unlocks on clearing Expedition VI (ch200)',
+    8: 'Unlocks on clearing Expedition VII (ch250)',
+  };
+  for(const eid of [1,2,3,4,5,6,7,8]){
     const b = document.getElementById('csExpTab'+eid);
     if(!b) continue;
     const unlocked = isExpeditionUnlocked(eid);
     b.classList.toggle('locked-tab', !unlocked);
     b.style.opacity = unlocked ? '1' : '.45';
-    b.title = unlocked ? '' : (lockHints[eid] || '잠김');
+    b.title = unlocked ? '' : L(lockHintsKo[eid] || '잠김', lockHintsEn[eid] || 'Locked');
   }
 }
 
