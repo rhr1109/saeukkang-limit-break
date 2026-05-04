@@ -758,8 +758,8 @@
       <div class="right">
         <!-- v12.12 — 사용자 피드백 "위 상단 점수·처치·코인이 한 UI로 묶여있는데 각각 한 줄로".
              score/kills/coins를 별도 panel로 분리. 모바일에서도 각자 한 줄. -->
-        <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">비둘기 광장</span></div>
-        <div class="panel" id="wavePanel">🌊 웨이브 <span id="waveNum">1</span>/3</div>
+        <div class="panel" id="chapterPanel">📕 <span id="chapterNum">1</span>. <span id="chapterLabel" style="color:#FFE066;">Pigeon Plaza</span></div>
+        <div class="panel" id="wavePanel">🌊 <span id="waveLabel">Wave</span> <span id="waveNum">1</span>/3</div>
         <div class="panel" id="timerPanel">⏱ <span id="timerTxt">60</span></div>
         <div class="panel hidden" id="hudHungerPanel"><span id="hudHungerTxt"></span></div>
         <div class="panel" id="scorePanel">⭐ <span id="scoreTxt">0</span></div>
@@ -769,7 +769,7 @@
     </div>
     <div class="invbar" id="invBar"></div>
     <div id="bossHpBar" aria-hidden="true">
-      <div class="boss-hp-name" id="bossHpName">보스</div>
+      <div class="boss-hp-name" id="bossHpName">Boss</div>
       <div class="boss-hp-track">
         <div class="boss-hp-fill" id="bossHpFill" style="width:100%"></div>
         <div class="boss-hp-text" id="bossHpText">0 / 0</div>
@@ -4393,7 +4393,7 @@ function drawSaeukkang(ctx, x, y, angle, scale){
   ctx.fillStyle='#C92A2A';
   ctx.font='bold 5px sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('새우깡', 0, -3.2);
+  ctx.fillText(L('새우깡','SHRIMP'), 0, -3.2);
   ctx.restore();
 }
 
@@ -4496,7 +4496,7 @@ function drawMissile(ctx, x, y, angle, scale){
 // Stats scale with the player's per-weapon level (set via the level-up unlock cards).
 const WEAPONS = {
   shrimp: {
-    name:'새우깡', icon:'🍤',
+    name:'새우깡', name_en:'Saeukkang', icon:'🍤',
     rate:(w,p)=> p.fireRate,            // shrimp keeps using global player stats
     count:(w,p)=> p.projCount,
     dmg:(w,p)=> p.damage,
@@ -4507,7 +4507,7 @@ const WEAPONS = {
     spinBase:10, draw:drawSaeukkang
   },
   shuriken: {
-    name:'표창', icon:'🌟',
+    name:'표창', name_en:'Shuriken', icon:'🌟',
     rate:(w)=> 2.4 + w.lvl*0.4,         // L1 2.8 → L5 4.4 shots/s
     count:(w)=> Math.min(7, 2 + w.lvl), // L1 3 → L5 7
     dmg:(w,p)=> p.damage * (0.40 + w.lvl*0.10), // L1 50% → L5 90% of saeukkang dmg
@@ -4519,7 +4519,7 @@ const WEAPONS = {
     spread:0.32                         // wider fan than shrimp
   },
   boomerang: {
-    name:'참치캔 부메랑', icon:'🪃',
+    name:'참치캔 부메랑', name_en:'Tuna-Can Boomerang', icon:'🪃',
     rate:(w)=> 0.85 + w.lvl*0.15,
     count:(w)=> Math.min(3, 1 + Math.floor(w.lvl/2)),
     dmg:(w,p)=> p.damage * (1.00 + w.lvl*0.20),
@@ -4530,7 +4530,7 @@ const WEAPONS = {
     returnAt:0.55, spinBase:18, draw:drawBoomerang
   },
   missile: {
-    name:'꿀꽈배기 미사일', icon:'🚀',
+    name:'꿀꽈배기 미사일', name_en:'Honey-Twist Missile', icon:'🚀',
     rate:(w)=> 0.55 + w.lvl*0.10,
     count:(w)=> Math.min(2, w.lvl),     // L1 1, L2+ 2
     dmg:(w,p)=> p.damage * (1.5 + w.lvl*0.40),
@@ -5287,7 +5287,7 @@ function drawEnemy(ctx, e, walkPhase){
       ctx.fillStyle = 'rgba(0,0,0,0.7)';
       ctx.fillRect(-44, -50*s-26, 88, 14);
       ctx.fillStyle = '#FFE066';
-      ctx.fillText(e.bossLabel, 0, -50*s-19);
+      ctx.fillText((getLang()==='en' && e.bossLabelEn) ? e.bossLabelEn : e.bossLabel, 0, -50*s-19);
       ctx.restore();
     }
   }
@@ -5334,19 +5334,43 @@ const MAX_CHAPTERS = 300;
 // v12.11 — 원정 Ⅳ 추가: 지옥 원정. 억울하게 지옥에 끌려간 조류·조류 친화 동물들을
 // 구해내며 함께 싸우는 스토리. 원정 Ⅲ 끝(ch100) 클리어 시 해금.
 const EXPEDITIONS = [
-  { id:1, name:'원정 Ⅰ — 지구 정복',         subtitle:'도시부터 지옥, 우주, 차원 너머까지 인류 영토 정복', range:[1,50],    theme:'earth' },
-  { id:2, name:'원정 Ⅱ — 비둘기 행성 정복',  subtitle:'비둘기 별을 점령하고 가족을 이룬다',               range:[51,70],   theme:'pigeon_planet' },
-  { id:3, name:'원정 Ⅲ — 우주 정복',         subtitle:'우주 자체를 손에 넣는 마지막 원정',                 range:[71,100],  theme:'cosmos' },
-  { id:4, name:'원정 Ⅳ — 지옥 구출 원정',    subtitle:'억울하게 지옥에 간 친구들을 구하러',                range:[101,130], theme:'hellfire_rescue' },
+  { id:1, name:'원정 Ⅰ — 지구 정복',         name_en:'Expedition I — Conquer Earth',
+    subtitle:'도시부터 지옥, 우주, 차원 너머까지 인류 영토 정복',
+    subtitle_en:'From cities to hell, space, and beyond — claim every realm humans touch',
+    range:[1,50],    theme:'earth' },
+  { id:2, name:'원정 Ⅱ — 비둘기 행성 정복',  name_en:'Expedition II — Conquer Pigeon Planet',
+    subtitle:'비둘기 별을 점령하고 가족을 이룬다',
+    subtitle_en:'Take the pigeon homeworld and start a family',
+    range:[51,70],   theme:'pigeon_planet' },
+  { id:3, name:'원정 Ⅲ — 우주 정복',         name_en:'Expedition III — Conquer the Cosmos',
+    subtitle:'우주 자체를 손에 넣는 마지막 원정',
+    subtitle_en:'The final campaign — seize the universe itself',
+    range:[71,100],  theme:'cosmos' },
+  { id:4, name:'원정 Ⅳ — 지옥 구출 원정',    name_en:'Expedition IV — Rescue from Hell',
+    subtitle:'억울하게 지옥에 간 친구들을 구하러',
+    subtitle_en:'Rescue the friends wrongfully dragged to hell',
+    range:[101,130], theme:'hellfire_rescue' },
   // v12.34 — 천국 원정. 지옥에서 친구를 모두 구출한 비둘기 가족이 천국의 인정을 받아 1층천부터 탐방.
-  { id:5, name:'원정 Ⅴ — 천국 1층천 탐방',   subtitle:'구원의 보답으로 천국이 문을 연다 — 빛의 정원·구름 회랑·천사의 도서관', range:[131,160], theme:'heaven_first' },
+  { id:5, name:'원정 Ⅴ — 천국 1층천 탐방',   name_en:'Expedition V — First Heaven Tour',
+    subtitle:'구원의 보답으로 천국이 문을 연다 — 빛의 정원·구름 회랑·천사의 도서관',
+    subtitle_en:'Heaven opens its gates as a reward — Garden of Light, Cloud Hall, Angel\'s Library',
+    range:[131,160], theme:'heaven_first' },
   // v12.35 — 2층천은 더 이상 "정복"이 아니다. 천국이 가족의 야망을 경계하며 시험대에 올린다.
-  { id:6, name:'원정 Ⅵ — 천국 2층천 시험',   subtitle:'더 높은 하늘이 가족의 야심을 시험한다 — 대천사 회랑·세라핌의 옥좌·창공의 끝', range:[161,200], theme:'heaven_second' },
+  { id:6, name:'원정 Ⅵ — 천국 2층천 시험',   name_en:'Expedition VI — Second Heaven Trial',
+    subtitle:'더 높은 하늘이 가족의 야심을 시험한다 — 대천사 회랑·세라핌의 옥좌·창공의 끝',
+    subtitle_en:'The higher heavens test the family — Archangel Hall · Seraphim Throne · End of the Sky',
+    range:[161,200], theme:'heaven_second' },
   // v12.35 — 3층천은 창조주의 영역. 가족이 이를 침범하며 부모 비둘기까지 합류해 천계 본격 진입.
-  { id:7, name:'원정 Ⅶ — 천국 3층천 침범',   subtitle:'창조주의 영역에 발을 들인 가족 — 부모 비둘기 합류, 신과 한 발자국씩 가까워진다', range:[201,250], theme:'heaven_third' },
+  { id:7, name:'원정 Ⅶ — 천국 3층천 침범',   name_en:'Expedition VII — Third Heaven Breach',
+    subtitle:'창조주의 영역에 발을 들인 가족 — 부모 비둘기 합류, 신과 한 발자국씩 가까워진다',
+    subtitle_en:'The family steps into the Creator\'s realm — parent pigeons join as gods draw near',
+    range:[201,250], theme:'heaven_third' },
   // v12.35 — 아마겟돈 원정. 악의 세력이 천국 침공 → 가족 + 창조주 한편 으로 함께 악과 대항.
   //   조상 비둘기 합류 + 신성 전쟁 승리 후 창조주가 천상의 새우깡을 내려준다.
-  { id:8, name:'원정 Ⅷ — 아마겟돈',          subtitle:'악의 세력이 천국을 침공 — 창조주와 함께 악과 싸워 승리하고 천상의 새우깡을 받는다', range:[251,300], theme:'armageddon' },
+  { id:8, name:'원정 Ⅷ — 아마겟돈',          name_en:'Expedition VIII — Armageddon',
+    subtitle:'악의 세력이 천국을 침공 — 창조주와 함께 악과 싸워 승리하고 천상의 새우깡을 받는다',
+    subtitle_en:'Evil invades heaven — fight beside the Creator, claim victory, receive the Celestial Saeukkang',
+    range:[251,300], theme:'armageddon' },
 ];
 function expeditionFor(c){
   for(const e of EXPEDITIONS){ if(c >= e.range[0] && c <= e.range[1]) return e; }
@@ -5406,7 +5430,7 @@ function chapterPlayTimeEstimate(c){
   // Simplify to round minutes for the UI label.
   const lo = Math.floor(minSec / 60);
   const hi = Math.ceil(maxSec / 60);
-  return `약 ${lo}-${hi}분`;
+  return L(`약 ${lo}-${hi}분`, `~${lo}-${hi} min`);
 }
 // Chapter names — each chapter is a location, not a difficulty label.
 // Difficulty is implicit in chapter number; higher chapters belong to harsher tiers.
@@ -5494,6 +5518,86 @@ const CHAPTER_NAMES = [
   '극한의 시험','진군의 정점','심판의 칼날','신성의 폭풍','악의 정점 격파',                   // 291-295 dread_apex (ch290+ 컨트롤 강요)
   '천상의 옥좌 앞 — 창조주와 어깨를 나란히','악의 군주 직전','신성의 회의장','마지막 한 발자국','천상의 새우깡' // 296-300 dread_sovereign (게임 최종 — 악의 군주)
 ];
+// v12.36e — Parallel English chapter names. chapterName(c) falls back to Korean if a slot is empty.
+const CHAPTER_NAMES_EN = [
+  // Tier 0: Day City
+  'Pigeon Plaza','City Park','Back Alley','Marketplace','Rooftop Garden',
+  // Tier 1: Neon Night
+  'Neon Street','Club Backdoor','Late-Night Highway','Abandoned Tower','City Under the Moon',
+  // Tier 2: Underground Cave
+  'Cave Entrance','Crystal Cave','Lava Cave','Dungeon Depths','Mushroom Forest',
+  // Tier 3: Ice
+  'Blizzard','Ice Lake','Snow Mountain Climb','Glacier Cliff','Aurora Summit',
+  // Tier 4: Cosmic
+  'Atmosphere Breach','Space Station','Asteroid Belt','Nebula Core','Black Hole Edge',
+  // Tier 5: Hellfire
+  'Hell Gate','Volcano Crater','Plain of Ashes','Gate of Judgment','Limit Break I',
+  // Tier 6: Abyss / Deep Sea (31-35)
+  'Abyss Mouth','Coral Reef Shadow','Sunken Ruins','Deep-Sea Trench','Edge of the Currents',
+  // Tier 7: Crystal Dimension (36-40)
+  'Crystal Dimension','Prism Circuit','Hall of Reflection','Glass-Shard Desert','Crystal Throne',
+  // Tier 8: Ash Wasteland (41-45)
+  'Plain of Ash','Iron-Dust Waste','Silent Desert','Ashen Citadel','Charcoal Garden',
+  // Tier 9: Beyond the Limit (46-50)
+  'Time Rift','Forgotten Empire','Stardust Hall','Judge\'s Throne','Beyond Infinity',
+  // === Expedition II — Conquer Pigeon Planet (51-70) ===
+  'Pigeon Planet Landing','Feather Plains','Grain Fields','Nest Village','Plaza Fountain',
+  'Sand-Dune Steles','Ruined Temple','Clocktower Plaza','Golden Nest','Fruit of Love — New Life',
+  'Family Garden','Planet Council','Army HQ','Holy Feather Temple','Planet Core',
+  'Lava Nest','Deep-Sea Pigeon Cave','Satellite Base','Planetary Defense Hangar','Pigeon Emperor\'s Throne',
+  // === Expedition III — Conquer the Cosmos (71-100) ===
+  'Voyage Begins','Mars Conquest','Jupiter Great Spot','Saturn Rings','Uranus Glacier',
+  'Neptune Storm','Pluto Outskirts','Kuiper Belt','Oort Cloud','Alpha Centauri',
+  'Sirius Star','Betelgeuse','Red Giant','Planetary Nebula','White Dwarf',
+  'Neutron Star','Pulsar Storm','Quasar','Wormhole Edge','Multiverse Gate',
+  'Parallel Dimension','River of Time','Cosmic Library','Origin Gate','Divine Council',
+  'Just Before the Big Bang','Edge of the Universe','Infinite Hall','Room of the Absolute','Sovereign of the Universe',
+  // === Expedition IV — Rescue from Hell (101-130) ===
+  'Through the Hellgate','Black-River Ferry','Plaza of Judgment','Prisoner\'s Alley','Hunter\'s Forest',           // 101-105
+  'Lava Basin','Flame Canyon','Ash-Gray Bridge','Judge\'s Temple','Plaza of Fire',                                  // 106-110
+  'Plain of Bones','Skull Hall','Death Clocktower','Burial Gate','Bone-Dust Desert',                                // 111-115
+  'Shadow Cathedral','Black Council','Hall of Lies','Throne of Judgment','Shadow Sanctum',                          // 116-120
+  'Angel\'s Fall','Ash-Gray Heaven','Forbidden Garden','Embered Well','Spire of the Abyss',                         // 121-125
+  'Sealed Hellgate','Demon-Pact Plaza','Bridge of Salvation','Final Judgment','Lord of the Hellgate',               // 126-130
+  // === Expedition V — First Heaven Tour (131-160) ===
+  'Cloud Threshold','Bridge of Light','Guardian Angel Garden','Holy Fountain','Starlight Hall',                     // 131-135
+  'Angelic Choir','Lotus Lake','Silver Spire','Field of Peace','Moonlight Garden',                                  // 136-140
+  'Archangel Library','Golden Council Hall','Mirror Hall of Truth','Temple of Promise','Plaza of Dawn',             // 141-145
+  'Cloud Army','Guardian Wall','River of Grace','Waterfall of Light','Promise Peak',                                // 146-150
+  'Heaven Checkpoint','Gate of Wonder','First Trial Officer','Throne of Dawn','Guardian of the First Heaven',       // 151-155
+  'Boundary Gate','Bridge Between Two Skies','Sky Inspection','Plaza of Ascension','Sovereign of the First Heaven', // 156-160
+  // === Expedition VI — Second Heaven Trial (161-200) ===
+  'Second-Heaven Border','Hall of Radiance','Bridge of Trial','Plaza of Purity','Holy River',                       // 161-165
+  'Trial of the Choir','Golden-Throne Audience','Hall of Wonders','Song of Wisdom','Light Beyond Time',             // 166-170
+  'Archangel Hall','Temple of Oaths','Council of Judgment','Throne of Promise','Holy Constellation',                // 171-175
+  'Seraph Garden','Hall of Flame','Holy Flame','Temple of Dawn','Throne of Ascension',                              // 176-180
+  'Ophanim Plaza','River of Truth','Council Gate','Garden of Wisdom','Spire of Clarity',                            // 181-185
+  'Michael Checkpoint','Archangel\'s Blade','Holy Battlefield','Army of Light','Final Trial',                       // 186-190
+  'Gabriel Hall','Spire of Heralding','Sky Gate','River of Promise','Field of Divinity',                            // 191-195
+  'End of the Sky','Where Stars Are Born','Final Council','Plaza of Divinity','Master of the Sky',                  // 196-200
+  // === Expedition VII — Third Heaven Breach (201-250) ===
+  'Bolt of the Third Heaven','Forbidden Entrance','First Breach','Divine Ward','Parents Join I',                    // 201-205
+  'Hall of the Vanguard','Holy Envoys','Throne Guard','Beyond the Boundary','Parents Join II',                      // 206-210
+  'Garden of Time','Waterfall of Radiance','Dawn of Judgment','Mirror of Lies','Throne of Truth',                   // 211-215
+  'Library of Divinity','Forbidden Book','Nameless Angel','Forgotten Hall','Spire of Revelation',                   // 216-220
+  'Bridge of Repentance','Plaza of Warning','Council of Wrath','Holy Army','Aide of Creation',                      // 221-225
+  'Gate of Power','Blade of Truth','Hall of Salvation','Mirror of Grace','Attendant of the Throne',                 // 226-230
+  'Holy Mountain','Sacred River','Celestial Lighthouse','Garden of Creation','Examiner of Goodness',                // 231-235
+  'Mirror of the Boundary','Light of the Abyss','Gate of Time','Last Warning','Warden of the Third Heaven',         // 236-240
+  'Mist Beyond the Boundary','Forbidden Throne','Before Time','Council of Creation','Herald of the Third Heaven',   // 241-245
+  'Final Bridge of Divinity','Shadow of the Creator','Throne of Wrath','Forbidden Silence','Sovereign of the Third Heaven', // 246-250
+  // === Expedition VIII — Armageddon (251-300) ===
+  'Darkness Strikes Heaven','Shadow of Evil','Tolling of the Bells','First Rally','Ancestor Joins I',               // 251-255
+  'The Creator\'s Call','Forming the Allied Front','First March','Crushing the Vanguard','Ancestor Joins II',       // 256-260
+  'Field of Oaths','First Dawn — Defending Heaven','Camp of Radiance','Holy Encampment','Spire of Warning',         // 261-265
+  'Herald of the March','Golden Encampment','Arrows of Dawn','Hall of Divinity','Last Supply Line',                 // 266-270
+  'Armageddon Front','Plaza of the Holy War','Clash of Powers','Holy Shockwave','Lord of Evil — First Clash',       // 271-275
+  'March of the Fallen Angels','Cry of the False God','Frontline of Good and Evil','March of Truth','Breaking the Evil Camp', // 276-280
+  'Allied Advance','Sword of the Holy Hall','Judgment Checkpoint','Final Encampment','Allied Ceremony',             // 281-285
+  'Banner of the Throne','Holy Cry','Arrows of Truth','Breaking the Evil Hall','Dawn of Victory',                   // 286-290
+  'Extreme Trial','Apex of the March','Blade of Judgment','Storm of Divinity','Crushing the Apex of Evil',           // 291-295
+  'Before the Celestial Throne — Beside the Creator','Just Before the Lord of Evil','Council of Divinity','One Last Step','Celestial Saeukkang' // 296-300
+];
 const CHAPTER_COLORS = [
   '#FFE066','#FFD43B','#FFA94D','#FF922B','#FF6B6B',
   '#F06595','#CC5DE8','#AE3EC9','#845EF7','#7048E8',
@@ -5564,7 +5668,12 @@ const CHAPTER_COLORS = [
   '#FFD43B','#FFE066','#FFFFFF','#FFA94D','#FFD43B',
   '#FFFFFF','#FFE066','#FFD43B','#FFA94D','#FFFFFF'
 ];
-function chapterName(c){ return CHAPTER_NAMES[Math.min(c-1, CHAPTER_NAMES.length-1)]; }
+function chapterName(c){
+  const idx = Math.min(c-1, CHAPTER_NAMES.length-1);
+  // v12.36e — EN 모드면 CHAPTER_NAMES_EN parallel 배열에서 lookup. 비어 있으면 KO fallback.
+  if(getLang() === 'en' && typeof CHAPTER_NAMES_EN !== 'undefined' && CHAPTER_NAMES_EN[idx]) return CHAPTER_NAMES_EN[idx];
+  return CHAPTER_NAMES[idx];
+}
 function chapterColor(c){ return CHAPTER_COLORS[Math.min(c-1, CHAPTER_COLORS.length-1)]; }
 function chapterMult(){
   const c = state.chapter;
@@ -5983,12 +6092,60 @@ const I18N = {
     'spm.sub': 'Title screen preview when applied',
     'spm.close': 'Close',
     'spm.apply': 'Apply',
+    // Stat labels (chapter cleared / victory / game over)
+    'stat.kills': 'Total Kills',
+    'stat.score': 'Score',
+    'stat.level': 'Final Level',
+    'stat.survived': 'Survival Time',
+    'stat.coinsRun': '🪙 Coins this run',
+    'stat.coinsChapter': '🪙 Coins earned this chapter',
+    'stat.coinsBalance': '🪙 Coin Balance',
+    'stat.reachedChapter': 'Reached Chapter',
+    'stat.reachedWave': 'Reached Wave',
+    'stat.conqueredChapter': 'Conquered Chapter',
+    'stat.bossLabel': '(Boss)',
+    'stat.killCount': 'Kills',
+    'stat.dropPity': '{n} chapters until guaranteed',
+    'stat.dropLabel': '🎁 Costume',
+    'stat.gotCostume': '🎁 Costume Obtained',
+    // Chapter labels / hero card
+    'ch.label': 'Chapter',
+    'ch.firstStart': 'Just starting',
+    'ch.first.try': '🔥 First try',
+    'ch.locked': '🔒 ???',
+    'ch.start': 'Start',
+    'ch.attempt': 'Attempt Chapter {n}',
+    'ch.bossLineup': 'Boss',
+    'ch.unknown': '???',
+    'ch.estTime': 'Est. play time',
+    'ch.expEnd': 'Expedition Finale',
+    'ch.replay': 'Replay',
+    'ch.complete': 'Conquered!',
+    'ch.takeOn': 'Take on Chapter',
+    'cs.empty': 'No conquered chapters yet. Start with Chapter 1!',
+    // Companion
+    'comp.joined': 'joined',
+    // Game over wave
+    'gow.boss': '(Boss)',
+    // Victory
+    'vict.expEnd': 'Expedition Cleared',
+    'vict.final.title': '🏆 Conquered All Chapters!',
+    'vict.final.sub': '200-chapter saga: family and friends reach the second heaven.',
+    // Hell prologue
+    'hell.title': '🔥 Expedition IV — Rescue from Hell',
+    'hell.body1': 'On the day they reached the edge of the universe, the pigeon family realized:',
+    'hell.body2': '"Every friend from every star we conquered is crying out from hell..."',
+    'hell.body3': 'To rescue those wrongfully dragged below,<br>the family departs on yet another expedition.',
+    'hell.cta': '▶ Through the Hellgate',
     // Buttons / generic
     'btn.confirm': 'OK',
     'btn.close': 'Close',
     'btn.cancel': 'Cancel',
     'btn.equip': 'Equip',
     'btn.unequip': 'Unequip',
+    'btn.swap': '✨ Swap (upgrade)',
+    'btn.equipNow': '✨ Equip Now',
+    'btn.equipAnyway': '⚠ Equip Anyway',
     // Costume preview modal labels
     'cpm.equipped': '★ Currently equipped',
     'cpm.owned': 'Owned — ready to equip',
@@ -6183,12 +6340,60 @@ const I18N = {
     'spm.sub': '적용 시 타이틀 화면 미리보기',
     'spm.close': '닫기',
     'spm.apply': '적용',
+    // Stat labels
+    'stat.kills': '누적 처치',
+    'stat.score': '점수',
+    'stat.level': '레벨',
+    'stat.survived': '생존 시간',
+    'stat.coinsRun': '🪙 이번 런 획득 코인',
+    'stat.coinsChapter': '🪙 이번 챕터 획득 코인',
+    'stat.coinsBalance': '🪙 보유 코인',
+    'stat.reachedChapter': '도달 챕터',
+    'stat.reachedWave': '도달 웨이브',
+    'stat.conqueredChapter': '정복 챕터',
+    'stat.bossLabel': '(보스)',
+    'stat.killCount': '처치 수',
+    'stat.dropPity': '{n}판 후 보장',
+    'stat.dropLabel': '🎁 코스튬',
+    'stat.gotCostume': '🎁 코스튬 획득',
+    // Chapter labels / hero card
+    'ch.label': '챕터',
+    'ch.firstStart': '처음 시작',
+    'ch.first.try': '🔥 첫 도전',
+    'ch.locked': '🔒 ???',
+    'ch.start': '시작',
+    'ch.attempt': '챕터 {n} 도전',
+    'ch.bossLineup': '보스',
+    'ch.unknown': '???',
+    'ch.estTime': '예상 플레이 시간',
+    'ch.expEnd': '원정 끝',
+    'ch.replay': '다시 보기',
+    'ch.complete': '정복!',
+    'ch.takeOn': '챕터 도전',
+    'cs.empty': '아직 정복한 챕터 없습니다. 챕터 1 부터 시작해보세요!',
+    // Companion
+    'comp.joined': '합류',
+    // Game over wave
+    'gow.boss': '(보스)',
+    // Victory
+    'vict.expEnd': '원정 클리어',
+    'vict.final.title': '🏆 전 챕터 정복 완료!',
+    'vict.final.sub': '200개 챕터를 모두 정복하고 천국의 1·2층천까지 가족·동료가 함께 도달한 신화.',
+    // Hell prologue
+    'hell.title': '🔥 원정 Ⅳ — 지옥 구출 원정',
+    'hell.body1': '우주의 끝에 다다른 그날, 비둘기 가족은 깨달았다.',
+    'hell.body2': '"우리가 정복한 모든 별의 친구들이 지옥에서 울고 있다…"',
+    'hell.body3': '억울하게 끌려간 친구들을 구하러,<br>가족은 또다시 원정을 떠난다.',
+    'hell.cta': '▶ 지옥문 통과',
     // Buttons / generic
     'btn.confirm': '확인',
     'btn.close': '닫기',
     'btn.cancel': '취소',
     'btn.equip': '장착',
     'btn.unequip': '해제',
+    'btn.swap': '✨ 갈아 입기 (업그레이드)',
+    'btn.equipNow': '✨ 착용하기',
+    'btn.equipAnyway': '⚠ 그래도 착용',
     // Costume preview
     'cpm.equipped': '★ 현재 장착 중',
     'cpm.owned': '보유 중 — 장착할 수 있어요',
@@ -6224,6 +6429,65 @@ function T(key, fallback){
 }
 // Picks ko vs en variant for inline pairs without a dictionary entry.
 function L(ko, en){ return getLang() === 'ko' ? ko : (en != null ? en : ko); }
+// Helpers for objects that store a Korean field plus a parallel `<field>_en`.
+// e.g. an EXPEDITION { name:'원정 Ⅰ', name_en:'Expedition I' } → nameOf(exp) returns the
+// localized one. Fallback to the Korean field if the EN sibling is missing.
+//
+// v12.36e — companion costume names live in 60+ scattered `{ name:'…', draw:… }` entries.
+// Rather than hand-edit each one with a `name_en`, we keep a central KO→EN map below and
+// let nameOf() consult it as a secondary fallback when the object has no `name_en` field.
+const NAME_EN_MAP = {
+  // Wife / child / general costumes
+  '핑크 리본':'Pink Bow', '황금 왕관':'Golden Crown', '다이아 티아라':'Diamond Tiara',
+  '신부 베일':'Bridal Veil', '요정 드레스':'Fairy Dress', '꽃관':'Flower Crown',
+  '리본 머리띠':'Ribbon Headband', '꽃 머리핀':'Flower Pin', '별 머리핀':'Star Pin',
+  '토끼 귀':'Bunny Ears', '썬햇':'Sun Hat', '노랑 머리띠':'Yellow Headband',
+  '꽃 드레스':'Flower Dress', '레이스 드레스':'Lace Dress', '웨딩 드레스':'Wedding Dress',
+  '공주 드레스':'Princess Dress', '슈퍼 망토':'Super Cape', '아이보리 가디건':'Ivory Cardigan',
+  '겨울 코트':'Winter Coat', '도트 원피스':'Polka-Dot Dress', '세일러 원피스':'Sailor Dress',
+  '분홍 한복':'Pink Hanbok', '분홍 앞치마':'Pink Apron', '사이버 자켓':'Cyber Jacket',
+  '노란 원피스':'Yellow Dress',
+  // Baby costumes
+  '아기 비니':'Baby Beanie', '아기 왕관':'Baby Crown', '나비 넥타이':'Bow Tie',
+  '아기 세일러':'Baby Sailor', '아기 한복':'Baby Hanbok', '별 헬멧':'Star Helmet',
+  '아기 가운':'Baby Gown', '아기 턱시도':'Baby Tuxedo', '멜빵 오버롤':'Suspender Overalls',
+  '아기 잠옷':'Baby Pajamas', '분홍 잠옷':'Pink Pajamas', '별 잠옷':'Star Pajamas',
+  '분홍 도트':'Pink Polka-Dot', '줄무늬 티':'Striped Tee', '우주복':'Space Suit',
+  '공룡 우주복':'Dino Space Suit', '곰 우주복':'Bear Space Suit', '호랑이 우주복':'Tiger Space Suit',
+  '기본 (머리털)':'Default (Hair Tuft)',
+  // Heaven / Armageddon companion costumes
+  '천국 후광':'Heaven Halo', '천국 의복':'Heaven Robe',
+  '아기 후광':'Baby Halo', '아기 천국복':'Baby Heaven Robe',
+  '아마겟돈 성관':'Armageddon Crown', '아마겟돈 광휘 갑주':'Armageddon Radiant Aegis',
+  '아기 아마겟돈 성관':'Baby Armageddon Crown', '아기 아마겟돈 갑주':'Baby Armageddon Aegis',
+  // Set names
+  '잿불 의장단':'Ember Pageantry', '구원의 합창단':'Salvation Choir', '심연의 결사대':'Abyss Vanguard',
+  '천국 승천 의장':'Heaven Ascension Set', '아마겟돈 천군 의장':'Armageddon Host Set',
+  '천사 디폴트':'Angel Default', '궁중 의복':'Court Vestments',
+  '별빛 새벽 의장':'Starlit Dawn Vestments', '천계 원로 의관':'Celestial Elder Robe',
+  '아마겟돈 원로 갑주':'Armageddon Elder Plate',
+  // Ancestor (developer/philosopher) costumes
+  '발명가 디폴트':'Inventor Default', '화가복':'Painter Robe', '기계공학자복':'Engineer Robe',
+  '궁정 발명가':'Royal Inventor', '아마겟돈 발명가 (SSS)':'Armageddon Inventor (SSS)',
+  '철학자 디폴트':'Scholar Default', '연설가복':'Orator Robe', '시인복':'Poet Robe',
+  '현자복':'Sage Robe', '아마겟돈 철학자 (SSS)':'Armageddon Philosopher (SSS)',
+};
+function _enFromMap(s){ return s ? (NAME_EN_MAP[s] || null) : null; }
+function nameOf(o){
+  if(!o) return '';
+  if(getLang()==='en'){
+    if(o.name_en != null) return o.name_en;
+    const fromMap = _enFromMap(o.name);
+    if(fromMap != null) return fromMap;
+  }
+  return o.name || '';
+}
+function titleOf(o){    if(!o) return ''; return getLang()==='en' && o.title_en    != null ? o.title_en    : (o.title||''); }
+function labelOf(o){    if(!o) return ''; return getLang()==='en' && o.label_en    != null ? o.label_en    : (o.label||''); }
+function descOf(o){     if(!o) return ''; return getLang()==='en' && o.desc_en     != null ? o.desc_en     : (o.desc||''); }
+function subOf(o){      if(!o) return ''; return getLang()==='en' && o.sub_en      != null ? o.sub_en      : (o.sub||''); }
+function subtitleOf(o){ if(!o) return ''; return getLang()==='en' && o.subtitle_en != null ? o.subtitle_en : (o.subtitle||''); }
+function descriptionOf(o){ if(!o) return ''; return getLang()==='en' && o.description_en != null ? o.description_en : (o.description||''); }
 function applyI18n(){
   const root = document;
   // textContent
@@ -6299,9 +6563,9 @@ try { applyI18n(); } catch(e){}
 // that compose multi-layer gradients (radial spots + tile texture + sky/ground band) to look
 // like a snapshot of a gameplay world rather than a flat gradient. No gameplay impact.
 const TITLE_SKINS = [
-  { id:'default',  name:'비둘기 광장',   price: 0,
+  { id:'default',  name:'비둘기 광장',   name_en:'Pigeon Plaza',     price: 0,
     grad:'radial-gradient(ellipse at 50% 65%, rgba(255,243,191,.92) 0%, rgba(255,212,59,.88) 18%, rgba(247,103,7,.88) 45%, rgba(90,26,4,.94) 80%, rgba(18,3,0,.98) 100%)' },
-  { id:'neon',     name:'네온 야경',     price: 1500,
+  { id:'neon',     name:'네온 야경',     name_en:'Neon Night',       price: 1500,
     grad:[
       // Window-light specks scattered across the upper third (skyscraper feel)
       'radial-gradient(circle at 12% 18%, rgba(255,224,102,.5) 0%, transparent 1.2%)',
@@ -6313,7 +6577,7 @@ const TITLE_SKINS = [
       // Base glow + dark ground
       'radial-gradient(ellipse at 50% 65%, rgba(186,104,200,.92) 0%, rgba(106,27,154,.85) 25%, rgba(255,64,129,.85) 60%, rgba(13,0,26,.96) 100%)'
     ].join(',') },
-  { id:'crystal',  name:'수정 동굴',     price: 3000,
+  { id:'crystal',  name:'수정 동굴',     name_en:'Crystal Cave',     price: 3000,
     grad:[
       // Crystal sparkles
       'radial-gradient(circle at 18% 30%, rgba(229,153,247,.6) 0%, transparent 1.4%)',
@@ -6324,7 +6588,7 @@ const TITLE_SKINS = [
       'repeating-linear-gradient(95deg, rgba(177,151,252,.06) 0 80px, transparent 80px 160px)',
       'radial-gradient(ellipse at 50% 65%, rgba(177,151,252,.92) 0%, rgba(95,61,196,.85) 30%, rgba(45,27,105,.92) 70%, rgba(5,1,27,.98) 100%)'
     ].join(',') },
-  { id:'glacier',  name:'빙하 새벽',     price: 4500,
+  { id:'glacier',  name:'빙하 새벽',     name_en:'Glacier Dawn',     price: 4500,
     grad:[
       // Aurora curtains
       'radial-gradient(ellipse 60% 25% at 20% 30%, rgba(81,207,102,.35) 0%, transparent 70%)',
@@ -6335,7 +6599,7 @@ const TITLE_SKINS = [
       'radial-gradient(circle at 75% 55%, rgba(255,255,255,.4) 0%, transparent 0.8%)',
       'radial-gradient(ellipse at 50% 65%, rgba(227,250,252,.92) 0%, rgba(116,192,252,.85) 30%, rgba(33,150,243,.85) 60%, rgba(13,71,161,.96) 100%)'
     ].join(',') },
-  { id:'cosmos',   name:'우주 정거장',   price: 6000,
+  { id:'cosmos',   name:'우주 정거장',   name_en:'Space Station',    price: 6000,
     grad:[
       // Star field
       'radial-gradient(circle at 11% 23%, rgba(255,255,255,.7) 0%, transparent 0.4%)',
@@ -6349,7 +6613,7 @@ const TITLE_SKINS = [
       'radial-gradient(ellipse 50% 40% at 75% 60%, rgba(116,64,255,.25) 0%, transparent 70%)',
       'radial-gradient(ellipse at 50% 65%, rgba(83,109,254,.85) 0%, rgba(123,31,162,.85) 35%, rgba(26,15,90,.92) 70%, rgba(0,0,30,.98) 100%)'
     ].join(',') },
-  { id:'hellfire', name:'지옥 분화구',   price: 7500,
+  { id:'hellfire', name:'지옥 분화구',   name_en:'Hell Crater',      price: 7500,
     grad:[
       // Ember sparks rising
       'radial-gradient(circle at 22% 78%, rgba(255,224,102,.6) 0%, transparent 1.2%)',
@@ -6360,7 +6624,7 @@ const TITLE_SKINS = [
       'repeating-linear-gradient(35deg, rgba(255,87,34,.08) 0 4px, transparent 4px 14px)',
       'radial-gradient(ellipse at 50% 75%, rgba(255,167,38,.9) 0%, rgba(244,67,54,.85) 30%, rgba(150,21,21,.92) 65%, rgba(13,0,0,.98) 100%)'
     ].join(',') },
-  { id:'abyss',    name:'심해 협곡',     price: 9000,
+  { id:'abyss',    name:'심해 협곡',     name_en:'Deep-Sea Trench',  price: 9000,
     grad:[
       // Bioluminescent particles
       'radial-gradient(circle at 25% 30%, rgba(61,217,217,.55) 0%, transparent 0.8%)',
@@ -6371,7 +6635,7 @@ const TITLE_SKINS = [
       'linear-gradient(180deg, rgba(116,192,252,.18) 0%, transparent 30%)',
       'radial-gradient(ellipse at 50% 65%, rgba(74,210,189,.85) 0%, rgba(0,121,107,.85) 30%, rgba(13,71,79,.92) 70%, rgba(0,18,29,.98) 100%)'
     ].join(',') },
-  { id:'stardust', name:'별빛 회랑',     price: 12000,
+  { id:'stardust', name:'별빛 회랑',     name_en:'Stardust Hall',    price: 12000,
     grad:[
       // Dense star scatter
       'radial-gradient(circle at 14% 18%, rgba(255,255,255,.8) 0%, transparent 0.4%)',
@@ -6385,7 +6649,7 @@ const TITLE_SKINS = [
       'radial-gradient(ellipse at 50% 65%, rgba(255,224,102,.85) 0%, rgba(229,153,247,.85) 30%, rgba(116,64,255,.92) 65%, rgba(13,2,30,.98) 100%)'
     ].join(',') },
   // ── Fancy "scene" skins — multi-layer compositions that suggest a real environment.
-  { id:'sunrise',  name:'새벽의 광장',   price: 5000,
+  { id:'sunrise',  name:'새벽의 광장',   name_en:'Dawn Plaza',       price: 5000,
     grad:[
       // Sun above the horizon
       'radial-gradient(circle 80px at 50% 30%, rgba(255,243,191,.9) 0%, rgba(255,224,102,.8) 30%, transparent 70%)',
@@ -6397,7 +6661,7 @@ const TITLE_SKINS = [
       // Dawn sky → ground
       'linear-gradient(180deg, #FFA94D 0%, #FF6B6B 35%, #C92A2A 70%, #2A0500 100%)'
     ].join(',') },
-  { id:'sakura',   name:'사쿠라 정원',   price: 5500,
+  { id:'sakura',   name:'사쿠라 정원',   name_en:'Sakura Garden',    price: 5500,
     grad:[
       // Falling petals (offset blobs)
       'radial-gradient(circle at 20% 20%, rgba(255,182,217,.55) 0%, transparent 1.2%)',
@@ -6409,7 +6673,7 @@ const TITLE_SKINS = [
       // Sky → ground
       'linear-gradient(180deg, #87CEEB 0%, #FFC9DA 50%, #FF8FB1 80%, #5A1A3F 100%)'
     ].join(',') },
-  { id:'fireworks',name:'불꽃축제',     price: 8500,
+  { id:'fireworks',name:'불꽃축제',     name_en:'Fireworks Festival', price: 8500,
     grad:[
       // Firework bursts — colored radial bursts
       'radial-gradient(circle at 22% 20%, rgba(255,224,102,.6) 0%, transparent 4%, transparent 6%, rgba(255,107,107,.4) 7%, transparent 12%)',
@@ -6422,7 +6686,7 @@ const TITLE_SKINS = [
       // Night sky base
       'linear-gradient(180deg, #0d0026 0%, #1a0033 50%, #000010 100%)'
     ].join(',') },
-  { id:'wheatfield',name:'풍요의 들판',  price: 6500,
+  { id:'wheatfield',name:'풍요의 들판',  name_en:'Bountiful Fields', price: 6500,
     grad:[
       // Sun
       'radial-gradient(circle 60px at 50% 25%, rgba(255,243,191,.9) 0%, rgba(255,224,102,.7) 40%, transparent 80%)',
@@ -6436,7 +6700,7 @@ const TITLE_SKINS = [
   // === v12.14 → v12.34 — 원정 보상 스킨. expeditionUnlock 으로 구매 자격을 해금만 하고,
   // 실제 소유는 코인 결제 필요 (사용자 피드백 "원정 클리어할때마다 무료로 사용할 수 있게 해놨는데
   // 그게 아니라 엄연히 그 스킨들도 해금 후 돈 내고 사야하는거야"). 단계별 상승 가격 책정. ===
-  { id:'sky_emperor', name:'🌅 하늘의 황제 (원정 Ⅰ 보상)', price: 8000, expeditionUnlock: 1,
+  { id:'sky_emperor', name:'🌅 하늘의 황제 (원정 Ⅰ 보상)', name_en:'🌅 Sky Emperor (Expedition I Reward)', price: 8000, expeditionUnlock: 1,
     grad:[
       // 떠 있는 왕관 후광
       'radial-gradient(circle 100px at 50% 22%, rgba(255,243,191,.85) 0%, rgba(255,224,102,.6) 35%, transparent 75%)',
@@ -6452,7 +6716,7 @@ const TITLE_SKINS = [
       // 노을 → 지평선 → 도시 silhouette
       'linear-gradient(180deg, #FFE3A6 0%, #FFA94D 30%, #E03131 60%, #5A1A04 90%, #18030A 100%)'
     ].join(',') },
-  { id:'pigeon_palace', name:'🪐 비둘기 궁전 (원정 Ⅱ 보상)', price: 18000, expeditionUnlock: 2,
+  { id:'pigeon_palace', name:'🪐 비둘기 궁전 (원정 Ⅱ 보상)', name_en:'🪐 Pigeon Palace (Expedition II Reward)', price: 18000, expeditionUnlock: 2,
     grad:[
       // 떨어지는 깃털
       'radial-gradient(ellipse 5px 2px at 18% 22%, rgba(255,224,102,.65) 0%, transparent 80%)',
@@ -6468,7 +6732,7 @@ const TITLE_SKINS = [
       // 핑크 새벽 sky
       'linear-gradient(180deg, #FFE3F2 0%, #FFB4D8 25%, #FA80B0 55%, #5A1A3F 85%, #1A0510 100%)'
     ].join(',') },
-  { id:'cosmic_throne', name:'🌌 우주의 옥좌 (원정 Ⅲ 보상)', price: 35000, expeditionUnlock: 3,
+  { id:'cosmic_throne', name:'🌌 우주의 옥좌 (원정 Ⅲ 보상)', name_en:'🌌 Cosmic Throne (Expedition III Reward)', price: 35000, expeditionUnlock: 3,
     grad:[
       // 별밭 (조밀)
       'radial-gradient(circle at 8% 14%, rgba(255,255,255,.85) 0%, transparent 0.4%)',
@@ -6487,7 +6751,7 @@ const TITLE_SKINS = [
       // 우주 베이스
       'linear-gradient(180deg, #0a0030 0%, #1a0050 30%, #2a0080 60%, #050015 100%)'
     ].join(',') },
-  { id:'hellgate_redeemer', name:'🔥 지옥문의 구원자 (원정 Ⅳ 보상)', price: 60000, expeditionUnlock: 4,
+  { id:'hellgate_redeemer', name:'🔥 지옥문의 구원자 (원정 Ⅳ 보상)', name_en:'🔥 Hellgate Redeemer (Expedition IV Reward)', price: 60000, expeditionUnlock: 4,
     grad:[
       // 떨어지는 잿불
       'radial-gradient(circle at 14% 18%, rgba(255,107,107,.7) 0%, transparent 1%)',
@@ -6506,7 +6770,7 @@ const TITLE_SKINS = [
       'linear-gradient(180deg, #1A0505 0%, #5A1010 25%, #C92A2A 55%, #FF6B00 75%, #2A0808 95%, #050000 100%)'
     ].join(',') },
   // v12.34 — 천국 1층천 보상 스킨 (ch160 클리어). 흰빛 cloud + 황금 후광.
-  { id:'heaven_first_garden', name:'🌟 천국 1층천 정원 (원정 Ⅴ 보상)', price: 90000, expeditionUnlock: 5,
+  { id:'heaven_first_garden', name:'🌟 천국 1층천 정원 (원정 Ⅴ 보상)', name_en:'🌟 First-Heaven Garden (Expedition V Reward)', price: 90000, expeditionUnlock: 5,
     grad:[
       // 떠다니는 황금 별
       'radial-gradient(circle at 14% 22%, rgba(255,224,102,.85) 0%, transparent 1%)',
@@ -6524,7 +6788,7 @@ const TITLE_SKINS = [
       'linear-gradient(180deg, #FFFFFF 0%, #FFF9DB 18%, #FFE066 38%, #A5D8FF 60%, #74C0FC 80%, #1864AB 100%)'
     ].join(',') },
   // v12.34 — 천국 2층천 보상 스킨 (ch200 최종 클리어). 오로라 + 광휘.
-  { id:'heaven_second_apex', name:'🪽 천국 2층천 창공 (원정 Ⅵ 보상)', price: 150000, expeditionUnlock: 6,
+  { id:'heaven_second_apex', name:'🪽 천국 2층천 창공 (원정 Ⅵ 보상)', name_en:'🪽 Second-Heaven Apex (Expedition VI Reward)', price: 150000, expeditionUnlock: 6,
     grad:[
       // 별빛 (적은 수, 크게)
       'radial-gradient(circle at 18% 14%, rgba(255,255,255,.85) 0%, transparent 1%)',
@@ -6541,7 +6805,7 @@ const TITLE_SKINS = [
       'linear-gradient(180deg, #FFE066 0%, #FFA94D 25%, #E599F7 55%, #9775FA 75%, #5F3DC4 90%, #1A0033 100%)'
     ].join(',') },
   // v12.35 — 천국 3층천 보상 스킨 (ch250 클리어).
-  { id:'heaven_third_throne', name:'⚜️ 천국 3층천 옥좌 (원정 Ⅶ 보상)', price: 220000, expeditionUnlock: 7,
+  { id:'heaven_third_throne', name:'⚜️ 천국 3층천 옥좌 (원정 Ⅶ 보상)', name_en:'⚜️ Third-Heaven Throne (Expedition VII Reward)', price: 220000, expeditionUnlock: 7,
     grad:[
       // 신성 자색 별빛
       'radial-gradient(circle at 22% 14%, rgba(229,176,255,.9) 0%, transparent 1%)',
@@ -6558,7 +6822,7 @@ const TITLE_SKINS = [
     ].join(',') },
   // v12.35 — 천상의 새우깡 스킨 (ch300 클리어 후 영구 무료 해금). 사용자 명시: "천상의 새우깡 스킨이 해금되도록".
   // 다른 보상 스킨과 달리 별도 가격 없이 ch300 클리어 시 자동으로 ownedSkins 에 추가 (onBossDefeated).
-  { id:'celestial_cracker', name:'🌟 천상의 새우깡 (원정 Ⅷ 최종)', price: 0, expeditionUnlock: 8,
+  { id:'celestial_cracker', name:'🌟 천상의 새우깡 (원정 Ⅷ 최종)', name_en:'🌟 Celestial Saeukkang (Expedition VIII Final)', price: 0, expeditionUnlock: 8,
     grad:[
       // 십자 별빛
       'radial-gradient(circle at 18% 14%, rgba(255,255,255,.95) 0%, transparent 1%)',
@@ -6619,46 +6883,46 @@ function rollGachaGrade(rates){
 // Costume catalogue — each entry can drop at any grade. Slot determines which body part it overlays.
 const COSTUME_DEFS = [
   // ─── HEAD ───
-  { id:'h_beanie',     slot:'head',   name:'동네 비니',       icon:'🧢', expedition:1 },
-  { id:'h_strawhat',   slot:'head',   name:'밀짚모자',         icon:'👒', expedition:1 },
-  { id:'h_helmet',     slot:'head',   name:'전투용 헬멧',      icon:'⛑️', expedition:1 },
-  { id:'h_tophat',     slot:'head',   name:'마법 실크햇',      icon:'🎩', expedition:1 },
-  { id:'h_crown',      slot:'head',   name:'황금 왕관',        icon:'👑', expedition:1 },
-  { id:'h_halo',       slot:'head',   name:'별빛 후광',        icon:'💫', expedition:1 },
+  { id:'h_beanie',     slot:'head',   name:'동네 비니',       name_en:'Street Beanie',   icon:'🧢', expedition:1 },
+  { id:'h_strawhat',   slot:'head',   name:'밀짚모자',         name_en:'Straw Hat',       icon:'👒', expedition:1 },
+  { id:'h_helmet',     slot:'head',   name:'전투용 헬멧',      name_en:'Battle Helmet',   icon:'⛑️', expedition:1 },
+  { id:'h_tophat',     slot:'head',   name:'마법 실크햇',      name_en:'Magic Top Hat',   icon:'🎩', expedition:1 },
+  { id:'h_crown',      slot:'head',   name:'황금 왕관',        name_en:'Golden Crown',    icon:'👑', expedition:1 },
+  { id:'h_halo',       slot:'head',   name:'별빛 후광',        name_en:'Starlight Halo',  icon:'💫', expedition:1 },
   // ─── BODY ───
-  { id:'b_jersey',     slot:'body',   name:'운동복',           icon:'👕', expedition:1 },
-  { id:'b_cape',       slot:'body',   name:'영웅의 망토',      icon:'🦸', expedition:1 },
-  { id:'b_robe',       slot:'body',   name:'마법 로브',        icon:'🪄', expedition:1 },
-  { id:'b_tux',        slot:'body',   name:'턱시도',           icon:'🤵', expedition:1 },
-  { id:'b_armor',      slot:'body',   name:'기사 갑옷',        icon:'🛡️', expedition:1 },
-  { id:'b_dragon',     slot:'body',   name:'용비늘 갑주',      icon:'🐉', expedition:1 },
+  { id:'b_jersey',     slot:'body',   name:'운동복',           name_en:'Athletic Jersey',  icon:'👕', expedition:1 },
+  { id:'b_cape',       slot:'body',   name:'영웅의 망토',      name_en:'Hero\'s Cape',     icon:'🦸', expedition:1 },
+  { id:'b_robe',       slot:'body',   name:'마법 로브',        name_en:'Magic Robe',       icon:'🪄', expedition:1 },
+  { id:'b_tux',        slot:'body',   name:'턱시도',           name_en:'Tuxedo',           icon:'🤵', expedition:1 },
+  { id:'b_armor',      slot:'body',   name:'기사 갑옷',        name_en:'Knight Armor',     icon:'🛡️', expedition:1 },
+  { id:'b_dragon',     slot:'body',   name:'용비늘 갑주',      name_en:'Dragonscale Mail', icon:'🐉', expedition:1 },
   // ─── WEAPON (gloves/fists) ───
-  { id:'w_ribbon',     slot:'weapon', name:'리본 글러브',      icon:'🎀', expedition:1 },
-  { id:'w_brass',      slot:'weapon', name:'브라스 너클',      icon:'👊', expedition:1 },
-  { id:'w_gauntlet',   slot:'weapon', name:'전투 건틀릿',      icon:'🦾', expedition:1 },
-  { id:'w_blade',      slot:'weapon', name:'쌍수도',          icon:'⚔️', expedition:1 },
-  { id:'w_thunder',    slot:'weapon', name:'천둥의 메이스',    icon:'🔨', expedition:1 },
-  { id:'w_phoenix',    slot:'weapon', name:'불사조 클로',      icon:'🔥', expedition:1 },
+  { id:'w_ribbon',     slot:'weapon', name:'리본 글러브',      name_en:'Ribbon Glove',     icon:'🎀', expedition:1 },
+  { id:'w_brass',      slot:'weapon', name:'브라스 너클',      name_en:'Brass Knuckles',   icon:'👊', expedition:1 },
+  { id:'w_gauntlet',   slot:'weapon', name:'전투 건틀릿',      name_en:'Battle Gauntlet',  icon:'🦾', expedition:1 },
+  { id:'w_blade',      slot:'weapon', name:'쌍수도',          name_en:'Twin Blades',      icon:'⚔️', expedition:1 },
+  { id:'w_thunder',    slot:'weapon', name:'천둥의 메이스',    name_en:'Thunder Mace',     icon:'🔨', expedition:1 },
+  { id:'w_phoenix',    slot:'weapon', name:'불사조 클로',      name_en:'Phoenix Claw',     icon:'🔥', expedition:1 },
   // ─── 원정 Ⅱ — 비둘기 행성 (drops only after ch50 cleared) ───
   // v12.10 — h_pearl_tiara 제거됨 (남편이 입을 코스튬이 아님 → wife.tiara로 이전됨).
   // v12.12 — 사용자 피드백 "남편 코스튬에 여성 코스튬은 다 없애줘". b_feather_robe(깃털
   // 드레스) 와 w_pink_glove(핑크 글러브)도 남편 풀에서 제거. (보유 사용자는 migrateRemovedCostumes
   // 가 인벤토리·equipped를 청소함.)
-  { id:'b_warrior_belt',slot:'body',  name:'전사 벨트',        icon:'⚙️', expedition:2 },
-  { id:'w_iron_glove', slot:'weapon', name:'철권 글러브',      icon:'🥊', expedition:2 },
+  { id:'b_warrior_belt',slot:'body',  name:'전사 벨트',        name_en:'Warrior Belt',         icon:'⚙️', expedition:2 },
+  { id:'w_iron_glove', slot:'weapon', name:'철권 글러브',      name_en:'Iron-Fist Glove',      icon:'🥊', expedition:2 },
   // ─── 원정 Ⅲ — 우주 (drops only after ch70 cleared) ───
-  { id:'h_galaxy_helm',slot:'head',   name:'은하 헬멧',        icon:'🌌', expedition:3 },
-  { id:'b_void_robe',  slot:'body',   name:'보이드 로브',      icon:'⚫', expedition:3 },
-  { id:'w_star_blade', slot:'weapon', name:'별의 검',          icon:'⭐', expedition:3 },
+  { id:'h_galaxy_helm',slot:'head',   name:'은하 헬멧',        name_en:'Galaxy Helm',          icon:'🌌', expedition:3 },
+  { id:'b_void_robe',  slot:'body',   name:'보이드 로브',      name_en:'Void Robe',            icon:'⚫', expedition:3 },
+  { id:'w_star_blade', slot:'weapon', name:'별의 검',          name_en:'Star Blade',           icon:'⭐', expedition:3 },
   // ─── v12.34 원정 Ⅴ/Ⅵ — 천국 (ch131 해금, SS 전용 자동 지급). 일반 가챠/드롭 풀에서는 제외. ───
-  { id:'h_seraph_halo',slot:'head',   name:'세라핌 후광',      icon:'😇', expedition:5, ssOnly:true },
-  { id:'b_holy_robe',  slot:'body',   name:'거룩한 로브',      icon:'🪽', expedition:5, ssOnly:true },
-  { id:'w_celestial_blade',slot:'weapon', name:'천공의 검',    icon:'⚜️', expedition:5, ssOnly:true },
+  { id:'h_seraph_halo',slot:'head',   name:'세라핌 후광',      name_en:'Seraph Halo',          icon:'😇', expedition:5, ssOnly:true },
+  { id:'b_holy_robe',  slot:'body',   name:'거룩한 로브',      name_en:'Holy Robe',            icon:'🪽', expedition:5, ssOnly:true },
+  { id:'w_celestial_blade',slot:'weapon', name:'천공의 검',    name_en:'Celestial Blade',      icon:'⚜️', expedition:5, ssOnly:true },
   // ─── v12.35 원정 Ⅷ — 아마겟돈 (ch251 해금, SSS 전용 자동 지급). ───
   // 사용자 명시: weapon 은 새우깡 비슷하지만 성스러운 아마겟돈 전쟁이 떠오르는 디자인.
-  { id:'h_armageddon_crown', slot:'head',   name:'아마겟돈 성관',           icon:'👑', expedition:8, sssOnly:true },
-  { id:'b_armageddon_aegis', slot:'body',   name:'아마겟돈 광휘 갑주',      icon:'🛡️', expedition:8, sssOnly:true },
-  { id:'w_armageddon_cracker', slot:'weapon', name:'성전의 새우깡',         icon:'⚔️', expedition:8, sssOnly:true },
+  { id:'h_armageddon_crown', slot:'head',   name:'아마겟돈 성관',           name_en:'Armageddon Crown',         icon:'👑', expedition:8, sssOnly:true },
+  { id:'b_armageddon_aegis', slot:'body',   name:'아마겟돈 광휘 갑주',      name_en:'Armageddon Radiant Aegis', icon:'🛡️', expedition:8, sssOnly:true },
+  { id:'w_armageddon_cracker', slot:'weapon', name:'성전의 새우깡',         name_en:'Crusade Saeukkang',        icon:'⚔️', expedition:8, sssOnly:true },
 ];
 const COSTUME_DEFS_BY_ID = Object.fromEntries(COSTUME_DEFS.map(d=>[d.id,d]));
 const COSTUME_DEFS_BY_SLOT = { head:[], body:[], weapon:[] };
@@ -6908,14 +7172,18 @@ function pullGachaTen(rates){
 //       feedBoost active w/ strength<2: boosted (dmg ×1.10, hp +10, fireRate ×1.05)
 //       feedBoost active w/ strength≥2: glow    (dmg ×1.20, hp +20, fireRate ×1.10)
 const FEEDS = [
-  { id:'basic',   icon:'🌾', name:'일반 새 모이',  price:50,    bellyH:8,  boostH:0, boostStr:0,
-    desc:'기본 사료 — 배고픔만 채워주는 검소한 한 끼.' },
-  { id:'premium', icon:'🥣', name:'고급 곡물 믹스', price:300,   bellyH:16, boostH:0, boostStr:0,
-    desc:'영양가 높은 곡물 믹스 — 배고픔이 더 오래 지속되지 않아요.' },
-  { id:'deluxe',  icon:'🌰', name:'황금 견과',     price:1500,  bellyH:24, boostH:4, boostStr:1,
-    desc:'특별한 견과 — 4시간 동안 +10% 전투력 부스트, 눈이 살짝 빛나요.' },
-  { id:'ultra',   icon:'✨', name:'전설의 사료',   price:8000,  bellyH:24, boostH:2, boostStr:2,
-    desc:'전설급 영양제 — 2시간 동안 +20% 전투력. 눈이 엄청 반짝이고 황금 후광까지!' },
+  { id:'basic',   icon:'🌾', name:'일반 새 모이',  name_en:'Basic Bird Feed',   price:50,    bellyH:8,  boostH:0, boostStr:0,
+    desc:'기본 사료 — 배고픔만 채워주는 검소한 한 끼.',
+    desc_en:'Basic feed — a humble meal that only fills hunger.' },
+  { id:'premium', icon:'🥣', name:'고급 곡물 믹스', name_en:'Premium Grain Mix', price:300,   bellyH:16, boostH:0, boostStr:0,
+    desc:'영양가 높은 곡물 믹스 — 배고픔이 더 오래 지속되지 않아요.',
+    desc_en:'Nutritious grain mix — keeps hunger at bay much longer.' },
+  { id:'deluxe',  icon:'🌰', name:'황금 견과',     name_en:'Golden Nuts',       price:1500,  bellyH:24, boostH:4, boostStr:1,
+    desc:'특별한 견과 — 4시간 동안 +10% 전투력 부스트, 눈이 살짝 빛나요.',
+    desc_en:'Special nuts — +10% combat boost for 4 hours, eyes faintly glow.' },
+  { id:'ultra',   icon:'✨', name:'전설의 사료',   name_en:'Legendary Feed',    price:8000,  bellyH:24, boostH:2, boostStr:2,
+    desc:'전설급 영양제 — 2시간 동안 +20% 전투력. 눈이 엄청 반짝이고 황금 후광까지!',
+    desc_en:'Legendary supplement — +20% combat for 2 hours. Eyes shine bright with a golden halo!' },
 ];
 const FEEDS_BY_ID = Object.fromEntries(FEEDS.map(f => [f.id, f]));
 
@@ -7001,71 +7269,71 @@ function rollChapterClearCostume(){
 // 기존 노드 id/효과 보존 → 저장 호환. cleared 게이트만 상향.
 const SHOP_BRANCHES = [
   {
-    id:'def', label:'방어', color:'#FF6B9D', tip:'생존력',
+    id:'def', label:'방어', label_en:'Defense', color:'#FF6B9D', tip:'생존력', tip_en:'Survival',
     nodes:[
-      { id:'hp',     icon:'❤️', name:'단단한 깃털',    desc:'시작 최대 HP +15',        max:10, cost:l=>60+l*45,    reqClearedCh:1,
+      { id:'hp',     icon:'❤️', name:'단단한 깃털',    name_en:'Sturdy Feather',    desc:'시작 최대 HP +15',        desc_en:'Starting Max HP +15',        max:10, cost:l=>60+l*45,    reqClearedCh:1,
         apply:(p,l)=>{ p.maxHp += 15*l; p.hp = p.maxHp; } },
-      { id:'magnet', icon:'🧲', name:'은빛 깃털 자석', desc:'XP 자석 반경 +25%',       max:5,  cost:l=>120+l*80,   req:'hp',     reqLvl:3, reqClearedCh:20,
+      { id:'magnet', icon:'🧲', name:'은빛 깃털 자석', name_en:'Silver Feather Magnet', desc:'XP 자석 반경 +25%',       desc_en:'XP magnet radius +25%',       max:5,  cost:l=>120+l*80,   req:'hp',     reqLvl:3, reqClearedCh:20,
         apply:(p,l)=>{ p.magnet *= Math.pow(1.25, l); } },
-      { id:'revive', icon:'🛡️', name:'예비 부활',     desc:'런 당 1회 부활 (HP 50%)', max:1,  cost:l=>1500,       req:'magnet', reqLvl:3, reqClearedCh:55,
+      { id:'revive', icon:'🛡️', name:'예비 부활',     name_en:'Reserve Revive',     desc:'런 당 1회 부활 (HP 50%)', desc_en:'Revive once per run (HP 50%)', max:1,  cost:l=>1500,       req:'magnet', reqLvl:3, reqClearedCh:55,
         apply:(p,l,s)=>{ if(l>0) s.abilities.shield = 1; } },
       // ── v12.19 신규: 4~6단계 (ch75 / ch105 / ch130) ──
-      { id:'dr',      icon:'🪨', name:'바위 깃털',     desc:'피해 감소 +4%',           max:5,  cost:l=>800+l*500,   req:'revive', reqLvl:1, reqClearedCh:75,
+      { id:'dr',      icon:'🪨', name:'바위 깃털',     name_en:'Stone Feather',     desc:'피해 감소 +4%',           desc_en:'Damage reduction +4%',           max:5,  cost:l=>800+l*500,   req:'revive', reqLvl:1, reqClearedCh:75,
         apply:(p,l)=>{ p.damageReduction = (p.damageReduction||0) + 0.04*l; } },
-      { id:'regen',   icon:'🩹', name:'재생의 깃털',   desc:'매 초 HP +1',             max:3,  cost:l=>2200+l*1500, req:'dr',     reqLvl:3, reqClearedCh:105,
+      { id:'regen',   icon:'🩹', name:'재생의 깃털',   name_en:'Regen Feather',   desc:'매 초 HP +1',             desc_en:'+1 HP per second',             max:3,  cost:l=>2200+l*1500, req:'dr',     reqLvl:3, reqClearedCh:105,
         apply:(p,l)=>{ p.regenPerSec = (p.regenPerSec||0) + 1*l; } },
-      { id:'bulwark', icon:'🏰', name:'대장벽',         desc:'피해 감소 +6%',           max:3,  cost:l=>5000+l*3500, req:'regen',  reqLvl:2, reqClearedCh:130,
+      { id:'bulwark', icon:'🏰', name:'대장벽',         name_en:'Bulwark',         desc:'피해 감소 +6%',           desc_en:'Damage reduction +6%',           max:3,  cost:l=>5000+l*3500, req:'regen',  reqLvl:2, reqClearedCh:130,
         apply:(p,l)=>{ p.damageReduction = (p.damageReduction||0) + 0.06*l; } },
       // v12.34 — 7단계 (ch160), 8단계 (ch200) 천국 신규 노드.
-      { id:'celestial_grace', icon:'🪽', name:'천국의 은총', desc:'최대 HP +10%',          max:3,  cost:l=>9000+l*6000, req:'bulwark', reqLvl:2, reqClearedCh:160,
+      { id:'celestial_grace', icon:'🪽', name:'천국의 은총', name_en:'Heaven\'s Grace', desc:'최대 HP +10%',          desc_en:'Max HP +10%',          max:3,  cost:l=>9000+l*6000, req:'bulwark', reqLvl:2, reqClearedCh:160,
         apply:(p,l)=>{ p.maxHp = Math.round(p.maxHp * Math.pow(1.10, l)); p.hp = p.maxHp; } },
-      { id:'sky_blessing',    icon:'☁️', name:'창공의 축복', desc:'피해 감소 +5% + 매 초 HP +2', max:2, cost:l=>16000+l*9000, req:'celestial_grace', reqLvl:2, reqClearedCh:200,
+      { id:'sky_blessing',    icon:'☁️', name:'창공의 축복', name_en:'Sky Blessing', desc:'피해 감소 +5% + 매 초 HP +2', desc_en:'DR +5% · +2 HP/sec', max:2, cost:l=>16000+l*9000, req:'celestial_grace', reqLvl:2, reqClearedCh:200,
         apply:(p,l)=>{ p.damageReduction = (p.damageReduction||0) + 0.05*l; p.regenPerSec = (p.regenPerSec||0) + 2*l; } },
     ]
   },
   {
-    id:'atk', label:'공격', color:'#FFA94D', tip:'화력',
+    id:'atk', label:'공격', label_en:'Attack', color:'#FFA94D', tip:'화력', tip_en:'Firepower',
     nodes:[
-      { id:'dmg',  icon:'💪', name:'근육질 한 방', desc:'시작 공격력 +6%',     max:10, cost:l=>80+l*55,    reqClearedCh:1,
+      { id:'dmg',  icon:'💪', name:'근육질 한 방', name_en:'Muscle Punch', desc:'시작 공격력 +6%',     desc_en:'Starting ATK +6%',     max:10, cost:l=>80+l*55,    reqClearedCh:1,
         apply:(p,l)=>{ p.damage *= Math.pow(1.06, l); } },
-      { id:'rate', icon:'⚡', name:'빠른 손놀림', desc:'시작 연사 속도 +5%',  max:8,  cost:l=>140+l*95,   req:'dmg',  reqLvl:3, reqClearedCh:25,
+      { id:'rate', icon:'⚡', name:'빠른 손놀림', name_en:'Quick Hands', desc:'시작 연사 속도 +5%',  desc_en:'Starting fire rate +5%',  max:8,  cost:l=>140+l*95,   req:'dmg',  reqLvl:3, reqClearedCh:25,
         apply:(p,l)=>{ p.fireRate *= Math.pow(1.05, l); } },
-      { id:'proj', icon:'🎯', name:'추가 새우깡', desc:'시작 새우깡 발사 +1', max:3,  cost:l=>500+l*500,  req:'rate', reqLvl:3, reqClearedCh:60,
+      { id:'proj', icon:'🎯', name:'추가 새우깡', name_en:'Extra Saeukkang', desc:'시작 새우깡 발사 +1', desc_en:'+1 starting projectile', max:3,  cost:l=>500+l*500,  req:'rate', reqLvl:3, reqClearedCh:60,
         apply:(p,l)=>{ p.projCount += l; } },
       // ── v12.19 신규: 4~6단계 (ch80 / ch110 / ch130) ──
-      { id:'pierce',   icon:'🔪', name:'예리한 깃끝', desc:'시작 관통 +1',         max:5,  cost:l=>900+l*600,    req:'proj',   reqLvl:1, reqClearedCh:80,
+      { id:'pierce',   icon:'🔪', name:'예리한 깃끝', name_en:'Sharp Quill', desc:'시작 관통 +1',         desc_en:'Starting pierce +1',         max:5,  cost:l=>900+l*600,    req:'proj',   reqLvl:1, reqClearedCh:80,
         apply:(p,l)=>{ p.pierce = (p.pierce||0) + l; } },
-      { id:'critmult', icon:'💥', name:'폭격 한 방',  desc:'치명타 배율 +0.3',     max:3,  cost:l=>2500+l*1800,  req:'pierce', reqLvl:3, reqClearedCh:110,
+      { id:'critmult', icon:'💥', name:'폭격 한 방',  name_en:'Critical Blast',  desc:'치명타 배율 +0.3',     desc_en:'Crit multiplier +0.3',     max:3,  cost:l=>2500+l*1800,  req:'pierce', reqLvl:3, reqClearedCh:110,
         apply:(p,l)=>{ p.critMult = (p.critMult||2.0) + 0.3*l; } },
-      { id:'apex',     icon:'🌋', name:'정점의 분노',  desc:'시작 공격력 ×1.10',    max:3,  cost:l=>5500+l*3800,  req:'critmult',reqLvl:2, reqClearedCh:130,
+      { id:'apex',     icon:'🌋', name:'정점의 분노',  name_en:'Apex Wrath',  desc:'시작 공격력 ×1.10',    desc_en:'Starting ATK ×1.10',    max:3,  cost:l=>5500+l*3800,  req:'critmult',reqLvl:2, reqClearedCh:130,
         apply:(p,l)=>{ p.damage *= Math.pow(1.10, l); } },
       // v12.34 — 7단계 (ch160), 8단계 (ch200) 천국 신규 노드.
-      { id:'seraph_strike',   icon:'⚜️', name:'세라핌의 일격',    desc:'시작 공격력 ×1.12 + 관통 +1', max:3, cost:l=>10000+l*7000, req:'apex', reqLvl:2, reqClearedCh:160,
+      { id:'seraph_strike',   icon:'⚜️', name:'세라핌의 일격',    name_en:'Seraph Strike',    desc:'시작 공격력 ×1.12 + 관통 +1', desc_en:'ATK ×1.12 · pierce +1', max:3, cost:l=>10000+l*7000, req:'apex', reqLvl:2, reqClearedCh:160,
         apply:(p,l)=>{ p.damage *= Math.pow(1.12, l); p.pierce = (p.pierce||0) + l; } },
-      { id:'creator_wrath',   icon:'🌟', name:'창조주의 분노',    desc:'공격력 ×1.20 + 치명타 배율 +0.4', max:2, cost:l=>20000+l*12000, req:'seraph_strike', reqLvl:2, reqClearedCh:200,
+      { id:'creator_wrath',   icon:'🌟', name:'창조주의 분노',    name_en:'Creator\'s Wrath',    desc:'공격력 ×1.20 + 치명타 배율 +0.4', desc_en:'ATK ×1.20 · crit ×+0.4', max:2, cost:l=>20000+l*12000, req:'seraph_strike', reqLvl:2, reqClearedCh:200,
         apply:(p,l)=>{ p.damage *= Math.pow(1.20, l); p.critMult = (p.critMult||2.0) + 0.4*l; } },
     ]
   },
   {
-    id:'agi', label:'민첩', color:'#74C0FC', tip:'기동',
+    id:'agi', label:'민첩', label_en:'Agility', color:'#74C0FC', tip:'기동', tip_en:'Mobility',
     nodes:[
-      { id:'speed', icon:'👟', name:'잽싼 발걸음',   desc:'이동 속도 +4%',     max:8, cost:l=>70+l*45,    reqClearedCh:3,
+      { id:'speed', icon:'👟', name:'잽싼 발걸음',   name_en:'Nimble Steps',   desc:'이동 속도 +4%',     desc_en:'Move speed +4%',     max:8, cost:l=>70+l*45,    reqClearedCh:3,
         apply:(p,l)=>{ p.speed *= Math.pow(1.04, l); } },
-      { id:'crit',  icon:'🎲', name:'행운의 비둘기', desc:'시작 치명타 +3%',   max:5, cost:l=>180+l*120,  req:'speed', reqLvl:3, reqClearedCh:30,
+      { id:'crit',  icon:'🎲', name:'행운의 비둘기', name_en:'Lucky Pigeon', desc:'시작 치명타 +3%',   desc_en:'Starting crit +3%',   max:5, cost:l=>180+l*120,  req:'speed', reqLvl:3, reqClearedCh:30,
         apply:(p,l)=>{ p.crit = Math.min(0.9, p.crit + 0.03*l); } },
-      { id:'xp',    icon:'🪶', name:'경험의 깃털',   desc:'경험치 획득 +6%',   max:5, cost:l=>260+l*180,  req:'crit',  reqLvl:2, reqClearedCh:65,
+      { id:'xp',    icon:'🪶', name:'경험의 깃털',   name_en:'Wisdom Feather',   desc:'경험치 획득 +6%',   desc_en:'XP gain +6%',   max:5, cost:l=>260+l*180,  req:'crit',  reqLvl:2, reqClearedCh:65,
         apply:(p,l)=>{ p.xpMult *= Math.pow(1.06, l); } },
       // ── v12.19 신규: 4~6단계 (ch85 / ch115 / ch130) ──
-      { id:'pspeed',    icon:'💨', name:'바람 깃털',    desc:'시작 탄속 +8%',  max:5, cost:l=>700+l*500,    req:'xp',     reqLvl:3, reqClearedCh:85,
+      { id:'pspeed',    icon:'💨', name:'바람 깃털',    name_en:'Wind Feather',    desc:'시작 탄속 +8%',  desc_en:'Starting projectile speed +8%',  max:5, cost:l=>700+l*500,    req:'xp',     reqLvl:3, reqClearedCh:85,
         apply:(p,l)=>{ p.projSpeed *= Math.pow(1.08, l); } },
-      { id:'coingreed', icon:'💰', name:'탐욕의 부리',  desc:'코인 획득 +15%', max:3, cost:l=>2000+l*1400,  req:'pspeed', reqLvl:3, reqClearedCh:115,
+      { id:'coingreed', icon:'💰', name:'탐욕의 부리',  name_en:'Greedy Beak',  desc:'코인 획득 +15%', desc_en:'Coin gain +15%', max:3, cost:l=>2000+l*1400,  req:'pspeed', reqLvl:3, reqClearedCh:115,
         apply:(p,l)=>{ p.coinMult = (p.coinMult||1) * Math.pow(1.15, l); } },
-      { id:'alacrity',  icon:'🌪️', name:'질풍의 가호', desc:'이동·연사 +5%',  max:3, cost:l=>5000+l*3500,  req:'coingreed',reqLvl:2, reqClearedCh:130,
+      { id:'alacrity',  icon:'🌪️', name:'질풍의 가호', name_en:'Gale Blessing', desc:'이동·연사 +5%',  desc_en:'Move & fire rate +5%',  max:3, cost:l=>5000+l*3500,  req:'coingreed',reqLvl:2, reqClearedCh:130,
         apply:(p,l)=>{ p.speed *= Math.pow(1.05, l); p.fireRate *= Math.pow(1.05, l); } },
       // v12.34 — 7단계 (ch160), 8단계 (ch200) 천국 신규 노드.
-      { id:'angel_wings',  icon:'🪽', name:'천사의 날개',    desc:'이동 +6% + 탄속 +6%',           max:3, cost:l=>9500+l*6500,  req:'alacrity', reqLvl:2, reqClearedCh:160,
+      { id:'angel_wings',  icon:'🪽', name:'천사의 날개',    name_en:'Angel Wings',    desc:'이동 +6% + 탄속 +6%',           desc_en:'Move +6% · projectile speed +6%',           max:3, cost:l=>9500+l*6500,  req:'alacrity', reqLvl:2, reqClearedCh:160,
         apply:(p,l)=>{ p.speed *= Math.pow(1.06, l); p.projSpeed *= Math.pow(1.06, l); } },
-      { id:'sky_anointed', icon:'✨', name:'창공의 인장',    desc:'치명타 +6% + 코인 ×1.20',        max:2, cost:l=>18000+l*10000, req:'angel_wings', reqLvl:2, reqClearedCh:200,
+      { id:'sky_anointed', icon:'✨', name:'창공의 인장',    name_en:'Sky-Anointed',    desc:'치명타 +6% + 코인 ×1.20',        desc_en:'Crit +6% · coins ×1.20',        max:2, cost:l=>18000+l*10000, req:'angel_wings', reqLvl:2, reqClearedCh:200,
         apply:(p,l)=>{ p.crit = Math.min(0.95, p.crit + 0.06*l); p.coinMult = (p.coinMult||1) * Math.pow(1.20, l); } },
     ]
   },
@@ -7089,11 +7357,12 @@ function shopUnlockReason(def){
   // Human-readable reason a node is locked, used by the shop screen to explain why a node is greyed out.
   const parts = [];
   if(def.reqClearedCh && (progress.clearedChapter || 0) < def.reqClearedCh){
-    parts.push(`Ch.${def.reqClearedCh} 클리어 필요`);
+    parts.push(L(`Ch.${def.reqClearedCh} 클리어 필요`, `Clear Ch.${def.reqClearedCh} first`));
   }
   if(def.req && shopLevel(def.req) < (def.reqLvl || 1)){
     const reqDef = SHOP_DEFS_BY_ID[def.req];
-    parts.push(`${reqDef ? reqDef.name : def.req} Lv ${def.reqLvl||1} 필요`);
+    const nm = reqDef ? nameOf(reqDef) : def.req;
+    parts.push(L(`${nm} Lv ${def.reqLvl||1} 필요`, `Requires ${nm} Lv ${def.reqLvl||1}`));
   }
   return parts.join(' · ');
 }
@@ -9065,30 +9334,33 @@ const RESCUED_KINDS = ['sparrow','magpie','owl','parrot','squirrel'];
 const RESCUED_SET_DEFS = [
   {
     id:'ashBrigade',
-    name:'잿불 의장단',
+    name:'잿불 의장단', name_en:'Ember Pageantry',
     icon:'🔥',
     accent:'#FF6B35',
     description:'지옥에서 함께한 친구들이 잿불 갑옷을 두른다',
+    description_en:'Friends from hell don ember-forged armor',
     perPieceBoost:1.01,    // 각 +1%
     setBonus:1.04,          // 풀세트 추가 ×1.04 → 합산 ~×1.092 (+9.2%)
     costPerPiece:1500,
   },
   {
     id:'salvationChoir',
-    name:'구원의 합창단',
+    name:'구원의 합창단', name_en:'Salvation Choir',
     icon:'✨',
     accent:'#FFE066',
     description:'천상의 빛을 담은 옷자락 — 친구들의 사기가 오른다',
+    description_en:'Robes that carry heavenly light — friend morale rises',
     perPieceBoost:1.015,
     setBonus:1.04,
     costPerPiece:2000,
   },
   {
     id:'abyssalPact',
-    name:'심연의 결사대',
+    name:'심연의 결사대', name_en:'Abyss Vanguard',
     icon:'🌑',
     accent:'#7048E8',
     description:'심연의 기운으로 강화된 결사 — 친구 화력 대폭 ↑',
+    description_en:'Empowered by abyssal energy — major friend DPS boost',
     perPieceBoost:1.02,
     setBonus:1.05,
     costPerPiece:2500,
@@ -9097,10 +9369,11 @@ const RESCUED_SET_DEFS = [
   // 사용자 명시: "다른 동료·부모·조상의 코스튬은 구매해야 한다."
   {
     id:'heavenAscension',
-    name:'천국 승천 의장',
+    name:'천국 승천 의장', name_en:'Heaven Ascension Set',
     icon:'🪽',
     accent:'#FFE066',
     description:'천국의 인정을 받아 친구들에게 새겨진 광휘 — 가장 강력한 동료 세트',
+    description_en:'Radiance bestowed by heaven — the strongest friend set',
     perPieceBoost:1.025,    // 각 +2.5%
     setBonus:1.06,          // 풀세트 ×1.06
     costPerPiece:2000,      // 일괄 5종 = 10,000코인 (사용자 피드백: "그렇게 비쌀 필요 없다")
@@ -9108,10 +9381,11 @@ const RESCUED_SET_DEFS = [
   // v12.35 — 아마겟돈 세트. ch251 해금, 코인 결제. SSS 등급에 준하는 친구 보너스.
   {
     id:'armageddonHostSet',
-    name:'아마겟돈 천군 의장',
+    name:'아마겟돈 천군 의장', name_en:'Armageddon Host Set',
     icon:'⚔️',
     accent:'#FFD43B',
     description:'성스러운 전쟁에 출진하는 친구들 — 황금 갑주 위 적금 십자',
+    description_en:'Friends march to holy war — gold plate with crimson cross',
     perPieceBoost:1.04,     // 각 +4%
     setBonus:1.09,          // 풀세트 ×1.09
     costPerPiece:4000,      // 일괄 5종 = 20,000코인 (사용자: SSS 모두 풀세트 구매가 어렵도록)
@@ -9189,21 +9463,26 @@ COMPANION_COSTUMES.squirrel = [
 // 장인+장모) 모두 같은 코스튬으로 일괄 장착. 효과는 친구 세트와 같은 골격(perPiece + setBonus).
 const PARENTS_KINDS = ['husbandParents','wifeParents'];
 const PARENTS_SET_DEFS = [
-  { id:'angelDefault', name:'천사 디폴트',   icon:'🪽', accent:'#FFE066',
+  { id:'angelDefault', name:'천사 디폴트', name_en:'Angel Default',   icon:'🪽', accent:'#FFE066',
     description:'천국에서 합류한 부모님이 입고 있는 디폴트 천사 옷. 자동 지급, 벗기 가능.',
+    description_en:'Default angel robe worn when parents joined from heaven. Auto-granted, removable.',
     perPieceBoost:1.02, setBonus:1.05, costPerPiece:0, autoUnlockClearedCh:205 },
-  { id:'royalCourt',   name:'궁중 의복',     icon:'👑', accent:'#FFD43B',
+  { id:'royalCourt',   name:'궁중 의복', name_en:'Court Vestments',     icon:'👑', accent:'#FFD43B',
     description:'천계 궁중에서 내려준 가문 의복 — 위엄 ↑',
+    description_en:'Family vestments from the celestial court — gravitas ↑',
     perPieceBoost:1.025, setBonus:1.06, costPerPiece:3000 },   // pair 1세트 3,000 (총 6,000 일괄)
-  { id:'starlitDawn',  name:'별빛 새벽 의장', icon:'🌟', accent:'#A5D8FF',
+  { id:'starlitDawn',  name:'별빛 새벽 의장', name_en:'Starlit Dawn Vestments', icon:'🌟', accent:'#A5D8FF',
     description:'새벽의 별이 수놓인 흰 로브 — 부모님의 광휘',
+    description_en:'White robes embroidered with dawn stars — a parent\'s radiance',
     perPieceBoost:1.03, setBonus:1.07, costPerPiece:4500 },    // 총 9,000 일괄
-  { id:'celestialElder', name:'천계 원로 의관', icon:'✨', accent:'#9775FA',
+  { id:'celestialElder', name:'천계 원로 의관', name_en:'Celestial Elder Robe', icon:'✨', accent:'#9775FA',
     description:'천계 원로회의 정장 — 가장 권위 있는 부모 코스튬',
+    description_en:'Formal robes of the celestial elders — the most prestigious parent set',
     perPieceBoost:1.035, setBonus:1.08, costPerPiece:5500 },   // 총 11,000 일괄
   // v12.35 — 아마겟돈 부모 세트. ch251 해금, 코인 결제 필요. SSS 등급에 준하는 보너스.
-  { id:'armageddonElder', name:'아마겟돈 원로 갑주', icon:'⚔️', accent:'#FFD43B',
+  { id:'armageddonElder', name:'아마겟돈 원로 갑주', name_en:'Armageddon Elder Plate', icon:'⚔️', accent:'#FFD43B',
     description:'성스러운 전쟁에 출진하는 부모님 — 황금 + 적금 십자 갑주',
+    description_en:'Parents marching to holy war — gold-and-crimson cross plate',
     perPieceBoost:1.05, setBonus:1.10, costPerPiece:11000 },  // pair 1세트 11,000 (총 22,000 일괄)
 ];
 function _makeParentsCostume(setId, kind, name, accent, secondary){
@@ -9785,7 +10064,7 @@ function buyCompanionCostume(kind, costumeId){
   // v12.36d — autoUnlockClearedCh 게이트. 천국·아마겟돈 코스튬은 해당 챕터 클리어 전엔 구매 불가.
   // (UI 에서도 숨기지만 안전을 위해 여기서도 가드.)
   if(def.autoUnlockClearedCh && (progress.clearedChapter||0) < def.autoUnlockClearedCh){
-    return { ok:false, reason:`Ch${def.autoUnlockClearedCh} 클리어 후 해금` };
+    return { ok:false, reason:L(`Ch${def.autoUnlockClearedCh} 클리어 후 해금`, `Unlocks after clearing Ch${def.autoUnlockClearedCh}`) };
   }
   if((progress.coins||0) < def.cost) return { ok:false, reason:'코인 부족' };
   progress.coins -= def.cost;
@@ -10216,81 +10495,81 @@ function spawnEnemy(kind){
 // Ch1~29 도 5챕터 단위 6 sub-tier 보스로 분할 (Day City / Neon / Cave / Ice / Cosmic / Hellfire).
 const BOSS_VARIANTS = {
   // === 원정 Ⅰ — 지구 정복 (1-50). v12.17 5챕터 단위 분할. ===
-  cat_king:        { hpMult:13.0, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕',     baseStyle:'cat_king',  baseBehavior:'cat_king' },                                  // 1-5 (Day City)
-  neon_warlord:    { hpMult:13.2, dmgMult:1.22, sizeMult:1.02, label:'네온 군주',         baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:200, saturate:1.5 },     // 6-10 (Neon Night)
-  crystal_brute:   { hpMult:13.4, dmgMult:1.24, sizeMult:1.05, label:'수정 골렘',         baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:60,  saturate:0.85 },    // 11-15 (Cave/Crystal)
-  frost_overlord:  { hpMult:13.6, dmgMult:1.26, sizeMult:1.05, label:'얼음 군주',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:180, saturate:0.7 },     // 16-20 (Ice)
-  cosmic_warden:   { hpMult:13.8, dmgMult:1.28, sizeMult:1.05, label:'우주 수문장',       baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:60,  saturate:1.2 },     // 21-25 (Cosmic)
-  ash_titan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.08, label:'잿불 거인',         baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:340, saturate:0.9 },     // 26-29 (Hellfire)
+  cat_king:        { hpMult:13.0, dmgMult:1.20, sizeMult:1.00, label:'왕관 고양이왕',     label_en:'Crowned Cat King',     baseStyle:'cat_king',  baseBehavior:'cat_king' },                                  // 1-5 (Day City)
+  neon_warlord:    { hpMult:13.2, dmgMult:1.22, sizeMult:1.02, label:'네온 군주',         label_en:'Neon Warlord',         baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:200, saturate:1.5 },     // 6-10 (Neon Night)
+  crystal_brute:   { hpMult:13.4, dmgMult:1.24, sizeMult:1.05, label:'수정 골렘',         label_en:'Crystal Golem',        baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:60,  saturate:0.85 },    // 11-15 (Cave/Crystal)
+  frost_overlord:  { hpMult:13.6, dmgMult:1.26, sizeMult:1.05, label:'얼음 군주',         label_en:'Frost Overlord',       baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:180, saturate:0.7 },     // 16-20 (Ice)
+  cosmic_warden:   { hpMult:13.8, dmgMult:1.28, sizeMult:1.05, label:'우주 수문장',       label_en:'Cosmic Warden',        baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:60,  saturate:1.2 },     // 21-25 (Cosmic)
+  ash_titan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.08, label:'잿불 거인',         label_en:'Ember Titan',          baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:340, saturate:0.9 },     // 26-29 (Hellfire)
   // === Ch30+ 기존 6 — 자기 자신 baseStyle. ===
-  tyrant:          { hpMult:14.0, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주',         baseStyle:'tyrant',    baseBehavior:'tyrant' },
-  leviathan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주',         baseStyle:'leviathan', baseBehavior:'leviathan' },
-  phantom:         { hpMult:14.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주',       baseStyle:'phantom',   baseBehavior:'phantom' },
-  phoenix:         { hpMult:14.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조',       baseStyle:'phoenix',   baseBehavior:'phoenix' },
-  void:            { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제',       baseStyle:'void',      baseBehavior:'void' },                                       // ch50
+  tyrant:          { hpMult:14.0, dmgMult:1.30, sizeMult:1.05, label:'폭군 군주',         label_en:'Tyrant Lord',          baseStyle:'tyrant',    baseBehavior:'tyrant' },
+  leviathan:       { hpMult:14.0, dmgMult:1.30, sizeMult:1.10, label:'심해 군주',         label_en:'Deep-Sea Lord',        baseStyle:'leviathan', baseBehavior:'leviathan' },
+  phantom:         { hpMult:14.0, dmgMult:1.40, sizeMult:1.00, label:'환영의 군주',       label_en:'Phantom Lord',         baseStyle:'phantom',   baseBehavior:'phantom' },
+  phoenix:         { hpMult:14.0, dmgMult:1.50, sizeMult:1.10, label:'잿불 불사조',       label_en:'Ember Phoenix',        baseStyle:'phoenix',   baseBehavior:'phoenix' },
+  void:            { hpMult:16.0, dmgMult:1.70, sizeMult:1.20, label:'공허의 황제',       label_en:'Void Emperor',         baseStyle:'void',      baseBehavior:'void' },                                       // ch50
   // === 원정 Ⅱ — 비둘기 행성 (companion: wife). v12.18 hpMult/dmgMult 단조증가 보정. ===
   // 이전 13.5/1.35 → 17.0/1.70 등으로 상향. 사용자 명령 "챕터 올라갈수록 더 어려워지는지" 반영.
   // Ch50 void (16.0/1.70) → Ch51 pigeon_warlord 가 보스 HP 13% 떨어지는 회귀 버그 수정.
-  pigeon_warlord:  { hpMult:17.0, dmgMult:1.70, sizeMult:1.05, label:'깃털 군주',         baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:320, saturate:1.2 },     // 51-55
-  pigeon_oracle:   { hpMult:17.5, dmgMult:1.75, sizeMult:1.05, label:'예언의 비둘기',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:300, saturate:1.0 },     // 56-60
-  pigeon_general:  { hpMult:18.0, dmgMult:1.80, sizeMult:1.10, label:'행성 사령관',       baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:280, saturate:1.1 },     // 61-65
-  pigeon_emperor:  { hpMult:18.5, dmgMult:1.90, sizeMult:1.25, label:'비둘기 행성 군주',   baseStyle:'void',      baseBehavior:'void',      hueShift:320, saturate:1.1 },     // 66-70
+  pigeon_warlord:  { hpMult:17.0, dmgMult:1.70, sizeMult:1.05, label:'깃털 군주',         label_en:'Feather Warlord',          baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:320, saturate:1.2 },     // 51-55
+  pigeon_oracle:   { hpMult:17.5, dmgMult:1.75, sizeMult:1.05, label:'예언의 비둘기',     label_en:'Oracle Pigeon',            baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:300, saturate:1.0 },     // 56-60
+  pigeon_general:  { hpMult:18.0, dmgMult:1.80, sizeMult:1.10, label:'행성 사령관',       label_en:'Planetary Commander',      baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:280, saturate:1.1 },     // 61-65
+  pigeon_emperor:  { hpMult:18.5, dmgMult:1.90, sizeMult:1.25, label:'비둘기 행성 군주',   label_en:'Pigeon-Planet Lord',       baseStyle:'void',      baseBehavior:'void',      hueShift:320, saturate:1.1 },     // 66-70
   // === 원정 Ⅲ — 우주. dmgMult 단조증가 보정 (이전 1.55~1.85 → 1.95~2.25). ===
-  star_devourer:   { hpMult:20.0, dmgMult:1.95, sizeMult:1.15, label:'별 포식자',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:50,  saturate:1.4 },     // 71-75
-  nebula_serpent:  { hpMult:21.0, dmgMult:2.00, sizeMult:1.18, label:'성운의 뱀',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:280, saturate:1.2 },     // 76-80
-  black_hole_lord: { hpMult:22.0, dmgMult:2.05, sizeMult:1.20, label:'블랙홀 군주',       baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:0.4 },     // 81-85
-  cosmic_arbiter:  { hpMult:23.0, dmgMult:2.10, sizeMult:1.20, label:'우주의 심판자',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.4 },     // 86-90
-  void_titan:      { hpMult:24.0, dmgMult:2.15, sizeMult:1.25, label:'보이드 타이탄',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:260, saturate:1.2 },     // 91-95
-  omega:           { hpMult:25.0, dmgMult:2.25, sizeMult:1.32, label:'오메가 — 우주의 주재자', baseStyle:'void',  baseBehavior:'void',      hueShift:60,  saturate:1.3 },     // 96-100
+  star_devourer:   { hpMult:20.0, dmgMult:1.95, sizeMult:1.15, label:'별 포식자',         label_en:'Star Devourer',            baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:50,  saturate:1.4 },     // 71-75
+  nebula_serpent:  { hpMult:21.0, dmgMult:2.00, sizeMult:1.18, label:'성운의 뱀',         label_en:'Nebula Serpent',           baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:280, saturate:1.2 },     // 76-80
+  black_hole_lord: { hpMult:22.0, dmgMult:2.05, sizeMult:1.20, label:'블랙홀 군주',       label_en:'Black-Hole Lord',          baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:0.4 },     // 81-85
+  cosmic_arbiter:  { hpMult:23.0, dmgMult:2.10, sizeMult:1.20, label:'우주의 심판자',     label_en:'Cosmic Arbiter',           baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.4 },     // 86-90
+  void_titan:      { hpMult:24.0, dmgMult:2.15, sizeMult:1.25, label:'보이드 타이탄',     label_en:'Void Titan',               baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:260, saturate:1.2 },     // 91-95
+  omega:           { hpMult:25.0, dmgMult:2.25, sizeMult:1.32, label:'오메가 — 우주의 주재자', label_en:'Omega — Sovereign of the Universe', baseStyle:'void',  baseBehavior:'void',      hueShift:60,  saturate:1.3 },     // 96-100
   // === 원정 Ⅳ — 지옥. dmgMult 단조증가 보정 (이전 1.70~2.00 → 2.30~2.65). ===
-  hell_houndmaster:    { hpMult:26.0, dmgMult:2.30, sizeMult:1.20, label:'사냥개의 주인',  baseStyle:'tyrant',  baseBehavior:'tyrant',  hueShift:0,   saturate:1.4 },          // 101-105
-  flame_overlord:      { hpMult:27.0, dmgMult:2.35, sizeMult:1.22, label:'화염 군주',      baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:0,   saturate:1.3 },          // 106-110
-  bone_archon:         { hpMult:28.0, dmgMult:2.40, sizeMult:1.24, label:'해골 대천사',    baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:0.3 },          // 111-115
-  shadow_inquisitor:   { hpMult:29.0, dmgMult:2.45, sizeMult:1.22, label:'그림자 심판관',  baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:1.5 },          // 116-120
-  infernal_seraph:     { hpMult:30.0, dmgMult:2.50, sizeMult:1.26, label:'잿불의 천사',    baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:30,  saturate:1.1 },          // 121-125
-  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.65, sizeMult:1.35, label:'지옥문의 군주',  baseStyle:'void',    baseBehavior:'void',    hueShift:340, saturate:1.4 },          // 126-130
+  hell_houndmaster:    { hpMult:26.0, dmgMult:2.30, sizeMult:1.20, label:'사냥개의 주인',  label_en:'Master of Hounds',     baseStyle:'tyrant',  baseBehavior:'tyrant',  hueShift:0,   saturate:1.4 },          // 101-105
+  flame_overlord:      { hpMult:27.0, dmgMult:2.35, sizeMult:1.22, label:'화염 군주',      label_en:'Flame Overlord',       baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:0,   saturate:1.3 },          // 106-110
+  bone_archon:         { hpMult:28.0, dmgMult:2.40, sizeMult:1.24, label:'해골 대천사',    label_en:'Skeletal Archangel',   baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:0.3 },          // 111-115
+  shadow_inquisitor:   { hpMult:29.0, dmgMult:2.45, sizeMult:1.22, label:'그림자 심판관',  label_en:'Shadow Inquisitor',    baseStyle:'phantom', baseBehavior:'phantom', hueShift:0,   saturate:1.5 },          // 116-120
+  infernal_seraph:     { hpMult:30.0, dmgMult:2.50, sizeMult:1.26, label:'잿불의 천사',    label_en:'Embered Seraph',       baseStyle:'phoenix', baseBehavior:'phoenix', hueShift:30,  saturate:1.1 },          // 121-125
+  hellgate_sovereign:  { hpMult:32.0, dmgMult:2.65, sizeMult:1.35, label:'지옥문의 군주',  label_en:'Hellgate Sovereign',   baseStyle:'void',    baseBehavior:'void',    hueShift:340, saturate:1.4 },          // 126-130
   // === v12.34 — 원정 Ⅴ — 천국 1층천 (ch131-160). 빛/금/하늘색 톤. dmgMult 단조증가. ===
-  cherub_warden:           { hpMult:34.0, dmgMult:2.75, sizeMult:1.20, label:'케루빔 수문장',     baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:50,  saturate:0.85 },   // 131-135
-  angelic_chorus:          { hpMult:36.0, dmgMult:2.85, sizeMult:1.22, label:'천사 합창단장',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:55,  saturate:0.6 },    // 136-140
-  throne_scholar:          { hpMult:38.0, dmgMult:2.95, sizeMult:1.24, label:'옥좌의 학자',       baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:45,  saturate:0.75 },   // 141-145
-  dominion_general:        { hpMult:40.0, dmgMult:3.05, sizeMult:1.26, label:'주권의 사령관',     baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:45,  saturate:0.8 },    // 146-150
-  first_heaven_guardian:   { hpMult:42.0, dmgMult:3.15, sizeMult:1.28, label:'1층천 수호자',      baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:55,  saturate:0.7 },    // 151-155
-  first_heaven_sovereign:  { hpMult:44.0, dmgMult:3.30, sizeMult:1.32, label:'1층천의 군주',      baseStyle:'void',      baseBehavior:'void',      hueShift:60,  saturate:0.9 },    // 156-160 (원정 Ⅴ 끝)
+  cherub_warden:           { hpMult:34.0, dmgMult:2.75, sizeMult:1.20, label:'케루빔 수문장',     label_en:'Cherub Warden',           baseStyle:'cat_king',  baseBehavior:'cat_king',  hueShift:50,  saturate:0.85 },   // 131-135
+  angelic_chorus:          { hpMult:36.0, dmgMult:2.85, sizeMult:1.22, label:'천사 합창단장',     label_en:'Angelic Chorus Master',   baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:55,  saturate:0.6 },    // 136-140
+  throne_scholar:          { hpMult:38.0, dmgMult:2.95, sizeMult:1.24, label:'옥좌의 학자',       label_en:'Throne Scholar',          baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:45,  saturate:0.75 },   // 141-145
+  dominion_general:        { hpMult:40.0, dmgMult:3.05, sizeMult:1.26, label:'주권의 사령관',     label_en:'Dominion General',        baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:45,  saturate:0.8 },    // 146-150
+  first_heaven_guardian:   { hpMult:42.0, dmgMult:3.15, sizeMult:1.28, label:'1층천 수호자',      label_en:'First-Heaven Guardian',   baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:55,  saturate:0.7 },    // 151-155
+  first_heaven_sovereign:  { hpMult:44.0, dmgMult:3.30, sizeMult:1.32, label:'1층천의 군주',      label_en:'First-Heaven Sovereign',  baseStyle:'void',      baseBehavior:'void',      hueShift:60,  saturate:0.9 },    // 156-160 (원정 Ⅴ 끝)
   // === v12.34 — 원정 Ⅵ — 천국 2층천 (ch161-200). 더 깊은 광휘·오로라·창공. dmgMult 단조증가. ===
-  power_seraph:            { hpMult:46.0, dmgMult:3.40, sizeMult:1.30, label:'권능 세라핌',        baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:35,  saturate:1.1 },    // 161-165
-  virtue_choir:            { hpMult:48.0, dmgMult:3.50, sizeMult:1.32, label:'권능의 합창',        baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.0 },    // 166-170
-  archangel_council:       { hpMult:50.0, dmgMult:3.60, sizeMult:1.34, label:'대천사 의장',        baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:50,  saturate:1.0 },    // 171-175
-  seraph_flame:            { hpMult:52.0, dmgMult:3.70, sizeMult:1.36, label:'세라핌의 불꽃',      baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:25,  saturate:1.2 },    // 176-180
-  ophanim_wheel:           { hpMult:54.0, dmgMult:3.80, sizeMult:1.36, label:'오필의 바퀴',        baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:55,  saturate:1.0 },    // 181-185
-  michael_blade:           { hpMult:56.0, dmgMult:3.90, sizeMult:1.38, label:'미가엘의 검',        baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:45,  saturate:1.2 },    // 186-190
-  gabriel_horn:            { hpMult:58.0, dmgMult:4.00, sizeMult:1.38, label:'가브리엘의 나팔',    baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.1 },    // 191-195
-  sky_sovereign:           { hpMult:62.0, dmgMult:4.20, sizeMult:1.45, label:'창공의 주인',        baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.1 },    // 196-200
+  power_seraph:            { hpMult:46.0, dmgMult:3.40, sizeMult:1.30, label:'권능 세라핌',        label_en:'Power Seraph',          baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:35,  saturate:1.1 },    // 161-165
+  virtue_choir:            { hpMult:48.0, dmgMult:3.50, sizeMult:1.32, label:'권능의 합창',        label_en:'Virtue Choir',          baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.0 },    // 166-170
+  archangel_council:       { hpMult:50.0, dmgMult:3.60, sizeMult:1.34, label:'대천사 의장',        label_en:'Archangel Council',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:50,  saturate:1.0 },    // 171-175
+  seraph_flame:            { hpMult:52.0, dmgMult:3.70, sizeMult:1.36, label:'세라핌의 불꽃',      label_en:'Seraph Flame',          baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:25,  saturate:1.2 },    // 176-180
+  ophanim_wheel:           { hpMult:54.0, dmgMult:3.80, sizeMult:1.36, label:'오필의 바퀴',        label_en:'Ophanim Wheel',         baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:55,  saturate:1.0 },    // 181-185
+  michael_blade:           { hpMult:56.0, dmgMult:3.90, sizeMult:1.38, label:'미가엘의 검',        label_en:'Michael\'s Blade',      baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:45,  saturate:1.2 },    // 186-190
+  gabriel_horn:            { hpMult:58.0, dmgMult:4.00, sizeMult:1.38, label:'가브리엘의 나팔',    label_en:'Gabriel\'s Horn',       baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.1 },    // 191-195
+  sky_sovereign:           { hpMult:62.0, dmgMult:4.20, sizeMult:1.45, label:'창공의 주인',        label_en:'Sky Sovereign',         baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.1 },    // 196-200
   // === v12.35 → v12.36b — 원정 Ⅶ·Ⅷ. 사용자 검수 후 hpMult 범위 축소. 기존 sky_sovereign 62 대비
   //   ch300 dread_sovereign 95 까지 1.5× 범위. chm.hp 평탄화 + 신규 카드 (×4-8) 와 결합해
   //   SSS 풀세트 기준 ch300 보스 ~10분 클리어선. dmgMult 도 완만화 (5.5→7.0). ===
-  covenant_warden:         { hpMult:54.0, dmgMult:4.30, sizeMult:1.36, label:'성약의 검문관',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:55,  saturate:1.0 },    // 201-205
-  archon_blade:            { hpMult:56.0, dmgMult:4.40, sizeMult:1.38, label:'대권의 검',         baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:45,  saturate:1.1 },    // 206-210
-  throne_judicator:        { hpMult:58.0, dmgMult:4.50, sizeMult:1.38, label:'옥좌의 심판자',     baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.0 },    // 211-215
-  nameless_oracle:         { hpMult:60.0, dmgMult:4.60, sizeMult:1.38, label:'이름 잃은 신탁',    baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:60,  saturate:0.7 },    // 216-220
-  wrath_legion:            { hpMult:62.0, dmgMult:4.75, sizeMult:1.40, label:'분노의 군단',       baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:25,  saturate:1.2 },    // 221-225
-  grace_marshal:           { hpMult:64.0, dmgMult:4.85, sizeMult:1.40, label:'은총의 사령관',     baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:50,  saturate:1.0 },    // 226-230
-  sanctum_examiner:        { hpMult:66.0, dmgMult:4.95, sizeMult:1.40, label:'성소의 시험관',     baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:50,  saturate:0.95 },   // 231-235
-  third_heaven_warden:     { hpMult:68.0, dmgMult:5.05, sizeMult:1.42, label:'3층천 검문관',      baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.0 },    // 236-240
-  herald_archon:           { hpMult:70.0, dmgMult:5.20, sizeMult:1.42, label:'기수의 대권',       baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:35,  saturate:1.2 },    // 241-245
-  third_heaven_sovereign:  { hpMult:74.0, dmgMult:5.40, sizeMult:1.46, label:'3층천의 군주',       baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.2 },    // 246-250 (원정 Ⅶ 끝)
+  covenant_warden:         { hpMult:54.0, dmgMult:4.30, sizeMult:1.36, label:'성약의 검문관',     label_en:'Covenant Warden',         baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:55,  saturate:1.0 },    // 201-205
+  archon_blade:            { hpMult:56.0, dmgMult:4.40, sizeMult:1.38, label:'대권의 검',         label_en:'Archon Blade',            baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:45,  saturate:1.1 },    // 206-210
+  throne_judicator:        { hpMult:58.0, dmgMult:4.50, sizeMult:1.38, label:'옥좌의 심판자',     label_en:'Throne Judicator',        baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:50,  saturate:1.0 },    // 211-215
+  nameless_oracle:         { hpMult:60.0, dmgMult:4.60, sizeMult:1.38, label:'이름 잃은 신탁',    label_en:'Nameless Oracle',         baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:60,  saturate:0.7 },    // 216-220
+  wrath_legion:            { hpMult:62.0, dmgMult:4.75, sizeMult:1.40, label:'분노의 군단',       label_en:'Wrath Legion',            baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:25,  saturate:1.2 },    // 221-225
+  grace_marshal:           { hpMult:64.0, dmgMult:4.85, sizeMult:1.40, label:'은총의 사령관',     label_en:'Grace Marshal',           baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:50,  saturate:1.0 },    // 226-230
+  sanctum_examiner:        { hpMult:66.0, dmgMult:4.95, sizeMult:1.40, label:'성소의 시험관',     label_en:'Sanctum Examiner',        baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:50,  saturate:0.95 },   // 231-235
+  third_heaven_warden:     { hpMult:68.0, dmgMult:5.05, sizeMult:1.42, label:'3층천 검문관',      label_en:'Third-Heaven Warden',     baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.0 },    // 236-240
+  herald_archon:           { hpMult:70.0, dmgMult:5.20, sizeMult:1.42, label:'기수의 대권',       label_en:'Herald Archon',           baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:35,  saturate:1.2 },    // 241-245
+  third_heaven_sovereign:  { hpMult:74.0, dmgMult:5.40, sizeMult:1.46, label:'3층천의 군주',       label_en:'Third-Heaven Sovereign',  baseStyle:'void',      baseBehavior:'void',      hueShift:55,  saturate:1.2 },    // 246-250 (원정 Ⅶ 끝)
   // === 원정 Ⅷ — 아마겟돈 (ch251-300). 악의 세력 침공. ===
-  fallen_vanguard:         { hpMult:76.0, dmgMult:5.55, sizeMult:1.42, label:'타락한 전위대장',  baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:0,   saturate:1.3 },    // 251-255
-  dread_legion:            { hpMult:78.0, dmgMult:5.70, sizeMult:1.42, label:'공포의 군단장',    baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:0,   saturate:1.4 },    // 256-260
-  ravager_warden:          { hpMult:80.0, dmgMult:5.85, sizeMult:1.44, label:'유린자 검문',      baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:340, saturate:1.3 },    // 261-265
-  nightlance_marshal:      { hpMult:82.0, dmgMult:6.00, sizeMult:1.46, label:'야창의 마샬',     baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:280, saturate:1.4 },    // 266-270
-  armageddon_invader:      { hpMult:85.0, dmgMult:6.15, sizeMult:1.50, label:'아마겟돈 침공자',  baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:0,   saturate:1.5 },    // 271-275
-  fallen_choir:            { hpMult:88.0, dmgMult:6.30, sizeMult:1.50, label:'타락한 합창단',    baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:0,   saturate:1.4 },    // 276-280
-  abyss_marshal:           { hpMult:90.0, dmgMult:6.45, sizeMult:1.52, label:'심연의 마샬',      baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:300, saturate:1.4 },    // 281-285
-  liar_legion:             { hpMult:92.0, dmgMult:6.65, sizeMult:1.52, label:'거짓의 군단장',    baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:340, saturate:1.5 },    // 286-290
+  fallen_vanguard:         { hpMult:76.0, dmgMult:5.55, sizeMult:1.42, label:'타락한 전위대장',  label_en:'Fallen Vanguard Captain',  baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:0,   saturate:1.3 },    // 251-255
+  dread_legion:            { hpMult:78.0, dmgMult:5.70, sizeMult:1.42, label:'공포의 군단장',    label_en:'Dread Legion General',     baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:0,   saturate:1.4 },    // 256-260
+  ravager_warden:          { hpMult:80.0, dmgMult:5.85, sizeMult:1.44, label:'유린자 검문',      label_en:'Ravager Warden',           baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:340, saturate:1.3 },    // 261-265
+  nightlance_marshal:      { hpMult:82.0, dmgMult:6.00, sizeMult:1.46, label:'야창의 마샬',     label_en:'Nightlance Marshal',       baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:280, saturate:1.4 },    // 266-270
+  armageddon_invader:      { hpMult:85.0, dmgMult:6.15, sizeMult:1.50, label:'아마겟돈 침공자',  label_en:'Armageddon Invader',       baseStyle:'tyrant',    baseBehavior:'tyrant',    hueShift:0,   saturate:1.5 },    // 271-275
+  fallen_choir:            { hpMult:88.0, dmgMult:6.30, sizeMult:1.50, label:'타락한 합창단',    label_en:'Fallen Choir',             baseStyle:'phantom',   baseBehavior:'phantom',   hueShift:0,   saturate:1.4 },    // 276-280
+  abyss_marshal:           { hpMult:90.0, dmgMult:6.45, sizeMult:1.52, label:'심연의 마샬',      label_en:'Abyss Marshal',            baseStyle:'phoenix',   baseBehavior:'phoenix',   hueShift:300, saturate:1.4 },    // 281-285
+  liar_legion:             { hpMult:92.0, dmgMult:6.65, sizeMult:1.52, label:'거짓의 군단장',    label_en:'Liar Legion General',      baseStyle:'leviathan', baseBehavior:'leviathan', hueShift:340, saturate:1.5 },    // 286-290
   // ch291-295 — 컨트롤 강요. v12.36b 단조증가 보장 위해 hpMult 살짝 ↑.
-  dread_apex:              { hpMult:115.0, dmgMult:7.05, sizeMult:1.58, label:'공포의 정점',      baseStyle:'void',      baseBehavior:'void',      hueShift:340, saturate:1.5 },    // 291-295
+  dread_apex:              { hpMult:115.0, dmgMult:7.05, sizeMult:1.58, label:'공포의 정점',      label_en:'Dread Apex',               baseStyle:'void',      baseBehavior:'void',      hueShift:340, saturate:1.5 },    // 291-295
   // ch296-300 — 게임 최종. 악의 군주 — 모든 패턴 통합. SSS 풀세트로도 아슬아슬한 클리어선.
-  dread_sovereign:         { hpMult:135.0, dmgMult:7.40, sizeMult:1.65, label:'악의 군주',        baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:1.6 },    // 296-300 (게임 최종)
+  dread_sovereign:         { hpMult:135.0, dmgMult:7.40, sizeMult:1.65, label:'악의 군주',        label_en:'Lord of Evil',             baseStyle:'void',      baseBehavior:'void',      hueShift:0,   saturate:1.6 },    // 296-300 (게임 최종)
 };
 function bossBaseStyleFor(variant){
   const v = BOSS_VARIANTS[variant];
@@ -10385,7 +10664,9 @@ function spawnBoss(){
   const variant = bossVariantForChapter(c);
   const v = BOSS_VARIANTS[variant];
   b.bossVariant = variant;
+  // v12.36e — store both label variants. Renderers pick by current language at draw time.
   b.bossLabel = v.label;
+  b.bossLabelEn = v.label_en || v.label;
   // Base HP grows with chapter (3500 + c^1.45 × 110) × chapterMult, then scaled by variant.
   // Re-tuned after restoring full per-mob XP — the player now reaches Lvl 15-17 with 14 cards
   // picked by boss time (cumulative XP-to-L15 = 1180, ch1 wave total ≈ 1934), so realistic
@@ -10558,154 +10839,157 @@ function spawnRateForStage(){ return spawnRateForWave(state.wave || 1); }
 // ---------- Upgrades ----------
 // Upgrade format: id, title, icon, desc(lvl), max, rarity, apply(p, state)
 const UPGRADES = [
-  { id:'dmg', title:'새우깡 강화', icon:'💪', max:8, rarity:'n',
-    desc:(l)=>`새우깡 공격력 +25% (현재 ${l||0}단계)`,
+  { id:'dmg', title:'새우깡 강화', title_en:'Saeukkang Power', icon:'💪', max:8, rarity:'n',
+    desc:(l)=>L(`새우깡 공격력 +25% (현재 ${l||0}단계)`, `Saeukkang DMG +25% (current Lv ${l||0})`),
     apply:p=>{ p.damage *= 1.25; } },
-  { id:'rate', title:'연사 속도', icon:'⚡', max:8, rarity:'n',
-    desc:(l)=>`공격속도 +18%`,
+  { id:'rate', title:'연사 속도', title_en:'Fire Rate', icon:'⚡', max:8, rarity:'n',
+    desc:(l)=>L('공격속도 +18%','Attack speed +18%'),
     apply:p=>{ p.fireRate *= 1.18; } },
-  { id:'speed', title:'이동 속도', icon:'👟', max:6, rarity:'n',
-    desc:(l)=>`이동속도 +12%`,
+  { id:'speed', title:'이동 속도', title_en:'Move Speed', icon:'👟', max:6, rarity:'n',
+    desc:(l)=>L('이동속도 +12%','Move speed +12%'),
     apply:p=>{ p.speed *= 1.12; } },
-  { id:'hp', title:'최대 체력 증가', icon:'❤️', max:6, rarity:'n',
-    desc:(l)=>`최대 HP +25, 체력 회복`,
+  { id:'hp', title:'최대 체력 증가', title_en:'Max HP Up', icon:'❤️', max:6, rarity:'n',
+    desc:(l)=>L('최대 HP +25, 체력 회복','Max HP +25 · heal'),
     apply:p=>{ p.maxHp += 25; p.hp = Math.min(p.maxHp, p.hp+25); } },
-  { id:'proj', title:'멀티 새우깡', icon:'🎯', max:4, rarity:'r',
-    desc:(l)=>`발사 개수 +1 (현재 ${(l||0)+1} → ${(l||0)+2})`,
+  { id:'proj', title:'멀티 새우깡', title_en:'Multi Saeukkang', icon:'🎯', max:4, rarity:'r',
+    desc:(l)=>L(`발사 개수 +1 (현재 ${(l||0)+1} → ${(l||0)+2})`, `Projectiles +1 (now ${(l||0)+1} → ${(l||0)+2})`),
     apply:p=>{ p.projCount += 1; } },
-  { id:'size', title:'왕새우깡', icon:'🔆', max:5, rarity:'r',
-    desc:(l)=>`투사체 크기 +25%, 데미지 +10%`,
+  { id:'size', title:'왕새우깡', title_en:'King Saeukkang', icon:'🔆', max:5, rarity:'r',
+    desc:(l)=>L('투사체 크기 +25%, 데미지 +10%','Projectile size +25% · DMG +10%'),
     apply:p=>{ p.projSize *= 1.25; p.damage *= 1.1; } },
-  { id:'pierce', title:'관통 새우깡', icon:'🗡️', max:4, rarity:'r',
-    desc:(l)=>`관통 +1`,
+  { id:'pierce', title:'관통 새우깡', title_en:'Piercing Saeukkang', icon:'🗡️', max:4, rarity:'r',
+    desc:(l)=>L('관통 +1','Pierce +1'),
     apply:p=>{ p.pierce += 1; } },
-  { id:'pspeed', title:'탄속 증가', icon:'💨', max:5, rarity:'n',
-    desc:(l)=>`투사체 속도 +20%`,
+  { id:'pspeed', title:'탄속 증가', title_en:'Projectile Speed', icon:'💨', max:5, rarity:'n',
+    desc:(l)=>L('투사체 속도 +20%','Projectile speed +20%'),
     apply:p=>{ p.projSpeed *= 1.2; } },
-  { id:'magnet', title:'자석 깃털', icon:'🧲', max:4, rarity:'n',
-    desc:(l)=>`획득 범위 +60%`,
+  { id:'magnet', title:'자석 깃털', title_en:'Magnet Feather', icon:'🧲', max:4, rarity:'n',
+    desc:(l)=>L('획득 범위 +60%','Pickup range +60%'),
     apply:p=>{ p.magnet *= 1.6; } },
-  { id:'xpmult', title:'탐욕의 비둘기', icon:'🪙', max:4, rarity:'r',
-    desc:(l)=>`경험치 획득량 +25%`,
+  { id:'xpmult', title:'탐욕의 비둘기', title_en:'Greedy Pigeon', icon:'🪙', max:4, rarity:'r',
+    desc:(l)=>L('경험치 획득량 +25%','XP gain +25%'),
     apply:p=>{ p.xpMult *= 1.25; } },
-  { id:'crit', title:'치명타 확률', icon:'🎲', max:4, rarity:'r',
-    desc:(l)=>`치명타 확률 +12%`,
+  { id:'crit', title:'치명타 확률', title_en:'Crit Chance', icon:'🎲', max:4, rarity:'r',
+    desc:(l)=>L('치명타 확률 +12%','Crit chance +12%'),
     apply:p=>{ p.crit = Math.min(0.9, p.crit+0.12); } },
-  { id:'critdmg', title:'치명타 배율', icon:'💥', max:4, rarity:'r',
-    desc:(l)=>`치명타 데미지 +60%`,
+  { id:'critdmg', title:'치명타 배율', title_en:'Crit Damage', icon:'💥', max:4, rarity:'r',
+    desc:(l)=>L('치명타 데미지 +60%','Crit damage +60%'),
     apply:p=>{ p.critMult += 0.6; } },
-  { id:'orbit', title:'새우깡 회오리', icon:'🌀', max:4, rarity:'e',
-    desc:(l)=>l?`회오리 개수 +1`:`주변을 회전하는 새우깡 소환!`,
+  { id:'orbit', title:'새우깡 회오리', title_en:'Saeukkang Vortex', icon:'🌀', max:4, rarity:'e',
+    desc:(l)=>l?L('회오리 개수 +1','Orbit count +1'):L('주변을 회전하는 새우깡 소환!','Summons orbiting saeukkang!'),
     apply:(p,s)=>{ s.abilities.orbit = (s.abilities.orbit||0) + 1; rebuildOrbits(); } },
-  { id:'bomb', title:'새우깡 폭탄', icon:'💣', max:4, rarity:'e',
-    desc:(l)=>l?`폭탄 빈도 +25%, 데미지 +30%`:`주기적으로 대폭발! 주변 모든 적에게 피해`,
+  { id:'bomb', title:'새우깡 폭탄', title_en:'Saeukkang Bomb', icon:'💣', max:4, rarity:'e',
+    desc:(l)=>l?L('폭탄 빈도 +25%, 데미지 +30%','Bomb cadence +25% · DMG +30%'):L('주기적으로 대폭발! 주변 모든 적에게 피해','Periodic explosion damaging all nearby foes'),
     apply:(p,s)=>{ s.abilities.bomb = (s.abilities.bomb||0) + 1; } },
-  { id:'lightning', title:'꼬북칩 번개', icon:'⚡', max:4, rarity:'e',
-    desc:(l)=>l?`번개 대상 +1`:`무작위 적에게 번개! 연쇄 효과`,
+  { id:'lightning', title:'꼬북칩 번개', title_en:'Cobuk-chip Lightning', icon:'⚡', max:4, rarity:'e',
+    desc:(l)=>l?L('번개 대상 +1','Lightning targets +1'):L('무작위 적에게 번개! 연쇄 효과','Strikes random enemies with chain lightning'),
     apply:(p,s)=>{ s.abilities.lightning = (s.abilities.lightning||0) + 1; } },
-  { id:'heal', title:'자가 치유', icon:'💖', max:3, rarity:'l',
-    desc:(l)=>l?`회복량 +50%`:`매 2.5초마다 HP 1 회복`,
+  { id:'heal', title:'자가 치유', title_en:'Self Heal', icon:'💖', max:3, rarity:'l',
+    desc:(l)=>l?L('회복량 +50%','Heal amount +50%'):L('매 2.5초마다 HP 1 회복','+1 HP every 2.5 seconds'),
     apply:(p,s)=>{ s.abilities.heal = (s.abilities.heal||0) + 1; } },
-  { id:'shield', title:'불굴의 깃털', icon:'🛡️', max:1, rarity:'l',
-    desc:(l)=>`죽을 때 한 번 부활 (HP 50%)`,
+  { id:'shield', title:'불굴의 깃털', title_en:'Indomitable Feather', icon:'🛡️', max:1, rarity:'l',
+    desc:(l)=>L('죽을 때 한 번 부활 (HP 50%)','Revive once at HP 50% on death'),
     apply:(p,s)=>{ s.abilities.shield = 1; } },
   // ----- Multi-weapon unlock cards. lvl 1 unlocks the weapon, subsequent picks scale it. -----
-  { id:'shuriken', title:'표창 투척', icon:'🌟', max:5, rarity:'r',
+  { id:'shuriken', title:'표창 투척', title_en:'Shuriken Throw', icon:'🌟', max:5, rarity:'r',
     desc:(l)=>{
-      if(!l) return '🌟 [신규 무기] 빠른 표창을 부채꼴로 던집니다';
+      if(!l) return L('🌟 [신규 무기] 빠른 표창을 부채꼴로 던집니다','🌟 [New weapon] Fan of fast shurikens');
       const w={lvl:l+1};
-      return `표창 강화 — 발사 ${WEAPONS.shuriken.count(w)}개 / 연사 ${WEAPONS.shuriken.rate(w).toFixed(1)}/초`;
+      return L(`표창 강화 — 발사 ${WEAPONS.shuriken.count(w)}개 / 연사 ${WEAPONS.shuriken.rate(w).toFixed(1)}/초`,
+               `Shuriken+ — count ${WEAPONS.shuriken.count(w)} · rate ${WEAPONS.shuriken.rate(w).toFixed(1)}/sec`);
     },
     apply:(p)=>{ if(!p.weapons.shuriken) p.weapons.shuriken={lvl:1,reloadT:0}; else p.weapons.shuriken.lvl++; } },
-  { id:'boomerang', title:'참치캔 부메랑', icon:'🪃', max:4, rarity:'e',
+  { id:'boomerang', title:'참치캔 부메랑', title_en:'Tuna-Can Boomerang', icon:'🪃', max:4, rarity:'e',
     desc:(l)=>{
-      if(!l) return '🪃 [신규 무기] 적을 관통하고 다시 돌아옵니다';
+      if(!l) return L('🪃 [신규 무기] 적을 관통하고 다시 돌아옵니다','🪃 [New weapon] Pierces enemies, then returns');
       const w={lvl:l+1};
-      return `부메랑 강화 — 발사 ${WEAPONS.boomerang.count(w)}개 / 데미지 ×${(1+(l+1)*0.20).toFixed(2)}`;
+      return L(`부메랑 강화 — 발사 ${WEAPONS.boomerang.count(w)}개 / 데미지 ×${(1+(l+1)*0.20).toFixed(2)}`,
+               `Boomerang+ — count ${WEAPONS.boomerang.count(w)} · DMG ×${(1+(l+1)*0.20).toFixed(2)}`);
     },
     apply:(p)=>{ if(!p.weapons.boomerang) p.weapons.boomerang={lvl:1,reloadT:0}; else p.weapons.boomerang.lvl++; } },
-  { id:'missile', title:'꿀꽈배기 미사일', icon:'🚀', max:3, rarity:'l',
+  { id:'missile', title:'꿀꽈배기 미사일', title_en:'Honey-Twist Missile', icon:'🚀', max:3, rarity:'l',
     desc:(l)=>{
-      if(!l) return '🚀 [신규 무기] 유도 미사일이 폭발 피해를 줍니다';
+      if(!l) return L('🚀 [신규 무기] 유도 미사일이 폭발 피해를 줍니다','🚀 [New weapon] Homing missiles deal explosive damage');
       const w={lvl:l+1};
-      return `미사일 강화 — ${WEAPONS.missile.count(w)}발 / 폭발 반경 ${WEAPONS.missile.aoeRadius(w)}`;
+      return L(`미사일 강화 — ${WEAPONS.missile.count(w)}발 / 폭발 반경 ${WEAPONS.missile.aoeRadius(w)}`,
+               `Missile+ — ${WEAPONS.missile.count(w)} salvo · blast radius ${WEAPONS.missile.aoeRadius(w)}`);
     },
     apply:(p)=>{ if(!p.weapons.missile) p.weapons.missile={lvl:1,reloadT:0}; else p.weapons.missile.lvl++; } },
   // ----- Chapter-gated bold upgrades. Each only shows once player has cleared up to that chapter,
   // and each is a 1-pick power spike (max:1) so the build feels noticeably different post-pick. -----
-  { id:'berserk', title:'광폭 새우깡', icon:'🔥', max:1, rarity:'l', unlockCh:5,
-    desc:(l)=>'공격력 ×1.5, 치명타 +12%',
+  { id:'berserk', title:'광폭 새우깡', title_en:'Berserk Saeukkang', icon:'🔥', max:1, rarity:'l', unlockCh:5,
+    desc:(l)=>L('공격력 ×1.5, 치명타 +12%','DMG ×1.5 · crit +12%'),
     apply:p=>{ p.damage *= 1.5; p.crit = Math.min(0.9, p.crit+0.12); } },
-  { id:'overdrive', title:'오버드라이브', icon:'⚙️', max:1, rarity:'l', unlockCh:10,
-    desc:(l)=>'연사 ×1.4, 탄속 ×1.3',
+  { id:'overdrive', title:'오버드라이브', title_en:'Overdrive', icon:'⚙️', max:1, rarity:'l', unlockCh:10,
+    desc:(l)=>L('연사 ×1.4, 탄속 ×1.3','Fire rate ×1.4 · projectile speed ×1.3'),
     apply:p=>{ p.fireRate *= 1.4; p.projSpeed *= 1.3; } },
-  { id:'deathray', title:'데스레이', icon:'☄️', max:1, rarity:'l', unlockCh:15,
-    desc:(l)=>'관통 +5, 투사체 크기 ×1.5',
+  { id:'deathray', title:'데스레이', title_en:'Deathray', icon:'☄️', max:1, rarity:'l', unlockCh:15,
+    desc:(l)=>L('관통 +5, 투사체 크기 ×1.5','Pierce +5 · projectile size ×1.5'),
     apply:p=>{ p.pierce += 5; p.projSize *= 1.5; } },
-  { id:'harvester', title:'대수확자', icon:'🌾', max:1, rarity:'l', unlockCh:20,
-    desc:(l)=>'XP 획득 ×2.0, 자석 범위 ×2.5',
+  { id:'harvester', title:'대수확자', title_en:'Great Harvester', icon:'🌾', max:1, rarity:'l', unlockCh:20,
+    desc:(l)=>L('XP 획득 ×2.0, 자석 범위 ×2.5','XP gain ×2.0 · magnet range ×2.5'),
     apply:p=>{ p.xpMult *= 2.0; p.magnet *= 2.5; } },
-  { id:'stormcaller', title:'폭풍 소환사', icon:'🌩️', max:2, rarity:'l', unlockCh:25,
-    desc:(l)=>l?'번개 대상 +2, 빈도 ×1.4':'⚡ 번개 빈도 +50%, 추가 대상 +2',
+  { id:'stormcaller', title:'폭풍 소환사', title_en:'Stormcaller', icon:'🌩️', max:2, rarity:'l', unlockCh:25,
+    desc:(l)=>l?L('번개 대상 +2, 빈도 ×1.4','Lightning targets +2 · cadence ×1.4'):L('⚡ 번개 빈도 +50%, 추가 대상 +2','⚡ Lightning cadence +50% · +2 targets'),
     apply:(p,s)=>{ s.abilities.lightning = (s.abilities.lightning||0) + 2; s.abilities.stormBoost = (s.abilities.stormBoost||0)+1; } },
-  { id:'godkiller', title:'신살자', icon:'🗡️', max:1, rarity:'l', unlockCh:28,
-    desc:(l)=>'공격력 ×2.0, 치명타 배율 +1.0 (단, 최대 HP -25%)',
+  { id:'godkiller', title:'신살자', title_en:'Godslayer', icon:'🗡️', max:1, rarity:'l', unlockCh:28,
+    desc:(l)=>L('공격력 ×2.0, 치명타 배율 +1.0 (단, 최대 HP -25%)','DMG ×2.0 · crit ×+1.0 (Max HP -25%)'),
     apply:p=>{ p.damage *= 2.0; p.critMult += 1.0; p.maxHp = Math.max(20, Math.round(p.maxHp*0.75)); p.hp = Math.min(p.maxHp, p.hp); } },
   // ── Late-game bold cards (Ch32+). Designed to give meaningful late builds without breaking the curve.
   // Numbers tuned against chapterMult.hp ≈ 36× (ch33) → 119× (ch47) and the existing card stack.
-  { id:'abyss_power', title:'심연의 권능', icon:'🌊', max:1, rarity:'l', unlockCh:32,
-    desc:(l)=>'최대 HP ×1.5, 피해 감소 +20%',
+  { id:'abyss_power', title:'심연의 권능', title_en:'Abyss Authority', icon:'🌊', max:1, rarity:'l', unlockCh:32,
+    desc:(l)=>L('최대 HP ×1.5, 피해 감소 +20%','Max HP ×1.5 · DR +20%'),
     apply:p=>{ p.maxHp = Math.round(p.maxHp * 1.5); p.hp = p.maxHp; p.damageReduction = (p.damageReduction||0) + 0.20; } },
-  { id:'crystal_core', title:'결정 코어', icon:'💎', max:1, rarity:'l', unlockCh:36,
-    desc:(l)=>'관통 +3, 발사 +1, 탄속 +30%',
+  { id:'crystal_core', title:'결정 코어', title_en:'Crystal Core', icon:'💎', max:1, rarity:'l', unlockCh:36,
+    desc:(l)=>L('관통 +3, 발사 +1, 탄속 +30%','Pierce +3 · projectiles +1 · projectile speed +30%'),
     apply:p=>{ p.pierce += 3; p.projCount += 1; p.projSpeed *= 1.3; } },
-  { id:'ash_ritual', title:'잿불 의식', icon:'🔥', max:1, rarity:'l', unlockCh:40,
-    desc:(l)=>'공격력 ×1.5, 연사 ×1.2 (단, 최대 HP -20%)',
+  { id:'ash_ritual', title:'잿불 의식', title_en:'Ember Rite', icon:'🔥', max:1, rarity:'l', unlockCh:40,
+    desc:(l)=>L('공격력 ×1.5, 연사 ×1.2 (단, 최대 HP -20%)','DMG ×1.5 · fire rate ×1.2 (Max HP -20%)'),
     apply:p=>{ p.damage *= 1.5; p.fireRate *= 1.2; p.maxHp = Math.max(20, Math.round(p.maxHp*0.80)); p.hp = Math.min(p.maxHp, p.hp); } },
-  { id:'singularity', title:'특이점 코어', icon:'🌌', max:1, rarity:'l', unlockCh:45,
-    desc:(l)=>'발사 +2, 탄속 ×1.5, 투사체 크기 ×1.3',
+  { id:'singularity', title:'특이점 코어', title_en:'Singularity Core', icon:'🌌', max:1, rarity:'l', unlockCh:45,
+    desc:(l)=>L('발사 +2, 탄속 ×1.5, 투사체 크기 ×1.3','Projectiles +2 · projectile speed ×1.5 · size ×1.3'),
     apply:p=>{ p.projCount += 2; p.projSpeed *= 1.5; p.projSize *= 1.3; } },
   // v12.36b — ch130+ 고티어 스킬. 기존 카드만으로는 ch200+ 보스 HP 못 따라잡아 클리어 시간 폭증.
   // 사용자 명시: "스킬트리가 ch300까지 추가가 안된거 같다 — 고려해서 난이도 재조정".
-  { id:'hellbringer', title:'지옥 부름꾼', icon:'👹', max:1, rarity:'l', unlockCh:101,
-    desc:(l)=>'공격력 ×1.6, 관통 +3 (지옥 원정 카드)',
+  { id:'hellbringer', title:'지옥 부름꾼', title_en:'Hellbringer', icon:'👹', max:1, rarity:'l', unlockCh:101,
+    desc:(l)=>L('공격력 ×1.6, 관통 +3 (지옥 원정 카드)','DMG ×1.6 · pierce +3 (Hell expedition card)'),
     apply:p=>{ p.damage *= 1.6; p.pierce += 3; } },
-  { id:'rescuer_might', title:'구원자의 권능', icon:'⛓️', max:2, rarity:'l', unlockCh:115,
-    desc:(l)=>l?'추가 ×1.3 dmg + 발사 +1':'공격력 ×1.4, 발사 +1, 동료 사기',
+  { id:'rescuer_might', title:'구원자의 권능', title_en:'Rescuer\'s Might', icon:'⛓️', max:2, rarity:'l', unlockCh:115,
+    desc:(l)=>l?L('추가 ×1.3 dmg + 발사 +1','Extra ×1.3 DMG · projectiles +1'):L('공격력 ×1.4, 발사 +1, 동료 사기','DMG ×1.4 · projectiles +1 · ally morale'),
     apply:p=>{ p.damage *= (1.4 + 0.3); p.projCount += 1; } },
   // 천국 1·2층천 — SS 코스튬과 시너지.
-  { id:'celestial_grace', title:'천공의 은총', icon:'🪽', max:2, rarity:'l', unlockCh:131,
-    desc:(l)=>l?'추가 ×1.4 dmg + 치명타 +15%':'공격력 ×1.5, 치명타 +15%, 자가 회복 +0.5/s',
+  { id:'celestial_grace', title:'천공의 은총', title_en:'Celestial Grace', icon:'🪽', max:2, rarity:'l', unlockCh:131,
+    desc:(l)=>l?L('추가 ×1.4 dmg + 치명타 +15%','Extra ×1.4 DMG · crit +15%'):L('공격력 ×1.5, 치명타 +15%, 자가 회복 +0.5/s','DMG ×1.5 · crit +15% · regen +0.5/s'),
     apply:p=>{ p.damage *= 1.5; p.crit = Math.min(0.95, p.crit+0.15); p.regenPerSec = (p.regenPerSec||0)+0.5; } },
-  { id:'seraph_strike', title:'세라핌의 일격', icon:'⚜️', max:1, rarity:'l', unlockCh:161,
-    desc:(l)=>'공격력 ×1.8, 관통 +2, 발사 +1',
+  { id:'seraph_strike', title:'세라핌의 일격', title_en:'Seraph Strike', icon:'⚜️', max:1, rarity:'l', unlockCh:161,
+    desc:(l)=>L('공격력 ×1.8, 관통 +2, 발사 +1','DMG ×1.8 · pierce +2 · projectiles +1'),
     apply:p=>{ p.damage *= 1.8; p.pierce += 2; p.projCount += 1; } },
-  { id:'sky_sovereign_pact', title:'창공의 계약', icon:'☁️', max:1, rarity:'l', unlockCh:181,
-    desc:(l)=>'공격력 ×2.0, 연사 ×1.3 (단, 최대 HP -15%)',
+  { id:'sky_sovereign_pact', title:'창공의 계약', title_en:'Sky Sovereign Pact', icon:'☁️', max:1, rarity:'l', unlockCh:181,
+    desc:(l)=>L('공격력 ×2.0, 연사 ×1.3 (단, 최대 HP -15%)','DMG ×2.0 · fire rate ×1.3 (Max HP -15%)'),
     apply:p=>{ p.damage *= 2.0; p.fireRate *= 1.3; p.maxHp = Math.max(20, Math.round(p.maxHp*0.85)); p.hp = Math.min(p.maxHp, p.hp); } },
   // 천국 3층천 — 신성 침범, 다음 단계 폭발적 강화.
-  { id:'covenant_blade', title:'성약의 검', icon:'🗡️', max:1, rarity:'l', unlockCh:201,
-    desc:(l)=>'공격력 ×2.0, 치명타 배율 +1.5',
+  { id:'covenant_blade', title:'성약의 검', title_en:'Covenant Blade', icon:'🗡️', max:1, rarity:'l', unlockCh:201,
+    desc:(l)=>L('공격력 ×2.0, 치명타 배율 +1.5','DMG ×2.0 · crit ×+1.5'),
     apply:p=>{ p.damage *= 2.0; p.critMult += 1.5; } },
-  { id:'archon_decree', title:'대권의 칙령', icon:'📜', max:2, rarity:'l', unlockCh:221,
-    desc:(l)=>l?'추가 ×1.5 dmg + 발사 +1 + 관통 +2':'공격력 ×1.6, 발사 +2, 관통 +2',
+  { id:'archon_decree', title:'대권의 칙령', title_en:'Archon Decree', icon:'📜', max:2, rarity:'l', unlockCh:221,
+    desc:(l)=>l?L('추가 ×1.5 dmg + 발사 +1 + 관통 +2','Extra ×1.5 DMG · projectiles +1 · pierce +2'):L('공격력 ×1.6, 발사 +2, 관통 +2','DMG ×1.6 · projectiles +2 · pierce +2'),
     apply:p=>{ p.damage *= 1.6; p.projCount += 2; p.pierce += 2; } },
-  { id:'third_heaven_writ', title:'3층천의 명령서', icon:'⚜️', max:1, rarity:'l', unlockCh:241,
-    desc:(l)=>'공격력 ×2.5, 연사 ×1.4 (단, 최대 HP -20%)',
+  { id:'third_heaven_writ', title:'3층천의 명령서', title_en:'Third-Heaven Writ', icon:'⚜️', max:1, rarity:'l', unlockCh:241,
+    desc:(l)=>L('공격력 ×2.5, 연사 ×1.4 (단, 최대 HP -20%)','DMG ×2.5 · fire rate ×1.4 (Max HP -20%)'),
     apply:p=>{ p.damage *= 2.5; p.fireRate *= 1.4; p.maxHp = Math.max(20, Math.round(p.maxHp*0.80)); p.hp = Math.min(p.maxHp, p.hp); } },
   // 아마겟돈 — 악의 세력에 맞선 신성 강화. v12.36b 사용자 검수 후 단조증가 위반 픽스.
   //   기존 multiplier 가 ch300 → ch250 보다 짧은 클리어 시간 → 보수적 재조정.
-  { id:'dawn_alliance', title:'창조주와의 동맹', icon:'🌟', max:1, rarity:'l', unlockCh:251,
-    desc:(l)=>'공격력 ×1.20, 발사 +1, 보스 추가 데미지 +15%',
+  { id:'dawn_alliance', title:'창조주와의 동맹', title_en:'Alliance with the Creator', icon:'🌟', max:1, rarity:'l', unlockCh:251,
+    desc:(l)=>L('공격력 ×1.20, 발사 +1, 보스 추가 데미지 +15%','DMG ×1.20 · projectiles +1 · boss DMG +15%'),
     apply:p=>{ p.damage *= 1.20; p.projCount += 1; p.holyBossBonus = (p.holyBossBonus||0) + 0.15; } },
-  { id:'armageddon_legion', title:'아마겟돈 진군', icon:'⚔️', max:2, rarity:'l', unlockCh:271,
-    desc:(l)=>l?'추가 ×1.15 dmg + 관통 +1':'공격력 ×1.15, 관통 +2, 보스 추가 데미지 +10%',
+  { id:'armageddon_legion', title:'아마겟돈 진군', title_en:'Armageddon March', icon:'⚔️', max:2, rarity:'l', unlockCh:271,
+    desc:(l)=>l?L('추가 ×1.15 dmg + 관통 +1','Extra ×1.15 DMG · pierce +1'):L('공격력 ×1.15, 관통 +2, 보스 추가 데미지 +10%','DMG ×1.15 · pierce +2 · boss DMG +10%'),
     apply:p=>{ p.damage *= 1.15; p.pierce += 2; p.holyBossBonus = (p.holyBossBonus||0) + 0.10; } },
-  { id:'creator_blessing', title:'창조주의 축복', icon:'✨', max:1, rarity:'l', unlockCh:286,
-    desc:(l)=>'공격력 ×1.20, 치명타 배율 +1.0, 보스 추가 데미지 +15%',
+  { id:'creator_blessing', title:'창조주의 축복', title_en:'Creator\'s Blessing', icon:'✨', max:1, rarity:'l', unlockCh:286,
+    desc:(l)=>L('공격력 ×1.20, 치명타 배율 +1.0, 보스 추가 데미지 +15%','DMG ×1.20 · crit ×+1.0 · boss DMG +15%'),
     apply:p=>{ p.damage *= 1.20; p.critMult += 1.0; p.holyBossBonus = (p.holyBossBonus||0) + 0.15; } },
-  { id:'final_judgment', title:'최후의 심판', icon:'⚡', max:1, rarity:'l', unlockCh:296,
-    desc:(l)=>'공격력 ×1.20, 연사 ×1.20, 발사 +1 (마지막 5챕터 전용)',
+  { id:'final_judgment', title:'최후의 심판', title_en:'Final Judgment', icon:'⚡', max:1, rarity:'l', unlockCh:296,
+    desc:(l)=>L('공격력 ×1.20, 연사 ×1.20, 발사 +1 (마지막 5챕터 전용)','DMG ×1.20 · fire rate ×1.20 · projectiles +1 (last 5 chapters only)'),
     apply:p=>{ p.damage *= 1.20; p.fireRate *= 1.20; p.projCount += 1; } },
 ];
 
@@ -10774,8 +11058,8 @@ function showLevelUp(){
       const lvl = state.player.upg[u.id]||0;
       const btn = document.createElement('button');
       btn.className='choice';
-      const rarityMap = {n:'노멀',r:'레어',e:'에픽',l:'전설'};
-      btn.innerHTML = `<div class="title"><span class="icon">${u.icon}</span>${u.title}<span class="rarity ${u.rarity}">${rarityMap[u.rarity]}</span></div><div class="desc">${u.desc(lvl)}</div><div class="lvl">Lv ${lvl+1} / ${u.max}</div>`;
+      const rarityMap = L({n:'노멀',r:'레어',e:'에픽',l:'전설'},{n:'Normal',r:'Rare',e:'Epic',l:'Legendary'});
+      btn.innerHTML = `<div class="title"><span class="icon">${u.icon}</span>${titleOf(u)}<span class="rarity ${u.rarity}">${rarityMap[u.rarity]}</span></div><div class="desc">${u.desc(lvl)}</div><div class="lvl">Lv ${lvl+1} / ${u.max}</div>`;
       btn.onclick = ()=>{
         if(isUpgradeMaxed(u, state.player)) { closeLevelUp(); return; }
         u.apply(state.player, state);
@@ -10881,7 +11165,7 @@ function damageEnemy(e, dmg, crit=false, knockbackDir=null){
         state.particles.push({ x:e.x, y:e.y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:.9, maxLife:.9, color:k%2?'#FFA94D':'#FFE066', size:5, grav:120 });
       }
       state.camera.shake = 28;
-      state.toastBanner = { text:'🔥 잿불 불사조 — 부활!', sub:'HP 60%로 다시 일어납니다', t:2.0, maxT:2.0 };
+      state.toastBanner = { text:L('🔥 잿불 불사조 — 부활!','🔥 Ember Phoenix — Revived!'), sub:L('HP 60%로 다시 일어납니다','Returning at 60% HP'), t:2.0, maxT:2.0 };
       sfxExplosion();
       sfxBoss();
       return;
@@ -10905,7 +11189,7 @@ function killEnemy(e){
     state.ultCharge = Math.min(ULT_MAX, state.ultCharge + gain);
     if(before < ULT_MAX && state.ultCharge >= ULT_MAX){
       // Just hit full charge — toast banner so the player knows the button is live.
-      state.toastBanner = { text:'🐦‍🔥 비둘기의 외침 충전!', sub:'우측 버튼 클릭', t:2.0, maxT:2.0 };
+      state.toastBanner = { text:L('🐦‍🔥 비둘기의 외침 충전!','🐦‍🔥 Pigeon\'s Cry charged!'), sub:L('우측 버튼 클릭','Tap the right button'), t:2.0, maxT:2.0 };
     }
     updateUltButton();
   }
@@ -11181,43 +11465,43 @@ function onBossDefeated(){
   if(state.chapter === 51 && !progress.companionUnlocks.wife){
     progress.companionUnlocks.wife = true;
     grantDefaultCompanionCostume('wife');
-    state.newCompanion = { kind:'wife', label:'아내 비둘기', sub:'다음 원정부터 함께 싸웁니다 💗' };
+    state.newCompanion = { kind:'wife', label:'아내 비둘기', label_en:'Wife Pigeon', sub:'다음 원정부터 함께 싸웁니다 💗', sub_en:'She\'ll fight beside you from the next expedition 💗' };
   } else if(state.chapter === 60 && !progress.companionUnlocks.child){
     progress.companionUnlocks.child = true;
     grantDefaultCompanionCostume('child');
-    state.newCompanion = { kind:'child', label:'아기 비둘기', sub:'다음 원정부터 함께 싸웁니다 👶' };
+    state.newCompanion = { kind:'child', label:'아기 비둘기', label_en:'Baby Pigeon', sub:'다음 원정부터 함께 싸웁니다 👶', sub_en:'They\'ll fight beside you from the next expedition 👶' };
   } else if(state.chapter === 105 && !progress.companionUnlocks.sparrow){
     progress.companionUnlocks.sparrow = true;
-    state.newCompanion = { kind:'sparrow', label:'참새 친구', sub:'사냥꾼의 숲에서 구출 🐦' };
+    state.newCompanion = { kind:'sparrow', label:'참새 친구', label_en:'Sparrow Friend', sub:'사냥꾼의 숲에서 구출 🐦', sub_en:'Rescued from the Hunter\'s Forest 🐦' };
     state._lastJoinedKind = 'sparrow';   // v12.35 — 5종 친구 세트 미리보기 트리거
   } else if(state.chapter === 110 && !progress.companionUnlocks.magpie){
     progress.companionUnlocks.magpie = true;
-    state.newCompanion = { kind:'magpie', label:'까치 친구', sub:'불의 광장에서 구출 🪶' };
+    state.newCompanion = { kind:'magpie', label:'까치 친구', label_en:'Magpie Friend', sub:'불의 광장에서 구출 🪶', sub_en:'Rescued from the Plaza of Fire 🪶' };
   } else if(state.chapter === 115 && !progress.companionUnlocks.owl){
     progress.companionUnlocks.owl = true;
-    state.newCompanion = { kind:'owl', label:'부엉이 친구', sub:'뼛가루 사막에서 구출 🦉' };
+    state.newCompanion = { kind:'owl', label:'부엉이 친구', label_en:'Owl Friend', sub:'뼛가루 사막에서 구출 🦉', sub_en:'Rescued from the Bone-Dust Desert 🦉' };
   } else if(state.chapter === 120 && !progress.companionUnlocks.parrot){
     progress.companionUnlocks.parrot = true;
-    state.newCompanion = { kind:'parrot', label:'앵무새 친구', sub:'그림자 전당에서 구출 🦜' };
+    state.newCompanion = { kind:'parrot', label:'앵무새 친구', label_en:'Parrot Friend', sub:'그림자 전당에서 구출 🦜', sub_en:'Rescued from the Shadow Sanctum 🦜' };
   } else if(state.chapter === 125 && !progress.companionUnlocks.squirrel){
     progress.companionUnlocks.squirrel = true;
-    state.newCompanion = { kind:'squirrel', label:'다람쥐 친구', sub:'심연의 첨탑에서 구출 🐿' };
+    state.newCompanion = { kind:'squirrel', label:'다람쥐 친구', label_en:'Squirrel Friend', sub:'심연의 첨탑에서 구출 🐿', sub_en:'Rescued from the Spire of the Abyss 🐿' };
   }
   // v12.35 — 원정 Ⅶ 부모 합류 (남편 부모 ch205, 아내 부모 ch210). pair 단위.
   else if(state.chapter === 205 && !progress.companionUnlocks.husbandParents){
     progress.companionUnlocks.husbandParents = true;
-    state.newCompanion = { kind:'husbandParents', label:'남편의 부모님 합류', sub:'천국 3층천에서 다시 만난 가족 — 천사의 옷을 입고 있습니다 🪽' };
+    state.newCompanion = { kind:'husbandParents', label:'남편의 부모님 합류', label_en:'Husband\'s Parents Join', sub:'천국 3층천에서 다시 만난 가족 — 천사의 옷을 입고 있습니다 🪽', sub_en:'Family reunited in the Third Heaven — clad in angel robes 🪽' };
   } else if(state.chapter === 210 && !progress.companionUnlocks.wifeParents){
     progress.companionUnlocks.wifeParents = true;
-    state.newCompanion = { kind:'wifeParents', label:'아내의 부모님 합류', sub:'천국에 모인 일가 — 천사의 옷차림으로 등장 🪽' };
+    state.newCompanion = { kind:'wifeParents', label:'아내의 부모님 합류', label_en:'Wife\'s Parents Join', sub:'천국에 모인 일가 — 천사의 옷차림으로 등장 🪽', sub_en:'The whole family in heaven, clad in angel attire 🪽' };
   }
   // v12.35 — 원정 Ⅷ 조상 합류 (구구나르도 다 둘치 ch255, 비리스토둘레스 ch260).
   else if(state.chapter === 255 && !progress.companionUnlocks.gugunardo){
     progress.companionUnlocks.gugunardo = true;
-    state.newCompanion = { kind:'gugunardo', label:'구구나르도 다 둘치 합류', sub:'비둘기 가문의 위대한 발명가 조상이 도면을 들고 합류 📐' };
+    state.newCompanion = { kind:'gugunardo', label:'구구나르도 다 둘치 합류', label_en:'Gugunardo da Dulci Joins', sub:'비둘기 가문의 위대한 발명가 조상이 도면을 들고 합류 📐', sub_en:'The great inventor ancestor joins, blueprints in claw 📐' };
   } else if(state.chapter === 260 && !progress.companionUnlocks.bristotodul){
     progress.companionUnlocks.bristotodul = true;
-    state.newCompanion = { kind:'bristotodul', label:'비리스토둘레스 합류', sub:'비둘기 가문의 위대한 철학자 조상이 두루마리를 들고 합류 📜' };
+    state.newCompanion = { kind:'bristotodul', label:'비리스토둘레스 합류', label_en:'Bristotodules Joins', sub:'비둘기 가문의 위대한 철학자 조상이 두루마리를 들고 합류 📜', sub_en:'The great philosopher ancestor joins, scroll in beak 📜' };
   }
   // v12.34 — ch131(원정 Ⅴ 첫 챕터) 클리어 시 천국 SS 코스튬 일괄 자동 지급. 한 번만 발생.
   if(state.chapter === 131 && !progress.heavenCostumesGranted){
@@ -11335,68 +11619,79 @@ function showCompanionMeetModal(){
   // v12.11 Phase 3b — 5종 구출 친구 분기 추가. 모두 "지옥에서 억울하게 끌려간 친구를 구한다" 톤.
   const meetCopy = {
     wife: {
-      title: '💗 아내 비둘기 합류!', color:'#FFB4D8',
-      sub: '비둘기 행성에서 만난 운명의 짝',
-      story: '비둘기 행성에 발 디딘 그날, 깃털 평원에서 만난 한 비둘기.<br>지금부터 모든 원정에서 옆에 함께 서서 새우깡을 던집니다.',
+      title:'💗 아내 비둘기 합류!', title_en:'💗 Wife Pigeon joins!', color:'#FFB4D8',
+      sub:'비둘기 행성에서 만난 운명의 짝', sub_en:'A fated mate met on the pigeon homeworld',
+      story:'비둘기 행성에 발 디딘 그날, 깃털 평원에서 만난 한 비둘기.<br>지금부터 모든 원정에서 옆에 함께 서서 새우깡을 던집니다.',
+      story_en:'On the day you set foot on the pigeon homeworld, a pigeon you met on the Feather Plains.<br>From now on, she stands beside you in every expedition, throwing saeukkang.',
     },
     child: {
-      title: '👶 아기 비둘기 합류!', color:'#A5D8FF',
-      sub: '두 비둘기의 사랑으로 태어난 새 생명',
-      story: '남편 비둘기와 아내 비둘기의 사랑으로 태어난 첫 아이.<br>아빠 따라 작은 새우깡을 던지며 함께 우주를 정복합니다.',
+      title:'👶 아기 비둘기 합류!', title_en:'👶 Baby Pigeon joins!', color:'#A5D8FF',
+      sub:'두 비둘기의 사랑으로 태어난 새 생명', sub_en:'A new life born from two pigeons in love',
+      story:'남편 비둘기와 아내 비둘기의 사랑으로 태어난 첫 아이.<br>아빠 따라 작은 새우깡을 던지며 함께 우주를 정복합니다.',
+      story_en:'The first child of the husband and wife pigeons.<br>Following dad, throwing tiny saeukkang to help conquer the cosmos.',
     },
     sparrow: {
-      title: '🐦 참새 친구 구출!', color:'#FFE066',
-      sub: '사냥꾼의 숲 — 그물에 걸려있던 참새',
-      story: '사냥꾼의 숲에서 그물에 걸려 떨고 있던 참새.<br>가족 뒤를 따라 무리지어 작은 깃털을 흩날리며 함께 합니다.',
+      title:'🐦 참새 친구 구출!', title_en:'🐦 Sparrow friend rescued!', color:'#FFE066',
+      sub:'사냥꾼의 숲 — 그물에 걸려있던 참새', sub_en:'Hunter\'s Forest — a sparrow snared in a net',
+      story:'사냥꾼의 숲에서 그물에 걸려 떨고 있던 참새.<br>가족 뒤를 따라 무리지어 작은 깃털을 흩날리며 함께 합니다.',
+      story_en:'Trembling in a net deep in the Hunter\'s Forest.<br>Now flocks behind the family, scattering tiny feathers as it goes.',
     },
     magpie: {
-      title: '🪶 까치 친구 구출!', color:'#74C0FC',
-      sub: '불의 광장 — 새장에 갇혀 있던 까치',
-      story: '불의 광장 새장 안에서 빛나는 모이로 유혹된 까치.<br>"반짝이는 건 다 못 가져갈 거야!" 하며 가족 뒤에 합류.',
+      title:'🪶 까치 친구 구출!', title_en:'🪶 Magpie friend rescued!', color:'#74C0FC',
+      sub:'불의 광장 — 새장에 갇혀 있던 까치', sub_en:'Plaza of Fire — a caged magpie',
+      story:'불의 광장 새장 안에서 빛나는 모이로 유혹된 까치.<br>"반짝이는 건 다 못 가져갈 거야!" 하며 가족 뒤에 합류.',
+      story_en:'A magpie lured into a cage by shiny bait in the Plaza of Fire.<br>"You can\'t take all the shinies!" — joins the family right behind you.',
     },
     owl: {
-      title: '🦉 부엉이 친구 구출!', color:'#FFA94D',
-      sub: '뼛가루 사막 — 모래 폭풍에 길을 잃었던 부엉이',
-      story: '뼛가루 사막 한가운데서 큰 눈을 깜박이며 길을 잃었던 부엉이.<br>밤하늘을 가르며 가족 뒤를 지켜봅니다.',
+      title:'🦉 부엉이 친구 구출!', title_en:'🦉 Owl friend rescued!', color:'#FFA94D',
+      sub:'뼛가루 사막 — 모래 폭풍에 길을 잃었던 부엉이', sub_en:'Bone-Dust Desert — an owl lost in a sandstorm',
+      story:'뼛가루 사막 한가운데서 큰 눈을 깜박이며 길을 잃었던 부엉이.<br>밤하늘을 가르며 가족 뒤를 지켜봅니다.',
+      story_en:'Big-eyed owl, blinking lost in the heart of the Bone-Dust Desert.<br>Now slices through the night behind the family, watching their back.',
     },
     parrot: {
-      title: '🦜 앵무새 친구 구출!', color:'#51CF66',
-      sub: '그림자 전당 — 거짓의 회랑에 갇혀있던 앵무새',
-      story: '거짓의 회랑에서 같은 말만 되풀이하던 앵무새.<br>이제는 가족 뒤에서 알록달록한 깃털을 흩날립니다.',
+      title:'🦜 앵무새 친구 구출!', title_en:'🦜 Parrot friend rescued!', color:'#51CF66',
+      sub:'그림자 전당 — 거짓의 회랑에 갇혀있던 앵무새', sub_en:'Shadow Sanctum — a parrot caged in the Hall of Lies',
+      story:'거짓의 회랑에서 같은 말만 되풀이하던 앵무새.<br>이제는 가족 뒤에서 알록달록한 깃털을 흩날립니다.',
+      story_en:'A parrot in the Hall of Lies, doomed to repeat the same words.<br>Now scatters bright feathers behind the family.',
     },
     squirrel: {
-      title: '🐿 다람쥐 친구 구출!', color:'#A87545',
-      sub: '심연의 첨탑 — 도토리를 빼앗긴 다람쥐',
-      story: '심연의 첨탑 정상에서 도토리를 빼앗기고 떨고 있던 다람쥐.<br>가족 뒤에서 도토리를 입에 물고 부지런히 따라옵니다.',
+      title:'🐿 다람쥐 친구 구출!', title_en:'🐿 Squirrel friend rescued!', color:'#A87545',
+      sub:'심연의 첨탑 — 도토리를 빼앗긴 다람쥐', sub_en:'Spire of the Abyss — a squirrel robbed of acorns',
+      story:'심연의 첨탑 정상에서 도토리를 빼앗기고 떨고 있던 다람쥐.<br>가족 뒤에서 도토리를 입에 물고 부지런히 따라옵니다.',
+      story_en:'A squirrel atop the Spire of the Abyss, trembling and acorn-less.<br>Now scampers behind the family with an acorn in its mouth.',
     },
     // v12.35 — 원정 Ⅶ 부모 합류 (pair 단위, 천사 디폴트 옷).
     husbandParents: {
-      title: '🪽 남편의 부모님 합류!', color:'#FFE066',
-      sub: '천국 3층천에서 다시 만난 가족',
-      story: '먼 옛날 별이 된 남편의 부모님이 천사의 옷을 입고 마중 나옵니다.<br>창조주가 침범에 노여워하고 있지만, 가족은 멈추지 않고 함께 새우깡을 던집니다.',
+      title:'🪽 남편의 부모님 합류!', title_en:'🪽 Husband\'s parents join!', color:'#FFE066',
+      sub:'천국 3층천에서 다시 만난 가족', sub_en:'Family reunited in the Third Heaven',
+      story:'먼 옛날 별이 된 남편의 부모님이 천사의 옷을 입고 마중 나옵니다.<br>창조주가 침범에 노여워하고 있지만, 가족은 멈추지 않고 함께 새우깡을 던집니다.',
+      story_en:'Long-departed parents of the husband, now in angel robes, come to greet you.<br>The Creator is angered, yet the family does not stop — they throw saeukkang together.',
     },
     wifeParents: {
-      title: '🪽 아내의 부모님 합류!', color:'#FFD43B',
-      sub: '하늘에서 일가가 모이다',
-      story: '아내의 부모님이 따뜻한 깃털과 함께 합류합니다.<br>천사의 옷자락은 디폴트 — 상점의 세트 코스튬으로 한 번에 갈아입을 수 있습니다.',
+      title:'🪽 아내의 부모님 합류!', title_en:'🪽 Wife\'s parents join!', color:'#FFD43B',
+      sub:'하늘에서 일가가 모이다', sub_en:'The whole family gathers in the heavens',
+      story:'아내의 부모님이 따뜻한 깃털과 함께 합류합니다.<br>천사의 옷자락은 디폴트 — 상점의 세트 코스튬으로 한 번에 갈아입을 수 있습니다.',
+      story_en:'The wife\'s parents join with warm feathers.<br>The angel robe is the default — you can swap to set costumes from the shop.',
     },
     // v12.35 — 원정 Ⅷ 조상 합류 (개별, 발명가/철학자 디폴트 옷).
     gugunardo: {
-      title: '📐 구구나르도 다 둘치 합류!', color:'#FFA94D',
-      sub: '비둘기 가문의 위대한 발명가 조상',
-      story: '르네상스 어디쯤에서 도면과 깃털 펜을 휘두르던 전설의 발명가 비둘기.<br>"새우깡의 비행 궤적은 정확히 황금비를 따라야 하지." — 합류 후 다양한 직업 코스튬으로 변신할 수 있습니다.',
+      title:'📐 구구나르도 다 둘치 합류!', title_en:'📐 Gugunardo da Dulci joins!', color:'#FFA94D',
+      sub:'비둘기 가문의 위대한 발명가 조상', sub_en:'The pigeon family\'s great inventor ancestor',
+      story:'르네상스 어디쯤에서 도면과 깃털 펜을 휘두르던 전설의 발명가 비둘기.<br>"새우깡의 비행 궤적은 정확히 황금비를 따라야 하지." — 합류 후 다양한 직업 코스튬으로 변신할 수 있습니다.',
+      story_en:'A legendary inventor pigeon, blueprint and quill in claw, somewhere in the Renaissance.<br>"The flight arc of saeukkang must follow the golden ratio precisely." — equip job costumes to transform.',
     },
     bristotodul: {
-      title: '📜 비리스토둘레스 합류!', color:'#9775FA',
-      sub: '비둘기 가문의 위대한 철학자 조상',
-      story: '"새우깡이란 무엇인가." 두루마리를 펴 들고 합류한 고대 사상가 비둘기.<br>합류 후 시인·연설가·현자 등 다양한 직업 코스튬을 입혀줄 수 있습니다.',
+      title:'📜 비리스토둘레스 합류!', title_en:'📜 Bristotodules joins!', color:'#9775FA',
+      sub:'비둘기 가문의 위대한 철학자 조상', sub_en:'The pigeon family\'s great philosopher ancestor',
+      story:'"새우깡이란 무엇인가." 두루마리를 펴 들고 합류한 고대 사상가 비둘기.<br>합류 후 시인·연설가·현자 등 다양한 직업 코스튬을 입혀줄 수 있습니다.',
+      story_en:'"What is saeukkang?" An ancient thinker pigeon, scroll unfurled, joins the family.<br>Equip poet, orator, sage, or other job costumes after he joins.',
     },
   };
   const cp = meetCopy[c.kind] || meetCopy.wife;
-  titleEl.textContent = cp.title;
+  titleEl.textContent = (getLang()==='en' && cp.title_en) ? cp.title_en : cp.title;
   titleEl.style.color = cp.color;
-  subEl.textContent = cp.sub;
-  storyEl.innerHTML = cp.story;
+  subEl.textContent = (getLang()==='en' && cp.sub_en) ? cp.sub_en : cp.sub;
+  storyEl.innerHTML = (getLang()==='en' && cp.story_en) ? cp.story_en : cp.story;
   // Draw the companion at center of canvas with sparkle aura.
   const cv = document.getElementById('cmmCanvas');
   const ctx2 = cv.getContext('2d');
@@ -12080,9 +12375,9 @@ function update(dt){
         // Multi-phase final boss. v12.17 — phase 토스트 텍스트는 보스 라벨로 동적 치환.
         // pigeon_emperor / omega / black_hole_lord / hellgate_sovereign 모두 voidBehavior 공유.
         const hpFrac = e.hp / e.maxHp;
-        const _bossName = e.bossLabel || '공허의 황제';
-        if(hpFrac < 0.66 && e.phase < 2){ e.phase = 2; state.toastBanner = { text:`⚠ ${_bossName} — 2단계!`, sub:'균열이 시작됩니다', t:2.0, maxT:2.0 }; state.camera.shake = 22; }
-        if(hpFrac < 0.33 && e.phase < 3){ e.phase = 3; state.toastBanner = { text:`⚠ ${_bossName} — 최종 단계!`, sub:'세계가 무너집니다', t:2.4, maxT:2.4 }; state.camera.shake = 30; }
+        const _bossName = (getLang()==='en' && e.bossLabelEn) ? e.bossLabelEn : (e.bossLabel || L('공허의 황제','Void Emperor'));
+        if(hpFrac < 0.66 && e.phase < 2){ e.phase = 2; state.toastBanner = { text:L(`⚠ ${_bossName} — 2단계!`,`⚠ ${_bossName} — Phase 2!`), sub:L('균열이 시작됩니다','Cracks begin to form'), t:2.0, maxT:2.0 }; state.camera.shake = 22; }
+        if(hpFrac < 0.33 && e.phase < 3){ e.phase = 3; state.toastBanner = { text:L(`⚠ ${_bossName} — 최종 단계!`,`⚠ ${_bossName} — Final Phase!`), sub:L('세계가 무너집니다','The world collapses'), t:2.4, maxT:2.4 }; state.camera.shake = 30; }
         // Phase 1+: void blast (8-shot ring) every 4s
         e.voidBlastCd -= dt;
         if(e.voidBlastCd <= 0){
@@ -12609,7 +12904,7 @@ function doUltimate(){
       });
     }
   }
-  state.toastBanner = { text:'🐦‍🔥 비둘기의 외침 — 구구~~~!!!', sub:'적 전체에게 화염 피해', t:2.0, maxT:2.0 };
+  state.toastBanner = { text:L('🐦‍🔥 비둘기의 외침 — 구구~~~!!!','🐦‍🔥 Pigeon\'s Cry — COO~~~!!!'), sub:L('적 전체에게 화염 피해','Fire damage to all enemies'), t:2.0, maxT:2.0 };
   updateUltButton();
 }
 
@@ -12626,7 +12921,7 @@ function updateHUD(){
       wavePanelEl.innerHTML = '🐉 <b style="color:#FF6B6B;">BOSS</b>';
       wavePanelEl.style.borderColor = '#FF6B6B';
     } else {
-      wavePanelEl.innerHTML = '🌊 웨이브 <span id="waveNum">'+(state.wave || 1)+'</span>/3';
+      wavePanelEl.innerHTML = '🌊 '+L('웨이브','Wave')+' <span id="waveNum">'+(state.wave || 1)+'</span>/3';
       wavePanelEl.style.borderColor = '#FFD43B';
     }
   }
@@ -12746,7 +13041,7 @@ function syncBossHpBar(){
   const nameEl = document.getElementById('bossHpName');
   if(fillEl) fillEl.style.width = pct.toFixed(1) + '%';
   if(txtEl) txtEl.textContent = `${Math.ceil(cur).toLocaleString()} / ${max.toLocaleString()}  (${pct.toFixed(1)}%)`;
-  if(nameEl) nameEl.textContent = '☠ ' + (boss.bossLabel || '챕터 보스');
+  if(nameEl) nameEl.textContent = '☠ ' + ((getLang()==='en' && boss.bossLabelEn) ? boss.bossLabelEn : (boss.bossLabel || L('챕터 보스','Chapter Boss')));
   if(sinceSpawn < 2.5){
     _bossHpEl.classList.remove('show', 'low');
     return;
@@ -12770,7 +13065,7 @@ function updateInvBar(){
   el.innerHTML = entries.map(u => {
     const lvl = p.upg[u.id];
     const maxed = lvl >= u.max;
-    return `<span class="inv-pill ${u.rarity}${maxed?' max':''}" title="${u.title}"><span class="ic">${u.icon}</span><span class="lv">${lvl}/${u.max}</span></span>`;
+    return `<span class="inv-pill ${u.rarity}${maxed?' max':''}" title="${titleOf(u)}"><span class="ic">${u.icon}</span><span class="lv">${lvl}/${u.max}</span></span>`;
   }).join('');
 }
 
@@ -15595,15 +15890,15 @@ document.addEventListener('click', e => {
   const rescuedOk = progress.companionUnlocks && (typeof RESCUED_KINDS !== 'undefined') &&
     RESCUED_KINDS.every(k => progress.companionUnlocks[k]);
   if(target === 'wife' && !wifeOk){
-    state.toastBanner = { text:'🔒 아내 비둘기 잠금', sub:'원정 Ⅱ ch51 클리어 시 합류', t:2.0, maxT:2.0, tone:'warn' };
+    state.toastBanner = { text:L('🔒 아내 비둘기 잠금','🔒 Wife Pigeon locked'), sub:L('원정 Ⅱ ch51 클리어 시 합류','Joins on Expedition II Ch51 clear'), t:2.0, maxT:2.0, tone:'warn' };
     return;
   }
   if(target === 'child' && !childOk){
-    state.toastBanner = { text:'🔒 아기 비둘기 잠금', sub:'원정 Ⅱ ch60 클리어 시 합류', t:2.0, maxT:2.0, tone:'warn' };
+    state.toastBanner = { text:L('🔒 아기 비둘기 잠금','🔒 Baby Pigeon locked'), sub:L('원정 Ⅱ ch60 클리어 시 합류','Joins on Expedition II Ch60 clear'), t:2.0, maxT:2.0, tone:'warn' };
     return;
   }
   if(target === 'rescued' && !rescuedOk){
-    state.toastBanner = { text:'🔒 구출 친구 세트 잠금', sub:'원정 Ⅳ Ch125 까지 진행 시 활성', t:2.4, maxT:2.4, tone:'warn' };
+    state.toastBanner = { text:L('🔒 구출 친구 세트 잠금','🔒 Rescued Friends Set locked'), sub:L('원정 Ⅳ Ch125 까지 진행 시 활성','Active once Ch125 of Expedition IV is reached'), t:2.4, maxT:2.4, tone:'warn' };
     return;
   }
   // v12.35 — 부모/조상 탭 가드.
@@ -15612,11 +15907,11 @@ document.addEventListener('click', e => {
   const ancestorsOk = progress.companionUnlocks && (typeof ANCESTOR_KINDS !== 'undefined') &&
     ANCESTOR_KINDS.some(k => progress.companionUnlocks[k]);
   if(target === 'parents' && !parentsOk){
-    state.toastBanner = { text:'🔒 부모 세트 잠금', sub:'원정 Ⅶ Ch210 까지 진행 시 활성', t:2.4, maxT:2.4, tone:'warn' };
+    state.toastBanner = { text:L('🔒 부모 세트 잠금','🔒 Parents Set locked'), sub:L('원정 Ⅶ Ch210 까지 진행 시 활성','Active once Ch210 of Expedition VII is reached'), t:2.4, maxT:2.4, tone:'warn' };
     return;
   }
   if(target === 'ancestors' && !ancestorsOk){
-    state.toastBanner = { text:'🔒 조상 코스튬 잠금', sub:'원정 Ⅷ Ch255 (구구나르도) / Ch260 (비리스토둘레스) 합류 후 활성', t:2.4, maxT:2.4, tone:'warn' };
+    state.toastBanner = { text:L('🔒 조상 코스튬 잠금','🔒 Ancestor Costumes locked'), sub:L('원정 Ⅷ Ch255 (구구나르도) / Ch260 (비리스토둘레스) 합류 후 활성','Active after Expedition VIII Ch255 (Gugunardo) / Ch260 (Bristotodules) joins'), t:2.4, maxT:2.4, tone:'warn' };
     return;
   }
   state.cosCharTab = target;
@@ -15660,7 +15955,7 @@ document.getElementById('combineBtn').addEventListener('click', () => {
   // v12.12 — 합성 시 미리보기 다이얼로그를 먼저 열어 oldest-first로 소비될 3장을 사전 노출.
   const grades = findCombinableGrades();
   if(grades.length === 0){
-    state.toastBanner = { text:'합성할 코스튬 부족', sub:'같은 등급 3장이 필요합니다 (장착 중인 것 제외)', t:2.0, maxT:2.0, tone:'warn' };
+    state.toastBanner = { text:L('합성할 코스튬 부족','Not enough costumes to combine'), sub:L('같은 등급 3장이 필요합니다 (장착 중인 것 제외)','Need 3 of the same grade (equipped not counted)'), t:2.0, maxT:2.0, tone:'warn' };
     return;
   }
   const order = { A:3, B:2, C:1 };
@@ -15992,8 +16287,8 @@ function openFeedModal(){
     card.innerHTML = `
       <div class="fc-icon">${f.icon}</div>
       <div class="fc-body">
-        <div class="fc-name">${f.name}</div>
-        <div class="fc-desc">${f.desc}</div>
+        <div class="fc-name">${nameOf(f)}</div>
+        <div class="fc-desc">${descOf(f)}</div>
       </div>
       <div class="fc-price">🪙 ${f.price.toLocaleString()}</div>
     `;
@@ -16257,10 +16552,10 @@ function renderRescuedSetGrid(){
       buyBtn.addEventListener('click', () => {
         const r = buyRescuedSet(setDef.id);
         if(!r.ok){
-          state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:2.0, maxT:2.0, tone:'warn' };
+          state.toastBanner = { text:T('status.fail'), sub:r.reason || L('실패','Failed'), t:2.0, maxT:2.0, tone:'warn' };
         } else {
           sfxLevelUp();
-          state.toastBanner = { text:`✨ ${setDef.name} 일괄 구매!`, sub:`-${r.cost.toLocaleString()} 🪙 → 5명 일괄 장착`, t:2.4, maxT:2.4, tone:'critical' };
+          state.toastBanner = { text:L(`✨ ${nameOf(setDef)} 일괄 구매!`, `✨ ${nameOf(setDef)} bulk purchase!`), sub:L(`-${r.cost.toLocaleString()} 🪙 → 5명 일괄 장착`, `-${r.cost.toLocaleString()} 🪙 → equipped on all 5`), t:2.4, maxT:2.4, tone:'critical' };
         }
         renderCompanionCostumeSection();
         const sc = document.getElementById('shopCoinTxt');
@@ -16340,11 +16635,11 @@ function renderParentsSetGrid(){
         btn.addEventListener('click', () => {
           const r = buyParentsSet(setDef.id, k);
           if(!r.ok){
-            state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:2.0, maxT:2.0, tone:'warn' };
+            state.toastBanner = { text:T('status.fail'), sub:r.reason || L('실패','Failed'), t:2.0, maxT:2.0, tone:'warn' };
           } else {
             sfxLevelUp();
             const sideLbl = k === 'husbandParents' ? '남편 부모님' : '아내 부모님';
-            state.toastBanner = { text:`✨ ${setDef.name} (${sideLbl}) 구매!`, sub:`-${(r.cost||0).toLocaleString()} 🪙`, t:2.4, maxT:2.4, tone:'critical' };
+            state.toastBanner = { text:L(`✨ ${nameOf(setDef)} (${sideLbl}) 구매!`, `✨ Purchased ${nameOf(setDef)} (${sideLbl})!`), sub:`-${(r.cost||0).toLocaleString()} 🪙`, t:2.4, maxT:2.4, tone:'critical' };
           }
           renderCompanionCostumeSection();
           const sc = document.getElementById('shopCoinTxt');
@@ -16358,7 +16653,7 @@ function renderParentsSetGrid(){
           renderCompanionCostumeSection();
         });
       } else {
-        btn.textContent = '장착';
+        btn.textContent = T('btn.equip');
         btn.style.background = 'linear-gradient(180deg,#74C0FC,#1864AB)';
         btn.addEventListener('click', () => {
           equipParentsSet(setDef.id, k);
@@ -16445,7 +16740,7 @@ function renderAncestorsCostumeGrid(){
         btn.addEventListener('click', () => {
           const r = buyCompanionCostume(ak, def.id);
           if(!r.ok){
-            state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:2.0, maxT:2.0, tone:'warn' };
+            state.toastBanner = { text:T('status.fail'), sub:r.reason || L('실패','Failed'), t:2.0, maxT:2.0, tone:'warn' };
           } else {
             sfxLevelUp();
             renderCompanionCostumeSection();
@@ -16462,7 +16757,7 @@ function renderAncestorsCostumeGrid(){
           renderCompanionCostumeSection();
         });
       } else {
-        btn.textContent = '장착';
+        btn.textContent = T('btn.equip');
         btn.style.background = 'linear-gradient(180deg,#74C0FC,#1864AB)';
         btn.addEventListener('click', () => {
           equipCompanionCostume(ak, def.id);
@@ -16602,12 +16897,12 @@ function renderCompanionGrid(kind, gridId){
       } else {
         const r = buyCompanionCostume(kind, def.id);
         if(!r.ok){
-          state.toastBanner = { text:'구매 실패', sub:r.reason || '실패', t:1.8, maxT:1.8, tone:'warn' };
+          state.toastBanner = { text:T('status.fail'), sub:r.reason || L('실패','Failed'), t:1.8, maxT:1.8, tone:'warn' };
         } else {
           slot.equipped[activeSk] = def.id;
           saveProgress();
           sfxLevelUp();
-          state.toastBanner = { text:`✨ ${def.name} 구매!`, sub:`-${def.cost.toLocaleString()} 🪙 → 즉시 장착`, t:2.0, maxT:2.0, tone:'critical' };
+          state.toastBanner = { text:L(`✨ ${nameOf(def)} 구매!`, `✨ Purchased ${nameOf(def)}!`), sub:L(`-${def.cost.toLocaleString()} 🪙 → 즉시 장착`,`-${def.cost.toLocaleString()} 🪙 → equipped instantly`), t:2.0, maxT:2.0, tone:'critical' };
         }
         renderCompanionCostumeSection();
         const sc = document.getElementById('shopCoinTxt');
@@ -16992,21 +17287,21 @@ function openSkinPreviewModal(skinId){
   const owned = (progress.ownedSkins||[]).includes(skin.id);
   const equipped = progress.skin === skin.id;
   const canAfford = (progress.coins||0) >= skin.price;
-  document.getElementById('spmTitle').textContent = skin.name;
+  document.getElementById('spmTitle').textContent = nameOf(skin);
   const preview = document.getElementById('spmPreview');
   preview.style.background = skin.grad;
   const ownEl = document.getElementById('spmOwnership');
-  if(equipped) ownEl.innerHTML = '★ <b style="color:#51CF66;">현재 적용 중</b>';
-  else if(owned) ownEl.innerHTML = '<b style="color:#FFE066;">보유 중</b> — 적용할 수 있어요';
-  else ownEl.innerHTML = `🪙 <b style="color:#FFE066;">${skin.price.toLocaleString()}</b> 코인으로 구매`;
+  if(equipped) ownEl.innerHTML = L('★ <b style="color:#51CF66;">현재 적용 중</b>','★ <b style="color:#51CF66;">Currently applied</b>');
+  else if(owned) ownEl.innerHTML = L('<b style="color:#FFE066;">보유 중</b> — 적용할 수 있어요','<b style="color:#FFE066;">Owned</b> — ready to apply');
+  else ownEl.innerHTML = L(`🪙 <b style="color:#FFE066;">${skin.price.toLocaleString()}</b> 코인으로 구매`,`🪙 <b style="color:#FFE066;">${skin.price.toLocaleString()}</b> coins to purchase`);
   const actBtn = document.getElementById('spmActionBtn');
   actBtn.classList.remove('alt');
   if(equipped){
-    actBtn.textContent = '적용 중';
+    actBtn.textContent = L('적용 중','Applied');
     actBtn.disabled = true;
     actBtn.onclick = null;
   } else if(owned){
-    actBtn.textContent = '적용';
+    actBtn.textContent = T('spm.apply');
     actBtn.disabled = false;
     actBtn.onclick = () => {
       progress.skin = skin.id;
@@ -17016,7 +17311,7 @@ function openSkinPreviewModal(skinId){
       renderSkinShop();
     };
   } else if(canAfford){
-    actBtn.textContent = `🪙 ${skin.price.toLocaleString()} 구매 후 적용`;
+    actBtn.textContent = L(`🪙 ${skin.price.toLocaleString()} 구매 후 적용`,`🪙 ${skin.price.toLocaleString()} buy & apply`);
     actBtn.disabled = false;
     actBtn.onclick = () => {
       if((progress.coins||0) < skin.price){ sfxHurt(); return; }
@@ -17031,7 +17326,7 @@ function openSkinPreviewModal(skinId){
       renderSkinShop();
     };
   } else {
-    actBtn.textContent = `🪙 ${skin.price.toLocaleString()} (코인 부족)`;
+    actBtn.textContent = L(`🪙 ${skin.price.toLocaleString()} (코인 부족)`,`🪙 ${skin.price.toLocaleString()} (insufficient coins)`);
     actBtn.disabled = true;
     actBtn.onclick = null;
   }
@@ -17202,7 +17497,7 @@ function renderSkinShop(){
     card.innerHTML = `
       ${tag}
       <div class="skin-thumb" style="background:${skin.grad}"></div>
-      <div class="skin-name">${skin.name}</div>
+      <div class="skin-name">${nameOf(skin)}</div>
       ${actionHtml}
     `;
     card.style.cursor = 'pointer';
@@ -17236,7 +17531,7 @@ function renderShop(){
     head.className = 'branch-head';
     head.style.color = branch.color;
     head.style.borderColor = branch.color;
-    head.innerHTML = `<span class="lbl">${branch.label}</span><span class="tip">${branch.tip}</span>`;
+    head.innerHTML = `<span class="lbl">${labelOf(branch)}</span><span class="tip">${getLang()==='en' && branch.tip_en ? branch.tip_en : (branch.tip||'')}</span>`;
     col.appendChild(head);
 
     branch.nodes.forEach((def, idx) => {
@@ -17277,15 +17572,15 @@ function renderShop(){
 
       const nm = document.createElement('div');
       nm.className = 'nm';
-      nm.textContent = def.name;
+      nm.textContent = nameOf(def);
       node.appendChild(nm);
 
       const desc = document.createElement('div');
       desc.className = 'desc-tip';
       if(!unlocked){
-        desc.textContent = shopUnlockReason(def) || '잠김';
+        desc.textContent = shopUnlockReason(def) || L('잠김','Locked');
       } else {
-        desc.textContent = def.desc;
+        desc.textContent = descOf(def);
       }
       node.appendChild(desc);
 
@@ -17350,8 +17645,8 @@ function renderChapterGrid(){
     const chm = chapterMult();
     state.chapter = oldCh;
     card.innerHTML = locked
-      ? `<div class="ch-lock">🔒</div><div class="ch-num">Ch. ${i}</div><div class="ch-name" style="font-size:12px;opacity:.7;">미공개</div>`
-      : `<div class="ch-num">Ch. ${i}</div><div class="ch-name">${chapterName(i)}</div><div class="ch-mult">${i===1?'처음 시작':`적 ×${chm.hp.toFixed(1)} HP · ×${chm.dmg.toFixed(2)} DMG`}</div>`;
+      ? `<div class="ch-lock">🔒</div><div class="ch-num">Ch. ${i}</div><div class="ch-name" style="font-size:12px;opacity:.7;">${L('미공개','Unrevealed')}</div>`
+      : `<div class="ch-num">Ch. ${i}</div><div class="ch-name">${chapterName(i)}</div><div class="ch-mult">${i===1?T('ch.firstStart'):L(`적 ×${chm.hp.toFixed(1)} HP · ×${chm.dmg.toFixed(2)} DMG`,`Enemy ×${chm.hp.toFixed(1)} HP · ×${chm.dmg.toFixed(2)} DMG`)}</div>`;
     if(!locked){
       card.addEventListener('click', ()=>{
         document.getElementById('chapterSelect').classList.add('hidden');
@@ -17391,7 +17686,7 @@ function renderChapterFocus(){
   const chm = chapterMult();
   state.chapter = oldCh;
   const isFresh = cleared === 0;
-  const heroLabel = allDone ? '🌟 모든 챕터 정복!' : (isFresh ? '⚔ 첫 도전' : `${cleared}챕터 정복 — 다음 도전`);
+  const heroLabel = allDone ? L('🌟 모든 챕터 정복!','🌟 All chapters conquered!') : (isFresh ? L('⚔ 첫 도전','⚔ First run') : L(`${cleared}챕터 정복 — 다음 도전`,`${cleared} chapters cleared — next up`));
   heroEl.innerHTML = '';
   const hero = document.createElement('div');
   hero.className = 'ch-hero';
@@ -17400,20 +17695,20 @@ function renderChapterFocus(){
     // Player has cleared everything — show a celebration card and a "최종 엔딩 보기" button that
     // routes to the cinematic victory screen instead of starting a new run.
     hero.innerHTML = `
-      <div class="h-celebration">🏆 한계돌파</div>
+      <div class="h-celebration">${L('🏆 한계돌파','🏆 Limit Broken')}</div>
       <div class="h-num">CHAPTER ${MAX_CHAPTERS}</div>
       <div class="h-name">${chapterName(MAX_CHAPTERS)}</div>
-      <div class="h-stats">전 챕터를 정복한 전설의 비둘기</div>
-      <button class="h-play" id="heroPlayBtn">🌟 최종 엔딩 다시 보기</button>
+      <div class="h-stats">${L('전 챕터를 정복한 전설의 비둘기','A legendary pigeon who conquered every chapter')}</div>
+      <button class="h-play" id="heroPlayBtn">${L('🌟 최종 엔딩 다시 보기','🌟 Watch Final Ending Again')}</button>
     `;
   } else {
     hero.innerHTML = `
       <div class="h-celebration">${heroLabel}</div>
       <div class="h-num">CHAPTER ${focusCh}</div>
       <div class="h-name">${chapterName(focusCh)}</div>
-      <div class="h-stats">${focusCh === 1 ? '체력 ×1.0 · 공격력 ×1.0 · 속도 ×1.0' : `체력 ×${chm.hp.toFixed(1)} · 공격력 ×${chm.dmg.toFixed(2)} · 속도 ×${chm.speed.toFixed(2)}`}</div>
-      <div class="h-time">⏱ 예상 플레이 ${chapterPlayTimeEstimate(focusCh)}</div>
-      <button class="h-play" id="heroPlayBtn">▶ 챕터 ${focusCh} 도전</button>
+      <div class="h-stats">${focusCh === 1 ? L('체력 ×1.0 · 공격력 ×1.0 · 속도 ×1.0','HP ×1.0 · ATK ×1.0 · SPD ×1.0') : L(`체력 ×${chm.hp.toFixed(1)} · 공격력 ×${chm.dmg.toFixed(2)} · 속도 ×${chm.speed.toFixed(2)}`,`HP ×${chm.hp.toFixed(1)} · ATK ×${chm.dmg.toFixed(2)} · SPD ×${chm.speed.toFixed(2)}`)}</div>
+      <div class="h-time">${L('⏱ 예상 플레이 ' + chapterPlayTimeEstimate(focusCh),'⏱ Est. play ' + chapterPlayTimeEstimate(focusCh))}</div>
+      <button class="h-play" id="heroPlayBtn">${L(`▶ 챕터 ${focusCh} 도전`,`▶ Take on Chapter ${focusCh}`)}</button>
     `;
   }
   heroEl.appendChild(hero);
@@ -17436,7 +17731,7 @@ function renderChapterFocus(){
   // Cleared strip — last 10 cleared chapters in reverse order so the most recent is first.
   clearedStrip.innerHTML = '';
   if(cleared === 0){
-    clearedStrip.innerHTML = `<div style="color:#868E96;font-size:12px;padding:8px 6px;">아직 정복한 챕터가 없습니다. 위 버튼으로 첫 도전을 시작하세요!</div>`;
+    clearedStrip.innerHTML = `<div style="color:#868E96;font-size:12px;padding:8px 6px;">${L('아직 정복한 챕터가 없습니다. 위 버튼으로 첫 도전을 시작하세요!','No chapters conquered yet. Use the button above to start your first run!')}</div>`;
   } else {
     const start = cleared, end = Math.max(1, cleared - 9);
     for(let i = start; i >= end; i--){
@@ -17456,7 +17751,7 @@ function renderChapterFocus(){
   const upStart = focusCh + 1;
   const upEnd = Math.min(MAX_CHAPTERS, upStart + 5);
   if(allDone || upStart > MAX_CHAPTERS){
-    upcomingStrip.innerHTML = `<div style="color:#868E96;font-size:12px;padding:8px 6px;">더 이상 챕터가 없습니다. 끝까지 정복하셨습니다!</div>`;
+    upcomingStrip.innerHTML = `<div style="color:#868E96;font-size:12px;padding:8px 6px;">${L('더 이상 챕터가 없습니다. 끝까지 정복하셨습니다!','No more chapters. You\'ve conquered them all!')}</div>`;
   } else {
     for(let i = upStart; i <= upEnd; i++){
       const tile = document.createElement('div');
@@ -17818,7 +18113,7 @@ function showHellOpeningCinematic(){
       const fontSize = 10*(W/360);
       ctx2.font = `bold ${fontSize}px sans-serif`;
       ctx2.textAlign = 'center';
-      ctx2.fillText('지옥문이 열린다…', W/2, fontSize + 8);
+      ctx2.fillText(L('지옥문이 열린다…','The hellgate opens…'), W/2, fontSize + 8);
     }
   }
   frame();
@@ -17861,13 +18156,12 @@ function togglePause(){
 }
 
 function renderCleared(){
-  document.getElementById('scTitle').textContent = `스테이지 ${state.stage} 클리어!`;
-  const bonus = `HP 25% 회복 + 보너스 업그레이드!`;
-  document.getElementById('scSub').textContent = bonus;
+  document.getElementById('scTitle').textContent = L(`스테이지 ${state.stage} 클리어!`, `Stage ${state.stage} clear!`);
+  document.getElementById('scSub').textContent = L('HP 25% 회복 + 보너스 업그레이드!','HP +25% restored · bonus upgrade!');
   document.getElementById('scStats').innerHTML = `
-    <div class="statline"><span>처치</span><b>${state.kills}</b></div>
-    <div class="statline"><span>점수</span><b>${state.score}</b></div>
-    <div class="statline"><span>레벨</span><b>${state.player.level}</b></div>`;
+    <div class="statline"><span>${L('처치','Kills')}</span><b>${state.kills}</b></div>
+    <div class="statline"><span>${T('stat.score')}</span><b>${state.score}</b></div>
+    <div class="statline"><span>${T('stat.level')}</span><b>${state.player.level}</b></div>`;
 }
 function renderChapterCleared(){
   const nextCh = state.chapter + 1;
@@ -17876,22 +18170,22 @@ function renderChapterCleared(){
   const directBtn = document.getElementById('ccNextDirectBtn');
   const nextBtn = document.getElementById('ccNextBtn');
   const nextLabelEl = document.getElementById('ccNextLabel');
-  document.getElementById('ccSub').textContent = `Ch.${state.chapter} 《${chapterName(state.chapter)}》 정복!`;
+  document.getElementById('ccSub').textContent = L(`Ch.${state.chapter} 《${chapterName(state.chapter)}》 정복!`, `Ch.${state.chapter} 《${chapterName(state.chapter)}》 conquered!`);
   if(atCap){
     // Final chapter cleared — direct button becomes the ending route, hide the chapter-select option.
     nextLabelEl.parentElement.style.display = 'none';
-    directBtn.textContent = '🏆 최종 엔딩 보기 ▶';
+    directBtn.textContent = L('🏆 최종 엔딩 보기 ▶','🏆 Watch Final Ending ▶');
     nextBtn.style.display = 'none';
   } else {
     nextLabelEl.parentElement.style.display = '';
-    directBtn.textContent = `⚔ 다음 챕터 바로 도전 — Ch.${nextCh} ▶`;
+    directBtn.textContent = L(`⚔ 다음 챕터 바로 도전 — Ch.${nextCh} ▶`, `⚔ Jump to next chapter — Ch.${nextCh} ▶`);
     nextBtn.style.display = '';
-    nextBtn.textContent = '🗺 챕터 선택으로';
+    nextBtn.textContent = T('cc.next.list');
     // Show next-chapter scaling pulled from the actual chapterMult formula instead of a stale formula.
     const oldCh = state.chapter; state.chapter = nextCh;
     const chm = chapterMult();
     state.chapter = oldCh;
-    nextLabelEl.innerHTML = `<span style="color:${chapterColor(nextCh)};font-weight:900;">챕터 ${nextCh} · ${nextName}</span> — 체력 ×${chm.hp.toFixed(1)}, 공격력 ×${chm.dmg.toFixed(2)}, 속도 ×${chm.speed.toFixed(2)}`;
+    nextLabelEl.innerHTML = `<span style="color:${chapterColor(nextCh)};font-weight:900;">${T('ch.label')} ${nextCh} · ${nextName}</span> — ${L('체력','HP')} ×${chm.hp.toFixed(1)}, ${L('공격력','ATK')} ×${chm.dmg.toFixed(2)}, ${L('속도','SPD')} ×${chm.speed.toFixed(2)}`;
   }
   // Reward block: coins earned this run + costume drop (if any).
   const earnedCoins = state.coinsThisRun || 0;
@@ -17902,13 +18196,13 @@ function renderChapterCleared(){
     const g = COSTUME_GRADES[dropped.grade];
     costumeLine = `
       <div class="statline" style="border-bottom:none;color:${g.color};">
-        <span>🎁 코스튬 획득</span>
-        <b>${def.icon} ${def.name} <span style="background:${g.color};color:#1A0033;padding:1px 8px;border-radius:999px;font-size:11px;margin-left:4px;">${g.label}</span></b>
+        <span>${T('stat.gotCostume')}</span>
+        <b>${def.icon} ${nameOf(def)} <span style="background:${g.color};color:#1A0033;padding:1px 8px;border-radius:999px;font-size:11px;margin-left:4px;">${g.label}</span></b>
       </div>`;
   } else {
     const since = (progress.chaptersSinceCostume || 0);
     const tilPity = Math.max(0, 10 - since);
-    costumeLine = `<div class="statline" style="opacity:.7;font-size:12px;"><span>🎁 코스튬</span><b>${tilPity}판 후 보장</b></div>`;
+    costumeLine = `<div class="statline" style="opacity:.7;font-size:12px;"><span>${T('stat.dropLabel')}</span><b>${T('stat.dropPity').replace('{n}', tilPity)}</b></div>`;
   }
   // v12 phase 2 — companion meet-event banner (wife on ch51, child on ch60).
   let companionLine = '';
@@ -17916,29 +18210,31 @@ function renderChapterCleared(){
     const c = state.newCompanion;
     companionLine = `
       <div class="statline" style="border:2px solid #FFB4D8;background:rgba(255,180,216,.15);color:#FFE066;padding:10px 12px;margin:6px 0;border-radius:10px;animation:pulseUpgrade 1.6s ease-in-out infinite;">
-        <span style="font-weight:900;">💗 ${c.label} 합류!</span>
-        <b style="color:#FFE066;font-size:12px;">${c.sub}</b>
+        <span style="font-weight:900;">💗 ${labelOf(c)} ${T('comp.joined')}!</span>
+        <b style="color:#FFE066;font-size:12px;">${subOf(c)}</b>
       </div>`;
   }
+  const secLabel = L('초','s');
   document.getElementById('ccStats').innerHTML = `
     ${companionLine}
-    <div class="statline"><span>누적 처치</span><b>${state.kills}</b></div>
-    <div class="statline"><span>점수</span><b>${state.score}</b></div>
-    <div class="statline"><span>레벨</span><b>${state.player.level}</b></div>
-    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time)}초</b></div>
-    <div class="statline" style="color:#FFD43B;"><span>🪙 이번 챕터 획득 코인</span><b>${earnedCoins.toLocaleString()}</b></div>
-    <div class="statline"><span>🪙 보유 코인</span><b>${(progress.coins||0).toLocaleString()}</b></div>
+    <div class="statline"><span>${T('stat.kills')}</span><b>${state.kills}</b></div>
+    <div class="statline"><span>${T('stat.score')}</span><b>${state.score}</b></div>
+    <div class="statline"><span>${T('stat.level')}</span><b>${state.player.level}</b></div>
+    <div class="statline"><span>${T('stat.survived')}</span><b>${Math.round(state.time)}${secLabel}</b></div>
+    <div class="statline" style="color:#FFD43B;"><span>${T('stat.coinsChapter')}</span><b>${earnedCoins.toLocaleString()}</b></div>
+    <div class="statline"><span>${T('stat.coinsBalance')}</span><b>${(progress.coins||0).toLocaleString()}</b></div>
     ${costumeLine}`;
 }
 function renderGameOver(){
+  const secLabel = L('초','s');
   document.getElementById('goStats').innerHTML = `
-    <div class="statline"><span>도달 챕터</span><b>${state.chapter} · ${chapterName(state.chapter)}</b></div>
-    <div class="statline"><span>도달 웨이브</span><b>${state.wave || 1} / ${WAVES_PER_CHAPTER}${state.bossSpawned?' (보스)':''}</b></div>
-    <div class="statline"><span>최종 레벨</span><b>${state.player.level}</b></div>
-    <div class="statline"><span>처치 수</span><b>${state.kills}</b></div>
-    <div class="statline"><span>점수</span><b>${state.score}</b></div>
-    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time)}초</b></div>
-    <div class="statline" style="color:#FFD43B;"><span>🪙 이번 런 획득 코인</span><b>${(state.coinsThisRun||0).toLocaleString()}</b></div>`;
+    <div class="statline"><span>${T('stat.reachedChapter')}</span><b>${state.chapter} · ${chapterName(state.chapter)}</b></div>
+    <div class="statline"><span>${T('stat.reachedWave')}</span><b>${state.wave || 1} / ${WAVES_PER_CHAPTER}${state.bossSpawned?' '+T('gow.boss'):''}</b></div>
+    <div class="statline"><span>${T('stat.level')}</span><b>${state.player.level}</b></div>
+    <div class="statline"><span>${T('stat.killCount')}</span><b>${state.kills}</b></div>
+    <div class="statline"><span>${T('stat.score')}</span><b>${state.score}</b></div>
+    <div class="statline"><span>${T('stat.survived')}</span><b>${Math.round(state.time)}${secLabel}</b></div>
+    <div class="statline" style="color:#FFD43B;"><span>${T('stat.coinsRun')}</span><b>${(state.coinsThisRun||0).toLocaleString()}</b></div>`;
 }
 function renderVictory(finalEnding){
   // v12 — expedition-aware victory screen. ch50/70 trigger expedition-end cinematics with their
@@ -17960,7 +18256,7 @@ function renderVictory(finalEnding){
   if(nextBtn){
     if(isHellEntry){
       nextBtn.style.display = '';
-      nextBtn.textContent = '✓ 확인';
+      nextBtn.textContent = L('✓ 확인','✓ Continue');
       nextBtn.style.background = 'linear-gradient(180deg,#FFD43B 0%,#FF6B6B 50%,#C92A2A 100%)';
       nextBtn.dataset.hellEntry = '1';
       delete nextBtn.dataset.toChapterSelect;
@@ -17968,18 +18264,18 @@ function renderVictory(finalEnding){
       // ch130 최종 클리어 — 챕터 선택으로 (재플레이 진입). [처음부터 다시] 는 챕터 선택의 숨겨진
       // 진입점이 아니라 명시적 CTA 가 더 직관적.
       nextBtn.style.display = '';
-      nextBtn.textContent = '🏆 챕터 선택으로 ▶';
+      nextBtn.textContent = L('🏆 챕터 선택으로 ▶','🏆 Back to chapter select ▶');
       nextBtn.style.background = '';
       delete nextBtn.dataset.hellEntry;
       nextBtn.dataset.toChapterSelect = '1';
     } else if(isExpEnd){
       nextBtn.style.display = '';
       // v12.34 — 원정 Ⅴ/Ⅵ(천국) 추가. ch130 → 원정 Ⅴ, ch160 → 원정 Ⅵ.
-      nextBtn.textContent = state.chapter === 50  ? '🪐 원정 Ⅱ — 비둘기 행성으로 ▶' :
-                            state.chapter === 70  ? '🌌 원정 Ⅲ — 우주 정복으로 ▶' :
-                            state.chapter === 130 ? '🌟 원정 Ⅴ — 천국 1층천으로 ▶' :
-                            state.chapter === 160 ? '🪽 원정 Ⅵ — 천국 2층천으로 ▶' :
-                                                    '▶ 다음 원정 시작';
+      nextBtn.textContent = state.chapter === 50  ? L('🪐 원정 Ⅱ — 비둘기 행성으로 ▶','🪐 Expedition II — to Pigeon Planet ▶') :
+                            state.chapter === 70  ? L('🌌 원정 Ⅲ — 우주 정복으로 ▶','🌌 Expedition III — to the Cosmos ▶') :
+                            state.chapter === 130 ? L('🌟 원정 Ⅴ — 천국 1층천으로 ▶','🌟 Expedition V — to the First Heaven ▶') :
+                            state.chapter === 160 ? L('🪽 원정 Ⅵ — 천국 2층천으로 ▶','🪽 Expedition VI — to the Second Heaven ▶') :
+                                                    T('vict.next');
       nextBtn.style.background = '';
       delete nextBtn.dataset.hellEntry;
       delete nextBtn.dataset.toChapterSelect;
@@ -17995,44 +18291,45 @@ function renderVictory(finalEnding){
   const sub = document.querySelector('#victory .card .sub');
   if(isFinal){
     // v12.34 — 진짜 최종 엔딩은 ch200 (원정 Ⅵ 끝). ch130 은 원정 Ⅴ 진입을 위한 중간 끝.
-    h2.textContent = '🪽 창공의 끝! 비둘기 신화의 완성';
-    if(sub) sub.textContent = '200개 챕터를 모두 정복하고 천국의 1·2층천까지 가족·동료가 함께 도달한 신화.';
+    h2.textContent = L('🪽 창공의 끝! 비둘기 신화의 완성','🪽 End of the Sky — The Pigeon Saga Complete');
+    if(sub) sub.textContent = L('200개 챕터를 모두 정복하고 천국의 1·2층천까지 가족·동료가 함께 도달한 신화.','A myth of 200 conquered chapters — family and allies reach the first and second heavens together.');
   } else if(isExpEnd && exp.id === 1){
-    h2.textContent = '🌍 원정 Ⅰ 완료 — 지구 정복!';
-    if(sub) sub.textContent = '50개 챕터의 모든 적을 무찌르고 인류 영토를 정복했습니다. 다음 원정은 비둘기 행성으로.';
+    h2.textContent = L('🌍 원정 Ⅰ 완료 — 지구 정복!','🌍 Expedition I Complete — Earth Conquered!');
+    if(sub) sub.textContent = L('50개 챕터의 모든 적을 무찌르고 인류 영토를 정복했습니다. 다음 원정은 비둘기 행성으로.','50 chapters cleared, every human realm claimed. Next expedition: the pigeon homeworld.');
   } else if(isExpEnd && exp.id === 2){
-    h2.textContent = '🪐 원정 Ⅱ 완료 — 비둘기 행성 정복!';
-    if(sub) sub.textContent = '비둘기 황제를 쓰러뜨리고 행성을 손에 넣었습니다. 아내와 아이가 함께 다음 원정을 떠납니다.';
+    h2.textContent = L('🪐 원정 Ⅱ 완료 — 비둘기 행성 정복!','🪐 Expedition II Complete — Pigeon Planet Conquered!');
+    if(sub) sub.textContent = L('비둘기 황제를 쓰러뜨리고 행성을 손에 넣었습니다. 아내와 아이가 함께 다음 원정을 떠납니다.','The Pigeon Emperor falls; the planet is yours. Your wife and child join the next expedition.');
   } else if(isExpEnd && exp.id === 3){
-    h2.textContent = '🌌 원정 Ⅲ 완료 — 전 우주 정복!';
+    h2.textContent = L('🌌 원정 Ⅲ 완료 — 전 우주 정복!','🌌 Expedition III Complete — Cosmos Conquered!');
     // v12.31 — 사용자 요청 "구원을 기다리고 있습니다" 문구 제거.
-    if(sub) sub.textContent = '오메가를 쓰러뜨리고 우주의 주재자가 되었습니다.';
+    if(sub) sub.textContent = L('오메가를 쓰러뜨리고 우주의 주재자가 되었습니다.','You felled Omega and became the sovereign of the universe.');
   } else if(isExpEnd && exp.id === 4){
-    h2.textContent = '🔥 원정 Ⅳ 완료 — 지옥 구출!';
-    if(sub) sub.textContent = '지옥의 친구들을 모두 구해낸 가족 — 천국이 그 보답으로 1층천의 문을 엽니다.';
+    h2.textContent = L('🔥 원정 Ⅳ 완료 — 지옥 구출!','🔥 Expedition IV Complete — Hell Rescue!');
+    if(sub) sub.textContent = L('지옥의 친구들을 모두 구해낸 가족 — 천국이 그 보답으로 1층천의 문을 엽니다.','Every friend rescued from hell — heaven opens the gate to the first heaven in return.');
   } else if(isExpEnd && exp.id === 5){
-    h2.textContent = '🌟 원정 Ⅴ 완료 — 천국 1층천 탐방!';
-    if(sub) sub.textContent = '1층천의 군주를 만나 인사를 나누고, 더 깊은 2층천으로 향하는 문이 열립니다.';
+    h2.textContent = L('🌟 원정 Ⅴ 완료 — 천국 1층천 탐방!','🌟 Expedition V Complete — First Heaven Tour!');
+    if(sub) sub.textContent = L('1층천의 군주를 만나 인사를 나누고, 더 깊은 2층천으로 향하는 문이 열립니다.','You greet the Sovereign of the First Heaven; the gate to the deeper Second Heaven opens.');
   } else if(isExpEnd && exp.id === 6){
-    h2.textContent = '🪽 원정 Ⅵ 완료 — 창공의 주인!';
-    if(sub) sub.textContent = '2층천의 끝, 창공의 주인까지 만난 비둘기 가족 — 가장 높은 하늘에 도달했습니다.';
+    h2.textContent = L('🪽 원정 Ⅵ 완료 — 창공의 주인!','🪽 Expedition VI Complete — Master of the Sky!');
+    if(sub) sub.textContent = L('2층천의 끝, 창공의 주인까지 만난 비둘기 가족 — 가장 높은 하늘에 도달했습니다.','End of the Second Heaven — the family meets the Master of the Sky and reaches the highest heaven.');
   } else {
-    h2.textContent = '🏆 한계돌파 성공!';
-    if(sub) sub.textContent = '여기까지의 전설이 기록되었습니다.';
+    h2.textContent = L('🏆 한계돌파 성공!','🏆 Limit Broken!');
+    if(sub) sub.textContent = L('여기까지의 전설이 기록되었습니다.','Your legend is now in the records.');
   }
   // v12.11 — 시네마틱 다시보기 시 state.player가 null일 수 있어 가드 추가.
   // 진짜 클리어 직후엔 player가 살아있어 정상 값, 다시보기 시엔 0/0 표시.
   const pl = state.player || {};
   const expColor = exp.id===1?'#FFE066':exp.id===2?'#FF8787':exp.id===3?'#9775FA':exp.id===4?'#FF6B6B':exp.id===5?'#A5D8FF':'#FFE066';
+  const secLabel = L('초','s');
   document.getElementById('vStats').innerHTML = `
-    <div class="statline"><span>원정</span><b style="color:${expColor};">${exp.name}</b></div>
-    <div class="statline"><span>정복 챕터</span><b>${state.chapter} · ${chapterName(state.chapter)}</b></div>
-    <div class="statline"><span>최종 레벨</span><b>${pl.level || '-'}</b></div>
-    <div class="statline"><span>처치 수</span><b>${state.kills || 0}</b></div>
-    <div class="statline"><span>점수</span><b>${state.score || 0}</b></div>
-    <div class="statline"><span>생존 시간</span><b>${Math.round(state.time || 0)}초</b></div>
-    <div class="statline" style="color:#FFD43B;"><span>🪙 보유 코인</span><b>${(progress.coins||0).toLocaleString()}</b></div>
-    <div class="statline"><span>최고 기록</span><b>챕터 ${progress.highChapter||state.chapter} · ${progress.highScore||state.score||0}점</b></div>`;
+    <div class="statline"><span>${L('원정','Expedition')}</span><b style="color:${expColor};">${nameOf(exp)}</b></div>
+    <div class="statline"><span>${T('stat.conqueredChapter')}</span><b>${state.chapter} · ${chapterName(state.chapter)}</b></div>
+    <div class="statline"><span>${T('stat.level')}</span><b>${pl.level || '-'}</b></div>
+    <div class="statline"><span>${T('stat.killCount')}</span><b>${state.kills || 0}</b></div>
+    <div class="statline"><span>${T('stat.score')}</span><b>${state.score || 0}</b></div>
+    <div class="statline"><span>${T('stat.survived')}</span><b>${Math.round(state.time || 0)}${secLabel}</b></div>
+    <div class="statline" style="color:#FFD43B;"><span>${T('stat.coinsBalance')}</span><b>${(progress.coins||0).toLocaleString()}</b></div>
+    <div class="statline"><span>${L('최고 기록','Best')}</span><b>${L('챕터','Chapter')} ${progress.highChapter||state.chapter} · ${progress.highScore||state.score||0}${L('점',' pt')}</b></div>`;
 }
 
 // Prevent page scroll on mobile
