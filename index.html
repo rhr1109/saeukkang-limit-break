@@ -136,6 +136,16 @@
   #ultBtn.ready{border-color:#FFE066;animation:ultPulse 1.1s infinite;box-shadow:0 0 20px rgba(255,224,102,.7),0 4px 0 rgba(0,0,0,.45);}
   #ultBtn.ready .ult-label{color:#FFF9DB;font-size:17px;}
   #ultBtn.used{opacity:.45;cursor:default;border-color:#444;}
+  /* Persistent keyboard hint floating above the ult button. Default hidden, shown only
+     when the button has `.ready`. Hidden on touch devices via body.touch override.
+     We use the body.touch signal (same one the joystick uses) so the keyhint reliably
+     appears on every desktop browser, including environments where the (hover/pointer)
+     media queries misreport (e.g. VMs, some Linux setups). */
+  #ultBtn .ult-keyhint{position:absolute;left:50%;top:-30px;transform:translateX(-50%);background:#FFE066;color:#5A1A04;font-weight:900;font-size:12px;letter-spacing:-.2px;padding:4px 10px;border-radius:999px;border:2px solid #FFF9DB;box-shadow:0 3px 0 rgba(0,0,0,.45);white-space:nowrap;display:none;pointer-events:none;animation:ultKeyBob 1.6s ease-in-out infinite;}
+  #ultBtn .ult-keyhint::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:#FFE066;border-right:2px solid #FFF9DB;border-bottom:2px solid #FFF9DB;}
+  #ultBtn.ready .ult-keyhint{display:block;}
+  body.touch #ultBtn .ult-keyhint{display:none !important;}
+  @keyframes ultKeyBob{ 0%,100%{ transform:translateX(-50%) translateY(0); } 50%{ transform:translateX(-50%) translateY(-3px); } }
   @keyframes ultPulse{ 0%,100%{ box-shadow:0 0 12px rgba(255,224,102,.55),0 4px 0 rgba(0,0,0,.45); } 50%{ box-shadow:0 0 28px rgba(255,224,102,.9),0 4px 0 rgba(0,0,0,.45); } }
   /* Touch / mobile — joystick lives bottom-right, so park the ult button DIRECTLY ABOVE it.
      Joystick: right clamp(10,4vw,32), width clamp(140,32vw,180). Center-x from right = clamp(80,20vw,122).
@@ -314,11 +324,11 @@
   .card h2{margin:0 0 6px;color:#FFE066;font-size:24px;text-align:center;text-shadow:0 2px 0 #C92A2A;}
   .card .sub{text-align:center;color:#FFF9DB;opacity:.9;margin-bottom:16px;font-size:13px;}
   .card .choices{display:flex;flex-direction:column;gap:10px;}
-  /* PC-only keyboard hint inside the level-up modal. Shown only when a precise hover-capable
-     pointer is present (mouse/trackpad) — not on phones/tablets. (hover:hover)+(pointer:fine)
-     is the standard CSS for "is this a desktop-class input device". */
-  .lv-pc-hint{display:none;margin:6px 0 10px;padding:6px 10px;border:1px dashed rgba(255,224,102,.55);border-radius:8px;background:rgba(0,0,0,.28);color:#FFE066;font-size:12px;font-weight:700;text-align:center;letter-spacing:-.2px;}
-  @media (hover: hover) and (pointer: fine){ .lv-pc-hint{display:block;} }
+  /* PC-only keyboard hint inside the level-up modal. Default visible, hidden on touch
+     via body.touch (same signal as the joystick) — more reliable than CSS hover/pointer
+     queries which misreport in some browsers/VMs. */
+  .lv-pc-hint{display:block;margin:6px 0 10px;padding:6px 10px;border:1px dashed rgba(255,224,102,.55);border-radius:8px;background:rgba(0,0,0,.28);color:#FFE066;font-size:12px;font-weight:700;text-align:center;letter-spacing:-.2px;}
+  body.touch .lv-pc-hint{display:none;}
   .choice{background:linear-gradient(180deg,rgba(201,42,42,.25),rgba(26,5,1,.6));border:2px solid #FFD43B;border-radius:10px;padding:12px;cursor:pointer;transition:transform .08s, background .15s, box-shadow .15s;text-align:left;color:#fff;font-family:inherit;outline:none;}
   .choice:hover{background:linear-gradient(180deg,rgba(201,42,42,.45),rgba(90,26,4,.7));}
   .choice:focus,.choice:focus-visible{background:linear-gradient(180deg,rgba(201,42,42,.55),rgba(90,26,4,.78));border-color:#FFF9DB;box-shadow:0 0 0 3px rgba(255,255,255,.55), 0 0 18px rgba(255,224,102,.6);}
@@ -789,6 +799,9 @@
       <div class="ult-fill" id="ultFill"></div>
       <div class="ult-icon">🐦‍🔥</div>
       <div class="ult-label" id="ultLabel" data-i18n="hud.ultLabel">외침</div>
+      <!-- PC-only persistent keyboard hint shown when the ult is fully charged. CSS hides
+           on touch devices, and only reveals when the button has the `.ready` class. -->
+      <div class="ult-keyhint" id="ultKeyHint" data-i18n="hud.ultKey">⌨ Spacebar</div>
     </button>
   </div>
 
@@ -5990,6 +6003,7 @@ const I18N = {
     'hud.settings': 'Settings (mute · family · effects)',
     'hud.ult': 'Pigeon\'s Cry — recharges after use',
     'hud.ultLabel': 'Cry',
+    'hud.ultKey': '⌨ Spacebar',
     // Settings modal
     'set.title': '⚙ Settings',
     'set.sub': 'You can change these any time',
@@ -6239,6 +6253,7 @@ const I18N = {
     'hud.settings': '설정 (음소거 · 가족 표시 · 효과)',
     'hud.ult': '비둘기의 외침 — 충전 후 재사용 가능',
     'hud.ultLabel': '외침',
+    'hud.ultKey': '⌨ Spacebar',
     // Settings modal
     'set.title': '⚙ 설정',
     'set.sub': '언제든 다시 변경할 수 있어요',
@@ -11227,16 +11242,15 @@ function killEnemy(e){
     state.ultCharge = Math.min(ULT_MAX, state.ultCharge + gain);
     if(before < ULT_MAX && state.ultCharge >= ULT_MAX){
       // Just hit full charge — toast banner so the player knows the button is live.
-      // Sub message branches by input device — desktop-class pointers see the Spacebar
-      // hint, touch-only devices see the tap-the-button hint. matchMedia(hover/pointer)
-      // is more reliable than isTouch() because puppeteer/embedded browsers sometimes
-      // report ontouchstart on real desktops too.
-      const _hasFinePointer = (typeof window !== 'undefined' && window.matchMedia)
-        ? window.matchMedia('(hover: hover) and (pointer: fine)').matches : false;
-      const ultSub = _hasFinePointer
+      // Sub message branches by input device — desktop sees the Spacebar hint, touch sees
+      // the tap-the-button hint. We use the same body.touch class the joystick uses
+      // (set by isTouch() at boot or `?m=1`) so the branch is consistent with the rest
+      // of the HUD.
+      const _isPc = !document.body.classList.contains('touch');
+      const ultSub = _isPc
         ? L('Spacebar 키로 발동','Press Spacebar to fire')
         : L('우측 버튼을 눌러 발동','Tap the right button to fire');
-      state.toastBanner = { text:L('🐦‍🔥 비둘기의 외침 충전 완료!','🐦‍🔥 Pigeon\'s Cry fully charged!'), sub:ultSub, t:2.6, maxT:2.6 };
+      state.toastBanner = { text:L('🐦‍🔥 비둘기의 외침 충전 완료!','🐦‍🔥 Pigeon\'s Cry fully charged!'), sub:ultSub, t:4.0, maxT:4.0 };
     }
     updateUltButton();
   }
@@ -15866,7 +15880,7 @@ function render(){
       ctx.save();
       ctx.font = '900 11px sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      const lbl = `보스 ${Math.round(dist/40)}m`;
+      const lbl = L(`보스 ${Math.round(dist/40)}m`, `Boss ${Math.round(dist/40)}m`);
       ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)';
       ctx.strokeText(lbl, ax, ay + 32);
       ctx.fillStyle = '#FFE066';
