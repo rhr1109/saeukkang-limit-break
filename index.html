@@ -314,6 +314,11 @@
   .card h2{margin:0 0 6px;color:#FFE066;font-size:24px;text-align:center;text-shadow:0 2px 0 #C92A2A;}
   .card .sub{text-align:center;color:#FFF9DB;opacity:.9;margin-bottom:16px;font-size:13px;}
   .card .choices{display:flex;flex-direction:column;gap:10px;}
+  /* PC-only keyboard hint inside the level-up modal. Shown only when a precise hover-capable
+     pointer is present (mouse/trackpad) — not on phones/tablets. (hover:hover)+(pointer:fine)
+     is the standard CSS for "is this a desktop-class input device". */
+  .lv-pc-hint{display:none;margin:6px 0 10px;padding:6px 10px;border:1px dashed rgba(255,224,102,.55);border-radius:8px;background:rgba(0,0,0,.28);color:#FFE066;font-size:12px;font-weight:700;text-align:center;letter-spacing:-.2px;}
+  @media (hover: hover) and (pointer: fine){ .lv-pc-hint{display:block;} }
   .choice{background:linear-gradient(180deg,rgba(201,42,42,.25),rgba(26,5,1,.6));border:2px solid #FFD43B;border-radius:10px;padding:12px;cursor:pointer;transition:transform .08s, background .15s, box-shadow .15s;text-align:left;color:#fff;font-family:inherit;outline:none;}
   .choice:hover{background:linear-gradient(180deg,rgba(201,42,42,.45),rgba(90,26,4,.7));}
   .choice:focus,.choice:focus-visible{background:linear-gradient(180deg,rgba(201,42,42,.55),rgba(90,26,4,.78));border-color:#FFF9DB;box-shadow:0 0 0 3px rgba(255,255,255,.55), 0 0 18px rgba(255,224,102,.6);}
@@ -1200,6 +1205,8 @@
     <div class="card">
       <h2 data-i18n="lvl.title">✨ 레벨 업!</h2>
       <div class="sub" data-i18n="lvl.sub">하나를 선택해 한계를 돌파하라</div>
+      <!-- PC-only keyboard hint. Hidden on touch devices via body.touch override below. -->
+      <div class="lv-pc-hint" data-i18n="lvl.pcHint">↑/↓ 키로 카드 선택 · Enter 키로 확정</div>
       <div class="choices" id="lvChoices"></div>
     </div>
   </div>
@@ -1240,9 +1247,9 @@
         <p data-i18n-html="how.wave"><b style="color:#FFE066;">⚔ 웨이브:</b> 시간이 지나면 웨이브가 자동으로 진행되고 적 밀도와 종류가 강해집니다. 웨이브 3 종료 시 챕터 보스 등장!</p>
         <p data-i18n-html="how.cards"><b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.</p>
         <p data-i18n-html="how.drops"><b style="color:#FFE066;">🎁 드롭 아이템:</b> 적이 확률로 5종 특수 아이템을 떨어뜨립니다 (5킬·10킬 pity 보장):
-          <br>&nbsp;&nbsp;💖 포카칩 — HP 30% 회복
+          <br>&nbsp;&nbsp;💖 하트 칩 — HP 30% 회복
           <br>&nbsp;&nbsp;🧲 자석 깃털 — 화면의 XP 전부 흡수
-          <br>&nbsp;&nbsp;💣 꿀꽈배기 폭탄 — 반경 260px 폭발 (공격력 ×3.5)
+          <br>&nbsp;&nbsp;💣 꽈배기 폭탄 — 반경 260px 폭발 (공격력 ×3.5)
           <br>&nbsp;&nbsp;🌟 황금 새우과자 — 다음 레벨업 XP 35% 즉시 지급
           <br>&nbsp;&nbsp;🪙 코인 — 점수 +25 (챕터당 가산)
         </p>
@@ -4529,7 +4536,7 @@ const WEAPONS = {
     returnAt:0.55, spinBase:18, draw:drawBoomerang
   },
   missile: {
-    name:'꿀꽈배기 미사일', name_en:'Honey-Twist Missile', icon:'🚀',
+    name:'꽈배기 미사일', name_en:'Pretzel Missile', icon:'🚀',
     rate:(w)=> 0.55 + w.lvl*0.10,
     count:(w)=> Math.min(2, w.lvl),     // L1 1, L2+ 2
     dmg:(w,p)=> p.damage * (1.5 + w.lvl*0.40),
@@ -6039,6 +6046,7 @@ const I18N = {
     // Level up
     'lvl.title': '✨ Level Up!',
     'lvl.sub': 'Pick one to break the limit',
+    'lvl.pcHint': '↑/↓ to highlight a card · Enter to confirm',
     // How-to
     'how.title': 'Controls · Rules',
     'how.close': 'Close',
@@ -6049,7 +6057,7 @@ const I18N = {
     'how.ch': '<b style="color:#FFE066;">📕 Chapters:</b> Total 130 chapters across 4 expeditions. Each chapter is 3 waves + a final boss. Chapter cap ≤ 15 minutes — Ch1–10 ~4–5 min, Ch11–25 ~7–9 min, Ch26–40 ~9–12 min, Ch41–50 ~11–15 min, Ch51–100 (Exp II/III) ~7–12 min, Ch101–130 (Exp IV — Hell) ~9–15 min (auto-kill at the cap if the boss survives).',
     'how.wave': '<b style="color:#FFE066;">⚔ Waves:</b> Waves auto-progress over time and enemy density / type ramps up. The chapter boss spawns at the end of wave 3!',
     'how.cards': '<b style="color:#FFE066;">🃏 Level-up cards:</b> When XP fills, pick one of three cards to shape your build. Combine multishot · pierce · vortex · explosion · lightning, etc.',
-    'how.drops': '<b style="color:#FFE066;">🎁 Drops:</b> Enemies drop 5 special items by chance (5-kill / 10-kill pity guarantees):<br>&nbsp;&nbsp;💖 Pocachips — heal 30% HP<br>&nbsp;&nbsp;🧲 Magnet feather — pulls all on-screen XP<br>&nbsp;&nbsp;💣 Honey-twist bomb — radius 260px AoE (×3.5 damage)<br>&nbsp;&nbsp;🌟 Golden shrimp snack — instantly grants 35% next-level XP<br>&nbsp;&nbsp;🪙 Coin — +25 score (per chapter)',
+    'how.drops': '<b style="color:#FFE066;">🎁 Drops:</b> Enemies drop 5 special items by chance (5-kill / 10-kill pity guarantees):<br>&nbsp;&nbsp;💖 Heart Chip — heal 30% HP<br>&nbsp;&nbsp;🧲 Magnet feather — pulls all on-screen XP<br>&nbsp;&nbsp;💣 Pretzel bomb — radius 260px AoE (×3.5 damage)<br>&nbsp;&nbsp;🌟 Golden shrimp snack — instantly grants 35% next-level XP<br>&nbsp;&nbsp;🪙 Coin — +25 score (per chapter)',
     'how.tip': '<b style="color:#FFE066;">💡 Tip:</b> HP, ATK, and SPD scale by chapter. Pick cards and costumes strategically!',
     // Chapter cleared
     'cc.title': '🏆 Chapter Clear!',
@@ -6287,6 +6295,7 @@ const I18N = {
     // Level up
     'lvl.title': '✨ 레벨 업!',
     'lvl.sub': '하나를 선택해 한계를 돌파하라',
+    'lvl.pcHint': '↑/↓ 키로 카드 선택 · Enter 키로 확정',
     // How-to
     'how.title': '조작법 · 규칙',
     'how.close': '닫기',
@@ -6297,7 +6306,7 @@ const I18N = {
     'how.ch': '<b style="color:#FFE066;">📕 챕터:</b> 총 130개 챕터(4원정). 각 챕터는 3웨이브 + 최종 보스로 진행됩니다. 모든 챕터 캡은 15분 이하 — Ch1~10 약 4-5분, Ch11~25 약 7-9분, Ch26~40 약 9-12분, Ch41~50 약 11-15분, Ch51~100(원정 Ⅱ·Ⅲ) 약 7-12분, Ch101~130(원정 Ⅳ 지옥) 약 9-15분 (보스를 못 잡으면 캡 시간에 자동 처치).',
     'how.wave': '<b style="color:#FFE066;">⚔ 웨이브:</b> 시간이 지나면 웨이브가 자동으로 진행되고 적 밀도와 종류가 강해집니다. 웨이브 3 종료 시 챕터 보스 등장!',
     'how.cards': '<b style="color:#FFE066;">🃏 레벨업 카드:</b> XP가 차면 3장의 카드 중 하나를 선택해 빌드를 완성합니다. 멀티샷·관통·회오리·폭발·번개 등을 조합하세요.',
-    'how.drops': '<b style="color:#FFE066;">🎁 드롭 아이템:</b> 적이 확률로 5종 특수 아이템을 떨어뜨립니다 (5킬·10킬 pity 보장):<br>&nbsp;&nbsp;💖 포카칩 — HP 30% 회복<br>&nbsp;&nbsp;🧲 자석 깃털 — 화면의 XP 전부 흡수<br>&nbsp;&nbsp;💣 꿀꽈배기 폭탄 — 반경 260px 폭발 (공격력 ×3.5)<br>&nbsp;&nbsp;🌟 황금 새우과자 — 다음 레벨업 XP 35% 즉시 지급<br>&nbsp;&nbsp;🪙 코인 — 점수 +25 (챕터당 가산)',
+    'how.drops': '<b style="color:#FFE066;">🎁 드롭 아이템:</b> 적이 확률로 5종 특수 아이템을 떨어뜨립니다 (5킬·10킬 pity 보장):<br>&nbsp;&nbsp;💖 하트 칩 — HP 30% 회복<br>&nbsp;&nbsp;🧲 자석 깃털 — 화면의 XP 전부 흡수<br>&nbsp;&nbsp;💣 꽈배기 폭탄 — 반경 260px 폭발 (공격력 ×3.5)<br>&nbsp;&nbsp;🌟 황금 새우과자 — 다음 레벨업 XP 35% 즉시 지급<br>&nbsp;&nbsp;🪙 코인 — 점수 +25 (챕터당 가산)',
     'how.tip': '<b style="color:#FFE066;">💡 팁:</b> 챕터마다 체력·공격력·속도가 배율로 상승합니다. 카드와 코스튬 선택을 전략적으로!',
     // Chapter cleared
     'cc.title': '🏆 챕터 클리어!',
@@ -10933,7 +10942,7 @@ const UPGRADES = [
                `Boomerang+ — count ${WEAPONS.boomerang.count(w)} · DMG ×${(1+(l+1)*0.20).toFixed(2)}`);
     },
     apply:(p)=>{ if(!p.weapons.boomerang) p.weapons.boomerang={lvl:1,reloadT:0}; else p.weapons.boomerang.lvl++; } },
-  { id:'missile', title:'꿀꽈배기 미사일', title_en:'Honey-Twist Missile', icon:'🚀', max:3, rarity:'l',
+  { id:'missile', title:'꽈배기 미사일', title_en:'Pretzel Missile', icon:'🚀', max:3, rarity:'l',
     desc:(l)=>{
       if(!l) return L('🚀 [신규 무기] 유도 미사일이 폭발 피해를 줍니다','🚀 [New weapon] Homing missiles deal explosive damage');
       const w={lvl:l+1};
@@ -11218,7 +11227,16 @@ function killEnemy(e){
     state.ultCharge = Math.min(ULT_MAX, state.ultCharge + gain);
     if(before < ULT_MAX && state.ultCharge >= ULT_MAX){
       // Just hit full charge — toast banner so the player knows the button is live.
-      state.toastBanner = { text:L('🐦‍🔥 비둘기의 외침 충전!','🐦‍🔥 Pigeon\'s Cry charged!'), sub:L('우측 버튼 클릭','Tap the right button'), t:2.0, maxT:2.0 };
+      // Sub message branches by input device — desktop-class pointers see the Spacebar
+      // hint, touch-only devices see the tap-the-button hint. matchMedia(hover/pointer)
+      // is more reliable than isTouch() because puppeteer/embedded browsers sometimes
+      // report ontouchstart on real desktops too.
+      const _hasFinePointer = (typeof window !== 'undefined' && window.matchMedia)
+        ? window.matchMedia('(hover: hover) and (pointer: fine)').matches : false;
+      const ultSub = _hasFinePointer
+        ? L('Spacebar 키로 발동','Press Spacebar to fire')
+        : L('우측 버튼을 눌러 발동','Tap the right button to fire');
+      state.toastBanner = { text:L('🐦‍🔥 비둘기의 외침 충전 완료!','🐦‍🔥 Pigeon\'s Cry fully charged!'), sub:ultSub, t:2.6, maxT:2.6 };
     }
     updateUltButton();
   }
